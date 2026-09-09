@@ -247,6 +247,8 @@ Copy or symlink the whole folder into your tool's skill directory and keep the f
 
 将整个文件夹复制或符号链接到所用工具的 Skill 目录，并保持文件夹名 `gpt-series-reasoning-style`。
 
+**Upgrading from the former name / 从旧名升级**：if an old `gpt-5-6-sol-reasoning-style` folder exists in your skills directory (pre-rename install), **delete it** — the installer only writes the new folder and will not remove the old one, and the v1.0.0 leftover carries the outdated description and rules. 若你的技能目录里存在旧名 `gpt-5-6-sol-reasoning-style` 文件夹（改名前的安装残留），请**删除它**——安装脚本只写入新目录、不会移除旧目录，v1.0.0 残留带着过时的描述与规则。
+
 **Script-supported platforms / 脚本支持的平台与 `-Platform` 参数**（project-level paths install into the current directory; `~` paths are per-user / 项目级路径装到当前目录，`~` 路径为用户级）：
 
 | Platform / 平台 | Parameter / 参数 | Target directory / 目标目录 |
