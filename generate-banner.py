@@ -35,6 +35,20 @@ def _first_existing(paths):
     return None
 
 
+def _version():
+    """Read the version from the VERSION file (the single source of truth).
+
+    A hardcoded footer version would silently go stale when VERSION bumps
+    (same defect family as stale version references in host memories).
+    """
+    try:
+        with open(os.path.join(HERE, "VERSION"), encoding="utf-8") as fh:
+            v = fh.read().strip()
+        return v if v else "?"
+    except OSError:
+        return "?"
+
+
 def font(size, bold=False, cjk=False):
     """Load a truetype font. CJK text must use a Chinese-capable face."""
     win = r"C:\Windows\Fonts"
@@ -143,7 +157,7 @@ for i, (zh, en, color) in enumerate(chips):
 # ---- footer (fixed page margins, independent of chip count) --------------
 MARGIN = 57
 draw.text((MARGIN, 596), "Planning · Execution · Review", font=f_footer, fill=FOOTER)
-foot_r = "v1.1.0 · MIT"
+foot_r = "v{} · MIT".format(_version())
 fw = text_width(draw, foot_r, f_footer)
 draw.text((WIDTH - MARGIN - fw, 596), foot_r, font=f_footer, fill=FOOTER)
 

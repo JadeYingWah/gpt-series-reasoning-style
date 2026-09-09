@@ -39,4 +39,15 @@ if (Test-Path -LiteralPath $dest) {
 }
 New-Item -ItemType Directory -Path $dest -Force | Out-Null
 Copy-Item -Path (Join-Path $source '*') -Destination $dest -Recurse -Force
+# Keep the install identical to the bash path: with -Force the '*' glob DOES
+# include hidden items, so .git history / CI config would otherwise be shipped.
+foreach ($dot in @('.git', '.github', '.gitignore')) {
+  $dotPath = Join-Path $dest $dot
+  if (Test-Path -LiteralPath $dotPath) {
+    Remove-Item -LiteralPath $dotPath -Recurse -Force
+  }
+}
+Get-ChildItem -Path $dest -Recurse -Directory -Filter '__pycache__' | ForEach-Object {
+  Remove-Item -LiteralPath $_.FullName -Recurse -Force
+}
 Write-Output "Installed $skillName to $dest"

@@ -33,4 +33,8 @@ fi
 mkdir -p "$(dirname "$DEST")"
 rm -rf "$DEST"
 cp -R "$SOURCE" "$DEST"
+# Keep the install identical to the PowerShell path (its '*' glob skips
+# dotfiles): the host needs the skill, not git history or CI config.
+rm -rf "$DEST/.git" "$DEST/.github" "$DEST/.gitignore"
+find "$DEST" -depth -type d -name "__pycache__" -exec rm -rf {} +
 echo "Installed $SKILL_NAME to $DEST"

@@ -33,7 +33,11 @@ ARCHIVE = PROBES / "last-run.md"
 def load():
     if not SCEN.exists():
         sys.exit("missing " + str(SCEN))
-    return json.loads(SCEN.read_text(encoding="utf-8"))
+    try:
+        return json.loads(SCEN.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        sys.exit("malformed JSON in " + str(SCEN) + " -- line %d col %d: %s"
+                 % (exc.lineno, exc.colno, exc.msg))
 
 
 def cmd_list(_):
@@ -78,7 +82,9 @@ def cmd_report(args):
         return 0
     text = ARCHIVE.read_text(encoding="utf-8")
     if args.id:
-        scid = args.id[0]
+        # args.id is a plain string (nargs="?"), not a list like archive's
+        # nargs=1 — indexing it would filter on the id's first character.
+        scid = args.id
         keep = [l for l in text.splitlines() if "**%s " % scid in l]
         text = "\n".join(keep) if keep else ("no entries for " + scid)
     print(text)

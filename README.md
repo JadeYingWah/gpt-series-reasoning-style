@@ -129,7 +129,7 @@ flowchart TD
 
 **Engineering / 工程化**
 
-- Progressive disclosure: loading proof needs only `SKILL.md` + `VERSION`; the 10 reference files load on demand.
+- Progressive disclosure: loading proof needs only `SKILL.md` + `VERSION`; the 11 reference files load on demand.
 - Natural presentation: templates are content checklists, not literal formatting; role/channel/gate output is rendered as compact tables or short sentences, never code blocks.
 - 22 built-in role-identity files under one 8-section contract; custom identities live in `custom-identities/`.
 - Authorization matrix separates read, edit, implement, local commit, push, external/network execution, production, and legal/submission decisions; tool availability is not authorization.

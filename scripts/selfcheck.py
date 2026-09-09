@@ -85,7 +85,9 @@ def run_checks() -> list:
     c = new(2, "self-test numbering 1..N")
     titles = re.findall(r"^## Test (\d+):", selftest, flags=re.M)
     nums = [int(n) for n in titles]
-    if len(titles) != len(set(titles)):
+    if not titles:
+        c.fail("self-test.md contains no Test blocks")
+    elif len(titles) != len(set(titles)):
         c.fail("duplicate Test numbers")
     elif nums != list(range(1, len(nums) + 1)):
         c.fail("numbering not contiguous 1.." + str(len(nums)))
@@ -96,16 +98,19 @@ def run_checks() -> list:
     c = new(3, "self-test structural completeness")
     blocks = [b.strip() for b in selftest.split("## Test ")[1:]]
     missing = []
-    for b in blocks:
-        name = b.splitlines()[0].strip()
-        has_prompt = ("Prompt" in b) and ("```" in b)
-        has_expected = ("Expected" in b or "期望" in b) and bool(re.search(r"^- ", b, re.M))
-        if not (has_prompt and has_expected):
-            missing.append(name)
-    if missing:
-        c.fail("tests lacking prompt or expectation: " + ", ".join(missing[:6]))
+    if not blocks:
+        c.fail("self-test.md contains no test blocks")
     else:
-        c.pass_("all " + str(len(blocks)) + " test blocks complete")
+        for b in blocks:
+            name = b.splitlines()[0].strip()
+            has_prompt = ("Prompt" in b) and ("```" in b)
+            has_expected = ("Expected" in b or "期望" in b) and bool(re.search(r"^- ", b, re.M))
+            if not (has_prompt and has_expected):
+                missing.append(name)
+        if missing:
+            c.fail("tests lacking prompt or expectation: " + ", ".join(missing[:6]))
+        else:
+            c.pass_("all " + str(len(blocks)) + " test blocks complete")
 
     # SB4 identity count == 22
     c = new(4, "identity file count == 22")
@@ -191,18 +196,21 @@ def run_checks() -> list:
     try:
         ps1 = read_text(REPO_ROOT / "scripts" / "install.ps1")
     except FileNotFoundError:
+        # Do NOT return early: skipping SB11-SB16 would silently shrink the
+        # reported total and mask six checks as "not applicable". Fail this
+        # check and let the remaining checks run (each guards its own I/O).
         c.fail("scripts/install.ps1 missing")
-        return checks
-    keys = set(re.findall(r"^\s+(\w+)\s+= Join-Path", ps1, flags=re.M))
-    required = {"agents", "codex", "claude", "cursor", "windsurf", "cline",
-                "gemini", "kiro", "trae", "goose", "opencode", "roo", "antigravity"}
-    diff = required - keys
-    if diff:
-        c.fail("install.ps1 missing platform keys: " + ", ".join(sorted(diff)))
-    elif len(keys) < 13:
-        c.fail("expected >=13 platform keys, found " + str(len(keys)))
     else:
-        c.pass_("install.ps1 covers " + str(len(keys)) + " platform keys")
+        keys = set(re.findall(r"^\s+(\w+)\s+= Join-Path", ps1, flags=re.M))
+        required = {"agents", "codex", "claude", "cursor", "windsurf", "cline",
+                    "gemini", "kiro", "trae", "goose", "opencode", "roo", "antigravity"}
+        diff = required - keys
+        if diff:
+            c.fail("install.ps1 missing platform keys: " + ", ".join(sorted(diff)))
+        elif len(keys) < 13:
+            c.fail("expected >=13 platform keys, found " + str(len(keys)))
+        else:
+            c.pass_("install.ps1 covers " + str(len(keys)) + " platform keys")
 
     # SB11 light-channel exclusion boundary cross-surface sync
     c = new(11, "light-channel exclusion boundary sync")
@@ -386,7 +394,16 @@ def main() -> int:
     ap.add_argument("--label", default="local", help="tag for the report")
     args = ap.parse_args()
 
-    checks = run_checks()
+    try:
+        checks = run_checks()
+    except (OSError, UnicodeDecodeError) as exc:
+        # Environment-level failure (missing/undecodable core file): report a
+        # structured failure instead of a traceback. Genuine code bugs are NOT
+        # swallowed — unexpected exception types still surface loudly.
+        print("[FAIL] SB0 environment error -- " + str(exc))
+        print("Static selfcheck aborted: core file missing or undecodable (see SB0 above).")
+        return 1
+
     lines = [c.line() for c in checks]
     passed = sum(1 for c in checks if c.ok)
     total = len(checks)

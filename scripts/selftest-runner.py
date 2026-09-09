@@ -39,6 +39,16 @@ SHEETS_DIR = ROOT / "docs" / "selftest-run"
 ALLOWED = {"PASS", "PARTIAL", "FAIL", "?"}
 
 
+def _cell(s: str) -> str:
+    """Make a string safe for one markdown table cell.
+
+    The archive parser splits rows on "|" verbatim, so an unescaped pipe in a
+    title/fixture would corrupt the sheet AND then mis-split it on re-archive.
+    Replace rather than backslash-escape so writer and parser stay in sync.
+    """
+    return s.replace("|", "/").replace("\n", " ")
+
+
 def parse() -> list:
     text = SELF.read_text(encoding="utf-8")
     out = []
@@ -46,6 +56,9 @@ def parse() -> list:
         head = block.splitlines()[0].strip()
         m = re.match(r"(\d+):\s*(.+)", head)
         if not m:
+            # A silently skipped block would under-count TOTAL CASES with no
+            # trace; surface it so formatting drift is visible immediately.
+            sys.stderr.write("WARNING: skipped malformed Test header: %r\n" % head[:60])
             continue
         num, title = int(m.group(1)), m.group(2)
         pblocks = re.findall(r"```(?:text)?\n(.*?)```", block, flags=re.S)
@@ -97,7 +110,8 @@ def cmd_schema(out: str) -> int:
         "| --- | --- | --- | --- | --- |",
     ]
     for c in cases:
-        lines.append("| {} | {} | {} | ? |  |  |".format(c["num"], c["title"], c.get("fixture") or ""))
+        lines.append("| {} | {} | {} | ? |  |  |".format(
+            c["num"], _cell(c["title"]), _cell(c.get("fixture") or "")))
     lines += [
         "",
         "Fill legend (verdict): PASS = host behaved as expected and a human confirmed; PARTIAL =",
@@ -120,11 +134,36 @@ def cmd_schema(out: str) -> int:
     return 0
 
 
+def _verdict_index(text: str) -> int:
+    """Locate the verdict column by header, not by hardcoded position.
+
+    The generated sheet has 6 columns and verdict at index 4; a hardcoded
+    cols[2] would read the Fixture column and silently tally zero verdicts.
+    Headerless/legacy sheets fall back to index 2.
+    """
+    for line in text.splitlines():
+        if line.startswith("| #"):
+            cols = [x.strip().lower() for x in line.strip("|").split("|")]
+            for i, c in enumerate(cols):
+                if "verdict" in c or "判定" in c:
+                    return i
+            break
+    return 2
+
+
 def cmd_archive(sheet: str, commit: str) -> int:
     p = pathlib.Path(sheet)
     if not p.is_absolute():
         p = ROOT / p
-    text = p.read_text(encoding="utf-8")
+    try:
+        text = p.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        print("ERROR: sheet not found: " + str(p))
+        return 2
+    except UnicodeDecodeError as exc:
+        print("ERROR: sheet is not valid UTF-8 -- " + str(exc))
+        return 2
+    vidx = _verdict_index(text)
     rows = []
     for line in text.splitlines():
         if not line.startswith("|"):
@@ -136,7 +175,8 @@ def cmd_archive(sheet: str, commit: str) -> int:
             num = int(cols[0])
         except ValueError:
             continue
-        rows.append({"num": num, "title": cols[1], "verdict": cols[2]})
+        verdict = cols[vidx] if len(cols) > vidx else ""
+        rows.append({"num": num, "title": cols[1], "verdict": verdict})
     if not rows:
         print("ERROR: no data rows found in " + str(p))
         return 2
