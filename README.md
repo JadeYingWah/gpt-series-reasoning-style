@@ -191,6 +191,7 @@ The deciding factors are task complexity, host capability, and quality requireme
 | Complex task on a chat-only model (no tools) / 复杂任务但只有纯聊天模型 | Medium — the discipline applies, but the evidence/hands-on loop is limited / 中等：流程可遵循，证据与实操闭环受限 |
 | Host already enforces full planning/review/verification / 宿主已自带完整规划-审查-验证 | Usually redundant / 通常重复 |
 | One-off Q&A, tiny snippets, maximum-speed one-shot, high-volume low-risk work / 一次性问答、琐碎片段、追求最快一次成型、高频低风险任务 | Do not enable (use the light channel or answer directly) / 不启用（走轻通道或直接回答） |
+| Single-turn or sub-10-minute tasks, even if non-trivial / 单轮对话或 10 分钟内可完成的小任务（即使不平凡） | Skip the full skill — pin [`docs/minimal-discipline.md`](docs/minimal-discipline.md) (three rules, ~500 tok) / 不装完整版——钉住速查卡（三条核心，约 500 tok） |
 
 In short: enable it for multi-stage builds, shifting requirements, evidence-gated delivery, cross-model teamwork, and models that tend to skip planning; skip it for trivial, speed-first, or already-governed work.
 
@@ -305,6 +306,8 @@ Only `SKILL.md` loads up front; each reference file is read on demand when its p
 - **Self-test / 自测**：`references/self-test.md` contains 77 tests (Test 1–77) covering language & identifier fidelity, authorization boundaries, the three forms, capability gates, role confirmation, task packages, trust tiers, the dispatch ledger, the hands-on loop, the light channel, and conflict-freeze behavior.
 - **Real-environment acceptance / 真实环境验收**：before final delivery, validate every deliverable in its real target environment — unit tests passing is not sufficient.
 - **Field tests / 实测报告**：the skill is also verified by adversarial field tests — an end-to-end commander-form run and a three-round probe series, each round exposing one real rule defect (template desync, light-channel bypass, rule contradiction) that was fixed and fed back; the probes are scripted and re-runnable via [`probes/probe-runner.py`](probes/probe-runner.py); reports in [docs/field-tests/](docs/field-tests/).
+- **Evidence strength / 证据强度（读结论前先读这行）**：blind tests are n=1 per cell with a proxy judge and a non-neutral baseline — they prove the **mechanisms exist and change process**, not that **defects decrease**; read the two claims separately. External reviews (including critical ones) are archived under [docs/reviews/](docs/reviews/).
+- **证据强度**：盲测每格 n=1、裁判为代理模型、基线不中立——它们证明的是**机制存在且能改变流程**，不是**缺陷会减少**；这两个结论分开记账。外部评审（含批评性评审）归档于 [docs/reviews/](docs/reviews/)。
 
 - **加载证明**：输出版本号、逐字引用门禁硬规则第一条（`宣布阶段序列不是确认。`）、简述“主干+两扩展”架构、列出实际读过的文件。
 - **自测**：`references/self-test.md` 含 77 条（Test 1–77），覆盖语言与标识符保真、授权边界、三种形态、能力门禁、角色确认、任务包、信任层级、派发台账、实操闭环、轻通道与冲突冻结。

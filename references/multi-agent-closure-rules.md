@@ -124,6 +124,8 @@ For user relay, `Recipient activation prompt` must tell the receiving model to l
 
 用户转交时，“接收方启动提示词”必须告诉接收模型：加载本 Skill、使用指挥官多 Agent 模式、采用指定身份，然后再执行任务包。缺少这个提示词，新会话可能不知道使用哪个 Skill、模式或身份。
 
+**Manual multi-window relay / 手动多窗口转交的低门槛入口**：没有子 Agent 工具、需要人在窗口间粘贴时，允许先用**五字段降级简化包**（目标 / 范围 / 验收标准 / 返回格式 / 信任层级，见 agent-modes「Recipient Downgrade」）启动接收方，正式 23 字段任务包在登记接收方后补齐——降级只减 briefing 复杂度，不减验收标准。
+
 `Recipient` must be concrete before the task package is complete: name the role and platform/window (e.g., `IDE 内置 AI 窗口执行者` / `网页对话窗口执行者`). Values such as `待用户指定`, `待确认`, or a bare "另一个 AI" make the handoff incomplete. The underlying LLM model/version is optional reference metadata — record it if known, never require it, and never let a model change invalidate a package or ledger row.
 
 `Recipient activation prompt` must be a self-contained copy-paste text: include the exact Skill version, the mode, the identity, and the identity declaration format.
@@ -294,6 +296,8 @@ A findings ledger is the escalation artifact required when a fix loop reaches it
 An empty or field-less ledger does not satisfy an escalation.
 
 发现账本是修复循环耗尽时的升级产物，与派发台账同级、放在项目根下（如 `<project root>/docs/agents/findings-ledger.md`）。每轮必填字段：轮次编号、本轮改动与原因、未解项、证据指针（路径 + 关键摘录）。空账本或无字段清单不视为合规升级。
+
+**All ledgers live in one place / 三本账一处安家**：all governance ledgers live under `<项目根>/docs/agents/` — the dispatch ledger and the form-change ledger share **one file** (`dispatch-ledger.md`，形态变更记入派发台账的行项)；the findings ledger is a **sibling file** in the same directory (`findings-ledger.md`)，只在修复循环触顶时创建。治理心智成本 = 一个目录、两个文件。
 
 ## Fix-Loop Cap / 修复循环上限
 
