@@ -1,0 +1,23 @@
+name: selfcheck
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  selfcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+      - name: Static selfcheck (SB1..SB16, tiered bilingual)
+        run: python scripts/selfcheck.py
+      - name: Official skilllint (agentskills.io spec, pinned — FM010 false-positive with `check .` on 1.19.2)
+        run: uvx skilllint@1.19.2 check gpt-series-reasoning-style
+      - name: Probe scenarios parse
+        run: python probes/probe-runner.py list > /dev/null
+      - name: Self-test sheet parses (77 cases)
+        run: python scripts/selftest-runner.py list > /dev/null
