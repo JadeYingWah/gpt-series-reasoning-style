@@ -173,7 +173,7 @@ def run_checks() -> list:
     c = new(9, "gate-field surface sync")
     oai = read_text(REPO_ROOT / "agents" / "openai.yaml")
     missing_tokens = []
-    for tk in ["风险分档", "形态选择", "已盘点可用资源", "最高影响问题", "需要你确认"]:
+    for tk in ["风险分档", "形态选择", "已盘点可用资源", "最高影响问题", "需要你确认", "宿主对齐"]:
         if tk not in skill_text:
             missing_tokens.append("SKILL.md:" + tk)
         if tk not in readme:

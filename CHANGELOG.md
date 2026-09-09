@@ -4,6 +4,8 @@
 
 Post-1.1.0 additive work, kept on the fixed public 1.1.0 per the "对外固定 1.1.0" rule. Static consistency & documentation additions only; no rule behaviour change, no version bump.
 
+- **新规则：首次使用宿主对齐（Host Alignment）**：SKILL.md 加载证明段新增——首次在当前宿主使用时，AI 在首次门禁前输出一次「宿主对齐声明」（宿主已有能力清单 / 与本 skill 小节的重叠映射并标记 SKIP / 裁剪后使用范围），经用户确认后本次会话生效；声明可落盘 `<项目根>/docs/agents/host-alignment.md` 供同项目复用。**两条硬边界**：证据报告、UNVERIFIED 标记、真实环境验收不可被对齐跳过；AI 不得为适配而修改 skill 本体（适配产物只落项目侧）。动机：外部评审 AI 丁 #2（宿主重复）的运行时解法，README 劝退段的机制化。SB9 表面同步锚点扩至 `宿主对齐`（SKILL.md+README）；README 宿主优先段同步文档化；规则按 RULE-ONLY 对待，行为探针验证列为 1.2 执行项（见 proposals 提案 C）。成本：SKILL.md 2,678 → 2,962 tok（+284，累计自 5,461 仍 -46%）。
+
 - **外部模型评审（AI 丁）归档 + 5 项风险采纳裁决**：新增 `docs/reviews/2026-09-09-ai-ding-external-review.md`——一份批评性外部模型评审的忠实转录与逐条裁决（评审者通读全仓库后给出"工程严谨度最高一档但成本即严谨度"的混合评价）。采纳 4 项、部分采纳 1 项、拒绝 2 项（改名：Formerly 归并与 13 平台安装路径成本 >> 收益；放宽轻通道排除项：三轮探针反绕过边界）。**评审者匿名化**：延续 AI 甲/乙/丙 编号记为 AI 丁，评审模型上游归属与盲测 proxy 身份一并匿名（协作工具链画像按隐私纪律不外泄）。
 - **防误触发澄清（采纳 AI 丁 #1）**：SKILL.md description 首句加 "Process-discipline layer only — not a reasoning-capability booster and not GPT-specific despite the legacy name"，同步 `agents/openai.yaml` short_description——宿主据此判定挂载，避免"提升推理能力"类请求误触发；**拒绝改名**（Formerly 归并与 13 平台安装路径成本远超收益）。
 - **证据强度显性标注（采纳 AI 丁 #4）**：README Verification 段新增"证据强度"行——盲测每格 n=1、proxy 裁判、基线不中立，证明的是"机制存在且改变流程"而非"缺陷减少"，两个结论分开记账；外部评审（含批评性）归档于 docs/reviews/。

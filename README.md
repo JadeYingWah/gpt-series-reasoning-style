@@ -199,6 +199,8 @@ In short: enable it for multi-stage builds, shifting requirements, evidence-gate
 
 如果宿主已经自带同等的规划 / 审查 / 验证流程，优先使用宿主原生能力（计划模式、二次确认对话框、审查门禁），而不是套本 skill——本 skill 是附加的纪律层，不替代宿主流程，只在宿主流程缺失或不足时才启用。给人给宿主都在管的纪律再套一层，纯属 Token 与延迟成本。
 
+**宿主对齐 / Host Alignment**：首次使用时，AI 会在加载证明后输出一次「宿主对齐声明」——列出你宿主已有的能力、与本 skill 重叠的小节（标记 SKIP），经你确认后本次会话跳过重复部分；声明可落盘 `docs/agents/host-alignment.md` 供同项目复用。**证据报告、UNVERIFIED 标记、真实环境验收永远不可被跳过**——这三项是本 skill 的存在理由。
+
 If your host already enforces equivalent planning / review / verification (native plan mode, confirmation dialogs, review gates), use those first --- this skill is an additive discipline layer, not a replacement; enable it only where the host's own flow is missing or too weak. Stacking redundant discipline costs tokens and latency for nothing.
 
 ## Before & After / 效果对比
