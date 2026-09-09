@@ -129,13 +129,14 @@ flowchart TD
 
 **Engineering / 工程化**
 
-- Progressive disclosure: loading proof needs only `SKILL.md` + `VERSION`; the 11 reference files load on demand.
+- Progressive disclosure: loading proof needs only `SKILL.md` + `VERSION`; the 13 reference files load on demand.
+- Optional one-line session-start hook (`hooks/`, opt-in) hedges "the model forgot to invoke the skill" — no resident context stuffing; the skill works fully without it. / 可选的一行会话启动提醒（`hooks/`，默认不装）对冲"忘记调用"，不做常驻上下文包装。
 - Natural presentation: templates are content checklists, not literal formatting; role/channel/gate output is rendered as compact tables or short sentences, never code blocks.
 - 22 built-in role-identity files under one 8-section contract; custom identities live in `custom-identities/`.
 - Authorization matrix separates read, edit, implement, local commit, push, external/network execution, production, and legal/submission decisions; tool availability is not authorization.
 - Roles are decoupled from the carrying model: the underlying model is optional metadata, never asked for, and a model change never invalidates a task package or ledger row.
 
-- 渐进式加载：加载证明只需 `SKILL.md` + `VERSION`；11 份 references 按需读取。
+- 渐进式加载：加载证明只需 `SKILL.md` + `VERSION`；13 份 references 按需读取。
 - 自然呈现：模板是内容清单而非逐字格式；角色/通道/门禁用紧凑表格或短句呈现，不得用代码块。
 - 22 个内置角色身份文件遵循统一 8 段契约；自定义身份放 `custom-identities/`。
 - 授权矩阵把读取、修改、实现、本地提交、推送、外部/网络执行、生产、法律/提交决定分离；工具可用不等于获得授权。
@@ -333,8 +334,10 @@ gpt-series-reasoning-style/
 ├── agents/openai.yaml           # OpenAI/Codex 兼容界面的可选元数据（display_name/default_prompt）
 ├── identities/                  # 22 个内置身份 + _template + README（权威角色目录）
 ├── custom-identities/           # 用户自定义身份（其他身份）
-├── references/                  # 11 份按需加载的详细规则
-│   ├── series-reasoning-workflow.md   # 完整流程与审计模板
+├── references/                  # 13 份按需加载的详细规则
+│   ├── series-reasoning-workflow.md   # 完整流程与审计模板（中文权威版）
+│   ├── series-reasoning-workflow-en.md # 同上 · English mirror（权威为中文版，冲突以中文为准）
+│   ├── project-artifacts.md           # 门禁单/台账/证据的落盘约定与状态机
 │   ├── agent-modes.md                 # 协作架构、模式自选、任务包
 │   ├── identity-library.md            # 身份契约、信任层级、置信度
 │   ├── commander-roles.md             # 角色库与按规模选角
@@ -346,10 +349,13 @@ gpt-series-reasoning-style/
 │   ├── project-policy-template.md     # 项目级策略模板
 │   └── self-test.md                   # 77 条安装后自测
 ├── docs/field-tests/            # 实测证据：端到端实测 + 三轮对抗探针报告
-│   └── blind-test/              # 第三方盲测报告（2026-09-08、2026-09-09 A/B）
+│   ├── blind-test/              # 第三方盲测报告（2026-09-08、2026-09-09 A/B）
+│   └── ab-baseline/             # A/B 基线评测（协议 + 12 样例；评测中，结果待填）
 ├── docs/proposals/              # 规则审计提案（如 2026-09-09-rule-audit-probe-c）
 ├── docs/reviews/                # 外部评审汇总裁决书（2026-09-09-three-ai-audit-verdict）
 ├── docs/minimal-discipline.md   # 最小纪律速查卡（三条核心常驻）
+├── hooks/                       # 可选的一行会话启动提醒（opt-in，默认不装）
+├── site/                        # 静态单页文档站（GitHub Pages 可直接指向）
 ├── probes/
 │   ├── probe-scenarios.json        # 对抗探针场景（三轮，可重跑）
 │   ├── probe-runner.py             # 探针驱动：list/archive/report
@@ -358,7 +364,8 @@ gpt-series-reasoning-style/
     ├── install.ps1              # Windows 安装脚本
     ├── install.sh               # macOS / Linux 安装脚本
     ├── selfcheck.py             # 静态自检：一致性/防漂移（机器可判）
-    └── selftest-runner.py       # 自测驱动/归档：list/schema/archive
+    ├── selftest-runner.py       # 自测驱动/归档：list/schema/archive
+    └── artifact-check.py        # 用户项目治理产物结构校验（gate/台账/账本）
 ```
 
 ## Language Policy / 语言策略
@@ -375,6 +382,8 @@ between layers is a designed feature, not a bug.
 | 入口 SKILL.md | 门禁模板、协作架构、加载证明 | 中文为主，术语用英文（UNVERIFIED / P0-P2 / Pre-Implementation Gate） |
 | 门面 README | 安装、使用、FAQ、维护 | 逐段双语 EN+CN |
 | 深规则 references/ | workflow / lessons / self-test / identity-library / commander-roles / platform-installation | 英文为主（agent-modes / closure-rules 英文带中文） |
+| 英文镜像 references/series-reasoning-workflow-en | workflow 的全英镜像（含中文版中文独占块的英译） | 全英文（权威为中文版，冲突以中文为准） |
+| 产物约定 references/project-artifacts | 门禁单/台账/证据落盘约定 + 校验工具 | 中文为主 |
 | 对照表 references/common-failures | claims↔最小充分证据对照 + 本仓库失败案例 | 中文为主（claim 列含英文原文） |
 | 示例 references/examples | 行为示例 | 中文为主 |
 | 身份 identities/ | 22 个角色契约 | 逐段双语 EN+CN |
@@ -434,10 +443,11 @@ Gate fields and hard rules are deliberately repeated across several surfaces (an
 
 1. `SKILL.md` gate field list / 门禁字段清单
 2. `references/series-reasoning-workflow.md` gate template / 门禁模板
-3. `agents/openai.yaml` `default_prompt`
-4. `README.md` gate example (Before & After) / 门禁示例（效果对比）
-5. `references/agent-modes.md` + `references/multi-agent-closure-rules.md` rule bodies (EN + ZH) / 规则正文（中英）
-6. `references/self-test.md` expectations / 自测期望
+3. `references/series-reasoning-workflow-en.md` English mirror of the same template / 同一模板的英文镜像
+4. `agents/openai.yaml` `default_prompt`
+5. `README.md` gate example (Before & After) / 门禁示例（效果对比）
+6. `references/agent-modes.md` + `references/multi-agent-closure-rules.md` rule bodies (EN + ZH) / 规则正文（中英）
+7. `references/self-test.md` expectations / 自测期望
 
 Other single-source-of-truth rules to keep consistent when editing / 其他改动时需保持一致的“单一权威”约定：
 

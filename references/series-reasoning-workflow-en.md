@@ -1,7 +1,9 @@
-# GPT-Series Reasoning Workflow / GPT 系列推理工作流
+# GPT-Series Reasoning Workflow — English Mirror
 
-> **镜像 / Mirror**：`series-reasoning-workflow-en.md` 是本文件的英文镜像。本文件是中文权威版；改动门禁字段、硬规则或模板时，同版本内同步镜像（见 README Maintainer Notes）。冲突时以本文件为准。
-> **Mirror**: `series-reasoning-workflow-en.md` is the English mirror of this file. This file is the authority; sync the mirror in the same version when gate fields, hard rules, or templates change. On conflict, this file wins.
+> **Mirror status**: English mirror of `series-reasoning-workflow.md` (the Chinese-primary
+> authority). Sync rule: any change to a gate field, hard rule, or template in the authority
+> file must be mirrored here in the same version (see README Maintainer Notes). On any
+> conflict between the two files, the Chinese authority wins.
 
 ## Loading Contract
 
@@ -12,7 +14,7 @@ References are read on demand. Do not require all of `references/`, `CHANGELOG.m
 When asked to prove loading:
 
 - State the current version.
-- Quote the first hard rule of the Mandatory Pre-Implementation Gate: `宣布阶段序列不是确认。`
+- Quote the first hard rule of the Mandatory Pre-Implementation Gate: `宣布阶段序列不是确认。` ("Announcing a stage sequence is not confirmation.")
 - State the collaboration architecture: Single-Agent backbone (default) plus two on-demand extensions — Subagent enhancement and Commander Multi-Agent.
 - List only the files actually read.
 - Do not claim to have read files you did not read.
@@ -22,11 +24,9 @@ Render loading proof and templates naturally: required fields must appear, but u
 
 History, case libraries, and experience files are background, not state sources. Product phase, test counts, task status, and next steps always come from the current authoritative documents and the actual workspace — never from what a historical file says they used to be.
 
-历史、案例库与经验文件只是背景，不是状态源。产品阶段、测试数量、任务状态和下一步，永远以当前权威文档和实际工作区为准，不以历史文件的记载为准。
+## Resume Check
 
-## Resume Check / 续会全面体检
-
-When taking over an existing project, resuming an interrupted task, or when the user says "继续" / "检查项目" / "先检查再继续", run a project-level consistency check before continuing work:
+When taking over an existing project, resuming an interrupted task, or when the user says "继续" / "检查项目" / "先检查再继续" ("continue" / "check the project" / "check before continuing"), run a project-level consistency check before continuing work:
 
 1. Git status: uncommitted changes, current branch, divergence from the recorded state.
 2. Gate and stage status: which stages are closed, which are open, which authorizations are still missing.
@@ -34,11 +34,9 @@ When taking over an existing project, resuming an interrupted task, or when the 
 4. Omissions and inconsistencies: tasks claimed done without evidence, unreported failures, conflicting records.
 5. Report the findings first; fix stale items before new work; only then continue.
 
-Do not resume blind. "没问题后继续" means the check must actually run — a resumed session that starts working without this check treats the user's ritual as noise.
+Do not resume blind. "没问题后继续" ("continue after it's fine") means the check must actually run — a resumed session that starts working without this check treats the user's ritual as noise.
 
-接手既有会话、恢复中断任务，或用户说"继续 / 检查项目 / 先检查再继续"时，先做项目级一致性检查：Git 状态；门禁与阶段状态；文档与实现是否同步（已完成阶段未同步的过期表述）；遗漏与不一致（声称完成却无证据、未报告的失败、互相矛盾的记录）。先报告发现，先修过期项，再继续。不做体检直接续干等于蒙眼开车；"没问题后继续"意味着检查必须真的执行，而不是把用户的仪式当耳旁风。
-
-发现与目标正面冲突的既有产物或数据时（例如"新建"指令指向的位置已存在实现、目标文件已被占用），**立即暂停一切写盘与创建目录动作**，先向用户报告：现状与指令逐条核对、冲突点、可选处置（新建隔离 / 迭代既有产物 / 覆盖及其数据风险），并等待裁决。**"指令说新建"不等于覆盖授权**；在用户裁决前不自行处置——擅自覆盖既有产物等于销毁用户尚未导出的数据。
+When an existing artifact or dataset directly conflicts with the goal (for example, a "create new" instruction points at a location that already holds an implementation, or the target file is occupied), **immediately freeze every write, directory-creation, and implementation action**. Report to the user first: a point-by-point comparison of the current state against the instruction, the conflict points, and the candidate dispositions (create isolated / iterate on the existing artifact / overwrite and its data risk), then wait for a ruling. **"The instruction said create new" is not overwrite authorization**; do not dispose of the conflict on your own before the user rules — overwriting an existing artifact without asking equals destroying data the user has not yet exported.
 
 ## Identity Boundary
 
@@ -46,6 +44,7 @@ Before acting, respect the host agent's existing identity and platform rules. Do
 
 ```text
 当前任务角色：<role>，任务 ID：<task-id>。
+(Current task role: <role>, task ID: <task-id>.)
 ```
 
 This skill adds behavior, not a new identity. The host agent's identity and platform rules take precedence.
@@ -94,7 +93,7 @@ Use this protocol only after the user chooses Subagent Mode and the host support
 
 Use this protocol only after the user chooses Commander Mode. Other agents are independent recipients, not subagents.
 
-0. Before entering Commander Mode, run role identity confirmation. Show the built-in identities in `identities/` with a one-line responsibility for each candidate, ask the user which role the model should take, and read the identity file before adopting it. Stop and wait for the user to confirm the identity; do not proceed to the next step even when `commander` is the default. If the user has a custom identity, read it from `custom-identities/` (Chinese: 其他身份) or ask for its path/content. If no identity matches, state the gap honestly and do not fake a loaded identity. Use `references/identity-library.md` as the universal role contract.
+0. Before entering Commander Mode, run role identity confirmation. Show the built-in identities in `identities/` with a one-line responsibility for each candidate, ask the user which role the model should take, and read the identity file before adopting it. Stop and wait for the user to confirm the identity; do not proceed to the next step even when `commander` is the default. If the user has a custom identity, read it from `custom-identities/` or ask for its path/content. If no identity matches, state the gap honestly and do not fake a loaded identity. Use `references/identity-library.md` as the universal role contract.
 1. Output the coordination channel confirmation: dispatch method (direct tool, external session, CLI/API, or user relay), recipient, and whether the path is confirmed. Direct tools and user relay are both valid; subagent tools may also be used after role identity is confirmed. Platform tool availability is not user confirmation; mark the path as confirmed only after the user explicitly chooses it, and do not proceed to the implementation gate before then.
 1.5. Before dispatch, ask the user where the project AI identity registry is. Use a user-provided path; if none exists, propose `docs/agents/` and request authorization; if authorization is denied, return `BLOCKED`. If the user confirms only one AI is available and chooses direct tools, skip the registry and recipient prompts while keeping Mode 3 confirmation and gate rules. If no recipients are registered and user relay is required, ask what project/task to work on, select the smallest suitable role set, register those roles, and generate a standalone activation prompt for each recipient to paste into a new conversation window. Confirm relay, and persist the Mode 3 plan in project docs such as `docs/plans/`.
 2. The selected role owns the responsibilities defined in its identity file. For `commander`, that includes user communication, instruction assessment, research, divergence, the pre-implementation gate, whole-plan re-evaluation, and final acceptance.
@@ -110,7 +109,7 @@ Use this protocol only after the user chooses Commander Mode. Other agents are i
 
 Detailed rules: `references/agent-modes.md`.
 
-## Commander Role Selection / 指挥官角色选择
+## Commander Role Selection
 
 When the plan needs multiple independent agents, select roles from `references/commander-roles.md`.
 
@@ -123,42 +122,42 @@ When the plan needs multiple independent agents, select roles from `references/c
 - If no matching identity exists, ask for a custom identity or use the closest generic role with an explicit caveat.
 - Every dispatched recipient has a named identity (role + platform/window) and a selection rationale; the underlying model is optional reference metadata, and the recipient declares identity at the declaration moments (first entry, role change, handoff, possible confusion).
 - Read `references/multi-agent-closure-rules.md` before dispatch; it is the canonical source for the mandatory task package, plus DRI closure, return handling, file ownership, the pre-dispatch conflict ledger, consolidation (fan-in), the fix-loop cap, authorization separation, and context discipline.
-- Recipient identity must be concrete (role + platform/window; a bare "另一个 AI" is not enough) and selected to match task capability, judged by observed return quality rather than model name; the activation prompt must be a self-contained copy-paste text. These rules are canonical in `references/multi-agent-closure-rules.md` and `references/agent-modes.md` — point there instead of treating this list as the source.
+- Recipient identity must be concrete (role + platform/window; a bare "another AI" is not enough) and selected to match task capability, judged by observed return quality rather than model name; the activation prompt must be a self-contained copy-paste text. These rules are canonical in `references/multi-agent-closure-rules.md` and `references/agent-modes.md` — point there instead of treating this list as the source.
 
 ## Input Clarification
 
 When a request is ambiguous or large, do not start implementation. Produce:
 
 ```text
-【理解确认】
-- 用户目标：...
-- 当前范围：...
-- 是否涉及代码/文档/外部操作：是/否
-- 是否需要先读取文件：是/否
-- 是否会修改任何文件：是/否
-- 风险初判：P0 / P1 / P2 / 无
-- 指令本身的问题/可优化点：...
-- 需要用户确认的关键点：...
-- 推荐选项与理由：...
-- 澄清方式：A 一次性确认推荐方案 / B 逐项问答
+【理解确认】(Understanding confirmation)
+- 用户目标 User goal: ...
+- 当前范围 Current scope: ...
+- 是否涉及代码/文档/外部操作 Involves code/docs/external actions: yes/no
+- 是否需要先读取文件 Files must be read first: yes/no
+- 是否会修改任何文件 Will modify any files: yes/no
+- 风险初判 Initial risk: P0 / P1 / P2 / none
+- 指令本身的问题/可优化点 Defects/optimizations in the instruction itself: ...
+- 需要用户确认的关键点 Key points needing user confirmation: ...
+- 推荐选项与理由 Recommended option and why: ...
+- 澄清方式 Clarification mode: A one-shot confirmation of the recommended plan / B step-by-step Q&A
 ```
 
 ## Clarify With The User
 
 Do not silently decide the user's meaning. Confirm the target, scope, and acceptance criteria with the user before producing or executing the final plan.
 
-Hard gate: do not edit files or run implementation commands until the user has confirmed the goal, scope, and acceptance criteria, or has explicitly said "you decide". "开始" and "现在开始" are not implementation authorization.
+Hard gate: do not edit files or run implementation commands until the user has confirmed the goal, scope, and acceptance criteria, or has explicitly said "you decide". "开始" ("start"), "现在开始" ("start now"), and "直接做" ("just do it") are not implementation authorization.
 
 1. State your understanding in one or two sentences, then ask the user to confirm or correct it.
 2. Present the complete candidate plan, including the highest-impact questions, recommended options, and alternatives.
 3. Ask the user to choose a clarification mode:
-   - A. One-shot confirmation: the user says "按推荐方案全部确认" or "按最高质量方案做"; record all decisions and proceed.
-   - B. Step-by-step: the user says "逐项问"; then ask exactly one highest-impact question per message, with a recommended option, alternatives, a free-form option, and a research option.
+   - A. One-shot confirmation: the user says "按推荐方案全部确认" ("confirm all per the recommendation") or "按最高质量方案做" ("do it the highest-quality way"); record all decisions and proceed.
+   - B. Step-by-step: the user says "逐项问" ("ask one by one"); then ask exactly one highest-impact question per message, with a recommended option, alternatives, a free-form option, and a research option.
 4. If the user chooses A, do not force one-by-one questions unless new material ambiguity appears.
 5. If the user chooses B, never dump all questions in one message. Each message contains one question, one recommendation, alternatives, a free-form option, and a research option.
 6. Provide at least 2-3 materially different options when the goal, scope, or approach is ambiguous. Explain tradeoffs. If your option set is thin, research before presenting.
 7. Recommend the option most likely to produce the highest final result quality, not the easiest, fastest, or most familiar one. Explain why it wins.
-8. If the user says "继续调研", search or read more material first, then present a new option set.
+8. If the user says "继续调研" ("research more"), search or read more material first, then present a new option set.
 9. When research or divergence creates a materially different path, bring it back to the user instead of silently changing the plan.
 10. Do not start implementation until the user has selected a mode, and all relevant questions have been resolved and confirmed.
 
@@ -183,39 +182,46 @@ Whenever the user changes any part of the plan, mid-clarification or mid-impleme
 Before creating any project folder, editing files, or running implementation commands, output and stop:
 
 ```text
-【实现前确认】
-- 我理解的目标：...
-- 风险分档：轻 / 中 / 重 — 判定理由（决定走轻通道还是全流程）
-- 形态选择：单 Agent 主干 / 子 Agent 增强 / 指挥官扩展 — 一行理由（判定顺序见 agent-modes 的模式自选；轻通道免填；"同时/并行/多任务"是子 Agent 信号，须显式评估并声明取舍）
-- 已盘点可用资源：本地 skills / 可装技能候选（批准后才装）/ 可复用模板与现成实现 / 网络参考（逐项列出；查过但不适用才可写"无适用"）
-- 最高影响问题（可多项）：...（影响方案取舍的技术风险与已知权衡，供你判断，**不是提问**）
-- 推荐方案：...
-- 其他选项：...（我已评估并否掉的备选，信息性、**不需要你选**）
-- 完整计划：...
-- 澄清方式：A 一次性确认推荐方案 / B 逐项问答
-- 需要你确认：...（**必须由你拍板的开放决策点**，每条给选项 + 推荐 + 一句话理由；与「其他选项」的区别：那栏是我否掉的、不用你选，本栏是我无法替你定的）
+【实现前确认】(Pre-implementation confirmation) — 10 fields:
+- 我理解的目标 My understanding of the goal: ...
+- 风险分档 Risk tier: light / medium / heavy — reason (decides light channel vs full flow)
+- 形态选择 Form selection: Single-Agent backbone / Subagent enhancement / Commander extension — one-line reason
+  (selection order per Mode Self-Selection in agent-modes; blank for the light channel;
+  "simultaneously / in parallel / multiple tasks" is a Subagent signal — evaluate and state the tradeoff explicitly)
+- 已盘点可用资源 Surveyed available resources: local skills / installable skill candidates (installed only after approval) /
+  reusable templates and prior implementations / web references (list item by item; write "none applies"
+  only after actually checking)
+- 最高影响问题 Highest-impact questions (may be several): ... (technical risks and known tradeoffs that affect the plan,
+  for your judgment — these are NOT questions to you)
+- 推荐方案 Recommended plan: ...
+- 其他选项 Alternatives: ... (options I evaluated and rejected — informational, do NOT require your choice)
+- 完整计划 Complete plan: ...
+- 澄清方式 Clarification mode: A one-shot confirmation of the recommended plan / B step-by-step Q&A
+- 需要你确认 Needs your confirmation: ... (open decision points ONLY YOU can make; each with options + a
+  recommendation + a one-line reason. Difference from "Alternatives": that column lists what I rejected and
+  you need not choose; this column lists what I cannot decide for you)
 ```
 
 Rules:
 
 - Announcing the stage sequence is not confirmation.
-- "开始", "现在开始", and "直接做" are not implementation authorization.
+- "开始" ("start"), "现在开始" ("start now"), and "直接做" ("just do it") are not implementation authorization.
 - Do not create directories, write code, run tests, or produce project artifacts until the user confirms or delegates.
-- "你决定" or "按最高质量方案做" is explicit delegation; record the decisions and then proceed.
+- "你决定" ("you decide") or "按最高质量方案做" ("do it the highest-quality way") is explicit delegation; record the decisions and then proceed.
 - If the user chooses A, record all recommended decisions and proceed.
 - If the user chooses B, ask exactly one question per message and update the plan after each answer.
 - When any part of the plan changes, re-evaluate the whole plan before continuing.
-- If you need permission to read skill files or run read-only commands, end with one exact authorization sentence: `请授权：允许我执行只读命令读取 [files]；不创建目录、不写文件、不运行实现命令。`
+- If you need permission to read skill files or run read-only commands, end with one exact authorization sentence: `请授权：允许我执行只读命令读取 [files]；不创建目录、不写文件、不运行实现命令。` ("Please authorize: allow me to run read-only commands to read [files]; no directory creation, no file writes, no implementation commands.")
 
-## Risk Trimming / 风险分档与轻量任务通道
+## Risk Trimming / Light-Task Channel
 
 Classify every task early (workflow step 2) and scale process intensity to risk — heavy machinery on trivial tasks is bureaucracy, not rigor:
 
 | Tier | Criteria | Process |
 | --- | --- | --- |
-| Light 轻 | Instruction specific and unambiguous; small blast radius (single-file tweak, typo/format fix, pure Q&A); fully reversible; no destructive or external side effects. Brand-new products (new project/app) default to medium unless the instruction fully specifies type, location, and form. | The instruction itself is the authorization: skip the gate and resource survey, execute directly, and still report the actual change with evidence |
-| Medium 中 | Ordinary implementation work | Full default flow: gate → staged execution → hands-on loop |
-| Heavy 重 | Large blast radius, irreversible, ambiguous, or external side effects | Full flow plus Commander Mode consideration |
+| Light | Instruction specific and unambiguous; small blast radius (single-file tweak, typo/format fix, pure Q&A); fully reversible; no destructive or external side effects. Brand-new products (new project/app) default to medium unless the instruction fully specifies type, location, and form. | The instruction itself is the authorization: skip the gate and resource survey, execute directly, and still report the actual change with evidence |
+| Medium | Ordinary implementation work | Full default flow: gate → staged execution → hands-on loop |
+| Heavy | Large blast radius, irreversible, ambiguous, or external side effects | Full flow plus Commander Mode consideration |
 
 Guardrails:
 
@@ -223,8 +229,9 @@ Guardrails:
 - When in doubt, escalate to medium automatically; ambiguity in the instruction disqualifies the light tier.
 - The light tier never skips evidence reporting: even a one-line fix reports what changed and how it was verified.
 
-轻档逐条满足才可适用：指令具体明确、影响面小、完全可逆、无破坏性与外部副作用——此时指令本身即为授权，可跳过门禁与资源盘点直接执行，但报告改动与证据不可省。破坏性/外部/推送部署/含糊指令永远不走轻通道；拿不准自动升中档。轻通道省的是流程，不是证据。
-轻通道**排除项与边界**（命中即升中档全流程）：①从零新建产物默认中档——除非指令已完整指定产物类型、位置与形态，否则不得走轻通道（新建产物涉及多文件与产品决策、不该默认绕过门禁；形态选择在门禁中由 AI 提议、用户裁决——被升档的原因是多文件与产品决策，而非"形态须由用户指定"）；②多交付物（≥2 个独立产物，如"同时做 A/B/C 三个工具"）；③并行信号（"同时/并行/一起做"是子 Agent 增强信号，须走全流程显式声明形态选择与取舍）。
+The light channel saves process, not evidence.
+
+**Light-channel exclusions and boundary** (any hit escalates to medium / full flow): ① A brand-new product defaults to medium — unless the instruction fully specifies the artifact's type, location, and form, the light channel is unavailable (new products involve multiple files and product decisions and must not bypass the gate by default; form selection is proposed by the AI inside the gate and ruled on by the user — the escalation reason is the multi-file and product-decision surface, not "the user must name the form"); ② multiple deliverables (≥2 independent artifacts, e.g. "build tools A/B/C at the same time"); ③ parallelism signals ("simultaneously / in parallel / together" is a Subagent-enhancement signal — take the full flow and declare form selection and the tradeoff explicitly).
 
 ## Authorization Request Format
 
@@ -232,9 +239,10 @@ When permission is required, do not bury the request in prose. End the reply wit
 
 ```text
 请授权：允许我执行只读命令读取 [file paths]；不创建目录、不写文件、不运行实现命令。
+(Please authorize: allow me to run read-only commands to read [file paths]; no directory creation, no file writes, no implementation commands.)
 ```
 
-The user should be able to reply `授权` or `允许` without needing to restate the scope. Do not continue before that authorization is given.
+The user should be able to reply `授权` ("authorized") or `允许` ("allowed") without needing to restate the scope. Do not continue before that authorization is given.
 
 ## Option Depth And User Input
 
@@ -243,12 +251,13 @@ In step-by-step mode, every question must include:
 - At least 2-3 materially different options with tradeoffs.
 - A recommended option and why it leads to higher final result quality.
 - An explicit free-form option: the user can propose their own solution.
-- An explicit research option: if the user says "继续调研", search or read more material before presenting additional options.
+- An explicit research option: if the user says "继续调研" ("research more"), search or read more material before presenting additional options.
 
 If you are not confident that the options cover the space, research before presenting them. End each question with:
 
 ```text
-请选择、直接说明你自己的方案，或回复“继续调研”让我先补充资料。
+请选择、直接说明你自己的方案，或回复"继续调研"让我先补充资料。
+(Pick an option, state your own plan, or reply "research more" and I will gather material first.)
 ```
 
 ## Assess And Optimize The Instruction
@@ -269,12 +278,12 @@ Do not blindly execute a flawed instruction. Do not silently replace the user's 
 For any non-trivial build or change task, announce the stage sequence before implementing:
 
 ```text
-我会分阶段处理：
-阶段1：调研
-阶段2：规划
-阶段3：实现
-阶段4：验证
-阶段5：收尾
+我会分阶段处理：(I will work in stages:)
+阶段1 Stage 1：调研 Research
+阶段2 Stage 2：规划 Planning
+阶段3 Stage 3：实现 Implementation
+阶段4 Stage 4：验证 Verification
+阶段5 Stage 5：收尾 Closure
 ```
 
 Rules:
@@ -282,7 +291,7 @@ Rules:
 - Do not skip from the user request to implementation.
 - Do not execute until the instruction has been assessed and instruction + research + divergence have converged into a complete plan.
 - Ask the user to confirm the goal and key acceptance criteria before the final plan is locked.
-- Do not treat "开始" or "现在开始" as implementation authorization.
+- Do not treat "开始" ("start") or "现在开始" ("start now") as implementation authorization.
 - Before each stage plan, collect evidence.
 - Do not proceed to the next stage until the current stage has an exit result.
 - After each stage, inspect the actual stage output with current evidence before starting the next stage.
@@ -299,7 +308,7 @@ Before planning any non-trivial stage:
 
 If research is impossible because no search tool or source is available, state that limitation explicitly and rely on verified local evidence instead of memory alone.
 
-## Resource Survey / 资源盘点前置
+## Resource Survey
 
 Before producing the implementation plan (and as part of the pre-implementation gate), inventory every source of help that could make the result better or cheaper:
 
@@ -311,9 +320,9 @@ Before producing the implementation plan (and as part of the pre-implementation 
 
 Skill discovery and self-install flow (step 4): present the shortlist to the user with a recommendation **before starting work** — installing means modifying the environment and is authorization-gated. On approval, install via the platform's official channel, verify the install, record it in the survey, then proceed to research the project needs and usable resources. On decline, proceed with what exists and note the gap. Never install silently.
 
-The survey result goes into the gate output as「已盘点可用资源」(installable-skill candidates appear here too, marked 待你批准). A plan produced without a survey is an incomplete plan.
+The survey result goes into the gate output as "Surveyed available resources" (installable-skill candidates appear here too, marked pending your approval). A plan produced without a survey is an incomplete plan.
 
-## Existing-Artifact Conflict: Stop And Report First / 既有产物冲突先报告
+## Existing-Artifact Conflict: Stop And Report First
 
 When the survey or the first look at the target location finds an existing artifact, file, data store, or prior implementation that **conflicts with the user's instruction** (for example: the user says "create a new X" but an X already exists, or the target directory already holds a working version, or local runtime data would be destroyed by overwriting):
 
@@ -322,7 +331,7 @@ When the survey or the first look at the target location finds an existing artif
 3. **Offer options, not a decision**: present materially different dispositions (create an isolated new directory / iterate on the existing one / overwrite with named risks) with a recommendation.
 4. **Wait**: act only after the user rules. "The instruction said create new" is not authorization to overwrite what exists.
 
-## Change Management / 变更管理
+## Change Management
 
 When the user changes a requirement, or a mid-flight discovery would change one, do not patch the visible spot:
 
@@ -333,8 +342,6 @@ When the user changes a requirement, or a mid-flight discovery would change one,
 5. **Surface conflicts**: if the change contradicts an approved decision, say so explicitly instead of silently reconciling it.
 
 Verification conveniences that add user-visible surface — debug switches, shortened-duration test modes, extra buttons, mock toggles — are **scope changes**, not implementation details. List them in the gate as explicit decisions for the user; do not adopt them silently as "fixed decisions" even when they exist only to make acceptance possible.
-
-动手前盘点一切能帮上忙的资源，逐项给**四档**结论：用（怎么用）/ 改造用（改什么）/ **本 skill 已覆盖**（点名覆盖它的小节，**不重复加载**——重复叠纪律纯耗 token 与延迟；例：已装的 `verification-before-completion` 对本 skill 的 `common-failures.md` 即属冗余）/ 不适用（必须真查过才能写）。本地盘点出缺口时，主动搜索技能市场与开源仓库里匹配本任务的技能/工具，给 2-3 个候选（含来源、维护状态、能加什么），**开工前先征求用户同意再安装**——安装即改环境，属授权门内动作；同意后走平台官方渠道安装并验证，然后进入项目需求调研与可用资源调研；不同意则带缺口开工并注明。盘点结果写入门禁确认单；没盘点的计划是不完整的计划。
 
 ## Generative Divergence Protocol
 
@@ -384,23 +391,17 @@ After all planned stages complete:
 7. Workspace hygiene: inspect new, untracked, and temporary files created during the work; classify each as keep, regenerate-able, or clean up now — a passing build must not leave work garbage behind.
 8. Only then report final completion.
 
-## User-Path Acceptance / 用户路径验收
+## User-Path Acceptance
 
 Before final acceptance, validate the delivery from the actual user path in its real target environment. This applies to every project type: web, game, desktop, mobile, CLI, API, library, plugin, configuration, and documentation. Unit tests are necessary but not sufficient; a passing test suite does not prove the product is usable.
 
-最终交付前，必须在真实目标环境中从用户路径验证交付物。这条规则适用于所有项目类型：Web、游戏、桌面、移动、CLI、API、库、插件、配置和文档。单元测试是必要但不充分条件；测试全绿不能证明产品可用。
-
-### Desktop / Mobile / 桌面或移动应用
+### Desktop / Mobile Applications
 
 - Launch the application in the real runtime, not only import or unit-test it.
 - Walk through the main user flow: start, data input, persistence, error path, exit.
 - Verify the actual UI, logs, and persisted state.
 
-- 在真实运行时中启动应用，而不只是导入或单元测试。
-- 走通主要用户流程：启动、数据输入、持久化、错误路径、退出。
-- 验证实际 UI、日志和已持久化状态。
-
-### Web / Frontend / Game / Web 前端 / 游戏
+### Web / Frontend / Game
 
 - Open the page with `file://` or a local server, matching the documented delivery method.
 - Check the browser console for JavaScript errors.
@@ -408,51 +409,29 @@ Before final acceptance, validate the delivery from the actual user path in its 
 - Simulate the key user actions: start, input, restart, failure path.
 - Capture a screenshot or equivalent runtime evidence.
 
-- 按文档交付方式用 `file://` 或本地服务器打开页面。
-- 检查浏览器控制台是否有 JS 报错。
-- 验证实际渲染内容存在：Canvas 像素、DOM 元素、图片或 UI 状态。
-- 模拟关键用户操作：开始、输入、重启、失败路径。
-- 保留截图或等价运行证据。
-
-### CLI / 命令行工具
+### CLI Tools
 
 - Run the real command in a clean environment.
 - Verify exit codes, stdout/stderr, and documented usage.
 - Cover success, validation error, and failure paths.
 
-- 在干净环境中运行真实命令。
-- 验证退出码、stdout/stderr 和文档用法。
-- 覆盖成功、校验错误和失败路径。
-
-### API / Service / API 或服务
+### API / Service
 
 - Start the service when required.
 - Send real requests covering success, error, auth, boundary, and persistence paths.
 - Verify returned data and stored state.
 
-- 需要时启动服务。
-- 发送真实请求，覆盖成功、错误、鉴权、边界和持久化路径。
-- 核验返回数据和已存储状态。
-
-### Library / Package / 库或包
+### Library / Package
 
 - Import or install the package in a consumer-like environment.
 - Run the documented example.
 - Verify there are no runtime errors.
 
-- 在类似使用者的环境中安装或导入包。
-- 运行文档示例。
-- 验证没有运行时错误。
-
-### Documentation / 文档
+### Documentation
 
 - Follow every link, path, and command in the documentation.
 - Verify that examples match the actual artifact.
 - Verify install and usage commands are executable.
-
-- 按文档执行每个链接、路径和命令。
-- 验证示例与实际产物一致。
-- 验证安装和使用命令可执行。
 
 Rules:
 
@@ -460,13 +439,7 @@ Rules:
 - Do not close final acceptance based only on unit tests, file existence, or a role report.
 - For browser projects, a blank canvas or missing DOM state is a P0 delivery defect.
 
-规则：
-
-- 用户路径无法验证时，将相关结论标记为 `UNVERIFIED`。
-- 不能只凭单元测试、文件存在或角色报告关闭最终验收。
-- 对浏览器项目，空白 Canvas 或缺失 DOM 状态属于 P0 交付缺陷。
-
-## Hands-On Experience Loop / 实操体验与自优化闭环
+## Hands-On Experience Loop
 
 For any artifact a human will directly operate or see (UI, game, document, tool, report), logic tests alone never close delivery. After implementation and before claiming completion:
 
@@ -481,20 +454,16 @@ Self-assessed claims like "the UI should be good" without hands-on operation are
 
 Environment precondition: this loop requires a runtime that can actually open the artifact and capture screenshots (GUI browser, rendered preview, and so on). Under a headless/CLI-only runtime, do not fake or silently skip: operate whatever the environment allows, state the limitation explicitly, mark every un-operated surface `UNVERIFIED` with concrete user self-verification steps, and never claim visual quality.
 
-环境前置：本闭环要求运行时能真实打开产物并截图（GUI 浏览器、渲染预览等）。在纯 headless/CLI 环境下不得伪造或静默跳过：能操作的操作，明说环境限制，未操作的部分一律标 `UNVERIFIED` 并给出用户自验步骤，绝不宣称视觉良好。
+### Non-GUI Artifacts (CLI, Library, API, Documentation)
 
-### Non-GUI artifacts / 非 GUI 产物（CLI、库、API、文档）
+The steps above target artifacts "a human operates with their eyes". Non-GUI artifacts follow the same discipline with a different evidence form — **do not downgrade a conclusion to `UNVERIFIED` merely because the artifact has no UI**; that mistakes "type not applicable" for "capability absent":
 
-上面的步骤以"人会用眼睛操作"的产物为对象。非 GUI 产物适用同一纪律，只是证据形态不同——**不得因为产物没有界面就把结论降格成 `UNVERIFIED`**，那是把"类型不适用"误当成"能力不具备"：
+- **CLI tools**: run every command and argument combination in a real shell; verify stdout, stderr, exit codes, and persisted state after each action; cover success, validation-error, and failure paths. Any command not actually run is `UNVERIFIED`.
+- **Library / Package**: install or import in a consumer-like environment, run the documented examples, verify return values and side effects.
+- **API / Service**: start the service; send real requests covering success, error, auth, and boundary paths.
+- **Documentation**: execute every command, link, and path in the docs; confirm they run and match the actual artifact.
 
-- **CLI / 命令行工具**：在真实 shell 中逐条运行每个命令与参数组合，验证 stdout、stderr、退出码，以及每次操作后的持久化状态；覆盖成功、校验错误、失败三类路径。没真跑过的命令一律 `UNVERIFIED`。
-- **Library / Package / 库或包**：在类使用者环境中安装或导入，运行文档示例，验证返回值与副作用。
-- **API / Service**：启动服务，发送覆盖成功、错误、鉴权、边界的真实请求。
-- **Documentation / 文档**：逐个执行文档里的命令、链接、路径，确认可执行且与实际产物一致。
-
-这类产物的运行时证据是**命令留痕**（存 `<项目根>/evidence/`），不是截图。判定标准：产物类型本就没有 GUI 时，应给出上面对应的类型化证据；只有"环境确实无法运行该类型产物"时才标 `UNVERIFIED` 并给出用户自验步骤。
-
-For CLI/non-GUI artifacts the runtime evidence is a **command transcript** (saved under `<项目根>/evidence/`), not screenshots. Never write "no GUI so UNVERIFIED" when the artifact type simply has no GUI — provide the type-appropriate evidence above; reserve `UNVERIFIED` for surfaces the environment genuinely cannot exercise.
+The runtime evidence for such artifacts is a **command transcript** (saved under `<project root>/evidence/`), not screenshots. Decision rule: when the artifact type simply has no GUI, provide the type-appropriate evidence above; reserve `UNVERIFIED` for surfaces the environment genuinely cannot exercise, with user self-verification steps.
 
 ## End-State Self-Check Loop
 
@@ -569,7 +538,7 @@ Run this loop continuously, not only at final acceptance:
 ## Independent Judgment
 
 - A user statement is input, not proof.
-- Do not open with "你说得对" or "you are right".
+- Do not open with "你说得对" ("you are right").
 - Output a judgment: agree, disagree, or conditionally accept, with evidence.
 - If you lack evidence, say what would change your judgment.
 
@@ -587,30 +556,26 @@ When reviewing a plan, code change, or report, check:
 | No unauthorized scope expansion | yes/no | diff | |
 | Git/commit/external side effects separately authorized | yes/no | user confirmation | |
 
-## Task Dispatch Package (Internal) / 内部任务派发包
+## Task Dispatch Package (Internal)
 
 Use this compact structure when dispatching inside Single-Agent Mode or to a subagent in Subagent Mode. It is an internal dispatch note, not a cross-Agent task package.
 
-在单 Agent 模式内部派发，或在子 Agent 模式派发给子 Agent 时，使用这个精简结构。它是内部派发说明，不是跨 Agent 任务包。
-
 ```text
-【任务派发】
-- 负责人（DRI）：...
-- 背景与根因：...
-- 当前事实：...
-- 目标交付物：...
-- 已定决策（不可推翻）：...
-- 待解决问题（按优先级）：...
-- 允许范围：可读取/修改/测试的文件或目录
-- 禁止范围：不得修改/提交/推送/替代用户决定的事项
-- 验收标准：如何证明完成
-- 退回条件：什么情况必须退回并附证据
-- 闭环路径：交付后由谁复核、谁修复、何时需要用户授权
+【任务派发】(Task dispatch)
+- 负责人 DRI: ...
+- 背景与根因 Background and root cause: ...
+- 当前事实 Current facts: ...
+- 目标交付物 Target deliverable: ...
+- 已定决策 Fixed decisions (must not be overturned): ...
+- 待解决问题 Open issues (by priority): ...
+- 允许范围 Allowed scope: files/directories that may be read/modified/tested
+- 禁止范围 Forbidden scope: what must not be modified/committed/pushed/decided for the user
+- 验收标准 Acceptance criteria: how completion is proven
+- 退回条件 Return conditions: when the task must be returned, with evidence
+- 闭环路径 Closure path: who reviews after delivery, who fixes, when user authorization is needed
 ```
 
 For Commander Multi-Agent Mode, this note alone does not complete a handoff. Use the mandatory full task package in `references/multi-agent-closure-rules.md`, which additionally requires recipient identity (role + platform/window), selection rationale, identity declaration format, recipient activation prompt, evidence required, return format, authorization, and trust tier (T1/T2/T3).
-
-指挥官多 Agent 模式下，只用这份说明不构成完整交接。必须使用 `references/multi-agent-closure-rules.md` 中的强制完整任务包，它额外要求接收方身份（角色 + 平台/窗口）、选择理由、身份声明格式、接收方启动提示词、所需证据、返回格式、授权和信任层级（T1/T2/T3）。
 
 ## Agent Addressing Protocol
 
@@ -643,12 +608,12 @@ Never accept a report without checking:
 Output a decision:
 
 ```text
-【复核结论】
-- 是否通过：通过 / 有条件通过 / 不通过
-- 发现问题：...
-- 是否需要返工：是/否
-- 是否需要用户决策：是/否
-- 下一步动作：...
+【复核结论】(Verification verdict)
+- 是否通过 Pass: pass / conditional pass / fail
+- 发现问题 Findings: ...
+- 是否需要返工 Rework needed: yes/no
+- 是否需要用户决策 User decision needed: yes/no
+- 下一步动作 Next action: ...
 ```
 
 ## Stage Transition Self-Check
@@ -666,13 +631,13 @@ At every `completed`, `committed`, `accepted`, or closed gate, before replying:
 Then report:
 
 ```text
-【阶段转换自检】
-- 完成证据：...
-- 当前状态：...
-- 下一项任务：...
-- 缺失条件/授权：...
-- 用户可直接执行的下一句话：...
-- 指挥官/主控 Agent 后续复核责任：...
+【阶段转换自检】(Stage transition self-check)
+- 完成证据 Completion evidence: ...
+- 当前状态 Current state: ...
+- 下一项任务 Next task: ...
+- 缺失条件/授权 Missing conditions/authorizations: ...
+- 用户可直接执行的下一句话 One sentence the user can reply with: ...
+- 指挥官/主控 Agent 后续复核责任 Commander/main-agent follow-up review duty: ...
 ```
 
 ## Authorization Matrix
@@ -696,17 +661,17 @@ If project-specific stage codes materially affect authorization, define them in 
 Prefer this shape:
 
 ```text
-## 当前判断
-一句话说明这是审阅、派发、复核还是阶段转换。
+## 当前判断 Current judgment
+One sentence: is this a review, dispatch, verification, or stage transition?
 
-## 关键事实
+## 关键事实 Key facts
 - ...
 
-## 决策/建议
+## 决策/建议 Decision / recommendation
 - ...
 
-## 下一步
-- DRI：...
-- 动作：...
-- 需要用户授权：是/否
+## 下一步 Next steps
+- DRI: ...
+- Action: ...
+- 需要用户授权 Needs user authorization: yes/no
 ```

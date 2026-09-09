@@ -122,13 +122,14 @@ def run_checks() -> list:
     else:
         c.pass_("22 identity files present")
 
-    # SB5 references count == 11
-    c = new(5, "reference file count == 11")
+    # SB5 references count == 13
+    # (11 originals + series-reasoning-workflow-en.md mirror + project-artifacts.md)
+    c = new(5, "reference file count == 13")
     refs = list((REPO_ROOT / "references").glob("*.md"))
-    if len(refs) != 11:
-        c.fail("found " + str(len(refs)) + " reference files, expected 11")
+    if len(refs) != 13:
+        c.fail("found " + str(len(refs)) + " reference files, expected 13")
     else:
-        c.pass_("11 reference .md files")
+        c.pass_("13 reference .md files")
 
     # SB6 code-fence pairing
     c = new(6, "markdown code-fence pairing")

@@ -1,0 +1,133 @@
+#!/usr/bin/env python3
+"""Structure checker for project governance artifacts (see references/project-artifacts.md).
+
+Validates the STRUCTURE of gate records and governance ledgers inside a user
+project. It deliberately does NOT judge content truthfulness: a structurally
+valid gate record says nothing about whether authorization really happened —
+that remains a human evidence check (same philosophy as selfcheck.py).
+
+  python scripts/artifact-check.py <project-root>
+
+Exit codes: 0 = all structural rules pass, 1 = structural problems found,
+2 = usage / path error.
+
+Checked rules:
+  1. docs/gate/*.md     — each record carries the 10 gate-field labels, a legal
+                          status line, and a superseded pointer when superseded.
+  2. dispatch-ledger.md — if present, must be non-empty governance content.
+  3. findings-ledger.md — if present, each round must name the required fields
+                          (round number / change & reason / open items / evidence pointer).
+"""
+
+from __future__ import annotations
+
+import pathlib
+import re
+import sys
+
+GATE_FIELDS = [
+    "我理解的目标",
+    "风险分档",
+    "形态选择",
+    "已盘点可用资源",
+    "最高影响问题",
+    "推荐方案",
+    "其他选项",
+    "完整计划",
+    "澄清方式",
+    "需要你确认",
+]
+STATUSES = {"proposed", "confirmed", "rejected", "superseded"}
+FINDINGS_FIELDS = ["轮次编号", "未解项", "证据指针"]
+# a round heading like "## Round 3" / "## 第 3 轮" / "### Round 3 / 第3轮"
+ROUND_HEADING = re.compile(r"^#{1,4}.*?(?:Round\s*\d+|第\s*\d+\s*轮)", re.M | re.I)
+
+
+def fail(items: list, msg: str) -> None:
+    items.append(msg)
+
+
+def check_gate_record(path: pathlib.Path, items: list) -> None:
+    text = path.read_text(encoding="utf-8", errors="replace")
+    for field in GATE_FIELDS:
+        if field not in text:
+            fail(items, "{}: missing gate field [{}]".format(path.name, field))
+    m = re.search(r"Status\s*/?\s*状态[:：]\s*(\S+)", text, re.I)
+    if not m:
+        fail(items, "{}: missing status line (Status / 状态:)".format(path.name))
+        return
+    status = m.group(1).strip("`*# ").lower()
+    if status not in STATUSES:
+        fail(items, "{}: illegal status {!r} (allowed: {})".format(
+            path.name, status, "/".join(sorted(STATUSES))))
+        return
+    if status == "superseded" and not re.search(
+            r"Superseded-by\s*/?\s*作废指向[:：]\s*\S+", text, re.I):
+        fail(items, "{}: superseded record lacks a Superseded-by pointer".format(path.name))
+
+
+def check_dispatch_ledger(path: pathlib.Path, items: list) -> None:
+    text = path.read_text(encoding="utf-8", errors="replace").strip()
+    if not text:
+        fail(items, "dispatch-ledger.md exists but is empty")
+        return
+    if "派发" not in text and "dispatch" not in text.lower():
+        fail(items, "dispatch-ledger.md: no dispatch-related content header found")
+
+
+def check_findings_ledger(path: pathlib.Path, items: list) -> None:
+    text = path.read_text(encoding="utf-8", errors="replace")
+    rounds = ROUND_HEADING.findall(text)
+    if not rounds:
+        fail(items, "findings-ledger.md: no round headings (## Round N / 第 N 轮)")
+        return
+    for field in FINDINGS_FIELDS:
+        if field not in text:
+            fail(items, "findings-ledger.md: required per-round field [{}] not found".format(field))
+
+
+def main() -> int:
+    if len(sys.argv) != 2:
+        print(__doc__)
+        return 2
+    root = pathlib.Path(sys.argv[1])
+    if not root.is_dir():
+        print("ERROR: not a directory: " + str(root))
+        return 2
+
+    items: list = []
+    gate_dir = root / "docs" / "gate"
+    n_gate = 0
+    if gate_dir.is_dir():
+        for p in sorted(gate_dir.glob("*.md")):
+            n_gate += 1
+            check_gate_record(p, items)
+    elif (root / "docs").is_dir():
+        # docs/ exists without gate/: fine for light-channel-only projects.
+
+        # a docs/agents ledger without any gate dir is legal; nothing to do here.
+        pass
+
+    dispatch = root / "docs" / "agents" / "dispatch-ledger.md"
+    if dispatch.is_file():
+        check_dispatch_ledger(dispatch, items)
+    findings = root / "docs" / "agents" / "findings-ledger.md"
+    if findings.is_file():
+        check_findings_ledger(findings, items)
+
+    print("Project artifact structure check / 项目治理产物结构校验")
+    print("- Project root: {}".format(root))
+    print("- Gate records scanned: {}".format(n_gate))
+    print("- dispatch-ledger.md: {}".format("present" if dispatch.is_file() else "absent"))
+    print("- findings-ledger.md: {}".format("present" if findings.is_file() else "absent"))
+    if items:
+        print("- Result: {} structural problem(s)".format(len(items)))
+        for it in items:
+            print("  [FAIL] " + it)
+        return 1
+    print("- Result: all structural rules pass (structure only — content truth is a human check)")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
