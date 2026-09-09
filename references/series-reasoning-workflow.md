@@ -185,12 +185,12 @@ Before creating any project folder, editing files, or running implementation com
 - 风险分档：轻 / 中 / 重 — 判定理由（决定走轻通道还是全流程）
 - 形态选择：单 Agent 主干 / 子 Agent 增强 / 指挥官扩展 — 一行理由（判定顺序见 agent-modes 的模式自选；轻通道免填；"同时/并行/多任务"是子 Agent 信号，须显式评估并声明取舍）
 - 已盘点可用资源：本地 skills / 可装技能候选（批准后才装）/ 可复用模板与现成实现 / 网络参考（逐项列出；查过但不适用才可写"无适用"）
-- 最高影响问题（可多项）：...
+- 最高影响问题（可多项）：...（影响方案取舍的技术风险与已知权衡，供你判断，**不是提问**）
 - 推荐方案：...
 - 其他选项：...
 - 完整计划：...
 - 澄清方式：A 一次性确认推荐方案 / B 逐项问答
-- 需要你确认：...
+- 需要你确认：...（**必须由你拍板的开放决策点**，每条给选项 + 推荐 + 一句话理由；与上一栏的区别：上栏是"我已知的风险"，本栏是"等你定的选项"）
 ```
 
 Rules:
@@ -304,7 +304,7 @@ Before producing the implementation plan (and as part of the pre-implementation 
 2. Reusable assets: existing templates, boilerplate, prior implementations in this project or on this machine that can be adapted instead of rebuilt.
 3. Web references: reference implementations, best-practice write-ups, and official docs for this exact task type.
 4. Installable skills and tools (self-discovery): when the local inventory shows a gap, search skill marketplaces and open-source repositories for skills/tools matching this task type; shortlist 2-3 candidates with source, maintenance state, and what each would add.
-5. Verdict per item: use it (say how), adapt it (say what changes), or not applicable (only after actually checking — an unevidenced "nothing available" is not a survey).
+5. Verdict per item — four buckets: **use it** (say how) / **adapt it** (say what changes) / **already covered by this skill** (name the section that covers it and do NOT load the other skill — stacking redundant discipline costs tokens and latency for nothing; e.g. an installed `verification-before-completion` skill is redundant against this skill's `common-failures.md`) / **not applicable** (only after actually checking — an unevidenced "nothing available" is not a survey).
 
 Skill discovery and self-install flow (step 4): present the shortlist to the user with a recommendation **before starting work** — installing means modifying the environment and is authorization-gated. On approval, install via the platform's official channel, verify the install, record it in the survey, then proceed to research the project needs and usable resources. On decline, proceed with what exists and note the gap. Never install silently.
 
@@ -331,7 +331,7 @@ When the user changes a requirement, or a mid-flight discovery would change one,
 
 Verification conveniences that add user-visible surface — debug switches, shortened-duration test modes, extra buttons, mock toggles — are **scope changes**, not implementation details. List them in the gate as explicit decisions for the user; do not adopt them silently as "fixed decisions" even when they exist only to make acceptance possible.
 
-动手前盘点一切能帮上忙的资源，逐项给结论：用（怎么用）、改造用（改什么）、不适用（必须真查过才能写）。本地盘点出缺口时，主动搜索技能市场与开源仓库里匹配本任务的技能/工具，给 2-3 个候选（含来源、维护状态、能加什么），**开工前先征求用户同意再安装**——安装即改环境，属授权门内动作；同意后走平台官方渠道安装并验证，然后进入项目需求调研与可用资源调研；不同意则带缺口开工并注明。盘点结果写入门禁确认单；没盘点的计划是不完整的计划。
+动手前盘点一切能帮上忙的资源，逐项给**四档**结论：用（怎么用）/ 改造用（改什么）/ **本 skill 已覆盖**（点名覆盖它的小节，**不重复加载**——重复叠纪律纯耗 token 与延迟；例：已装的 `verification-before-completion` 对本 skill 的 `common-failures.md` 即属冗余）/ 不适用（必须真查过才能写）。本地盘点出缺口时，主动搜索技能市场与开源仓库里匹配本任务的技能/工具，给 2-3 个候选（含来源、维护状态、能加什么），**开工前先征求用户同意再安装**——安装即改环境，属授权门内动作；同意后走平台官方渠道安装并验证，然后进入项目需求调研与可用资源调研；不同意则带缺口开工并注明。盘点结果写入门禁确认单；没盘点的计划是不完整的计划。
 
 ## Generative Divergence Protocol
 
@@ -479,6 +479,19 @@ Self-assessed claims like "the UI should be good" without hands-on operation are
 Environment precondition: this loop requires a runtime that can actually open the artifact and capture screenshots (GUI browser, rendered preview, and so on). Under a headless/CLI-only runtime, do not fake or silently skip: operate whatever the environment allows, state the limitation explicitly, mark every un-operated surface `UNVERIFIED` with concrete user self-verification steps, and never claim visual quality.
 
 环境前置：本闭环要求运行时能真实打开产物并截图（GUI 浏览器、渲染预览等）。在纯 headless/CLI 环境下不得伪造或静默跳过：能操作的操作，明说环境限制，未操作的部分一律标 `UNVERIFIED` 并给出用户自验步骤，绝不宣称视觉良好。
+
+### Non-GUI artifacts / 非 GUI 产物（CLI、库、API、文档）
+
+上面的步骤以"人会用眼睛操作"的产物为对象。非 GUI 产物适用同一纪律，只是证据形态不同——**不得因为产物没有界面就把结论降格成 `UNVERIFIED`**，那是把"类型不适用"误当成"能力不具备"：
+
+- **CLI / 命令行工具**：在真实 shell 中逐条运行每个命令与参数组合，验证 stdout、stderr、退出码，以及每次操作后的持久化状态；覆盖成功、校验错误、失败三类路径。没真跑过的命令一律 `UNVERIFIED`。
+- **Library / Package / 库或包**：在类使用者环境中安装或导入，运行文档示例，验证返回值与副作用。
+- **API / Service**：启动服务，发送覆盖成功、错误、鉴权、边界的真实请求。
+- **Documentation / 文档**：逐个执行文档里的命令、链接、路径，确认可执行且与实际产物一致。
+
+这类产物的运行时证据是**命令留痕**（存 `<项目根>/evidence/`），不是截图。判定标准：产物类型本就没有 GUI 时，应给出上面对应的类型化证据；只有"环境确实无法运行该类型产物"时才标 `UNVERIFIED` 并给出用户自验步骤。
+
+For CLI/non-GUI artifacts the runtime evidence is a **command transcript** (saved under `<项目根>/evidence/`), not screenshots. Never write "no GUI so UNVERIFIED" when the artifact type simply has no GUI — provide the type-appropriate evidence above; reserve `UNVERIFIED` for surfaces the environment genuinely cannot exercise.
 
 ## End-State Self-Check Loop
 

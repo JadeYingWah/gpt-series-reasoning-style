@@ -139,7 +139,7 @@ Delegation must include:
 ## Common Failure Patterns
 
 - Reporting completion without running verification.
-- Claiming full test coverage while tests only cover one branch.
+- Claiming full test coverage while tests only cover one branch — **and its subtler form: a green suite that never exercises the state combination where the bug actually lives.** In the 2026-09-09 end-to-end field test, `clear()` silently kept completed tasks and returned a wrong count while 38/38 tests were green, because the only clear-test happened to run against two pending tasks. Cover the combination (with-completed / without-completed), not just the convenient default state.
 - Accepting a role report without reading the underlying files.
 - Leaving stale docs that say "not implemented" after code is committed.
 - Blocking unrelated parallel branches as if they are dependencies.
