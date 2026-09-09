@@ -32,11 +32,13 @@ When taking over an existing project, resuming an interrupted task, or when the 
 2. Gate and stage status: which stages are closed, which are open, which authorizations are still missing.
 3. Docs-versus-reality sync: stale statements in plans, logs, or status tables that a completed stage already invalidated.
 4. Omissions and inconsistencies: tasks claimed done without evidence, unreported failures, conflicting records.
-5. Report the findings first; fix stale items before new work; only then continue.
+5. Re-anchor the original instruction: re-read the task's original instruction text in full before acting — never rely on a remembered or inherited summary of it.
+6. Project-root hard check: before the first write or directory creation after a resume, verify the current working directory matches the project root stated in the task instruction; on mismatch, stop and report instead of writing.
+7. Report the findings first; fix stale items before new work; only then continue.
 
 Do not resume blind. "没问题后继续" means the check must actually run — a resumed session that starts working without this check treats the user's ritual as noise.
 
-接手既有会话、恢复中断任务，或用户说"继续 / 检查项目 / 先检查再继续"时，先做项目级一致性检查：Git 状态；门禁与阶段状态；文档与实现是否同步（已完成阶段未同步的过期表述）；遗漏与不一致（声称完成却无证据、未报告的失败、互相矛盾的记录）。先报告发现，先修过期项，再继续。不做体检直接续干等于蒙眼开车；"没问题后继续"意味着检查必须真的执行，而不是把用户的仪式当耳旁风。
+接手既有会话、恢复中断任务，或用户说"继续 / 检查项目 / 先检查再继续"时，先做项目级一致性检查：Git 状态；门禁与阶段状态；文档与实现是否同步（已完成阶段未同步的过期表述）；遗漏与不一致（声称完成却无证据、未报告的失败、互相矛盾的记录）；**重锚定原始指令**——恢复后先重读任务原始指令全文再行动，绝不依赖记忆或继承来的摘要；**项目根硬检查**——恢复后首次写盘或建目录前，核验当前工作目录与任务指定的项目根一致，不一致即停下报告而不是写入。先报告发现，先修过期项，再继续。不做体检直接续干等于蒙眼开车；"没问题后继续"意味着检查必须真的执行，而不是把用户的仪式当耳旁风。（本条后两项源自 2026-09-10 A/B 基线评测的实测缺陷：恢复后丢失简报导致行为漂移、误把宿主根当项目根写盘、汇报与磁盘状态矛盾——见 `docs/field-tests/ab-baseline/judgement-sheet.md`。）
 
 发现与目标正面冲突的既有产物或数据时（例如"新建"指令指向的位置已存在实现、目标文件已被占用），**立即暂停一切写盘与创建目录动作**，先向用户报告：现状与指令逐条核对、冲突点、可选处置（新建隔离 / 迭代既有产物 / 覆盖及其数据风险），并等待裁决。**"指令说新建"不等于覆盖授权**；在用户裁决前不自行处置——擅自覆盖既有产物等于销毁用户尚未导出的数据。
 

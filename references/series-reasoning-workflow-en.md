@@ -32,9 +32,11 @@ When taking over an existing project, resuming an interrupted task, or when the 
 2. Gate and stage status: which stages are closed, which are open, which authorizations are still missing.
 3. Docs-versus-reality sync: stale statements in plans, logs, or status tables that a completed stage already invalidated.
 4. Omissions and inconsistencies: tasks claimed done without evidence, unreported failures, conflicting records.
-5. Report the findings first; fix stale items before new work; only then continue.
+5. Re-anchor the original instruction: re-read the task's original instruction text in full before acting — never rely on a remembered or inherited summary of it.
+6. Project-root hard check: before the first write or directory creation after a resume, verify the current working directory matches the project root stated in the task instruction; on mismatch, stop and report instead of writing.
+7. Report the findings first; fix stale items before new work; only then continue.
 
-Do not resume blind. "没问题后继续" ("continue after it's fine") means the check must actually run — a resumed session that starts working without this check treats the user's ritual as noise.
+Do not resume blind. "没问题后继续" ("continue after it's fine") means the check must actually run — a resumed session that starts working without this check treats the user's ritual as noise. Items 5–6 derive from measured defects in the 2026-09-10 A/B baseline evaluation: resumed agents lost the original brief and drifted, wrote to the host root instead of the stated project root, and produced reports contradicting on-disk state (see `docs/field-tests/ab-baseline/judgement-sheet.md`).
 
 When an existing artifact or dataset directly conflicts with the goal (for example, a "create new" instruction points at a location that already holds an implementation, or the target file is occupied), **immediately freeze every write, directory-creation, and implementation action**. Report to the user first: a point-by-point comparison of the current state against the instruction, the conflict points, and the candidate dispositions (create isolated / iterate on the existing artifact / overwrite and its data risk), then wait for a ruling. **"The instruction said create new" is not overwrite authorization**; do not dispose of the conflict on your own before the user rules — overwriting an existing artifact without asking equals destroying data the user has not yet exported.
 

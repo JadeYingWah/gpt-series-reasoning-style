@@ -26,6 +26,7 @@ Most skills are designed and shipped. This one is designed, shipped, **attacked,
 | 3 | Probe R2 探针二轮 | Same probe 同一探针 | 3.1.2 | Light-channel bypass 轻通道旁路 | Light clause had no exclusions 轻通道无排除项 | 3 explicit exclusions added 三条显式排除项 |
 | 4 | Probe R3 探针三轮 | Same probe 同一探针 | 3.2.0 | Conservative choice, text cited verbatim 保守选择、逐字引原文自辩 | The rules contradicted themselves in 3 places 规则三处自相矛盾 | Contradictions removed 消除矛盾、收敛自选意图 |
 | 5 | Blind test 2 盲测二 · A/B（3 任务 × 双臂） | Minimal-discipline summary 速查卡摘要 | Public 1.1.0 | Process axes 0/3→3/3 (clarify/compare/gate); defects 0 vs 0 (ceiling) 流程轴 0/3→3/3，缺陷 0 vs 0（天花板） | None in skill rules; summary omission of light-task waiver priced it 规则无缺陷；摘要省略轻任务免流程付出代价 | Pending adjudication 待与缺陷提案一并裁决 |
+| 6 | A/B baseline eval round 1 基线评测一轮（12 任务 × 双臂，同宿主子智能体） | Full skill 全量 skill | Public 1.1.0 | Total 81 vs 84 /96 — arm with skill did **not** win this round; behavior-level: gates/surveys/governance did fire（5 cells stopped at gate; full mode-3 chain）总分 81 vs 84——本轮带 skill 臂**未跑赢**；行为级：门禁/盘点/治理确实触发 | Environment noise, not rule defects: resume-context loss → report drift; host-root vs project-root confusion; cross-arm file adoption（declared in sheet）环境噪声而非规则缺陷：恢复丢上下文→汇报漂移；宿主根/项目根混淆；跨臂文件复用（判分表已声明） | Resume Check +2 items: re-anchor original instruction, project-root hard check（both bilingual）Resume Check 增两项：重锚定原始指令、项目根硬检查（双语同步） |
 
 \* Pre-release internal versions, all consolidated into public **1.1.0** — see [INTERNAL-HISTORY](../../INTERNAL-HISTORY.md). / 均为发布前内部版本，已全部合并入公开版 **1.1.0**，见 INTERNAL-HISTORY。
 
@@ -38,6 +39,7 @@ Earlier handover field tests (versions also consolidated into 1.1.0) validated t
 - [Field Test 3 · Third-party blind test（method; first run 2026-09-08）/ 实测三 · 第三方盲测（方法；2026-09-08 已首测）](third-party-blind-test.md)
 - [Blind-test first run · 2026-09-08 / 盲测首次执行 · 2026-09-08](blind-test/2026-09-08/report.md)
 - [Blind-test second run · A/B summary test · 2026-09-09 / 盲测二 · A/B 摘要实测 · 2026-09-09](blind-test/2026-09-09/report.md)
+- [A/B baseline eval round 1 · 12 tasks × 2 arms · 2026-09-10 / A/B 基线评测第一轮 · 12 任务 × 双臂 · 2026-09-10](ab-baseline/judgement-sheet.md)
 
 ## Honesty & hygiene rules for these reports / 本目录的报告纪律
 
