@@ -129,15 +129,15 @@ def run_checks() -> list:
         else:
             c.pass_("all " + str(len(cases)) + " test blocks complete")
 
-    # SB4 identity count == 22
-    c = new(4, "identity file count == 22")
+    # SB4 identity count == 21
+    c = new(4, "identity file count == 21")
     idir = REPO_ROOT / "identities"
     names = {p.name for p in idir.glob("*.md")}
     names.discard("_template.md"); names.discard("README.md")
-    if len(names) != 22:
-        c.fail("found " + str(len(names)) + " identity files, expected 22")
+    if len(names) != 21:
+        c.fail("found " + str(len(names)) + " identity files, expected 21")
     else:
-        c.pass_("22 identity files present")
+        c.pass_("21 identity files present")
 
     # SB5 references count == 13
     # (11 originals + series-reasoning-workflow-en.md mirror + project-artifacts.md)

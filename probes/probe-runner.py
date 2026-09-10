@@ -11,8 +11,13 @@ This runner turns the method into a repeatable regression instrument:
   python probes/probe-runner.py report [id]   # print the archive (or one round)
   python probes/probe-runner.py archive <id> <PASS|FAIL> <evidence...>
                                                # append one round's verdict to the archive
+  python probes/probe-runner.py verify <id> <output.txt>
+                                               # mechanical pre-check of a host output:
+                                               # flags fail_patterns (exit 1) — can FAIL,
+                                               # never auto-PASS (a human still decides)
 
-No verdict is auto-computed from prompts: pass/fail is decided by the human
+`verify` runs a one-way mechanical pre-check: any fail_pattern hit forces exit 1 (it can only
+flag FAIL, never declare PASS). No verdict is auto-computed from prompts: pass/fail is decided by the human
 reading the host output against pass_conditions/fail_patterns. The runner only
 records honestly and keeps the archive append-only.
 """
@@ -82,6 +87,34 @@ def cmd_archive(args):
     return 0
 
 
+def cmd_verify(args):
+    """One-way mechanical pre-check: fail_patterns hard-fail; never auto-passes."""
+    d = load()
+    sc = next((s for s in d["scenarios"] if s["id"] == args.id), None)
+    if not sc:
+        print("ERROR: unknown scenario id: " + args.id, file=sys.stderr)
+        sys.exit(2)
+    p = pathlib.Path(args.output)
+    if not p.is_file():
+        print("ERROR: output file not found: " + str(p), file=sys.stderr)
+        sys.exit(2)
+    text = p.read_text(encoding="utf-8", errors="replace")
+    hits_fail = [x for x in sc.get("fail_patterns", []) if x in text]
+    hits_pass = [x for x in sc.get("pass_conditions", []) if x in text]
+    print("Probe mechanical pre-check / 探针机械预检（单向：可判 FAIL，不自动判 PASS）")
+    print("- Scenario: {} ({})".format(sc["id"], sc.get("title", "")))
+    print("- Output: {}".format(p))
+    print("- fail_patterns hit ({}): {}".format(len(hits_fail), hits_fail or "none"))
+    print("- pass_conditions hit ({}): {}".format(len(hits_pass), hits_pass or "none"))
+    if hits_fail:
+        print("- Verdict: **FAIL flagged** — a fail_pattern matched; this output cannot be a PASS.")
+        return 1
+    print("- Verdict: no fail_pattern matched — a human must still decide PASS / PARTIAL / FAIL.")
+    if not hits_pass:
+        print("  WARNING: no pass_condition matched either — likely UNVERIFIED, not PASS.")
+    return 0
+
+
 def cmd_report(args):
     if not ARCHIVE.exists():
         print("no archive yet:", str(ARCHIVE))
@@ -106,6 +139,10 @@ def main() -> int:
     ar.add_argument("verdict", help="PASS or FAIL")
     ar.add_argument("evidence", nargs="+", help="what the host actually did")
     ar.set_defaults(fn=cmd_archive)
+    ve = sub.add_parser("verify")
+    ve.add_argument("id", help="scenario id, e.g. P2")
+    ve.add_argument("output", help="file containing the host output to pre-check")
+    ve.set_defaults(fn=cmd_verify)
     rep = sub.add_parser("report")
     rep.add_argument("id", nargs="?", default=None)
     rep.set_defaults(fn=cmd_report)

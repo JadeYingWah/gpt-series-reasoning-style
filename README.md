@@ -134,13 +134,13 @@ flowchart TD
 - Progressive disclosure: loading proof needs only `SKILL.md` + `VERSION`; the 13 reference files load on demand.
 - Optional one-line session-start hook (`hooks/`, opt-in) hedges "the model forgot to invoke the skill" — no resident context stuffing; the skill works fully without it. / 可选的一行会话启动提醒（`hooks/`，默认不装）对冲"忘记调用"，不做常驻上下文包装。
 - Natural presentation: templates are content checklists, not literal formatting; role/channel/gate output is rendered as compact tables or short sentences, never code blocks.
-- 22 built-in role-identity files under one 8-section contract; custom identities live in `custom-identities/`.
+- 21 built-in role-identity files under one 8-section contract; custom identities live in `custom-identities/`.
 - Authorization matrix separates read, edit, implement, local commit, push, external/network execution, production, and legal/submission decisions; tool availability is not authorization.
 - Roles are decoupled from the carrying model: the underlying model is optional metadata, never asked for, and a model change never invalidates a task package or ledger row.
 
 - 渐进式加载：加载证明只需 `SKILL.md` + `VERSION`；13 份 references 按需读取。
 - 自然呈现：模板是内容清单而非逐字格式；角色/通道/门禁用紧凑表格或短句呈现，不得用代码块。
-- 22 个内置角色身份文件遵循统一 8 段契约；自定义身份放 `custom-identities/`。
+- 21 个内置角色身份文件遵循统一 8 段契约；自定义身份放 `custom-identities/`。
 - 授权矩阵把读取、修改、实现、本地提交、推送、外部/网络执行、生产、法律/提交决定分离；工具可用不等于获得授权。
 - 角色与承载模型解耦：底层模型是可选元数据、从不主动询问，换模型不会使任务包或台账失效。
 
@@ -169,9 +169,9 @@ Form selection is not implementation authorization — every form still passes i
 
 ## Identity Library / 身份库
 
-22 built-in identity files (21 role classes — `qa-engineer` and `test-engineer` both map to 测试工程师), each following the same 8-section contract: **Identity · Mission · Responsibilities · Process · Required Output · Handoff · Boundaries · Anti-Patterns** (deputy-commander additionally carries a ninth `Command Succession` section).
+21 built-in identity files (21 role classes), each following the same 8-section contract: **Identity · Mission · Responsibilities · Process · Required Output · Handoff · Boundaries · Anti-Patterns** (deputy-commander additionally carries a ninth `Command Succession` section).
 
-22 个内置身份文件（21 类角色——`qa-engineer` 与 `test-engineer` 同属测试工程师），每个都遵循统一 8 段契约：**身份定位 · 使命 · 职责 · 流程 · 必需输出 · 交接 · 边界 · 反模式**（deputy-commander 额外含第 9 节「指挥权接管」）。
+21 个内置身份文件（21 类角色），每个都遵循统一 8 段契约：**身份定位 · 使命 · 职责 · 流程 · 必需输出 · 交接 · 边界 · 反模式**（deputy-commander 额外含第 9 节「指挥权接管」）。
 
 - Core / 核心：commander 总指挥、executor 执行者、planner 计划者、deputy-planner 副计划者、requirements-analyst 需求分析师、architect 架构师、reviewer 审查者、code-reviewer 代码审查员、qa/test engineer 测试工程师、security-tester 安全测试员、acceptance-auditor 验收审计员、documentation-consistency-reviewer 文档一致性审查员、user-representative 用户代表。
 - Optional / 可选：deputy-commander 副总指挥（指挥不可用/过载或连续性关键时启用）、performance-engineer 性能优化员、deployment-release-engineer 部署发布工程师、privacy-compliance-reviewer 隐私合规审查员、legal-reviewer 专利法律审查员、integration-coordinator 集成协调员、risk-manager 风险管理员、documentation-writer 文档编写员。

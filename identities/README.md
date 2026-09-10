@@ -23,7 +23,7 @@ Use this table when presenting built-in identities to the user. Do not show only
 | `deputy-planner` / 副计划者 | Audits plans and risks before execution. |
 | `requirements-analyst` / 需求分析师 | Clarifies goals, scope, and testable acceptance criteria. |
 | `architect` / 架构师 | Chooses technology, boundaries, data models, and extension points. |
-| `qa-engineer` / `test-engineer` / 测试工程师 | Designs test strategy, cases, coverage, and real verification evidence. |
+| `qa-engineer` / 测试工程师 | Designs test strategy, cases, coverage, and real verification evidence. |
 | `reviewer` / 审查者 | Reviews actual artifacts and returns P0 / P1 / P2 / UNVERIFIED findings. |
 | `code-reviewer` / 代码审查员 | Reviews code for correctness, readability, architecture, security, and performance. |
 | `security-tester` / 安全测试员 | Attacks trust boundaries, auth, injection, secrets, permissions, and AI/LLM risks. |
@@ -50,7 +50,6 @@ Use this table when presenting built-in identities to the user. Do not show only
 - `requirements-analyst.md` - Requirements Analyst / 需求分析师
 - `architect.md` - Architect / 架构师
 - `qa-engineer.md` - QA / Test Engineer / 测试工程师
-- `test-engineer.md` - Test Engineer / 测试工程师
 - `security-tester.md` - Security Tester / 安全测试员
 - `acceptance-auditor.md` - Acceptance Auditor / 验收审计员
 - `documentation-consistency-reviewer.md` - Documentation Consistency Reviewer / 文档一致性审查员

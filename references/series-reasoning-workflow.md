@@ -614,9 +614,9 @@ When reviewing a plan, code change, or report, check:
 
 ## Task Dispatch Package (Internal) / 内部任务派发包
 
-Use this compact structure when dispatching inside Single-Agent Mode or to a subagent in Subagent Mode. It is an internal dispatch note, not a cross-Agent task package.
+Use this compact structure **for internal dispatch inside Single-Agent Mode only**. Subagent dispatch uses the six-field mini package (see agent-modes.md); cross-model commander dispatch uses the mandatory 23-field package (see multi-agent-closure-rules.md). Three tiers, one authority per tier — do not mix them.
 
-在单 Agent 模式内部派发，或在子 Agent 模式派发给子 Agent 时，使用这个精简结构。它是内部派发说明，不是跨 Agent 任务包。
+**仅在单 Agent 模式的内部派发**使用这个精简结构。派发给子 Agent 用六字段迷你包（见 agent-modes.md）；跨模型指挥官派发用 23 字段完整包（见 multi-agent-closure-rules.md）。三层口径各归其权威，不得混用。
 
 ```text
 【任务派发】
