@@ -386,6 +386,8 @@ After all stages complete, do not wait for the user or a reviewer to find bugs. 
 4. Re-run the bug sweep and final acceptance until no confirmed issues remain.
 5. Only then report final completion.
 
+Findings that directly affect the task's acceptance goal are **not** "unrelated issues": fix them or explicitly request adjudication — recording alone does not discharge them (example: a century-year bug found while the task demands "leap-year correctness" is in-goal, not out-of-scope). / 直接影响任务验收目标的发现**不属于无关问题**：必须修复或显式提请裁决，仅记录不视为处理。
+
 ## Final Acceptance Inspection
 
 After all planned stages complete:
@@ -402,6 +404,8 @@ After all planned stages complete:
 ## User-Path Acceptance / 用户路径验收
 
 Before final acceptance, validate the delivery from the actual user path in its real target environment. This applies to every project type: web, game, desktop, mobile, CLI, API, library, plugin, configuration, and documentation. Unit tests are necessary but not sufficient; a passing test suite does not prove the product is usable.
+
+A "no issues found" conclusion must state the detection method and coverage (tools used, viewport/environment matrix, executed case list); if any is missing, downgrade the conclusion to UNVERIFIED — never present it as verified-clean. Field tests (R2/R3) caught this exact gap: zero-finding reports while a peer found real issues. / 「未发现问题」类结论必须附检测方法与覆盖面声明（工具、视口/环境矩阵、用例清单）；缺任一项即降级为 UNVERIFIED，不得表述为已验收无问题。
 
 最终交付前，必须在真实目标环境中从用户路径验证交付物。这条规则适用于所有项目类型：Web、游戏、桌面、移动、CLI、API、库、插件、配置和文档。单元测试是必要但不充分条件；测试全绿不能证明产品可用。
 
