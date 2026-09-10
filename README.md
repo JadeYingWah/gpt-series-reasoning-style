@@ -331,6 +331,8 @@ gpt-series-reasoning-style/
 ├── LICENSE                      # MIT
 ├── generate-banner.py           # 社交预览图生成脚本（维护用）
 ├── social-preview.png / .svg    # 社交预览图
+├── .gitattributes               # 行尾策略：仓库与工作树统一 LF（* text=auto eol=lf）
+├── .github/                     # CI：selfcheck 工作流（push/PR 触发）
 ├── agents/openai.yaml           # OpenAI/Codex 兼容界面的可选元数据（display_name/default_prompt）
 ├── identities/                  # 22 个内置身份 + _template + README（权威角色目录）
 ├── custom-identities/           # 用户自定义身份（其他身份）
@@ -350,7 +352,7 @@ gpt-series-reasoning-style/
 │   └── self-test.md                   # 77 条安装后自测
 ├── docs/field-tests/            # 实测证据：端到端实测 + 三轮对抗探针报告
 │   ├── blind-test/              # 第三方盲测报告（2026-09-08、2026-09-09 A/B）
-│   └── ab-baseline/             # A/B 基线评测（协议 + 12 样例；第一轮已完成，见 judgement-sheet）
+│   └── ab-baseline/             # A/B 基线评测（协议 + 12 样例；两轮已完成，见 judgement-sheet）
 ├── docs/proposals/              # 规则审计提案（如 2026-09-09-rule-audit-probe-c）
 ├── docs/reviews/                # 外部评审汇总裁决书（2026-09-09-three-ai-audit-verdict）
 ├── docs/minimal-discipline.md   # 最小纪律速查卡（三条核心常驻）
