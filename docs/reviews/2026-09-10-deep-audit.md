@@ -2,7 +2,7 @@
 
 - **Date / 日期**: 2026-09-10
 - **Reviewer / 审查者**: 总指挥面板（总指挥身份 + 磁盘亲验 + 静态自检对照）
-- **Target / 审查对象**: `E:\Skill管理\自制skill\gpt-series-reasoning-style`，VERSION = 1.1.0
+- **Target / 审查对象**: 仓库根（本地绝对路径已脱敏），VERSION = 1.1.0
 - **Method / 方法**: ① 逐文件实读（含 SKILL.md/AGENTS.md/README.md/全部 13 份 references / 21 份 identities / 3 份脚本 / 2 份安装器 / 站点 / 历史 / 评审归档）；② 静态自检实测（SB1–SB20）；③ 同类 skill 横向对比（obra/superpowers、garrytan/gstack、gsd-core、anthropics/skills、mattpocock/skills、K-Dense-AI/scientific-agent-skills 等）；④ 与本仓库自留失败案例（F1–F5）做交叉验证。
 - **Skill 自有诚实条款**: 本报告遵守 `references/common-failures.md`「零命中」通则——所有"已修"项均经磁盘亲验或 selfcheck 重跑验证；所有"未发现"项均附检测方法与覆盖面声明。
 
