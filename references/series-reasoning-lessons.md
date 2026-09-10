@@ -80,12 +80,12 @@ Delegation must include:
 
 - Always announce the stage sequence before implementing a non-trivial task.
 - Loading proof requires only `SKILL.md` + `VERSION`. Do not claim to have read files you did not read; list only the files actually read.
-- On initial loading, state the three execution modes before continuing: Single-Agent, Subagent, and Commander Multi-Agent.
+- On initial loading, state the collaboration architecture: a Single-Agent backbone plus two on-demand extensions (Subagent enhancement, Commander Multi-Agent).
 - Treat every incoming instruction as a draft. Critique ambiguity, contradiction, missing constraints, and better alternatives before planning.
 - Ask the user to confirm the goal and acceptance criteria before locking the plan; do not silently decide the user's meaning.
 - "开始" or "现在开始" is not implementation authorization. It only authorizes beginning clarification and planning.
 - Announcing the stage sequence is not confirmation. Do not create directories or write files until the user confirms or delegates.
-- Scale process intensity to task risk: for a specific, small, reversible, side-effect-free task, the instruction itself is the authorization (light tier — skip the gate, keep the evidence report); destructive, external, or ambiguous work always takes the full gate.
+- Scale process intensity to task risk: for a specific, small, reversible, side-effect-free task, the instruction itself is the authorization (light tier — skip the gate, keep the evidence report); destructive, external, or ambiguous work always takes the full gate; new-from-scratch products default to the medium tier (light tier only when the instruction fully specifies product type, location, and product form), and multi-deliverable or parallelism-signal tasks never take the light tier.
 - Scope discipline: changes required by the user's goal are handled proactively; discovered unrelated issues are recorded and reported, never fixed opportunistically.
 - History, case libraries, and experience files are background, not state sources — re-verify current phase, counts, and status against current authoritative documents and the actual workspace before acting on them.
 - Offer two clarification modes: one-shot confirmation of the recommended plan, or one-question-at-a-time clarification. Let the user choose.
@@ -95,7 +95,7 @@ Delegation must include:
 - When any part of the plan changes, re-evaluate the whole plan and update related decisions, tests, docs, and acceptance criteria.
 - Research before planning: use web search, docs, similar products, and local context.
 - Never plan from memory when external or local evidence is available.
-- Before planning, inventory available help: locally installed skills, reusable templates and existing implementations, and web references for this task type; give a use/adapt/not-applicable verdict per item and put the inventory into the gate output.
+- Before planning, inventory available help: locally installed skills, reusable templates and existing implementations, and web references for this task type; give a use/adapt/not-applicable/skill-already-covers verdict per item (four steps, incl. the "an installed skill already covers this → do not reload" case) and put the inventory into the gate output.
 - Merge instruction, research, and divergence into one complete plan before starting staged execution.
 - Each stage needs an exit result before the next stage starts.
 - After every stage, inspect the completed stage with current evidence; tests green is not enough.
@@ -133,7 +133,7 @@ Delegation must include:
 - After all stages, run a divergence-to-convergence bug sweep and fix confirmed issues before final completion.
 - Divergence must be generated from context, assumptions, and counterfactuals. A fixed category list is only a cold-start aid, not divergence itself.
 - After all stages, enter an end-state self-check loop and keep fixing until no materially different perspective can find a problem.
-- On session resume or "检查项目", run a full project-level consistency check (Git, gates, doc sync, omissions) and fix stale items before continuing; do not resume blind.
+- On session resume or "检查项目", run the full Resume Check (7 items: re-anchor the original instruction, project-root hard check, Git state, gates, doc sync, stale wording, omissions) and fix stale items before continuing; do not resume blind.
 - A verification role is an independent gatekeeper: it does not decide, execute, or push closure; it personally verifies what everyone else missed (Driver+Approver versus independent gatekeeper).
 
 ## Common Failure Patterns

@@ -54,6 +54,12 @@ def check_gate_record(path: pathlib.Path, items: list) -> None:
     for field in GATE_FIELDS:
         if field not in text:
             fail(items, "{}: missing gate field [{}]".format(path.name, field))
+    if not re.search(r"Date\s*/?\s*日期[:：]\s*\d{4}-\d{2}-\d{2}", text, re.I):
+        fail(items, "{}: missing Date line (Date / 日期: YYYY-MM-DD)".format(path.name))
+    if not re.search(r"Task tier\s*/?\s*任务分档[:：]\s*(轻|中|重)", text, re.I):
+        fail(items, "{}: missing Task tier line (轻|中|重)".format(path.name))
+    if not re.search(r"Form\s*/?\s*形态[:：]\s*(主干|子Agent|指挥官)", text, re.I):
+        fail(items, "{}: missing Form line (主干|子Agent|指挥官)".format(path.name))
     m = re.search(r"Status\s*/?\s*状态[:：]\s*(\S+)", text, re.I)
     if not m:
         fail(items, "{}: missing status line (Status / 状态:)".format(path.name))

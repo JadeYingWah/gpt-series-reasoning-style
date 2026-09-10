@@ -430,6 +430,31 @@ def run_checks() -> list:
         else:
             c.pass_("AGENTS.md routes to SKILL.md/VERSION; hard-rule quote intact; routed files exist")
 
+    # SB18 forbidden-authorization-phrase parity (evidence: P0-4, a real 2026-09-10
+    # external-review finding — the CN authority workflow.md lagged its EN mirror and
+    # SKILL.md on the third phrase). The three phrases must appear on all three
+    # hard-rule surfaces; the check cannot judge semantics, only presence parity.
+    c = new(18, "forbidden-authorization-phrase parity")
+    phrases = ["开始", "现在开始", "直接做"]
+    surfaces = {
+        "SKILL.md": skill_text,
+        "references/series-reasoning-workflow.md": read_text(REPO_ROOT / "references" / "series-reasoning-workflow.md"),
+        "references/series-reasoning-workflow-en.md": read_text(REPO_ROOT / "references" / "series-reasoning-workflow-en.md"),
+    }
+    missing_phrases = []
+    for rel, txt in surfaces.items():
+        for ph in phrases:
+            if ph == "直接做":
+                if "直接做" not in txt:
+                    missing_phrases.append(rel + ":" + ph)
+            else:
+                if ('"' + ph + '"') not in txt and ("\u201c" + ph + "\u201d") not in txt:
+                    missing_phrases.append(rel + ":" + ph)
+    if missing_phrases:
+        c.fail("forbidden phrases missing on: " + ", ".join(missing_phrases))
+    else:
+        c.pass_("开始/现在开始/直接做 present on SKILL.md + workflow CN/EN")
+
     return checks
 
 

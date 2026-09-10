@@ -3,6 +3,7 @@
 > 目的：把"机制存在且改变流程"升级为"缺陷减少"的证据（对齐 anthropics skill-creator 的
 > 带/不带 skill 对照方法论，回应对比报告中指出的 P0 短板——现有盲测 n=1、裁判为代理模型）。
 >
+> 各轮 A 臂 skill 状态（归因诚实）：R1 = 纯公开 1.1.0；R2 = 1.1.0 + Unreleased 第四批（Resume Check ⑤⑥）；R3 = 1.1.0 + Unreleased 第七批（完成门三条款 + claim-check）。
 > 状态：**三轮已完成（2026-09-10）**。每轮 24 格（12 任务 × 2 臂）由主持人子智能体团队执行、
 > 主持人逐格上盘核验后计分（R3 起引入 `scripts/claim-check.py` 机械核验完成声明），结果见 `judgement-sheet.md`。
 > - **第一轮**：A 臂 81/96 vs B 臂 84/96——未跑赢；主因托管环境噪声。反哺：Resume Check 5→7 项。

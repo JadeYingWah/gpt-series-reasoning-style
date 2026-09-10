@@ -416,6 +416,8 @@ Commander response:
 ```text
 【实现前确认】
 - 我理解的目标：做一个本地任务管理 CLI...
+- 风险分档：中 — 从零新建产物（多文件 + 产品决策），走全流程。
+- 形态选择：单 Agent 主干 — 单机小工具、无独立并行分支；一行理由即此。
 - 已盘点可用资源：检查了本地已装 skills（无 CLI 任务管理专用 skill）；Python 标准库 sqlite3 可直接用；参考了主流 CLI 的命令注册与退出码约定（改造用）。
 - 最高影响问题：SQLite 单文件在并发写入时会锁库（当前单机够用，将来做多端同步需换存储层）；数据目录的跨平台路径约定不同，便携与“项目内可见”不可兼得。
 - 推荐方案：Python + SQLite，分层结构，后续可扩展。
@@ -469,7 +471,7 @@ Commander response:
 
 当前版本：1.1.0
 门禁硬性规则第一条：宣布阶段序列不是确认。
-三种执行模式：
+协作架构（一条主干 + 两个按需扩展）：
 1. 单 Agent 模式（默认）：内部切换规划面、执行面、审查面。
 2. 子 Agent 模式：宿主支持子 Agent 时，把角色面映射为子 Agent，使用前必须确认能力。
 3. 指挥官多 Agent 模式：当前模型可作为总指挥或其他角色，与其他独立大模型或 Agent 协作、协调或派发任务；可覆盖模式一的直接工具路径和模式二的子 Agent 路径，但需遵守模式三治理规则。
@@ -556,7 +558,7 @@ Commander response:
 - 整体计划和用户需求变更后的整体再规划
 - 最终验收
 
-执行子 Agent 只接收完整任务包，并返回真实文件、命令、测试和输出。
+执行子 Agent 接收六字段迷你包（需要更完整边界时用内部派发包），并返回真实文件、命令、测试和输出。
 审查子 Agent 只读取或运行实际产物，返回 P0 / P1 / P2 / UNVERIFIED 结论。
 任何子 Agent 都不能关闭阶段或代替你接受最终交付。
 ```
@@ -569,17 +571,9 @@ Commander response:
 
 ```text
 【角色身份确认】
-- 内置身份及职责（速查）：
-  - commander：整体规划、派发、证据核验、最终验收
-  - executor：按任务包实现并返回真实证据
-  - reviewer：读取或运行实际产物，返回 P0 / P1 / P2 / UNVERIFIED
-  - planner：制定完整计划
-  - requirements-analyst：澄清需求与验收标准
-  - architect：技术选型和架构设计
-  - qa-engineer：测试策略和真实验证
-  - code-reviewer：代码审查
-  - acceptance-auditor：真实用户路径验收
-- 可选内置身份：commander / executor / reviewer / planner / requirements-analyst / architect / qa-engineer / code-reviewer / acceptance-auditor / 其他（完整列表见 identities/README.md）
+- 内置身份：读取 `identities/README.md`（权威角色目录），逐条呈现全部内置身份并各附一行职责（当前 22 个，此处不硬编码清单）。
+  - 示例（此处从略，实际输出须完整）：commander — 整体规划、派发、证据核验、最终验收；executor — 按任务包实现并返回真实证据；reviewer — 读取或运行实际产物，返回 P0 / P1 / P2 / UNVERIFIED；……（至全部 22 个）
+- 接收方指名：角色 + 平台/窗口（如 executor / 网页对话窗口）。
 - 用户指定身份：待确认
 - 其他身份文件路径：custom-identities/ 或用户提供路径
 - 是否已读取身份文件：否

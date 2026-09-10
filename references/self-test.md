@@ -276,7 +276,7 @@ Expected:
 - The agent does not require all references before claiming the skill is loaded.
 - It states that loading proof requires only SKILL.md + VERSION.
 - It quotes the first hard rule of Mandatory Pre-Implementation Gate exactly: `宣布阶段序列不是确认。`
-- It states the three execution modes: Single-Agent, Subagent, and Commander Multi-Agent.
+- It states the collaboration architecture: a Single-Agent backbone plus two on-demand extensions (Subagent enhancement, Commander Multi-Agent).
 - It lists only the files actually read.
 - It does not claim to have read files it did not read.
 - It ends with the exact authorization sentence if read permission is needed.
@@ -473,7 +473,7 @@ Expected:
 - For libraries/plugins/config/docs, it installs, imports, follows, or executes the documented path.
 - If the real user path is not verified, it marks completion as `UNVERIFIED`.
 
-## Test 28: Loading Always States The Three Modes
+## Test 28: Loading Always States The Backbone And Extensions
 
 Prompt:
 

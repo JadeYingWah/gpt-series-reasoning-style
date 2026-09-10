@@ -171,8 +171,8 @@ Form selection is not implementation authorization — every form still passes i
 
 22 个内置身份文件（21 类角色——`qa-engineer` 与 `test-engineer` 同属测试工程师），每个都遵循统一 8 段契约：**身份定位 · 使命 · 职责 · 流程 · 必需输出 · 交接 · 边界 · 反模式**（deputy-commander 额外含第 9 节「指挥权接管」）。
 
-- Core / 核心：commander 总指挥、deputy-commander 副总指挥、executor 执行者、planner 计划者、deputy-planner 副计划者、requirements-analyst 需求分析师、architect 架构师、reviewer 审查者、code-reviewer 代码审查员、qa/test engineer 测试工程师、security-tester 安全测试员、acceptance-auditor 验收审计员、documentation-consistency-reviewer 文档一致性审查员、user-representative 用户代表。
-- Optional / 可选：performance-engineer 性能优化员、deployment-release-engineer 部署发布工程师、privacy-compliance-reviewer 隐私合规审查员、legal-reviewer 专利法律审查员、integration-coordinator 集成协调员、risk-manager 风险管理员、documentation-writer 文档编写员。
+- Core / 核心：commander 总指挥、executor 执行者、planner 计划者、deputy-planner 副计划者、requirements-analyst 需求分析师、architect 架构师、reviewer 审查者、code-reviewer 代码审查员、qa/test engineer 测试工程师、security-tester 安全测试员、acceptance-auditor 验收审计员、documentation-consistency-reviewer 文档一致性审查员、user-representative 用户代表。
+- Optional / 可选：deputy-commander 副总指挥（指挥不可用/过载或连续性关键时启用）、performance-engineer 性能优化员、deployment-release-engineer 部署发布工程师、privacy-compliance-reviewer 隐私合规审查员、legal-reviewer 专利法律审查员、integration-coordinator 集成协调员、risk-manager 风险管理员、documentation-writer 文档编写员。
 
 The canonical per-role responsibility table is maintained **only** in `identities/README.md` (single source to prevent drift). Before asking a user to pick a role, show each candidate with a one-line responsibility — never a bare list of names. Custom identities go in `custom-identities/` (其他身份) and must be read before adoption. The universal contract, trust tiers (T1/T2/T3), and confidence protocol are in `references/identity-library.md`; role sets by project size are in `references/commander-roles.md`.
 
@@ -311,8 +311,12 @@ Only `SKILL.md` loads up front; each reference file is read on demand when its p
 - **Self-test / 自测**：`references/self-test.md` contains 77 tests (Test 1–77) covering language & identifier fidelity, authorization boundaries, the three forms, capability gates, role confirmation, task packages, trust tiers, the dispatch ledger, the hands-on loop, the light channel, and conflict-freeze behavior.
 - **Real-environment acceptance / 真实环境验收**：before final delivery, validate every deliverable in its real target environment — unit tests passing is not sufficient.
 - **Field tests / 实测报告**：the skill is also verified by adversarial field tests — an end-to-end commander-form run and a three-round probe series, each round exposing one real rule defect (template desync, light-channel bypass, rule contradiction) that was fixed and fed back; the probes are scripted and re-runnable via [`probes/probe-runner.py`](probes/probe-runner.py); reports in [docs/field-tests/](docs/field-tests/).
-- **Evidence strength / 证据强度（读结论前先读这行）**：blind tests are n=1 per cell with a proxy judge and a non-neutral baseline — they prove the **mechanisms exist and change process**, not that **defects decrease**; read the two claims separately. External reviews (including critical ones) are archived under [docs/reviews/](docs/reviews/).
-- **证据强度**：盲测每格 n=1、裁判为代理模型、基线不中立——它们证明的是**机制存在且能改变流程**，不是**缺陷会减少**；这两个结论分开记账。外部评审（含批评性评审）归档于 [docs/reviews/](docs/reviews/)。
+- **A/B baseline evaluation / A/B 基线评测**：12 tasks × 2 arms × 3 rounds (81 vs 84 → 89 vs 87 → 93 vs 86 /96). This is the strongest evidence in the repo — and still n=1 per cell with the author as judge; read it with the caveats in [docs/field-tests/ab-baseline/](docs/field-tests/ab-baseline/judgement-sheet.md).
+- **Machine checkers / 机械核验**：[`scripts/claim-check.py`](scripts/claim-check.py) verifies completion claims (files / commands / hashes) against disk; [`scripts/artifact-check.py`](scripts/artifact-check.py) validates project governance artifacts.
+- **Evidence strength / 证据强度（读结论前先读这行）**：blind tests and the A/B rounds are n=1 per cell with a proxy/author judge and a non-neutral baseline — they prove the **mechanisms exist and change process**, and (A/B) show a score gap; they do not establish universal defect reduction. Read the claims separately. External reviews (including critical ones) are archived under [docs/reviews/](docs/reviews/).
+- **A/B 基线评测**：12 任务 × 双臂 × 三轮（81 vs 84 → 89 vs 87 → 93 vs 86 /96）——本仓库最强证据；同为每格 n=1、裁判=作者，判读须带 [判分表](docs/field-tests/ab-baseline/judgement-sheet.md) 的局限声明。
+- **机械核验工具**：[`scripts/claim-check.py`](scripts/claim-check.py)（完成声明↔磁盘核验）与 [`scripts/artifact-check.py`](scripts/artifact-check.py)（治理产物结构校验）。
+- **证据强度**：盲测与 A/B 每格 n=1、裁判为代理/作者、基线不中立——它们证明的是**机制存在且能改变流程**（A/B 另有分差）；不构成普适的「缺陷必然减少」。各结论分开记账。外部评审（含批评性评审）归档于 [docs/reviews/](docs/reviews/)。
 
 - **加载证明**：输出版本号、逐字引用门禁硬规则第一条（`宣布阶段序列不是确认。`）、简述“主干+两扩展”架构、列出实际读过的文件。
 - **自测**：`references/self-test.md` 含 77 条（Test 1–77），覆盖语言与标识符保真、授权边界、三种形态、能力门禁、角色确认、任务包、信任层级、派发台账、实操闭环、轻通道与冲突冻结。
@@ -386,7 +390,7 @@ between layers is a designed feature, not a bug.
 | --- | --- | --- |
 | 入口 SKILL.md | 门禁模板、协作架构、加载证明 | 中文为主，术语用英文（UNVERIFIED / P0-P2 / Pre-Implementation Gate） |
 | 门面 README | 安装、使用、FAQ、维护 | 逐段双语 EN+CN |
-| 深规则 references/ | workflow / lessons / self-test / identity-library / commander-roles / platform-installation | 英文为主（agent-modes / closure-rules 英文带中文） |
+| 深规则 references/ | workflow / lessons / self-test / identity-library / commander-roles / platform-installation | 混排：workflow/lessons/self-test 英文占比高；identity-library/commander-roles 中英混排；agent-modes / closure-rules 中文过半（实测中文字符占比 1.5–1.8×英文词） |
 | 英文镜像 references/series-reasoning-workflow-en | workflow 的全英镜像（含中文版中文独占块的英译） | 全英文（权威为中文版，冲突以中文为准） |
 | 产物约定 references/project-artifacts | 门禁单/台账/证据落盘约定 + 校验工具 | 中文为主 |
 | 对照表 references/common-failures | claims↔最小充分证据对照 + 本仓库失败案例 | 中文为主（claim 列含英文原文） |
@@ -408,7 +412,7 @@ This skill must obey its own discipline: a checker must earn its existence with 
 本 skill 自身也要遵守本 skill 的纪律——**检查器必须用证据挣得存在**。
 
 - **SKILL.md 门面 ≤ 250 行**。它是唯一每次调用必载的表面，中文为主、仅保留英文入口指引（完整英文规则在 references 的 EN sections），不再加长——新内容一律下沉到 references/。
-- **静态检查当前 17 项（SB1–SB17）**：新增第 18 项前，必须先证明它抓到过至少一个真实缺陷（可指认提交哈希）；抓不到就不加。
+- **静态检查当前 18 项（SB1–SB18）**：新增第 19 项前，必须先证明它抓到过至少一个真实缺陷（可指认提交哈希）；抓不到就不加。
 - **行为自测冻结在 77 条**：只做「旧测失去鉴别力 → 替换」，不再扩容。
 - **长参考文档（500+ 行）不做全文双语强制**：SB16 分级（tier-A 规则面严查 / tier-B 仅 informational），避免「永远红」与「文件翻倍」二选一。
 - **收敛优先于加码**：改动清单里出现「新增规则 / 新增检查」时，先问能否用修订现有条文达到同样效果。
@@ -442,7 +446,7 @@ MIT License — see [LICENSE](LICENSE). 本项目采用 MIT 许可证，详见 [
 
 ## Maintainer Notes / 维护者须知
 
-Gate fields and hard rules are deliberately repeated across several surfaces (anti-drift by design, because references load on demand). When you change any of them, sync **all** of these surfaces in the same version — a field test showed that a rule missing from even one surface makes the model silently skip it:
+Gate fields and hard rules are deliberately repeated across several surfaces (anti-drift by design, because references load on demand). When you change any of them, sync **all** of these surfaces in the same version — a field test showed that a rule missing from even one surface makes the model silently skip it. The restatement surfaces include `references/series-reasoning-examples.md` and `references/series-reasoning-lessons.md` (both are rule second-copies and drift silently; a 2026-09-10 external review found five stale rules in lessons.md alone):
 
 门禁字段与硬规则刻意在多个表面重复（按需加载下的防漂移设计）。改动任一项时，必须在同一版本同步以下**所有**表面——缺一个表面，模型就会在实测中悄悄跳过它：
 

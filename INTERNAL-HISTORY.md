@@ -1,6 +1,6 @@
 # Internal Release History / 内部版本历史
 
-公开发布线见 [CHANGELOG.md](CHANGELOG.md)。本文件归档**发布前的内部迭代**（`0.1.x`–`3.x`，含重定位前那条 `2.4.0`→`3.2.2` 长线）以及更早的旧公开线，一律**按史实原样保留、仅用于追溯**；对外版本从当前 `1.1.0` 起算，不在此文件计数。
+公开发布线见 [CHANGELOG.md](CHANGELOG.md)。本文件归档**发布前的内部迭代**（`0.1.x`–`3.3.x`，含重定位前那条 `2.4.0`→`3.2.2` 长线及分支末端的 `3.3.0` 实验记录）以及更早的旧公开线，一律**按史实原样保留、仅用于追溯**；对外版本从当前 `1.1.0` 起算，不在此文件计数。
 
 The public release line lives in CHANGELOG.md. This file archives the pre-publication internal iterations (`0.1.x`–`3.x`, incl. the pre-rebase `2.4.0`→`3.2.2` line) and the earlier public line, preserved verbatim for traceability. Public releases number from `1.1.0` and are not counted here.
 

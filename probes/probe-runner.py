@@ -7,9 +7,9 @@ execute a host model — a human/agent runs each probe prompt against the skill
 under test and records the verdict in an archive file (default "probes/last-run.md").
 This runner turns the method into a repeatable regression instrument:
 
-  python scripts/probe-runner.py list          # print scenario table
-  python scripts/probe-runner.py report [id]   # print the archive (or one round)
-  python scripts/probe-runner.py archive <id> <PASS|FAIL> <evidence...>
+  python probes/probe-runner.py list          # print scenario table
+  python probes/probe-runner.py report [id]   # print the archive (or one round)
+  python probes/probe-runner.py archive <id> <PASS|FAIL> <evidence...>
                                                # append one round's verdict to the archive
 
 No verdict is auto-computed from prompts: pass/fail is decided by the human

@@ -166,7 +166,7 @@ The mini package is the subagent-channel standard; attaching a full 23-field pac
 - A separate Reviewer subagent is optional but recommended.
 
 - 主模型负责规划、审查、整体再规划和最终验收。
-- 执行子 Agent 接收完整任务包，并带回产物和证据。
+- 执行子 Agent 接收六字段迷你包（需要更完整边界时用内部派发包），并带回产物和证据；完整 23 字段包用于跨模型指挥官场景。
 - 可选的独立审查子 Agent 负责对抗性审查。
 
 ### Three-Role Submode / 三角色子模式

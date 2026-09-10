@@ -53,7 +53,7 @@ agents/openai.yaml
 | Goose | `~/.config/goose/skills/` |
 | OpenCode | `~/.config/opencode/skills/` |
 | Roo Code | `.roo/rules/` |
-| Antigravity | `.agents/skills/` |
+| Antigravity | `~/.agents/skills/` |
 | Generic Agent Skills | `~/.agents/skills/` |
 
 ## Windows Example

@@ -164,7 +164,7 @@ def main():
     # ---- three capability chips ---------------------------------------------
     chips = [
         ("实现前门禁", "Pre-Implementation Gate", PURPLE),
-        ("三种协作形态", "1 Backbone + 2 Extensions", CYAN),
+        ("一条主干+两扩展", "1 Backbone + 2 Extensions", CYAN),
         ("证据与实操验收", "Evidence & Hands-On", AMBER),
     ]
     chip_w, chip_h, gap = 272, 100, 26

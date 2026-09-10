@@ -129,7 +129,7 @@ Custom user identities go in `custom-identities/` (Chinese: 其他身份) and mu
 - Using all roles for every task.
 - Claiming a role without reading its identity file.
 - Silently improvising a specialist identity when no matching identity exists.
-- Dispatching to a generic recipient without identity, model/session, or rationale.
+- Dispatching to a generic recipient without identity (role + platform/window) or rationale.
 - Responding without an identity declaration when the host does not inject identity automatically.
 
 - 加入没有必需交付物的角色。
