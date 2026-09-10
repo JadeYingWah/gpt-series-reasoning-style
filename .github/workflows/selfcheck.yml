@@ -25,6 +25,12 @@ jobs:
         run: |
           python -m pip install pyyaml --quiet
           python -c "import yaml; yaml.safe_load(open('agents/openai.yaml', encoding='utf-8')); print('yaml ok')"
+      - name: Checker CLIs respond to --help
+        run: |
+          python scripts/claim-check.py --help > /dev/null
+          python scripts/artifact-check.py --help > /dev/null
+      - name: artifact-check empty-dir is not a false pass
+        run: python scripts/artifact-check.py . | grep -q "NO governance artifacts found"
       - name: Probe scenarios parse
         run: python probes/probe-runner.py list > /dev/null
       - name: Self-test sheet parses (77 cases)

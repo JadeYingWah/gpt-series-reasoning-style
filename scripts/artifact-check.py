@@ -141,6 +141,11 @@ def main() -> int:
         for it in items:
             print("  [FAIL] " + it)
         return 1
+    if n_gate == 0 and not dispatch.is_file() and not findings.is_file():
+        # P1-23: an empty directory must not read as "all pass" — nothing was validated.
+        print("- Result: NO governance artifacts found — nothing was validated (not a pass)")
+        print("  (Legal for light-channel-only projects; add docs/gate/, a dispatch ledger, or a findings ledger to have something checked.)")
+        return 0
     print("- Result: all structural rules pass (structure only — content truth is a human check)")
     return 0
 
