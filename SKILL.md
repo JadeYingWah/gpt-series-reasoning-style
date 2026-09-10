@@ -110,8 +110,11 @@ description: 'Process-discipline layer only — not a reasoning-capability boost
 - `references/series-reasoning-lessons.md`：反模式和教训
 - `references/common-failures.md`：高频造假对照表与失败案例（任何完成声明前对照）
 - `references/series-reasoning-examples.md`：行为示例
+- `references/project-artifacts.md`：产物落盘约定——gate 单四态状态机、台账/账本路径（配套 `scripts/artifact-check.py` 结构校验）
+- `references/series-reasoning-workflow-en.md`：workflow 的英文镜像（中文宿主读中文权威版，勿加载本镜像）
 - `references/self-test.md`：安装后自测（维护者/用户人工执行，宿主任务路径无需读取）
 - `references/platform-installation.md`：安装方式
+- `docs/minimal-discipline.md`：最小纪律速查卡（不装完整 skill 时的三条常驻规则）
 
 ## Version
 

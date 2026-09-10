@@ -66,6 +66,10 @@ def cmd_archive(args):
     evidence = " ".join(args.evidence)
     if not evidence:
         sys.exit("evidence is required")
+    # Keep every archive entry on ONE line (append-only format invariant):
+    # embedded newlines in evidence would corrupt the line-oriented archive
+    # and silently break cmd_report's per-line filtering.
+    evidence = " ".join(evidence.split())
     stamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     with ARCHIVE.open("a", encoding="utf-8") as f:
         f.write("- [{stamp}] **{scid} ({round_}; since rule {rule_ver})** "

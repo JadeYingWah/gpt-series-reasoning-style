@@ -162,7 +162,7 @@ def run_checks() -> list:
 
     # SB8 authoritative field counts
     c = new(8, "authoritative field counts consistent")
-    live = "\n".join([skill_text, readme, selftest[0:4000]])
+    live = "\n".join([skill_text, readme, selftest])
     leaked = []
     if re.findall(r"24\s*字段|24-field", live):
         leaked.append("24-field mention in live surfaces")
@@ -386,7 +386,54 @@ def run_checks() -> list:
     else:
         c.pass_("all rule-layer sections carry both languages")
 
+    # SB17 AGENTS.md cross-runtime entry consistency (C4-1: the new surface
+    # must stay aligned with SKILL.md or it drifts unguarded).
+    c = new(17, "AGENTS.md entry consistency")
+    ag_path = REPO_ROOT / "AGENTS.md"
+    if not ag_path.exists():
+        c.fail("AGENTS.md missing (cross-runtime entry alias expected at repo root)")
+    else:
+        ag = read_text(ag_path)
+        problems = []
+        if "SKILL.md" not in ag or "VERSION" not in ag:
+            problems.append("does not route to SKILL.md/VERSION")
+        if "宣布阶段序列不是确认。" not in ag:
+            problems.append("quoted first hard rule missing/drifted")
+        if "gpt-series-reasoning-style" not in ag:
+            problems.append("skill name missing")
+        if re.search(r"references/[\w\-.]+\.md", ag):
+            pass  # routing mentions are fine; existence is checked below
+        for m in re.findall(r"references/([\w\-.]+\.md)", ag):
+            if not (REPO_ROOT / "references" / m).exists():
+                problems.append("routes to missing file references/" + m)
+        if problems:
+            c.fail("; ".join(problems))
+        else:
+            c.pass_("AGENTS.md routes to SKILL.md/VERSION; hard-rule quote intact; routed files exist")
+
     return checks
+
+
+def _write_report(args, lines: list, summary: str) -> None:
+    """Write the report inside the repository only (C1-3 guard).
+
+    `--out` is an in-repo convenience; absolute paths or `..` traversal would
+    let a typo drop the report anywhere on disk.
+    """
+    dest = (REPO_ROOT / args.out)
+    if dest.is_absolute():
+        print("ERROR: --out must be a repo-relative path, got: " + args.out)
+        raise SystemExit(2)
+    resolved_root = REPO_ROOT.resolve()
+    resolved = dest.resolve()
+    import os.path
+    rel = os.path.relpath(str(resolved), str(resolved_root))
+    if rel == ".." or rel.startswith(".." + os.sep):
+        print("ERROR: --out escapes the repository: " + args.out)
+        raise SystemExit(2)
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_text("\n".join(lines), encoding="utf-8")
+    print("\nreport written: " + str(dest))
 
 
 def main() -> int:
@@ -424,10 +471,7 @@ def main() -> int:
     print("\n".join(out_lines))
 
     if args.out:
-        dest = REPO_ROOT / args.out
-        dest.parent.mkdir(parents=True, exist_ok=True)
-        dest.write_text("\n".join(out_lines), encoding="utf-8")
-        print("\nreport written: " + str(dest))
+        _write_report(args, out_lines, summary)
 
     return 0 if passed == total else 1
 

@@ -30,11 +30,22 @@ if [ -e "$DEST" ] && [ "$FORCE" != "1" ]; then
   exit 1
 fi
 
+# Safety guard (C3-3): refuse to install into the skill repo itself — a
+# pwd-based DEST (cursor/windsurf/cline/trae/roo) run from the repo root
+# would otherwise nest the repo inside itself via cp -R.
+case "$DEST" in
+  "$SOURCE"|"$SOURCE"/*)
+    echo "Refusing: destination is inside the skill repo itself ($DEST)" >&2
+    exit 1
+    ;;
+esac
+
 mkdir -p "$(dirname "$DEST")"
 rm -rf "$DEST"
 cp -R "$SOURCE" "$DEST"
 # Keep the install identical to the PowerShell path (its '*' glob skips
-# dotfiles): the host needs the skill, not git history or CI config.
-rm -rf "$DEST/.git" "$DEST/.github" "$DEST/.gitignore"
+# dotfiles): the host needs the skill, not git history, CI config, the
+# static site, or repo-level line-ending config.
+rm -rf "$DEST/.git" "$DEST/.github" "$DEST/.gitignore" "$DEST/.gitattributes" "$DEST/site"
 find "$DEST" -depth -type d -name "__pycache__" -exec rm -rf {} +
 echo "Installed $SKILL_NAME to $DEST"

@@ -50,19 +50,37 @@ def _version():
 
 
 def font(size, bold=False, cjk=False):
-    """Load a truetype font. CJK text must use a Chinese-capable face."""
+    """Load a truetype font. CJK text must use a Chinese-capable face.
+
+    Windows-first candidate chain; falls back to macOS/Linux system fonts so
+    the maintainer tool does not silently render CJK as tofu boxes elsewhere.
+    """
     win = r"C:\Windows\Fonts"
     if cjk:
         candidates = [
             os.path.join(win, "msyhbd.ttc" if bold else "msyh.ttc"),
             os.path.join(win, "NotoSansSC-VF.ttf"),
             os.path.join(win, "simhei.ttf"),
+            # macOS CJK
+            "/System/Library/Fonts/PingFang.ttc",
+            "/System/Library/Fonts/STHeiti Light.ttc",
+            "/System/Library/Fonts/Hiragino Sans GB.ttc",
+            # Linux CJK (Noto CJK / WenQuanYi)
+            "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+            "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
+            "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc",
         ]
+        if bold:
+            candidates.insert(0, "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc")
     else:
         candidates = [
             os.path.join(win, "segoeuib.ttf" if bold else "segoeui.ttf"),
             os.path.join(win, "arialbd.ttf" if bold else "arial.ttf"),
             os.path.join(win, "msyhbd.ttc" if bold else "msyh.ttc"),
+            # macOS / Linux Latin
+            "/System/Library/Fonts/Helvetica.ttc",
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+            if bold else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
         ]
     path = _first_existing(candidates)
     if path:

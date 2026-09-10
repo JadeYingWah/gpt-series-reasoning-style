@@ -6,15 +6,22 @@ This skill is a plain Agent Skills package (top-level layout; the fully annotate
 gpt-series-reasoning-style/
 ├── SKILL.md                 # entry point
 ├── VERSION
+├── AGENTS.md                # cross-runtime entry alias (Codex/Gemini/Copilot CLI) — routes here
 ├── README.md / LICENSE / CHANGELOG.md
 ├── agents/openai.yaml       # optional platform metadata
 ├── identities/              # built-in role identities
 ├── custom-identities/       # user-defined identities
 ├── references/              # on-demand detailed rules
+├── docs/minimal-discipline.md  # minimal three-rule quick card (also valid standalone)
+├── hooks/                   # optional session-start reminder (opt-in)
 ├── scripts/                 # install.ps1 / install.sh
+├── probes/ · site/          # maintainer instruments (probe runner; static docs page)
 ├── generate-banner.py       # maintainer tool: renders social-preview.png
 └── social-preview.png / .svg
 ```
+
+The installers strip repo-only surfaces (`.git*`, `.github/`, `site/`, `__pycache__/`) so an
+installed copy contains only what the host needs; the fully annotated tree is in README → Repository Layout.
 
 Copy or symlink the whole folder into the skill directory used by your tool. Keep the folder name `gpt-series-reasoning-style`.
 

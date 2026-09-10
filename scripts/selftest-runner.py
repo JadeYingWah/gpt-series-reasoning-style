@@ -50,7 +50,15 @@ def _cell(s: str) -> str:
 
 
 def parse() -> list:
-    text = SELF.read_text(encoding="utf-8")
+    try:
+        text = SELF.read_text(encoding="utf-8")
+    except UnicodeDecodeError as exc:
+        # Structured failure instead of a raw traceback (parity with cmd_archive).
+        print("ERROR: self-test.md is not valid UTF-8 -- " + str(exc))
+        raise SystemExit(2)
+    except OSError as exc:
+        print("ERROR: cannot read self-test.md -- " + str(exc))
+        raise SystemExit(2)
     out = []
     for block in re.split(r"^## Test ", text, flags=re.M)[1:]:
         head = block.splitlines()[0].strip()

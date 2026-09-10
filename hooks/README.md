@@ -21,6 +21,7 @@
   "hooks": {
     "SessionStart": [
       {
+        "matcher": "startup|clear|compact",
         "hooks": [
           {
             "type": "command",
@@ -32,6 +33,8 @@
   }
 }
 ```
+
+> matcher 含 `compact`：长会话压缩后提醒会被吞掉，`compact` 让它重注入（详见下方"matcher 变体"）。
 
 3. 重启会话，会话开头应出现一行 `[skill-reminder] …`。
 
