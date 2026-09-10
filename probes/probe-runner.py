@@ -32,12 +32,14 @@ ARCHIVE = PROBES / "last-run.md"
 
 def load():
     if not SCEN.exists():
-        sys.exit("missing " + str(SCEN))
+        print("ERROR: missing " + str(SCEN), file=sys.stderr)
+        sys.exit(1)
     try:
         return json.loads(SCEN.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
-        sys.exit("malformed JSON in " + str(SCEN) + " -- line %d col %d: %s"
-                 % (exc.lineno, exc.colno, exc.msg))
+        print("ERROR: malformed JSON in " + str(SCEN) + " -- line %d col %d: %s"
+              % (exc.lineno, exc.colno, exc.msg), file=sys.stderr)
+        sys.exit(1)
 
 
 def cmd_list(_):

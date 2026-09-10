@@ -18,9 +18,12 @@ import argparse
 import datetime
 import hashlib
 import json
+import os.path
 import pathlib
 import re
 import sys
+
+import _selftest_parser
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 FENCE_RE = re.compile(r"^```")
@@ -81,13 +84,19 @@ def run_checks() -> list:
         else:
             c.pass_("all surfaces agree on " + version + "; no 3.2.x residue")
 
+    # Shared parse (M1: single parser for self-test.md — selfcheck and
+    # selftest-runner.py must never disagree on the format).
+    cases, malformed_headers = _selftest_parser.parse(selftest)
+
     # SB2 self-test numbering contiguous
     c = new(2, "self-test numbering 1..N")
-    titles = re.findall(r"^## Test (\d+):", selftest, flags=re.M)
-    nums = [int(n) for n in titles]
-    if not titles:
+    nums = [c["num"] for c in cases]
+    if not cases:
         c.fail("self-test.md contains no Test blocks")
-    elif len(titles) != len(set(titles)):
+    elif malformed_headers:
+        c.fail("malformed Test headers (hidden from numbering): "
+               + "; ".join(malformed_headers[:3]))
+    elif len(nums) != len(set(nums)):
         c.fail("duplicate Test numbers")
     elif nums != list(range(1, len(nums) + 1)):
         c.fail("numbering not contiguous 1.." + str(len(nums)))
@@ -96,21 +105,23 @@ def run_checks() -> list:
 
     # SB3 structural completeness
     c = new(3, "self-test structural completeness")
-    blocks = [b.strip() for b in selftest.split("## Test ")[1:]]
     missing = []
-    if not blocks:
+    if not cases:
         c.fail("self-test.md contains no test blocks")
     else:
-        for b in blocks:
-            name = b.splitlines()[0].strip()
-            has_prompt = ("Prompt" in b) and ("```" in b)
-            has_expected = ("Expected" in b or "期望" in b) and bool(re.search(r"^- ", b, re.M))
+        for case in cases:
+            raw = case["raw"]
+            name = "Test {}: {}".format(case["num"], case["title"])
+            # case-insensitive (L2): format drift to lowercase must not slip past
+            has_prompt = ("prompt" in raw.lower()) and ("```" in raw)
+            low = raw.lower()
+            has_expected = ("expected" in low or "期望" in raw) and bool(re.search(r"^- ", raw, re.M))
             if not (has_prompt and has_expected):
                 missing.append(name)
         if missing:
             c.fail("tests lacking prompt or expectation: " + ", ".join(missing[:6]))
         else:
-            c.pass_("all " + str(len(blocks)) + " test blocks complete")
+            c.pass_("all " + str(len(cases)) + " test blocks complete")
 
     # SB4 identity count == 22
     c = new(4, "identity file count == 22")
@@ -197,8 +208,8 @@ def run_checks() -> list:
     try:
         ps1 = read_text(REPO_ROOT / "scripts" / "install.ps1")
     except FileNotFoundError:
-        # Do NOT return early: skipping SB11-SB16 would silently shrink the
-        # reported total and mask six checks as "not applicable". Fail this
+        # Do NOT return early: skipping SB11-SB17 would silently shrink the
+        # reported total and mask seven checks as "not applicable". Fail this
         # check and let the remaining checks run (each guards its own I/O).
         c.fail("scripts/install.ps1 missing")
     else:
@@ -312,22 +323,16 @@ def run_checks() -> list:
 
     # SB15 self-test prompt uniqueness
     c = new(15, "self-test prompt uniqueness")
-    blocks = selftest.split("## Test ")[1:]
     seen = {}
     dup = []
-    for b in blocks:
-        mm = re.match(r"(\d+):", b)
-        if not mm:
-            continue
-        num = mm.group(1)
-        pb = re.findall(r"```text\n(.*?)```", b, flags=re.S)
-        pp = pb[0].strip() if pb else ""
+    for case in cases:
+        pp = case["text_prompt"]
         if not pp:
             continue
         if pp in seen:
-            dup.append("Test " + seen[pp] + " & Test " + num)
+            dup.append("Test " + seen[pp] + " & Test " + str(case["num"]))
         else:
-            seen[pp] = num
+            seen[pp] = str(case["num"])
     if dup:
         c.fail("duplicated prompts: " + "; ".join(dup[:6]))
     else:
@@ -401,8 +406,6 @@ def run_checks() -> list:
             problems.append("quoted first hard rule missing/drifted")
         if "gpt-series-reasoning-style" not in ag:
             problems.append("skill name missing")
-        if re.search(r"references/[\w\-.]+\.md", ag):
-            pass  # routing mentions are fine; existence is checked below
         for m in re.findall(r"references/([\w\-.]+\.md)", ag):
             if not (REPO_ROOT / "references" / m).exists():
                 problems.append("routes to missing file references/" + m)
@@ -414,7 +417,7 @@ def run_checks() -> list:
     return checks
 
 
-def _write_report(args, lines: list, summary: str) -> None:
+def _write_report(args, lines: list) -> None:
     """Write the report inside the repository only (C1-3 guard).
 
     `--out` is an in-repo convenience; absolute paths or `..` traversal would
@@ -426,7 +429,6 @@ def _write_report(args, lines: list, summary: str) -> None:
         raise SystemExit(2)
     resolved_root = REPO_ROOT.resolve()
     resolved = dest.resolve()
-    import os.path
     rel = os.path.relpath(str(resolved), str(resolved_root))
     if rel == ".." or rel.startswith(".." + os.sep):
         print("ERROR: --out escapes the repository: " + args.out)

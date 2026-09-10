@@ -9,6 +9,8 @@ English uses Segoe UI; Chinese uses Microsoft YaHei (with Noto/SimHei fallback).
 """
 
 import os
+import sys
+
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 WIDTH, HEIGHT = 1280, 640
@@ -88,97 +90,106 @@ def font(size, bold=False, cjk=False):
             return ImageFont.truetype(path, size)
         except Exception:
             pass
+    if cjk:
+        # M4: silent CJK tofu is worse than a loud warning.
+        print('WARNING: no CJK font found — output will contain unreadable glyphs',
+              file=sys.stderr)
     return ImageFont.load_default()
 
 
-f_eye = font(22, bold=True)
-f_title = font(82, bold=True)
-f_sub_zh = font(40, bold=True, cjk=True)
-f_tag_en = font(30, bold=True)
-f_tag_zh = font(23, cjk=True)
-f_chip_zh = font(24, bold=True, cjk=True)
-f_chip_en = font(18)
-f_footer = font(19)
+def main():
+    f_eye = font(22, bold=True)
+    f_title = font(82, bold=True)
+    f_sub_zh = font(40, bold=True, cjk=True)
+    f_tag_en = font(30, bold=True)
+    f_tag_zh = font(23, cjk=True)
+    f_chip_zh = font(24, bold=True, cjk=True)
+    f_chip_en = font(18)
+    f_footer = font(19)
 
-# ---- background gradient -------------------------------------------------
-img = Image.new("RGB", (WIDTH, HEIGHT), BG_TOP)
-draw = ImageDraw.Draw(img)
-for y in range(HEIGHT):
-    t = y / HEIGHT
-    draw.line(
-        [(0, y), (WIDTH, y)],
-        fill=tuple(int(BG_TOP[i] + (BG_BOTTOM[i] - BG_TOP[i]) * t) for i in range(3)),
-    )
+    # ---- background gradient -------------------------------------------------
+    img = Image.new("RGB", (WIDTH, HEIGHT), BG_TOP)
+    draw = ImageDraw.Draw(img)
+    for y in range(HEIGHT):
+        t = y / HEIGHT
+        draw.line(
+            [(0, y), (WIDTH, y)],
+            fill=tuple(int(BG_TOP[i] + (BG_BOTTOM[i] - BG_TOP[i]) * t) for i in range(3)),
+        )
 
-# ---- soft glows (blurred so edges are not hard) --------------------------
-glow = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
-gdraw = ImageDraw.Draw(glow)
-gdraw.ellipse([920, -120, 1320, 280], fill=(124, 58, 237, 34))
-gdraw.ellipse([-120, 360, 360, 780], fill=(6, 182, 212, 24))
-glow = glow.filter(ImageFilter.GaussianBlur(70))
-img = Image.alpha_composite(img.convert("RGBA"), glow).convert("RGB")
-draw = ImageDraw.Draw(img)
-
-
-def text_width(d, text, ft):
-    return d.textbbox((0, 0), text, font=ft)[2]
+    # ---- soft glows (blurred so edges are not hard) --------------------------
+    glow = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
+    gdraw = ImageDraw.Draw(glow)
+    gdraw.ellipse([920, -120, 1320, 280], fill=(124, 58, 237, 34))
+    gdraw.ellipse([-120, 360, 360, 780], fill=(6, 182, 212, 24))
+    glow = glow.filter(ImageFilter.GaussianBlur(70))
+    img = Image.alpha_composite(img.convert("RGBA"), glow).convert("RGB")
+    draw = ImageDraw.Draw(img)
 
 
-def center_text(d, cx, y, text, ft, fill):
-    bbox = d.textbbox((0, 0), text, font=ft)
-    w = bbox[2] - bbox[0]
-    d.text((cx - w / 2 - bbox[0], y), text, font=ft, fill=fill)
+    def text_width(d, text, ft):
+        return d.textbbox((0, 0), text, font=ft)[2]
 
 
-def tracked_text(d, cx, y, text, ft, fill, tracking=4):
-    widths = [ft.getlength(ch) for ch in text]
-    total = sum(widths) + tracking * (len(text) - 1)
-    x = cx - total / 2
-    for ch, w in zip(text, widths):
-        d.text((x, y), ch, font=ft, fill=fill)
-        x += w + tracking
+    def center_text(d, cx, y, text, ft, fill):
+        bbox = d.textbbox((0, 0), text, font=ft)
+        w = bbox[2] - bbox[0]
+        d.text((cx - w / 2 - bbox[0], y), text, font=ft, fill=fill)
 
 
-# ---- eyebrow + titles ----------------------------------------------------
-tracked_text(draw, WIDTH / 2, 62, "AGENT SKILL · BEHAVIOR OVERLAY", f_eye, EYEBROW, tracking=4)
+    def tracked_text(d, cx, y, text, ft, fill, tracking=4):
+        widths = [ft.getlength(ch) for ch in text]
+        total = sum(widths) + tracking * (len(text) - 1)
+        x = cx - total / 2
+        for ch, w in zip(text, widths):
+            d.text((x, y), ch, font=ft, fill=fill)
+            x += w + tracking
 
-# title with a soft shadow
-title = "GPT-Series Reasoning Style"
-tw = text_width(draw, title, f_title)
-tx = (WIDTH - tw) / 2
-ty = 104
-draw.text((tx + 2, ty + 3), title, font=f_title, fill=(2, 6, 23))
-draw.text((tx, ty), title, font=f_title, fill=INK)
 
-center_text(draw, WIDTH / 2, 208, "GPT 系列推理风格", f_sub_zh, SUB_ZH)
-center_text(draw, WIDTH / 2, 276, "Gate before code · Evidence before claims", f_tag_en, TAG_EN)
-center_text(draw, WIDTH / 2, 322, "先确认再动手 · 先证据再结论 · 真实环境才验收", f_tag_zh, TAG_ZH)
+    # ---- eyebrow + titles ----------------------------------------------------
+    tracked_text(draw, WIDTH / 2, 62, "AGENT SKILL · BEHAVIOR OVERLAY", f_eye, EYEBROW, tracking=4)
 
-# ---- three capability chips ---------------------------------------------
-chips = [
-    ("实现前门禁", "Pre-Implementation Gate", PURPLE),
-    ("三种协作形态", "1 Backbone + 2 Extensions", CYAN),
-    ("证据与实操验收", "Evidence & Hands-On", AMBER),
-]
-chip_w, chip_h, gap = 272, 100, 26
-total_w = len(chips) * chip_w + (len(chips) - 1) * gap
-x0 = (WIDTH - total_w) / 2
-chip_y = 416
-for i, (zh, en, color) in enumerate(chips):
-    x1 = x0 + i * (chip_w + gap)
-    box = [x1, chip_y, x1 + chip_w, chip_y + chip_h]
-    draw.rounded_rectangle(box, radius=18, fill=CHIP_FILL, outline=color, width=2)
-    cx = x1 + chip_w / 2
-    center_text(draw, cx, chip_y + 22, zh, f_chip_zh, CHIP_TEXT)
-    center_text(draw, cx, chip_y + 64, en, f_chip_en, color)
+    # title with a soft shadow
+    title = "GPT-Series Reasoning Style"
+    tw = text_width(draw, title, f_title)
+    tx = (WIDTH - tw) / 2
+    ty = 104
+    draw.text((tx + 2, ty + 3), title, font=f_title, fill=(2, 6, 23))
+    draw.text((tx, ty), title, font=f_title, fill=INK)
 
-# ---- footer (fixed page margins, independent of chip count) --------------
-MARGIN = 57
-draw.text((MARGIN, 596), "Planning · Execution · Review", font=f_footer, fill=FOOTER)
-foot_r = "v{} · MIT".format(_version())
-fw = text_width(draw, foot_r, f_footer)
-draw.text((WIDTH - MARGIN - fw, 596), foot_r, font=f_footer, fill=FOOTER)
+    center_text(draw, WIDTH / 2, 208, "GPT 系列推理风格", f_sub_zh, SUB_ZH)
+    center_text(draw, WIDTH / 2, 276, "Gate before code · Evidence before claims", f_tag_en, TAG_EN)
+    center_text(draw, WIDTH / 2, 322, "先确认再动手 · 先证据再结论 · 真实环境才验收", f_tag_zh, TAG_ZH)
 
-out = os.path.join(HERE, "social-preview.png")
-img.save(out, "PNG")
-print(f"Saved banner to {out} ({WIDTH}x{HEIGHT})")
+    # ---- three capability chips ---------------------------------------------
+    chips = [
+        ("实现前门禁", "Pre-Implementation Gate", PURPLE),
+        ("三种协作形态", "1 Backbone + 2 Extensions", CYAN),
+        ("证据与实操验收", "Evidence & Hands-On", AMBER),
+    ]
+    chip_w, chip_h, gap = 272, 100, 26
+    total_w = len(chips) * chip_w + (len(chips) - 1) * gap
+    x0 = (WIDTH - total_w) / 2
+    chip_y = 416
+    for i, (zh, en, color) in enumerate(chips):
+        x1 = x0 + i * (chip_w + gap)
+        box = [x1, chip_y, x1 + chip_w, chip_y + chip_h]
+        draw.rounded_rectangle(box, radius=18, fill=CHIP_FILL, outline=color, width=2)
+        cx = x1 + chip_w / 2
+        center_text(draw, cx, chip_y + 22, zh, f_chip_zh, CHIP_TEXT)
+        center_text(draw, cx, chip_y + 64, en, f_chip_en, color)
+
+    # ---- footer (fixed page margins, independent of chip count) --------------
+    MARGIN = 57
+    draw.text((MARGIN, 596), "Planning · Execution · Review", font=f_footer, fill=FOOTER)
+    foot_r = "v{} · MIT".format(_version())
+    fw = text_width(draw, foot_r, f_footer)
+    draw.text((WIDTH - MARGIN - fw, 596), foot_r, font=f_footer, fill=FOOTER)
+
+    out = os.path.join(HERE, "social-preview.png")
+    img.save(out, "PNG")
+    print(f"Saved banner to {out} ({WIDTH}x{HEIGHT})")
+
+
+if __name__ == "__main__":
+    main()

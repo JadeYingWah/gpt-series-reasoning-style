@@ -32,6 +32,8 @@ import pathlib
 import re
 import sys
 
+import _selftest_parser
+
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SELF = ROOT / "references" / "self-test.md"
 SHEETS_DIR = ROOT / "docs" / "selftest-run"
@@ -59,24 +61,21 @@ def parse() -> list:
     except OSError as exc:
         print("ERROR: cannot read self-test.md -- " + str(exc))
         raise SystemExit(2)
+    # Shared parser (M1): keep this tool and selfcheck.py in lockstep on format.
+    cases, malformed = _selftest_parser.parse(text)
+    for head in malformed:
+        # A silently skipped block would under-count TOTAL CASES with no
+        # trace; surface it so formatting drift is visible immediately.
+        sys.stderr.write("WARNING: skipped malformed Test header: %r\n" % head[:60])
     out = []
-    for block in re.split(r"^## Test ", text, flags=re.M)[1:]:
-        head = block.splitlines()[0].strip()
-        m = re.match(r"(\d+):\s*(.+)", head)
-        if not m:
-            # A silently skipped block would under-count TOTAL CASES with no
-            # trace; surface it so formatting drift is visible immediately.
-            sys.stderr.write("WARNING: skipped malformed Test header: %r\n" % head[:60])
-            continue
-        num, title = int(m.group(1)), m.group(2)
-        pblocks = re.findall(r"```(?:text)?\n(.*?)```", block, flags=re.S)
-        prompt = "\n---\n".join(b.strip() for b in pblocks) if pblocks else ""
-        tail = block.split("Expected")[-1] if "Expected" in block else block
-        exp = [x.strip() for x in re.findall(r"^-\s+(.+)$", tail, flags=re.M)]
-        fm = re.search(r"^Fixture:\s*(.+)$", block, flags=re.M)
-        fixture = fm.group(1).strip() if fm else ""
-        out.append({"num": num, "title": title, "prompt": prompt, "expect": exp, "fixture": fixture})
-    out.sort(key=lambda d: d["num"])
+    for c in cases:
+        out.append({
+            "num": c["num"],
+            "title": c["title"],
+            "prompt": "\n---\n".join(c["fences"]) if c["fences"] else "",
+            "expect": c["expect"],
+            "fixture": c["fixture"],
+        })
     return out
 
 
@@ -156,6 +155,9 @@ def _verdict_index(text: str) -> int:
                 if "verdict" in c or "判定" in c:
                     return i
             break
+    # L1: the fallback exists for legacy 3-column sheets; on the current
+    # 6-column layout index 2 would silently tally the wrong column.
+    sys.stderr.write("WARNING: verdict column not found in header; falling back to index 2\n")
     return 2
 
 
