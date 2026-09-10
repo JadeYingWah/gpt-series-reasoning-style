@@ -97,12 +97,12 @@ description: 'Process-discipline layer only — not a reasoning-capability boost
 5. 实操体验闭环：以真实用户方式亲自操作每一处交互（按钮/按键/手势/反馈/视觉）并截图留证，修复后亲自复验；循环到自评通过或上限（默认 3 轮）；运行环境无 GUI/截图能力时如实标 `UNVERIFIED` 并给出用户自验步骤，不得宣称视觉良好。
 6. 主动执行发散-收敛的 bug sweep，不等用户发现；完成时给出实际文件、命令、测试、Git 状态与截图证据，未验证项标 `UNVERIFIED`。
 
-完整流程与审计模板见 `references/series-reasoning-workflow.md`。
+完整流程与审计模板见 `references/series-reasoning-workflow.md`（按其头部 Section Map 定位取节，勿整读）。
 
 ## References
 
-- `references/series-reasoning-workflow.md`：完整流程和审计模板
-- `references/agent-modes.md`：协作架构（主干+扩展）、确认模板、任务包
+- `references/series-reasoning-workflow.md`：完整流程和审计模板（先读其头部 Section Map，按节定位取用）
+- `references/agent-modes.md`：协作架构（主干+扩展）、确认模板、任务包（形态判定读头部 `Mode Self-Selection` 节即可）
 - `references/identity-library.md`：身份库契约
 - `references/commander-roles.md`：角色库和最小角色集
 - `references/multi-agent-closure-rules.md`：多 Agent 闭环规则
@@ -110,7 +110,7 @@ description: 'Process-discipline layer only — not a reasoning-capability boost
 - `references/series-reasoning-lessons.md`：反模式和教训
 - `references/common-failures.md`：高频造假对照表与失败案例（任何完成声明前对照）
 - `references/series-reasoning-examples.md`：行为示例
-- `references/self-test.md`：安装后自测
+- `references/self-test.md`：安装后自测（维护者/用户人工执行，宿主任务路径无需读取）
 - `references/platform-installation.md`：安装方式
 
 ## Version

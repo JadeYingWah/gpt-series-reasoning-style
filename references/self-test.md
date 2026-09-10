@@ -1,5 +1,8 @@
 # Self-Test
 
+> **非宿主任务路径 / Not on the task path**：本文件是安装后自测（维护者/用户人工执行），宿主 AI 执行任务时**无需读取**本文件。
+> This file is the post-installation self-test (run manually by the maintainer/user). Host AIs do NOT need to read it while executing tasks.
+
 Use these checks after installing the skill. Each test should be run with the skill active.
 
 > **条数冻结 / count frozen**：自测条数冻结于 **77**（Test 1–77）。只做「旧测失去鉴别力 → 替换」，不再扩容；

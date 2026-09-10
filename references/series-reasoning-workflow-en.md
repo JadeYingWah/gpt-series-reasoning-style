@@ -4,6 +4,21 @@
 > authority). Sync rule: any change to a gate field, hard rule, or template in the authority
 > file must be mirrored here in the same version (see README Maintainer Notes). On any
 > conflict between the two files, the Chinese authority wins.
+> **Who should read this**: English-primary hosts only. Chinese-primary hosts must read the
+> authority file instead — do not load this mirror in addition to it.
+
+## Section Map / Section Locator (read only the section you need)
+
+> This file is 700+ lines. Locate the section you need by its exact heading (Grep / offset read)
+> and read only that section — do not read the whole file "just in case".
+
+- **Loading & resume**: `Loading Contract`, `Resume Check`, `Identity Boundary`
+- **Forms & roles**: `Execution Modes`, `Three Internal Role Faces (Single-Agent Default Mode)`, `Subagent Mode Protocol`, `Commander Multi-Agent Mode Protocol`, `Commander Role Selection`
+- **Gate & authorization**: `Input Clarification`, `Clarify With The User`, `Pre-Implementation Gate`, `Risk Trimming`, `Authorization Request Format`, `Authorization Matrix`
+- **Instruction & survey**: `Assess And Optimize The Instruction`, `Resource Survey`, `Research Before Planning`, `Existing-Artifact Conflict: Stop And Report First`, `Change Management`
+- **Execution & acceptance**: `Staged Execution Protocol`, `Generative Divergence Protocol`, `Stage Completion Inspection`, `Divergence -> Convergence Bug Sweep`, `Final Acceptance Inspection`, `User-Path Acceptance` (per product-type subsections), `Hands-On Experience Loop`, `End-State Self-Check Loop`
+- **Honesty & self-check**: `Honesty Gate`, `Self-Check Gate`, `Best-Achievable Standard`, `Independent Judgment`, `Audit / Review Checklist`
+- **Dispatch & audit templates**: `Task Dispatch Package (Internal)`, `Agent Addressing Protocol`, `Verification Pass`, `Stage Transition Self-Check`, `Output Style`, audit templates at the end of the file
 
 ## Loading Contract
 

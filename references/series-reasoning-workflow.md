@@ -3,6 +3,19 @@
 > **镜像 / Mirror**：`series-reasoning-workflow-en.md` 是本文件的英文镜像。本文件是中文权威版；改动门禁字段、硬规则或模板时，同版本内同步镜像（见 README Maintainer Notes）。冲突时以本文件为准。
 > **Mirror**: `series-reasoning-workflow-en.md` is the English mirror of this file. This file is the authority; sync the mirror in the same version when gate fields, hard rules, or templates change. On conflict, this file wins.
 
+## Section Map / 分节定位（宿主按需取用，勿整读）
+
+> 本文件 700+ 行。宿主按当前阶段用 Grep 定位对应节标题，只读所需节——**禁止为"保险"而整读**。
+> 700+ lines. Locate the section you need by its exact heading and read only that section — do not read the whole file "just in case".
+
+- **加载与续接**：`Loading Contract`、`Resume Check / 续会全面体检`、`Identity Boundary`
+- **形态与角色**：`Execution Modes`、`Three Internal Role Faces`、`Subagent Mode Protocol`、`Commander Multi-Agent Mode Protocol`、`Commander Role Selection`
+- **门禁与授权**：`Input Clarification`、`Clarify With The User`、`Pre-Implementation Gate`、`Risk Trimming / 风险分档`、`Authorization Request Format`、`Authorization Matrix`
+- **指令与盘点**：`Assess And Optimize The Instruction`、`Resource Survey / 资源盘点前置`、`Research Before Planning`、`Existing-Artifact Conflict`、`Change Management / 变更管理`
+- **执行与验收**：`Staged Execution Protocol`、`Generative Divergence Protocol`、`Stage Completion Inspection`、`Divergence -> Convergence Bug Sweep`、`Final Acceptance Inspection`、`User-Path Acceptance`（按产物类型子节）、`Hands-On Experience Loop`、`End-State Self-Check Loop`
+- **诚实与自检**：`Honesty Gate`、`Self-Check Gate`、`Best-Achievable Standard`、`Independent Judgment`、`Audit / Review Checklist`
+- **派发与审计模板**：`Task Dispatch Package (Internal)`、`Agent Addressing Protocol`、`Verification Pass`、`Stage Transition Self-Check`、`Output Style`、文末审计模板（`当前判断` / `关键事实` / `决策/建议` / `下一步`）
+
 ## Loading Contract
 
 Follow progressive disclosure. Loading proof requires only `SKILL.md` + `VERSION`.
