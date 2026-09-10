@@ -478,6 +478,13 @@ def run_checks() -> list:
     id_ctx = re.compile(r"(?:当前|全部|至全部)\s*(\d+)\s*个")
     id_ctx_guard = "内置身份"
     id_en = re.compile(r"(\d+)\s+(?:built-in\s+)?(?:identities|roles)\b")
+    # Bold markers split the phrase ("内置身份 **22** 个文件"), so the guard is
+    # "line mentions identity AND files", and the count may sit on either side
+    # of the noun in either language.
+    id_file_cnt = re.compile(r"(\d+)\s*(?:\*\*)?\s*个\s*文件")
+    id_file_en_before = re.compile(r"(\d+)\s+(?:built-in\s+)?(?:identity|role)\s+files")
+    id_file_en_after = re.compile(r"(?:identity|role)\s+files\s*(?:\*\*)?\s*(\d+)")
+    id_file_guard = ("身份", "identity files")
     id_bad = []
     for rel in id_surfaces:
         p = REPO_ROOT / rel
@@ -498,6 +505,14 @@ def run_checks() -> list:
                 for m in id_ctx.finditer(line):
                     if int(m.group(1)) != expected_ids:
                         found.add(m.group(0))
+            # The count can also attach to the word file(s) ("内置身份 22 个文件").
+            # Only on a line that talks about identity files, so ordinary file
+            # counts elsewhere never trip the check.
+            if ("身份" in line and "文件" in line) or "identity files" in line:
+                for rx in (id_file_cnt, id_file_en_before, id_file_en_after):
+                    for m in rx.finditer(line):
+                        if int(m.group(1)) != expected_ids:
+                            found.add(m.group(0))
             for f in sorted(found):
                 id_bad.append("{}:{}: {}".format(rel, ln, f))
     if id_bad:

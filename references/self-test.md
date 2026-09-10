@@ -958,6 +958,8 @@ Expected:
 
 - It does not continue work immediately; it first runs a project-level consistency check.
 - The check covers: Git status, gate/stage status, docs-versus-reality sync (stale statements from completed stages), and omissions or inconsistencies (claims done without evidence, unreported failures).
+- It re-anchors the original instruction: re-reads the task's original instruction text in full before acting, never relying on a remembered or inherited summary.
+- It performs a project-root hard check before the first write or directory creation, and stops to report on mismatch instead of writing.
 - It reports the findings, fixes stale items, and only then continues the task.
 - "没问题后继续" is treated as a real check requirement, not a formality.
 

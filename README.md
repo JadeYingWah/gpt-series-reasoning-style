@@ -97,13 +97,13 @@ flowchart TD
 - Mandatory pre-implementation gate (10 fields) before creating directories, editing files, or running implementation commands; announcing a stage sequence is not confirmation.
 - Risk trimming: a specific, small, reversible, side-effect-free task takes the light channel (the instruction itself is authorization); brand-new products, multi-deliverables, and parallelism signals are excluded and take the full flow.
 - Resource survey before planning: local skills, reusable assets, web references, and installable candidates (installing needs approval); a plan without a survey is incomplete.
-- Whole-plan re-evaluation after any user change; a Resume Check (Git/gate/docs-vs-reality) before continuing an existing session.
+- Whole-plan re-evaluation after any user change; a 7-item Resume Check before continuing an existing session (git status, gate/stage status, docs-vs-reality, omissions, re-anchor the original instruction, project-root hard check, report findings first).
 
 - 三个内部角色面——规划面、执行面、审查面；执行者不能不经对抗式审查就自行关闭阶段。
 - 建目录、改文件、跑实现命令前必须过实现前门禁（10 字段）；宣布阶段序列不等于获得确认。
 - 风险分档：具体、影响小、可逆、无副作用的任务走轻通道（指令本身即授权）；全新产物默认中档（除非指令完整指定产物类型/位置/形态）、多交付物、并行信号被排除，走全流程。
 - 规划前先做资源盘点：本地技能、可复用资产、网络参考、可安装候选（安装须经批准）；没盘点的计划不完整。
-- 用户一改需求就从整体重新评估；接手既有会话前先做续会体检（Git / 门禁 / 文档与现实一致性）。
+- 用户一改需求就从整体重新评估；接手既有会话前先做 7 项续会体检（Git 状态、门禁与阶段、文档与现实、遗漏与矛盾、重锚定原始指令、项目根硬检查、先报告后修）。
 
 **Collaboration forms / 协作形态**
 
@@ -462,7 +462,7 @@ Gate fields and hard rules are deliberately repeated across several surfaces (an
 
 Other single-source-of-truth rules to keep consistent when editing / 其他改动时需保持一致的“单一权威”约定：
 
-- The authoritative task-package field count is **23**; the subagent mini package is **6** fields; fix-loop cap **5**; hands-on loop default **3**; self-test **77**; built-in identity files **22** (21 role classes). / 任务包权威 **23** 字段、子 Agent 迷你包 **6** 字段、修复循环上限 **5**、实操闭环默认 **3** 轮、自测 **77** 条、内置身份 **22** 个文件（21 类角色）。
+- The authoritative task-package field count is **23**; the subagent mini package is **6** fields; fix-loop cap **5**; hands-on loop default **3**; self-test **77**; built-in identity files **21** (21 role classes). / 任务包权威 **23** 字段、子 Agent 迷你包 **6** 字段、修复循环上限 **5**、实操闭环默认 **3** 轮、自测 **77** 条、内置身份 **21** 个文件（21 类角色）。
 - The per-role responsibility catalog lives only in `identities/README.md`; every identity file keeps the 8-section contract. / 逐角色职责目录只在 `identities/README.md` 维护；每个身份文件保持 8 段契约。
 - The light-channel exclusions (new-from-scratch product defaults to medium; ≥2 deliverables; parallelism signals) and the mode self-selection order must match across `SKILL.md`, `series-reasoning-workflow.md`, `agent-modes.md`, and `self-test.md`. / 轻通道三排除项（全新产物默认中档、≥2 交付物、并行信号）与模式自选顺序须在 `SKILL.md`、`series-reasoning-workflow.md`、`agent-modes.md`、`self-test.md` 间一致。
 - The install platform list here must match the actual `-Platform` keys in both `scripts/install.ps1` and `scripts/install.sh`; platforms without a key are documented as manual-only. / 本文件安装平台表必须与两个安装脚本真实支持的 `-Platform` 参数一致；无参数平台标注为手动安装。

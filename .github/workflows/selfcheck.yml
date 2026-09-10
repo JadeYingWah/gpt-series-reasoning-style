@@ -19,8 +19,10 @@ jobs:
         run: |
           python scripts/selfcheck.py --out docs/tmp-selfcheck.md
           test -f docs/tmp-selfcheck.md && rm docs/tmp-selfcheck.md
-      - name: Official skilllint (agentskills.io spec, pinned — FM010 false-positive with `check .` on 1.19.2)
-        run: uvx skilllint@1.19.2 check gpt-series-reasoning-style
+      - name: Install uv (runs the pinned skilllint below)
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1 (SHA-pinned)
+      - name: Official skilllint (agentskills.io spec, pinned 1.19.2 — `check .` trips FM010 on this version, so lint from the parent dir where the repo dir name exists)
+        run: cd .. && uvx skilllint@1.19.2 check gpt-series-reasoning-style
       - name: openai.yaml parses
         run: |
           python -m pip install pyyaml --quiet
