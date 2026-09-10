@@ -15,12 +15,14 @@ Checked rules:
   1. docs/gate/*.md     — each record carries the 10 gate-field labels, a legal
                           status line, and a superseded pointer when superseded.
   2. dispatch-ledger.md — if present, must be non-empty governance content.
-  3. findings-ledger.md — if present, each round must name the required fields
-                          (round number / change & reason / open items / evidence pointer).
+  3. findings-ledger.md — if present, each round must name all four required
+                          fields (round number / change & reason / open items /
+                          evidence pointer); checked per round, not file-wide.
 """
 
 from __future__ import annotations
 
+import argparse
 import pathlib
 import re
 import sys
@@ -38,7 +40,7 @@ GATE_FIELDS = [
     "需要你确认",
 ]
 STATUSES = {"proposed", "confirmed", "rejected", "superseded"}
-FINDINGS_FIELDS = ["轮次编号", "未解项", "证据指针"]
+FINDINGS_FIELDS = ["轮次编号", "本轮改动与原因", "未解项", "证据指针"]
 # a round heading like "## Round 3" / "## 第 3 轮" / "### Round 3 / 第3轮"
 ROUND_HEADING = re.compile(r"^#{1,4}.*?(?:Round\s*\d+|第\s*\d+\s*轮)", re.M | re.I)
 
@@ -77,20 +79,28 @@ def check_dispatch_ledger(path: pathlib.Path, items: list) -> None:
 
 def check_findings_ledger(path: pathlib.Path, items: list) -> None:
     text = path.read_text(encoding="utf-8", errors="replace")
-    rounds = ROUND_HEADING.findall(text)
+    rounds = list(ROUND_HEADING.finditer(text))
     if not rounds:
         fail(items, "findings-ledger.md: no round headings (## Round N / 第 N 轮)")
         return
-    for field in FINDINGS_FIELDS:
-        if field not in text:
-            fail(items, "findings-ledger.md: required per-round field [{}] not found".format(field))
+    # L5: check PER ROUND — file-wide containment let a single complete round
+    # mask other rounds that were missing required fields.
+    for i, m in enumerate(rounds):
+        start = m.end()
+        end = rounds[i + 1].start() if i + 1 < len(rounds) else len(text)
+        seg = text[start:end]
+        name = m.group(0).strip()
+        for field in FINDINGS_FIELDS:
+            if field not in seg:
+                fail(items, "findings-ledger.md: [{}] missing field [{}]".format(name, field))
 
 
 def main() -> int:
-    if len(sys.argv) != 2:
-        print(__doc__)
-        return 2
-    root = pathlib.Path(sys.argv[1])
+    ap = argparse.ArgumentParser(
+        description="Structure checker for project governance artifacts (docs/gate, ledgers)")
+    ap.add_argument("root", help="project root whose docs/ governance artifacts are checked")
+    args = ap.parse_args()
+    root = pathlib.Path(args.root)
     if not root.is_dir():
         print("ERROR: not a directory: " + str(root))
         return 2

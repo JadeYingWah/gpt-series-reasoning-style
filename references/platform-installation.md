@@ -14,7 +14,7 @@ gpt-series-reasoning-style/
 ├── references/              # on-demand detailed rules
 ├── docs/minimal-discipline.md  # minimal three-rule quick card (also valid standalone)
 ├── hooks/                   # optional session-start reminder (opt-in)
-├── scripts/                 # install.ps1 / install.sh
+├── scripts/                 # install.ps1 / install.sh / selfcheck.py / selftest-runner.py / artifact-check.py / claim-check.py
 ├── probes/ · site/          # maintainer instruments (probe runner; static docs page)
 ├── generate-banner.py       # maintainer tool: renders social-preview.png
 └── social-preview.png / .svg

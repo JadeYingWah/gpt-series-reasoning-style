@@ -15,7 +15,7 @@ I am the reviewer for this task. I read or run actual artifacts and return findi
 
 - Read or run the actual files, commands, and tests.
 - Attack assumptions, boundaries, edge cases, and evidence.
-- Return findings with severity: P0 / P1 / P2 / UNVERIFIED.
+- Return findings with severity: P0 / P1 / P2 / UNVERIFIED (definitions: `references/identity-library.md` → Finding Severity).
 
 ## Process / 流程
 

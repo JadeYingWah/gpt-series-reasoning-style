@@ -157,7 +157,7 @@ Rules:
 1. Ask the user where the project AI identity directory is located.
 2. If the user provides a path, use it even if it is not the default.
 3. If the user does not know or says there is no such directory, propose creating one with the default ASCII path `docs/agents/` and ask for authorization.
-4. If the user authorizes creation, the registry is a **per-member identity file layout**: a registry README (index) plus **one standalone identity markdown file per AI member** (e.g., `docs/agents/executor.md`). Each member file must include role identity, responsibilities, current platform/channel, task status, DRI ownership, and whether it is available for this task. The underlying LLM model is **never asked for** — record it only when the user volunteers it or it is publicly evident; it churns and must never invalidate a record. A bare brand or product name alone is not enough; name the role and platform/window.
+4. If the user authorizes creation, the registry is a **per-member identity file layout**: a registry README (index) plus **one standalone identity markdown file per AI member** (e.g., `docs/agents/executor.md`). Each member file must include role identity, responsibilities, current platform/channel, trust tier, task status, DRI ownership, and whether it is available for this task. The underlying LLM model is **never asked for** — record it only when the user volunteers it or it is publicly evident; it churns and must never invalidate a record. A bare brand or product name alone is not enough; name the role and platform/window.
 5. **Commander reads before dispatching**: before the first relay to any member, the commander reads that member's identity file and adapts communication and task-package framing to it.
 6. **Recipients read their own file first**: every activation prompt instructs the recipient to read its own identity file under `<项目根>/docs/agents/` and declare its identity before executing the task package.
 7. If the user denies authorization, explain why Mode 3 needs the registry and return `BLOCKED`; do not create the directory and do not generate a placeholder task package.
@@ -177,7 +177,7 @@ Rules:
 1. 先问用户项目 AI 身份目录在哪里。
 2. 用户指定路径时，即使不是默认路径也沿用。
 3. 用户不知道或说没有时，先提出创建默认 ASCII 路径 `docs/agents/`，并请求授权。
-4. 用户授权创建后，登记目录采用**每个 AI 成员一个身份 md 文件**的结构：登记 README（索引）+ **每个成员独立的身份 md**（如 `docs/agents/executor.md`）。成员文件包含角色身份、职责、平台/通道、任务状态、DRI 归属和是否可承接本次任务。底层大模型**从不主动询问**——仅在用户主动告知或公开可得时记录；它容易变动，且绝不使记录失效。只写品牌名或产品名不够，应写清角色与平台/窗口。
+4. 用户授权创建后，登记目录采用**每个 AI 成员一个身份 md 文件**的结构：登记 README（索引）+ **每个成员独立的身份 md**（如 `docs/agents/executor.md`）。成员文件包含角色身份、职责、平台/通道、信任层级、任务状态、DRI 归属和是否可承接本次任务。底层大模型**从不主动询问**——仅在用户主动告知或公开可得时记录；它容易变动，且绝不使记录失效。只写品牌名或产品名不够，应写清角色与平台/窗口。
 5. **指挥官派发前先读**：对任一成员的首次传话前，指挥官先读取该成员的身份 md，并据此适配沟通方式与任务包表述。
 6. **接收方先读自己的文件**：每份启动提示词都指示接收方先读取自己在 `<项目根>/docs/agents/` 下的身份 md、声明身份，然后再执行任务包。
 7. 用户拒绝授权时，说明模式三为什么需要身份目录，并返回 `BLOCKED`；不创建目录，不生成占位任务包。

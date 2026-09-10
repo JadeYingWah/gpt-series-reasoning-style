@@ -136,7 +136,7 @@ Rules:
 3. **验收标准**：怎样算做完，可验证。
 4. **所需证据**：返回哪些文件路径/命令输出/截图。
 5. **返回格式**：结论先行 + 证据指针（不粘贴大段日志）+ `CONFIDENCE` 或 `BLOCKED`。
-6. **信任层级**：T1 只读 / T2 可写产物。
+6. **信任层级**：T1 只读 / T2 可写产物。T3（命令/部署/破坏性或外部操作）属指挥官扩展（23 字段包）场景——子 Agent 迷你包限 T1/T2。
 
 **Six-field mini package (EN)** — subagents do not use the full 23-field package (that belongs to cross-model commander scenarios); they use the **six-field mini package**, and a missing field means no dispatch:
 
@@ -145,19 +145,19 @@ Rules:
 3. **Acceptance criteria**: what counts as done, stated verifiably.
 4. **Required evidence**: which file paths / command outputs / screenshots to return.
 5. **Return format**: conclusion first + evidence pointers (no large pasted logs) + `CONFIDENCE` or `BLOCKED`.
-6. **Trust tier**: T1 read-only / T2 may write deliverables.
+6. **Trust tier**: T1 read-only / T2 may write deliverables. T3 (commands, deployments, destructive/external) belongs to the Commander extension's 23-field package; subagent mini packages are limited to T1/T2.
 
 The mini package is the subagent-channel standard; attaching a full 23-field package to a subagent is acceptable but not required — package size follows the channel, not the mode label. 迷你包是子 Agent 通道的标准配置；给子 Agent 附 23 字段完整包可以，但非必需——包规格跟随通道，不跟随模式标签。
 
 ### Failure Fallback / 失败止损
 
 - 子 Agent 返回不合格：打回一次，附具体发现；仍不合格则**收回主干自己做**并在报告里记录——委派是加速器，不是沉没成本黑洞。
-- 打回与 23 字段场景共用"修复循环上限 5 轮"的纪律。
+- 打回与 23 字段场景共用"修复循环上限 5 轮"的纪律（近闭环缓冲可延至第 6 轮——见 multi-agent-closure-rules 的 Fix-Loop Cap）。
 
 **Failure fallback (EN)**
 
 - A subagent returns substandard work: return it once with the specific findings; if it is still substandard, **take the work back onto the backbone and do it yourself**, and record this in the report — delegation is an accelerator, not a sunk-cost black hole.
-- Returns share the "fix-loop cap of 5 rounds" discipline with the 23-field scenario.
+- Returns share the "fix-loop cap of 5 rounds" discipline with the 23-field scenario (a near-closure buffer may extend to a 6th round — see the Fix-Loop Cap in multi-agent-closure-rules).
 
 ### Orchestrator Submode / 编排子模式（推荐）
 

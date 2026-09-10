@@ -10,6 +10,12 @@ sync, and the install-platform parameter set. Running it is a fast regression
 check that the repo has not silently drifted.
 
 Python 3.7+ stdlib only. Exit: 0=all passed, 1=failed, 2=usage.
+
+Known blind spots (literal-layer checks only, documented by design after the
+2026-09-10 external reviews): semantic drift; per-item bilingual parity
+(incl. identities/); cross-file field-set unions; claims-vs-reality gaps
+(use claim-check.py); install.sh parity; per-round ledger fields. Green
+means the literal layer is intact — nothing more.
 """
 
 from __future__ import annotations

@@ -125,7 +125,7 @@ flowchart TD
 - 在真实目标环境做用户路径验收（Web、桌面、移动、CLI、API、库、文档）；单元测试全绿是必要不充分条件。
 - 人会操作的产物走实操体验闭环：亲手操作每个按钮/按键/手势并截图，修复后复验，默认上限 3 轮；headless 环境对无法操作的部分标 `UNVERIFIED`，不伪造。
 - 生成式发散→收敛缺陷扫描与视角轮换；发散不是背固定清单（中等任务至少产出 10 个不同候选）。
-- 诚实信号：`UNVERIFIED`、`CONFIDENCE: High/Medium/Low`、`BLOCKED: 原因, 解除条件`，发现按 P0/P1/P2 分级；审查-修复循环上限 5 轮。
+- 诚实信号：`UNVERIFIED`、`CONFIDENCE: High/Medium/Low`、`BLOCKED: 原因, 解除条件`，发现按 P0/P1/P2 分级；审查-修复循环上限 5 轮（近闭环缓冲可延至第 6 轮，见 closure 规则）。
 
 **Engineering / 工程化**
 
@@ -167,9 +167,9 @@ Form selection is not implementation authorization — every form still passes i
 
 ## Identity Library / 身份库
 
-22 built-in identity files (21 role classes — `qa-engineer` and `test-engineer` both map to 测试工程师), each following the same 8-section contract: **Identity · Mission · Responsibilities · Process · Required Output · Handoff · Boundaries · Anti-Patterns**.
+22 built-in identity files (21 role classes — `qa-engineer` and `test-engineer` both map to 测试工程师), each following the same 8-section contract: **Identity · Mission · Responsibilities · Process · Required Output · Handoff · Boundaries · Anti-Patterns** (deputy-commander additionally carries a ninth `Command Succession` section).
 
-22 个内置身份文件（21 类角色——`qa-engineer` 与 `test-engineer` 同属测试工程师），每个都遵循统一 8 段契约：**身份定位 · 使命 · 职责 · 流程 · 必需输出 · 交接 · 边界 · 反模式**。
+22 个内置身份文件（21 类角色——`qa-engineer` 与 `test-engineer` 同属测试工程师），每个都遵循统一 8 段契约：**身份定位 · 使命 · 职责 · 流程 · 必需输出 · 交接 · 边界 · 反模式**（deputy-commander 额外含第 9 节「指挥权接管」）。
 
 - Core / 核心：commander 总指挥、deputy-commander 副总指挥、executor 执行者、planner 计划者、deputy-planner 副计划者、requirements-analyst 需求分析师、architect 架构师、reviewer 审查者、code-reviewer 代码审查员、qa/test engineer 测试工程师、security-tester 安全测试员、acceptance-auditor 验收审计员、documentation-consistency-reviewer 文档一致性审查员、user-representative 用户代表。
 - Optional / 可选：performance-engineer 性能优化员、deployment-release-engineer 部署发布工程师、privacy-compliance-reviewer 隐私合规审查员、legal-reviewer 专利法律审查员、integration-coordinator 集成协调员、risk-manager 风险管理员、documentation-writer 文档编写员。
@@ -353,7 +353,7 @@ gpt-series-reasoning-style/
 │   └── self-test.md                   # 77 条安装后自测
 ├── docs/field-tests/            # 实测证据：端到端实测 + 三轮对抗探针报告
 │   ├── blind-test/              # 第三方盲测报告（2026-09-08、2026-09-09 A/B）
-│   └── ab-baseline/             # A/B 基线评测（协议 + 12 样例；两轮已完成，见 judgement-sheet）
+│   └── ab-baseline/             # A/B 基线评测（协议 + 12 样例；三轮已完成，见 judgement-sheet）
 ├── docs/proposals/              # 规则审计提案（如 2026-09-09-rule-audit-probe-c）
 ├── docs/reviews/                # 外部评审汇总裁决书（2026-09-09-three-ai-audit-verdict）
 ├── docs/minimal-discipline.md   # 最小纪律速查卡（三条核心常驻）
@@ -368,7 +368,9 @@ gpt-series-reasoning-style/
     ├── install.sh               # macOS / Linux 安装脚本
     ├── selfcheck.py             # 静态自检：一致性/防漂移（机器可判）
     ├── selftest-runner.py       # 自测驱动/归档：list/schema/archive
-    └── artifact-check.py        # 用户项目治理产物结构校验（gate/台账/账本）
+    ├── artifact-check.py        # 用户项目治理产物结构校验（gate/台账/账本）
+    ├── claim-check.py           # 完成声明机械核验（Files/Commands/Hashes）
+    └── _selftest_parser.py      # self-test.md 共享解析器（selfcheck/runner 共用）
 ```
 
 ## Language Policy / 语言策略
@@ -389,7 +391,7 @@ between layers is a designed feature, not a bug.
 | 产物约定 references/project-artifacts | 门禁单/台账/证据落盘约定 + 校验工具 | 中文为主 |
 | 对照表 references/common-failures | claims↔最小充分证据对照 + 本仓库失败案例 | 中文为主（claim 列含英文原文） |
 | 示例 references/examples | 行为示例 | 中文为主 |
-| 身份 identities/ | 22 个角色契约 | 逐段双语 EN+CN |
+| 身份 identities/ | 22 个角色契约 | 身份定位节双语（EN+CN）；契约正文英文为主 |
 | 实测 docs/ | 端到端 / 探针 / 盲测报告 | 中文为主，关键词双语 |
 | 速查卡 docs/minimal-discipline | 三条核心常驻 | 中文为主 |
 | 策略模板 references/project-policy-template | 项目策略填空模板 | 英文（模板即交付文案，默认英文） |
@@ -406,7 +408,7 @@ This skill must obey its own discipline: a checker must earn its existence with 
 本 skill 自身也要遵守本 skill 的纪律——**检查器必须用证据挣得存在**。
 
 - **SKILL.md 门面 ≤ 250 行**。它是唯一每次调用必载的表面，中文为主、仅保留英文入口指引（完整英文规则在 references 的 EN sections），不再加长——新内容一律下沉到 references/。
-- **静态检查上限 16 项（SB1–SB16）**：新增第 17 项前，必须先证明它抓到过至少一个真实缺陷（可指认提交哈希）；抓不到就不加。
+- **静态检查当前 17 项（SB1–SB17）**：新增第 18 项前，必须先证明它抓到过至少一个真实缺陷（可指认提交哈希）；抓不到就不加。
 - **行为自测冻结在 77 条**：只做「旧测失去鉴别力 → 替换」，不再扩容。
 - **长参考文档（500+ 行）不做全文双语强制**：SB16 分级（tier-A 规则面严查 / tier-B 仅 informational），避免「永远红」与「文件翻倍」二选一。
 - **收敛优先于加码**：改动清单里出现「新增规则 / 新增检查」时，先问能否用修订现有条文达到同样效果。

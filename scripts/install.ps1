@@ -33,10 +33,6 @@ if ((Test-Path -LiteralPath $dest) -and -not $Force) {
   exit 1
 }
 
-New-Item -ItemType Directory -Path (Split-Path -Parent $dest) -Force | Out-Null
-if (Test-Path -LiteralPath $dest) {
-  Remove-Item -LiteralPath $dest -Recurse -Force
-}
 # Safety guard (C3-3): refuse to install into the skill repo itself — a
 # pwd-based DEST run from the repo root would otherwise nest the repo
 # inside itself via Copy-Item -Recurse.
@@ -47,6 +43,10 @@ if ($destFull -like "$sourceFull*") {
   exit 1
 }
 
+New-Item -ItemType Directory -Path (Split-Path -Parent $dest) -Force | Out-Null
+if (Test-Path -LiteralPath $dest) {
+  Remove-Item -LiteralPath $dest -Recurse -Force
+}
 New-Item -ItemType Directory -Path $dest -Force | Out-Null
 Copy-Item -Path (Join-Path $source '*') -Destination $dest -Recurse -Force
 # Keep the install identical to the bash path: with -Force the '*' glob DOES

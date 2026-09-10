@@ -86,7 +86,7 @@ Before generating a task package:
 - Governance artifacts are project-scoped: registry `<项目根>/docs/agents/`, Mode 3 plan `<项目根>/docs/plans/`, dispatch ledger `<项目根>/docs/agents/dispatch-ledger.md`. Never place them in the commander's own workspace — a governance file the project cannot find does not exist. **The registry belongs to the project being worked on: reusing another project's identity directory (for example a different project's `docs/项目AI身份/`) is not an acceptable option**, even if the user proposes it — governance must sit beside the work it governs, and offering that as an option is itself a governance defect.
 - When the task package requires file-based evidence (screenshots, exports, logs), the project skeleton includes the evidence directory (`<项目根>/evidence/`) — created by the commander with the root, or explicitly assigned to the executor in the package Scope. Evidence must land somewhere before it can be verified.
 - If the project root does not exist yet at gate time: after gate approval, either create the project root and `docs/agents/` yourself (authorized by the approval) or assign the executor to create the project root first and write governance files immediately after — state which path you chose.
-- Registry layout is **one standalone identity markdown file per AI member** (e.g., `docs/agents/executor.md`) plus a registry README index; each member file carries role, responsibilities, platform/channel, trust tier, status, and current task.
+- Registry layout is **one standalone identity markdown file per AI member** (e.g., `docs/agents/executor.md`) plus a registry README index; each member file carries role, responsibilities, platform/channel, trust tier, DRI ownership, availability for this task, status, and current task.
 - Before the first relay to any member, the commander reads that member's identity file and adapts communication and task-package framing to it.
 - Every activation prompt instructs the recipient to read its own identity file under `<项目根>/docs/agents/` and declare its identity before executing the task package.
 - **Never ask the user what underlying model an AI member uses.** Record a model only when the user volunteers it or it is publicly evident; it is optional reference metadata that must never block or invalidate a registry record or task package.
@@ -133,6 +133,16 @@ When dispatching work, assign a trust tier to every task:
 | T1 | Research and analysis / 调研分析 | Use directly after evidence review; no separate confirmation needed. |
 | T2 | Artifacts and file writes / 产物与文件写入 | Show the plan or output to the user and obtain confirmation before writing. |
 | T3 | Commands, deployments, destructive or external actions / 命令、部署、破坏性或外部操作 | Explicit per-action user authorization. |
+
+## Finding Severity / 发现严重度（P0/P1/P2）
+
+Review- and audit-type findings are graded with these definitions (used by `reviewer`, `code-reviewer`, `documentation-consistency-reviewer`, and the fix-loop). This table is the single authority for severity labels.
+
+| Severity / 严重度 | Definition / 定义 | Handling / 处置 |
+| --- | --- | --- |
+| P0 | Would cause wrong execution, data/credential leakage, security incidents, or irreversible damage. / 会导致错误执行、数据或凭据泄露、安全事故或不可逆损坏。 | Fix immediately; block delivery until resolved. / 立即修复，修复前不得交付。 |
+| P1 | Violates the skill's discipline or produces wrong results, without security or irreversible impact. / 违反本 skill 纪律或产生错误结果，但不涉及安全与不可逆。 | Fix before delivery. / 交付前修复。 |
+| P2 | Quality, consistency, or maintainability improvement. / 质量、一致性或可维护性改进。 | Record as backlog; non-blocking. / 记入 backlog，不阻塞交付。 |
 
 If a task produces both T1 and T2 output, classify it as the higher tier.
 

@@ -114,7 +114,7 @@ def cmd_schema(out: str) -> int:
         "  prompt of the matching Test N into the host AI.",
         "",
         "| # | Title / 标题 | Fixture 预置真相 | Status | 判定 verdict | Evidence / 证据句 |",
-        "| --- | --- | --- | --- | --- |",
+        "| --- | --- | --- | --- | --- | --- |",
     ]
     for c in cases:
         lines.append("| {} | {} | {} | ? |  |  |".format(

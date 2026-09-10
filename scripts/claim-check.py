@@ -37,6 +37,11 @@ Usage:
   <project-root> (default: current directory) is the base for relative file
   paths and the working directory for commands.
 
+Blacklist is best-effort and NOT a sandbox: PowerShell aliases (ri / del with
+-Recursion), long options (--recursive --force), and interpreter-indirect
+execution (python -c "shutil.rmtree(...)") are NOT covered. The real trust
+boundary is a trusted claims source plus human review of every entry.
+
 Exit codes: 0 = all claims verified, 1 = at least one failed, 2 = usage /
 unreadable claims file.
 """

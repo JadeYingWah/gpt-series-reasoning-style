@@ -88,7 +88,7 @@
   <h2>自我验证 · The Skill Verifies Itself</h2>
   <table>
     <tr><th>层 · Layer</th><th>机制 · Mechanism</th><th>说明 · Note</th></tr>
-    <tr><td>机器自检</td><td><code>scripts/selfcheck.py</code> SB1–SB16</td><td>版本一致性、门禁字段多表面同步、结构完整性等；新增第 17 项须先证明抓到过真实缺陷</td></tr>
+    <tr><td>机器自检</td><td><code>scripts/selfcheck.py</code> SB1–SB17</td><td>版本一致性、门禁字段多表面同步、结构完整性等；新增第 18 项须先证明抓到过真实缺陷</td></tr>
     <tr><td>行为自测</td><td>77 条 · <code>references/self-test.md</code></td><td>人判定、工具只记录不造假（冻结不再扩容）</td></tr>
     <tr><td>对抗探针</td><td>3 轮 · <code>probes/</code></td><td>可重跑的回归探针，逐轮留痕</td></tr>
     <tr><td>实测证据</td><td><code>docs/field-tests/</code></td><td>端到端指挥官实测 + 探针报告 + 盲测（含证据强度降级声明）</td></tr>
@@ -101,7 +101,7 @@
 
 # Windows (PowerShell)
 powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Platform agents</code></pre>
-  <p>13 个平台参数见 <a href="https://github.com/JadeYingWah/gpt-series-reasoning-style#install--安装">README · Install</a>；仅需要核心纪律时，直接摘用 <code>docs/minimal-discipline.md</code>（三条核心，约 500 tok）。</p>
+  <p>13 个平台参数见 <a href="https://github.com/JadeYingWah/gpt-series-reasoning-style#install--安装">README · Install</a>；仅需要核心纪律时，直接摘用 <code>docs/minimal-discipline.md</code>（三条核心，约 500 tok，估算值）。</p>
 
   <h2>文档 · Documents</h2>
   <table>
@@ -111,7 +111,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Platform agents<
     <tr><td><a href="https://github.com/JadeYingWah/gpt-series-reasoning-style/blob/main/references/series-reasoning-workflow-en.md">series-reasoning-workflow-en.md</a></td><td>同上 · English mirror</td></tr>
     <tr><td><a href="https://github.com/JadeYingWah/gpt-series-reasoning-style/blob/main/references/project-artifacts.md">project-artifacts.md</a></td><td>门禁单/台账落盘约定 + 结构校验工具</td></tr>
     <tr><td><a href="https://github.com/JadeYingWah/gpt-series-reasoning-style/tree/main/docs/field-tests">docs/field-tests/</a></td><td>实测证据与 A/B 基线评测</td></tr>
-    <tr><td><a href="https://github.com/JadeYingWah/gpt-series-reasoning-style/blob/main/docs/field-tests/ab-baseline/judgement-sheet.md">A/B 基线评测 · 两轮</a></td><td>12 任务 × 双臂 × 2 轮：R1 81 vs 84 → R2 <b>89 vs 87（skill 臂首次跑赢）</b>；位置违规 6+ → 0。n=1、裁判=作者，结论不外推</td></tr>
+    <tr><td><a href="https://github.com/JadeYingWah/gpt-series-reasoning-style/blob/main/docs/field-tests/ab-baseline/judgement-sheet.md">A/B 基线评测 · 三轮</a></td><td>12 任务 × 双臂 × 3 轮：R1 81 vs 84 → R2 89 vs 87 → R3 <b>93 vs 86（三轮最大分差）</b>；T12 完成门 5→3→8；位置违规 6+ → 0。n=1、裁判=作者，结论不外推</td></tr>
   </table>
 
   <div class="footer">
