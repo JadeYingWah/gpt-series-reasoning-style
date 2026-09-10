@@ -41,6 +41,7 @@
 - [Commander Multi-Agent Mode / 指挥官模式](#commander-multi-agent-mode--指挥官模式)
 - [Built-in Identities / 内置身份](#built-in-identities--内置身份)
 - [When To Use / 何时使用](#when-to-use--何时使用)
+- [Cost & Benefit / 成本与收益](#cost--benefit--成本与收益)
 - [Install / 安装](#install--安装)
 - [Minimal Usage / 最小用法](#minimal-usage--最小用法)
 - [Repository Layout / 仓库结构](#repository-layout--仓库结构)
@@ -73,7 +74,7 @@
 2. **声称未验证的完成**——"已经修好了 / 测试都过了"，而磁盘上没有可核对的证据。
 
 本 skill 把这两件事变成硬规则：**动手前先过 10 字段门禁**，**声称完成必须附证据清单**。
-它是一个普通 Agent Skills 包：常驻面只有 `SKILL.md` + `VERSION`（约 3k tokens，o200k 估算），
+它是一个普通 Agent Skills 包：常驻面只有 `SKILL.md` + `VERSION`（实测 3,476 tokens，o200k_base，2026-09-10 计数），
 13 份 references 按需取节加载，`AGENTS.md` 为 Codex / Gemini CLI / Copilot CLI 等运行时提供跨运行时入口别名。
 
 ### 三大机制 / Three Mechanisms
@@ -274,6 +275,42 @@
 
 ---
 
+## Cost & Benefit / 成本与收益
+
+**成本全部实测（o200k_base 分词器，2026-09-10 计数；其他模型分词器略有差异）。收益只写有证据的部分，没实测的如实标注。**
+/ All costs are measured; benefits are tagged with their evidence, and unmeasured ones say so.
+
+### 成本 / Cost
+
+| 项 | Tokens（o200k） | 何时发生 |
+| --- | --- | --- |
+| 常驻面：`SKILL.md` + `VERSION` | **3,476** | 装上后的每次会话 |
+| 按需 references | 单份 280–13,424；一个中等任务全周期通常累计 2–3 份（约 1.5 万–3 万 tokens，**摊在整个任务，不是每条消息**） | 对应阶段首次需要时 |
+| Lite 档（不装整包） | 三条本体 154（整卡 518） | 常驻 |
+
+- 永远不会被宿主加载的面：`self-test.md`（13.4k，维护者自测专用，明确不在任务路径）与英文镜像 `series-reasoning-workflow-en.md`（中文宿主不读）——上表"单份"含它们，实际任务面更小。
+- 琐碎任务走轻通道：不进门禁、不写治理产物，成本就是常驻面 + 一句证据报告。
+
+### 收益 / Benefit
+
+| 收益 | 证据 | 强度 |
+| --- | --- | --- |
+| **返工减少** | A/B R2/R3：位置违规 6+ 起 → **0**；声称失实 3 → 1 → 1；T12 完成门弧线 5 → 3 → 8 | 实测（每格 n=1，不外推） |
+| **交付质量** | 端到端 16 分制 16/16 × 2；bug sweep 抓到 4 个边界缺陷；「测试全绿 ≠ 功能正确」实例入册 | 实测（n=1） |
+| **安全面** | 审查面强制攻击信任边界（注入 / 密钥 / 权限 / AI-LLM 风险）；实测中指挥官层抓到执行者未发现的 P0 | 机制 + 个案 |
+| **开发时间** | **未实测**。机制上：每拦下一次「假完成」就省一整轮返工来回——R2/R3 的分差主要来自返工减少 | 机制推断（如实标注） |
+
+### 首次加载会发生什么 / First load（自检 · 宿主优先 · skill 互补）
+
+1. **加载证明自检**：输出版本号、逐字引用门禁硬规则第一条、协作架构简介、实际读过的文件清单——证明「真的加载了」，读不到就请求权限，不伪造。
+2. **宿主对齐（仅首次、仅一次）**：先盘点**宿主已有能力** → 与 skill 小节做重叠映射，被宿主完整覆盖的小节标 **SKIP**（优先用宿主原生流程）→ 裁剪后范围经你确认生效。适配产物可落 `<项目根>/docs/agents/host-alignment.md` 复用；AI 不得为适配而改 skill 本体。
+3. **三条底线永不可被对齐跳过**：证据报告、`UNVERIFIED` 诚实标记、真实环境验收。
+4. 之后才谈任务：琐碎任务走轻通道，其余过门禁。
+
+> 宿主为主、skill 互补——「不冲突、收益最大化」不是口号，是宿主对齐声明的机制本身。
+
+---
+
 ## Install / 安装
 
 本 skill 是普通 Agent Skills 包（顶层布局）。**保持文件夹名 `gpt-series-reasoning-style`**，整包复制或软链到宿主的 skill 目录即可。
@@ -461,7 +498,7 @@ gpt-series-reasoning-style/
 
 为防"规则越写越多、检查越加越重"的失控，本仓库给自己立了预算：
 
-- **`SKILL.md` ≤ 250 行**（当前约 122 行 / 约 3k tokens 常驻，o200k 估算）——入口只保留决策点，细节下沉到按需的 references；
+- **`SKILL.md` ≤ 250 行**（当前约 122 行 / 实测 3,476 tokens 常驻，o200k_base，2026-09-10 计数）——入口只保留决策点，细节下沉到按需的 references；
 - **静态检查上限 20 项（SB1–SB20）**：新增第 21 项必须先证明它抓到过**真实缺陷**（可指认提交哈希）——SB18/19/20 均按此准入立项；
 - **77 条行为自测冻结**：只做"旧测失去鉴别力 → 替换"，不再扩容；
 - **收敛优先于加码**：版本对外固定 `1.1.0` 基线，post-1.1.0 增量以 CHANGELOG 的 Unreleased 批次计价，引用时注明批次。
