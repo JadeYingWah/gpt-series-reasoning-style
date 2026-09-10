@@ -341,7 +341,7 @@ gpt-series-reasoning-style/
 ├── .github/                     # CI：selfcheck 工作流（push/PR 触发）
 ├── AGENTS.md                    # 跨运行时入口别名（Codex/Gemini/Copilot CLI 识别，指向 SKILL.md）
 ├── agents/openai.yaml           # OpenAI/Codex 兼容界面的可选元数据（display_name/default_prompt）
-├── identities/                  # 22 个内置身份 + _template + README（权威角色目录）
+├── identities/                  # 21 个内置身份 + _template + README（权威角色目录）
 ├── custom-identities/           # 用户自定义身份（其他身份）
 ├── references/                  # 13 份按需加载的详细规则
 │   ├── series-reasoning-workflow.md   # 完整流程与审计模板（中文权威版）
@@ -397,7 +397,7 @@ between layers is a designed feature, not a bug.
 | 产物约定 references/project-artifacts | 门禁单/台账/证据落盘约定 + 校验工具 | 中文为主 |
 | 对照表 references/common-failures | claims↔最小充分证据对照 + 本仓库失败案例 | 中文为主（claim 列含英文原文） |
 | 示例 references/examples | 行为示例 | 中文为主 |
-| 身份 identities/ | 22 个角色契约 | 身份定位节双语（EN+CN）；契约正文英文为主 |
+| 身份 identities/ | 21 个角色契约 | 身份定位节双语（EN+CN）；契约正文英文为主 |
 | 实测 docs/ | 端到端 / 探针 / 盲测报告 | 中文为主，关键词双语 |
 | 速查卡 docs/minimal-discipline | 三条核心常驻 | 中文为主 |
 | 策略模板 references/project-policy-template | 项目策略填空模板 | 英文（模板即交付文案，默认英文） |
@@ -414,7 +414,7 @@ This skill must obey its own discipline: a checker must earn its existence with 
 本 skill 自身也要遵守本 skill 的纪律——**检查器必须用证据挣得存在**。
 
 - **SKILL.md 门面 ≤ 250 行**。它是唯一每次调用必载的表面，中文为主、仅保留英文入口指引（完整英文规则在 references 的 EN sections），不再加长——新内容一律下沉到 references/。
-- **静态检查当前 18 项（SB1–SB18）**：新增第 19 项前，必须先证明它抓到过至少一个真实缺陷（可指认提交哈希）；抓不到就不加。
+- **静态检查当前 19 项（SB1–SB19）**：新增第 20 项前，必须先证明它抓到过至少一个真实缺陷（可指认提交哈希）；抓不到就不加。SB19 即按此规则准入（22/21 身份计数跨面漂移，证据 `9d32cbb`）。
 - **行为自测冻结在 77 条**：只做「旧测失去鉴别力 → 替换」，不再扩容。
 - **长参考文档（500+ 行）不做全文双语强制**：SB16 分级（tier-A 规则面严查 / tier-B 仅 informational），避免「永远红」与「文件翻倍」二选一。
 - **收敛优先于加码**：改动清单里出现「新增规则 / 新增检查」时，先问能否用修订现有条文达到同样效果。

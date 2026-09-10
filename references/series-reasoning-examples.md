@@ -571,8 +571,8 @@ Commander response:
 
 ```text
 【角色身份确认】
-- 内置身份：读取 `identities/README.md`（权威角色目录），逐条呈现全部内置身份并各附一行职责（当前 22 个，此处不硬编码清单）。
-  - 示例（此处从略，实际输出须完整）：commander — 整体规划、派发、证据核验、最终验收；executor — 按任务包实现并返回真实证据；reviewer — 读取或运行实际产物，返回 P0 / P1 / P2 / UNVERIFIED；……（至全部 22 个）
+- 内置身份：读取 `identities/README.md`（权威角色目录），逐条呈现全部内置身份并各附一行职责（当前 21 个，此处不硬编码清单）。
+  - 示例（此处从略，实际输出须完整）：commander — 整体规划、派发、证据核验、最终验收；executor — 按任务包实现并返回真实证据；reviewer — 读取或运行实际产物，返回 P0 / P1 / P2 / UNVERIFIED；……（至全部 21 个）
 - 接收方指名：角色 + 平台/窗口（如 executor / 网页对话窗口）。
 - 用户指定身份：待确认
 - 其他身份文件路径：custom-identities/ 或用户提供路径

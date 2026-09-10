@@ -455,6 +455,56 @@ def run_checks() -> list:
     else:
         c.pass_("开始/现在开始/直接做 present on SKILL.md + workflow CN/EN")
 
+    # SB19 identity-count prose consistency across surfaces (evidence: commit
+    # 9d32cbb — the qa-engineer/test-engineer merge updated SB4 and two README
+    # spots but left five prose surfaces still saying "22 个身份"; SB4 only counts
+    # FILES, so the prose drift was invisible to every check we had).
+    # Admitted under README's own rule for a 19th check: it demonstrates a real
+    # defect with an identifiable commit hash.
+    # It scans an explicit allowlist of LIVE surfaces. Deliberately excluded:
+    # CHANGELOG.md / INTERNAL-HISTORY.md / docs/reviews/ / docs/field-tests/
+    # (dated records — a past count is correct for its date) and
+    # docs/selftest-run/ (generated per run, not repo content).
+    c = new(19, "identity-count prose consistency")
+    expected_ids = 21
+    id_surfaces = [
+        "SKILL.md", "README.md", "AGENTS.md", "agents/openai.yaml",
+        "identities/README.md", "docs/minimal-discipline.md", "site/index.html",
+    ] + sorted(
+        p.relative_to(REPO_ROOT).as_posix()
+        for p in (REPO_ROOT / "references").glob("*.md")
+    )
+    id_cn = re.compile(r"(\d+)\s*(?:个|类)(?:内置)?(?:身份|角色|契约)")
+    id_ctx = re.compile(r"(?:当前|全部|至全部)\s*(\d+)\s*个")
+    id_ctx_guard = "内置身份"
+    id_en = re.compile(r"(\d+)\s+(?:built-in\s+)?(?:identities|roles)\b")
+    id_bad = []
+    for rel in id_surfaces:
+        p = REPO_ROOT / rel
+        if not p.exists():
+            id_bad.append(rel + ": missing (surface listed for the count check)")
+            continue
+        for ln, line in enumerate(read_text(p).splitlines(), 1):
+            found = set()
+            for rx in (id_cn, id_en):
+                for m in rx.finditer(line):
+                    if int(m.group(1)) != expected_ids:
+                        found.add(m.group(0))
+            # The catalog size is often stated apart from the noun
+            # ("（当前 22 个，硬编码必然漂移）"). Only apply this second form on a
+            # line that also says 内置身份 -- a bare "共 N 个角色" is legitimate
+            # prose and must not trip the check.
+            if id_ctx_guard in line:
+                for m in id_ctx.finditer(line):
+                    if int(m.group(1)) != expected_ids:
+                        found.add(m.group(0))
+            for f in sorted(found):
+                id_bad.append("{}:{}: {}".format(rel, ln, f))
+    if id_bad:
+        c.fail("identity count != {} on: {}".format(expected_ids, "; ".join(id_bad[:8])))
+    else:
+        c.pass_("all {} live surfaces state {} identities".format(len(id_surfaces), expected_ids))
+
     return checks
 
 
