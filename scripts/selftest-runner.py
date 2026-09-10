@@ -136,9 +136,10 @@ def cmd_schema(out: str) -> int:
     if not dest.is_absolute():
         dest = ROOT / dest
     dest.parent.mkdir(parents=True, exist_ok=True)
-    # newline="\n" is pinned: without it Windows text mode turns every \n into
-    # \r\n, so the generated sheet would disagree with the repo's LF policy.
-    dest.write_text("\n".join(lines), encoding="utf-8", newline="\n")
+    # LF is pinned via open(newline=): Path.write_text gained newline= only in
+    # Python 3.10 and CI runs 3.9 -- the open() form works on every version.
+    with dest.open("w", encoding="utf-8", newline="\n") as fh:
+        fh.write("\n".join(lines))
     print("judgement sheet written:", dest)
     return 0
 
@@ -226,7 +227,8 @@ def cmd_archive(sheet: str, commit: str) -> int:
     if unknown:
         report.append("WARNING unknown verdict tokens: " + ", ".join(sorted(unknown)))
     out = p.with_name(p.stem + "-report.md")
-    out.write_text("\n".join(report), encoding="utf-8", newline="\n")
+    with out.open("w", encoding="utf-8", newline="\n") as fh:
+        fh.write("\n".join(report))
     print("\n".join(report))
     print("report written:", out)
     return 0

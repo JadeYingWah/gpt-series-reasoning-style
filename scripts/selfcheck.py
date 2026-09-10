@@ -571,7 +571,10 @@ def _write_report(args, lines: list) -> None:
         print("ERROR: --out escapes the repository: " + args.out)
         raise SystemExit(2)
     dest.parent.mkdir(parents=True, exist_ok=True)
-    dest.write_text("\n".join(lines), encoding="utf-8", newline="\n")
+    # Path.write_text(newline=) exists only on Python 3.10+; CI runs 3.9.
+    # open(newline=) is supported everywhere and keeps the LF pin.
+    with dest.open("w", encoding="utf-8", newline="\n") as fh:
+        fh.write("\n".join(lines))
     print("\nreport written: " + str(dest))
 
 

@@ -37,3 +37,5 @@ jobs:
         run: python probes/probe-runner.py list > /dev/null
       - name: Self-test sheet parses (77 cases)
         run: python scripts/selftest-runner.py list > /dev/null
+      - name: Judgement sheet writes (schema smoke, Python 3.9 safe)
+        run: python scripts/selftest-runner.py schema > /dev/null
