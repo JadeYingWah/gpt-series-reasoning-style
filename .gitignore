@@ -3,3 +3,6 @@ Thumbs.db
 *.log
 node_modules/
 __pycache__/
+
+# selftest-runner schema outputs (generated per run, not repo content)
+docs/selftest-run/
