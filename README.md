@@ -4,20 +4,21 @@
 
 # GPT系列推理风格（GPT-Series Reasoning Style）
 
+[![CI](https://github.com/JadeYingWah/gpt-series-reasoning-style/actions/workflows/selfcheck.yml/badge.svg)](https://github.com/JadeYingWah/gpt-series-reasoning-style/actions/workflows/selfcheck.yml)
 ![version](https://img.shields.io/badge/version-1.1.0-7c3aed)
 ![license](https://img.shields.io/github/license/JadeYingWah/gpt-series-reasoning-style)
-![stars](https://img.shields.io/github/stars/JadeYingWah/gpt-series-reasoning-style)
-![issues](https://img.shields.io/github/issues/JadeYingWah/gpt-series-reasoning-style)
 ![last-commit](https://img.shields.io/github/last-commit/JadeYingWah/gpt-series-reasoning-style)
 <br>
 ![forms](https://img.shields.io/badge/forms-backbone%20%C2%B7%20subagent%20%C2%B7%20commander-7c3aed)
 ![platforms](https://img.shields.io/badge/platforms-13%20supported-10b981)
 ![spec](https://img.shields.io/badge/spec-agentskills.io%20compliant-10b981)
+![static-checks](https://img.shields.io/badge/static%20checks-SB1%E2%80%93SB20%20passing-10b981)
+![self-tests](https://img.shields.io/badge/behavioural%20self--tests-77%20executed-10b981)
 ![evidence-first](https://img.shields.io/badge/evidence-first-f59e0b)
 
-**A delivery-discipline behavior layer for AI agents: it turns "the agent says it's done" into "the agent proves it's done" — a mandatory pre-implementation gate, one backbone with two on-demand collaboration forms, evidence-based adversarial review, and real-environment acceptance.**
+**A delivery-discipline behavior layer for AI agents: it turns "the agent says it's done" into "the agent proves it's done" — and it holds its own discipline to the same standard: 20 static checks, 77 executed behavioural self-tests, a 13-step CI pipeline.**
 
-**一个面向 AI Agent 的交付纪律行为层：把“Agent 说做完了”变成“Agent 证明做完了”——强制实现前门禁、一条主干加两种按需协作形态、基于证据的对抗式审查、真实环境验收。**
+**一个面向 AI Agent 的交付纪律行为层：把“Agent 说做完了”变成“Agent 证明做完了”——并且用同样的标准要求它自己：20 项静态检查、77 条已执行并留档的行为自测、一条 13 步的 CI 流水线。**
 
 > Research before plan · Confirm before build · Evidence before claim · Accept in the real environment
 >
@@ -30,6 +31,19 @@ _当任务复杂度确实需要规划、验证和审查时再启用，不是每�
 **名称与来源 / Name & Origin：** 本 skill 从**一系列 GPT 系列大模型的对话记录**中打磨提炼而成——那批长对话里反复出现的交付失败模式（未证实就宣称完成、跳过确认直接动手、把漏检当成没问题）被逐条归纳为规则、门禁与自测；名字里的 `gpt-series` 记录的就是这段来源。它**不依赖、也不限于** GPT 系列：任何宿主模型都能用。`reasoning-style` 指它施加的**流程纪律**风格，不是提升模型推理上限——它是交付纪律层，不是推理引擎。
 
 **Name & Origin:** this skill was distilled from a long series of GPT-series model conversations — the delivery-failure patterns that kept recurring in those dialogues (claiming completion without evidence, acting before confirmation, mistaking a missed defect for no defect) were codified into its rules, gate, and self-tests; `gpt-series` in the name records that origin. It is **not tied to, and not limited to**, GPT-series models — any host model can use it. `reasoning-style` refers to the **process discipline** it imposes, not to any boost in the model's reasoning ceiling: it is a delivery-discipline layer, not a reasoning engine.
+
+<br>
+
+**Proof at a glance / 证据速览** — don’t take the README’s word for it; every line opens into this repo. / 别只信 README，每一条都能点开核验：
+
+| Evidence / 证据 | What you can check / 你能核验什么 |
+| --- | --- |
+| [**CI**](https://github.com/JadeYingWah/gpt-series-reasoning-style/actions/workflows/selfcheck.yml) | 13-step pipeline, all green on every push & PR — **broken from the day it was added until 2026-09-10; the failure history is public** / 13 步全绿；从加上那天起就是坏的、2026-09-10 才修好，失败历史公开 |
+| [**Static checks / 静态检查**](scripts/selfcheck.py) | 20 items (SB1–SB20); a new check is admitted only after catching a real defect with an identifiable commit / 20 项；新检查须先抓到真实缺陷（可指认提交哈希）才准入 |
+| [**Behavioural self-tests / 行为自测**](docs/field-tests/selftest-run-2026-09-10/report.md) | 77/77 executed & archived; 10 cells re-run against a seeded project / 全部执行并留档；10 格带预置工程复跑 |
+| **Field tests / 实测** | 1 end-to-end commander run + 3 adversarial probe rounds + A/B ×3 rounds (n=1, limits disclosed) / 1 次端到端 + 3 轮探针 + A/B 三轮（n=1，局限如实标注） |
+| [**External audits / 外部审查**](docs/reviews/) | 7 archived (incl. critical); the 3 full-project audits of 2026-09-10 yielded 3 P0s, confirmed and fixed the same day / 7 份归档（含批评性）；2026-09-10 三份全面复查 3 个 P0 当天修 |
+| **Honesty / 诚实** | Honesty Gate 5 clauses; `UNVERIFIED` / `CONFIDENCE` / `BLOCKED` are enforced signals, not decoration / 强制信号，不是装饰 |
 
 </div>
 
@@ -309,21 +323,19 @@ Only `SKILL.md` loads up front; each reference file is read on demand when its p
 
 ## Verification / 验证
 
-- **Loading proof / 加载证明**：state the version, quote the first gate hard rule verbatim (`宣布阶段序列不是确认。`), summarize the backbone+two-extension architecture, and list the files actually read.
-- **Self-test / 自测**：`references/self-test.md` contains 77 tests (Test 1–77) covering language & identifier fidelity, authorization boundaries, the three forms, capability gates, role confirmation, task packages, trust tiers, the dispatch ledger, the hands-on loop, the light channel, and conflict-freeze behavior.
-- **Real-environment acceptance / 真实环境验收**：before final delivery, validate every deliverable in its real target environment — unit tests passing is not sufficient.
-- **Field tests / 实测报告**：the skill is also verified by adversarial field tests — an end-to-end commander-form run and a three-round probe series, each round exposing one real rule defect (template desync, light-channel bypass, rule contradiction) that was fixed and fed back; the probes are scripted and re-runnable via [`probes/probe-runner.py`](probes/probe-runner.py); reports in [docs/field-tests/](docs/field-tests/).
-- **A/B baseline evaluation / A/B 基线评测**：12 tasks × 2 arms × 3 rounds (81 vs 84 → 89 vs 87 → 93 vs 86 /96). This is the strongest evidence in the repo — and still n=1 per cell with the author as judge; read it with the caveats in [docs/field-tests/ab-baseline/](docs/field-tests/ab-baseline/judgement-sheet.md).
-- **Machine checkers / 机械核验**：[`scripts/claim-check.py`](scripts/claim-check.py) verifies completion claims (files / commands / hashes) against disk; [`scripts/artifact-check.py`](scripts/artifact-check.py) validates project governance artifacts.
-- **Evidence strength / 证据强度（读结论前先读这行）**：blind tests and the A/B rounds are n=1 per cell with a proxy/author judge and a non-neutral baseline — they prove the **mechanisms exist and change process**, and (A/B) show a score gap; they do not establish universal defect reduction. Read the claims separately. External reviews (including critical ones) are archived under [docs/reviews/](docs/reviews/).
-- **A/B 基线评测**：12 任务 × 双臂 × 三轮（81 vs 84 → 89 vs 87 → 93 vs 86 /96）——本仓库最强证据；同为每格 n=1、裁判=作者，判读须带 [判分表](docs/field-tests/ab-baseline/judgement-sheet.md) 的局限声明。
-- **机械核验工具**：[`scripts/claim-check.py`](scripts/claim-check.py)（完成声明↔磁盘核验）与 [`scripts/artifact-check.py`](scripts/artifact-check.py)（治理产物结构校验）。
-- **证据强度**：盲测与 A/B 每格 n=1、裁判为代理/作者、基线不中立——它们证明的是**机制存在且能改变流程**（A/B 另有分差）；不构成普适的「缺陷必然减少」。各结论分开记账。外部评审（含批评性评审）归档于 [docs/reviews/](docs/reviews/)。
+**The discipline layer verifies itself — the full evidence chain is below, including the parts that used to be broken. / 纪律层验证它自己——完整证据链如下，包括曾经坏掉的部分。**
 
-- **加载证明**：输出版本号、逐字引用门禁硬规则第一条（`宣布阶段序列不是确认。`）、简述“主干+两扩展”架构、列出实际读过的文件。
-- **自测**：`references/self-test.md` 含 77 条（Test 1–77），覆盖语言与标识符保真、授权边界、三种形态、能力门禁、角色确认、任务包、信任层级、派发台账、实操闭环、轻通道与冲突冻结。
-- **真实环境验收**：最终交付前在真实目标环境验证每个交付物，单元测试通过并不充分。
-- **实测报告**：本 skill 还用对抗式实测验证自身——一次指挥官形态端到端实测与三轮探针系列，每轮抓出一层真缺陷（模板脱节、轻通道旁路、规则自相矛盾）并修复回灌；探针已脚本化可重跑（[`probes/probe-runner.py`](probes/probe-runner.py)）；报告见 [docs/field-tests/](docs/field-tests/)。
+- **CI / 持续集成（13 steps, every push & PR）**: static checks SB1–SB20 · the official agentskills.io `skilllint` · OpenAI manifest parse · probe-scenario parse · the 77-case self-test parse · a judgement-sheet write smoke. **It was broken from the day it was added until 2026-09-10** — the lint step failed and silently skipped every check after it; the failure history is public in [Actions](https://github.com/JadeYingWah/gpt-series-reasoning-style/actions/workflows/selfcheck.yml). / 静态检查 SB1–SB20 · agentskills.io 官方 skilllint · OpenAI 清单解析 · 探针场景解析 · 自测 77 条解析 · 判定表写入冒烟。**这条流水线从加上那天起就是坏的，直到 2026-09-10 才修好**——lint 一步失败、其后所有校验被静默跳过；失败历史在 [Actions](https://github.com/JadeYingWah/gpt-series-reasoning-style/actions/workflows/selfcheck.yml) 全部公开。
+
+- **Behavioural self-tests / 行为自测（77/77 executed）**: all 77 tests were executed by independent host sessions given only their verbatim prompts (expectations withheld — reading them voids the cell), every full reply archived on disk, every verdict filled by a human. After a harness gap was found (fixture-dependent cells could not reach PASS on a bare host), `self-test.md` gained `Fixture:` declarations and the 10 affected cells were re-run against a seeded project. Method, results and per-cell verdicts: [docs/field-tests/selftest-run-2026-09-10/](docs/field-tests/selftest-run-2026-09-10/report.md). / 77 条全部由独立宿主会话执行——只喂逐字提示词（期望值不下发，读了即作废），每格回复全文落盘，判定由人填。发现装备缺口并修复后，`self-test.md` 补 `Fixture:` 声明、10 个受影响格带预置工程复跑。方法、结果与逐格判定见 [运行报告](docs/field-tests/selftest-run-2026-09-10/report.md)。
+
+- **Static checks / 静态检查（SB1–SB20）**: [`scripts/selfcheck.py`](scripts/selfcheck.py) — version consistency, gate-field sync across surfaces, identity counts in prose, fenced-code pairing, cross-file references, language policy. **A new check is admitted only after catching a real defect with an identifiable commit hash** (SB18/SB19/SB20 each carry one). / [`scripts/selfcheck.py`](scripts/selfcheck.py)——版本一致性、跨表面字段同步、散文层身份计数、围栏配对、跨文件引用、语言策略。**新检查必须先抓到过真实缺陷（可指认提交哈希）才准入**（SB18/19/20 均如此准入）。
+
+- **Machine claim verification / 完成声明机械化**: [`scripts/claim-check.py`](scripts/claim-check.py) verifies claimed files / commands / hashes against disk; [`scripts/artifact-check.py`](scripts/artifact-check.py) validates governance artifacts. Disclosed gap: the destructive-command blacklist does not cover interpreter-indirect execution (`python -c …`) — treat claims files as untrusted input. / 完成声明的文件/命令/哈希对盘核验；治理产物结构校验。已知缺口如实披露：破坏性命令黑名单不覆盖解释器间接执行（`python -c …`）——claims 文件按不可信输入对待。
+
+- **Field tests / 实测**: an end-to-end commander-form run + a three-round adversarial probe series (each round caught a real rule defect that was fixed and fed back; re-runnable via [`probes/probe-runner.py`](probes/probe-runner.py)) + an A/B baseline (12 tasks × 2 arms × 3 rounds, 81/84 → 89/87 → 93/86). Reports in [docs/field-tests/](docs/field-tests/). / 一次指挥官形态端到端 + 三轮对抗探针（每轮抓出真缺陷并修复回灌，可重跑）+ A/B 基线三轮（12 任务 × 双臂）。报告见 [docs/field-tests/](docs/field-tests/)。
+
+- **Evidence strength / 证据强度（读结论前先读这行）**: the A/B rounds are n=1 per cell with the author as judge on a non-neutral baseline — they prove the **mechanisms exist and change process**, and show a score gap; they do not establish universal defect reduction. Seven external reviews (including critical ones) are archived under [docs/reviews/](docs/reviews/); the three full-project audits of 2026-09-10 produced three P0s that were confirmed and fixed the same day. / A/B 每格 n=1、裁判为作者、基线不中立——证明的是**机制存在且能改变流程**并有分差，不构成普适「缺陷必然减少」。七份外部评审（含批评性）归档于 [docs/reviews/](docs/reviews/)；2026-09-10 三份全面复查的三个 P0 当天实锤当天修。
 
 ## Repository Layout / 目录结构
 
@@ -338,7 +350,7 @@ gpt-series-reasoning-style/
 ├── generate-banner.py           # 社交预览图生成脚本（维护用）
 ├── social-preview.png / .svg    # 社交预览图
 ├── .gitattributes               # 行尾策略：仓库与工作树统一 LF（* text=auto eol=lf）
-├── .github/                     # CI：selfcheck 工作流（push/PR 触发）
+├── .github/                     # CI：13 步校验流水线（push/PR 触发；2026-09-10 起全绿）
 ├── AGENTS.md                    # 跨运行时入口别名（Codex/Gemini/Copilot CLI 识别，指向 SKILL.md）
 ├── agents/openai.yaml           # OpenAI/Codex 兼容界面的可选元数据（display_name/default_prompt）
 ├── identities/                  # 21 个内置身份 + _template + README（权威角色目录）
@@ -357,11 +369,11 @@ gpt-series-reasoning-style/
 │   ├── platform-installation.md       # 全平台安装路径
 │   ├── project-policy-template.md     # 项目级策略模板
 │   └── self-test.md                   # 77 条安装后自测
-├── docs/field-tests/            # 实测证据：端到端实测 + 三轮对抗探针报告
+├── docs/field-tests/            # 实测证据：端到端实测 + 三轮探针 + 77 条自测运行报告
 │   ├── blind-test/              # 第三方盲测报告（2026-09-08、2026-09-09 A/B）
 │   └── ab-baseline/             # A/B 基线评测（协议 + 12 样例；三轮已完成，见 judgement-sheet）
 ├── docs/proposals/              # 规则审计提案（如 2026-09-09-rule-audit-probe-c）
-├── docs/reviews/                # 外部评审汇总裁决书（2026-09-09-three-ai-audit-verdict）
+├── docs/reviews/                # 外部评审归档（7 份，含 2026-09-10 三份全面复查与核验结论）
 ├── docs/minimal-discipline.md   # 最小纪律速查卡（三条核心常驻）
 ├── hooks/                       # 可选的一行会话启动提醒（opt-in，默认不装）
 ├── site/                        # 静态单页文档站（GitHub Pages 可直接指向）
