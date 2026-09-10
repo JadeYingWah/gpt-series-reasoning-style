@@ -267,7 +267,7 @@
 
 **不需要 / 用更轻的：**
 
-- **单轮或 10 分钟内的小任务** → 只钉 [`docs/minimal-discipline.md`](docs/minimal-discipline.md) 三条速查卡（常驻数百 token，估算值）；
+- **单轮或 10 分钟内的小任务** → 只钉 [`docs/minimal-discipline.md`](docs/minimal-discipline.md) 三条速查卡（**Lite 档**：三条本体实测 154 tokens / o200k_base）；
 - **宿主已自带同等规划/审查/验收** → 优先用宿主原生流程（首次使用做宿主对齐声明）；
 - **只想提升模型推理/智力** → 装错东西了，这是流程纪律层；
 - 琐碎任务在 skill 内部就走轻通道，不会为小事开全流程。
@@ -307,6 +307,8 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Platform agents
 | 通用 Agent Skills | `~/.agents/skills/` | `agents`（默认） |
 
 > 徽章口径：脚本接受 **13 个平台参数**（`antigravity` 与 `agents` 同指 `~/.agents/skills/`）；安装表含手动路径共 14 行。
+>
+> **只要核心收益？/ Lite install**：可以不装整包——把 [Minimal Usage](#minimal-usage--最小用法) 的三条写进宿主配置即可（三条本体实测 **154 tokens** / o200k_base；完整治理随时整包叠加，三条中的「全新产物默认中档」边界不要省）。
 
 **验证安装**——按名调用：
 
@@ -327,7 +329,7 @@ skill 应加载 `SKILL.md`；references 仅在当前阶段需要时按需读取�
 ## Minimal Usage / 最小用法
 
 只想要核心收益、不想要全套治理（23 字段任务包、21 个身份、指挥官协议、自测台账）？
-把 [`docs/minimal-discipline.md`](docs/minimal-discipline.md) 的三条写进宿主配置即可——常驻仅数百 token（估算），覆盖约八成流程收益（工程估算，非实测）：
+把 [`docs/minimal-discipline.md`](docs/minimal-discipline.md) 的三条写进宿主配置即可——这就是官方 **Lite 装法**：三条本体实测 **154 tokens**（o200k_base，2026-09-10 计数；整文件 481），覆盖约八成流程收益（工程估算，非实测）：
 
 1. **建文件 / 跑命令前先确认**：先输出"我理解的目标 / 风险分档 / 推荐方案 / 需要你确认"，未经确认不动手。"开始""直接做"不算授权；"你决定"算显式委托。
 2. **轻任务免流程**：具体、影响小、可逆、无副作用的轻任务，指令本身即授权，直接做，做完报实际改动与证据。
