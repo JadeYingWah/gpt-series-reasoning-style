@@ -429,10 +429,10 @@ def _write_report(args, lines: list) -> None:
     `--out` is an in-repo convenience; absolute paths or `..` traversal would
     let a typo drop the report anywhere on disk.
     """
-    dest = (REPO_ROOT / args.out)
-    if dest.is_absolute():
+    if pathlib.Path(args.out).is_absolute():
         print("ERROR: --out must be a repo-relative path, got: " + args.out)
         raise SystemExit(2)
+    dest = (REPO_ROOT / args.out)
     resolved_root = REPO_ROOT.resolve()
     resolved = dest.resolve()
     rel = os.path.relpath(str(resolved), str(resolved_root))
@@ -479,7 +479,7 @@ def main() -> int:
     print("\n".join(out_lines))
 
     if args.out:
-        _write_report(args, out_lines, summary)
+        _write_report(args, out_lines)
 
     return 0 if passed == total else 1
 

@@ -162,7 +162,7 @@ When a request is ambiguous or large, do not start implementation. Produce:
 
 Do not silently decide the user's meaning. Confirm the target, scope, and acceptance criteria with the user before producing or executing the final plan.
 
-Hard gate: do not edit files or run implementation commands until the user has confirmed the goal, scope, and acceptance criteria, or has explicitly said "you decide". "开始" and "现在开始" are not implementation authorization.
+Hard gate: do not edit files or run implementation commands until the user has confirmed the goal, scope, and acceptance criteria, or has explicitly said "you decide". "开始", "现在开始" and "直接做" are not implementation authorization.
 
 1. State your understanding in one or two sentences, then ask the user to confirm or correct it.
 2. Present the complete candidate plan, including the highest-impact questions, recommended options, and alternatives.

@@ -15,6 +15,10 @@ jobs:
           python-version: "3.9"
       - name: Static selfcheck (SB1..SB17, tiered bilingual)
         run: python scripts/selfcheck.py
+      - name: selfcheck --out smoke (report path works)
+        run: |
+          python scripts/selfcheck.py --out docs/tmp-selfcheck.md
+          test -f docs/tmp-selfcheck.md && rm docs/tmp-selfcheck.md
       - name: Official skilllint (agentskills.io spec, pinned — FM010 false-positive with `check .` on 1.19.2)
         run: uvx skilllint@1.19.2 check gpt-series-reasoning-style
       - name: openai.yaml parses
