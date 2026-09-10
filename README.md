@@ -27,7 +27,9 @@ _Enable it when task complexity genuinely needs planning, verification, and revi
 
 _当任务复杂度确实需要规划、验证和审查时再启用，不是每个提示都要套的万能包装。它约束流程，不抬升模型本身的推理上限。_
 
-**名称简注：** 别被名字误导——“推理风格”指它施加的**流程纪律**风格，不是提升模型推理上限；它是交付纪律层，不是推理引擎。
+**名称与来源 / Name & Origin：** 本 skill 从**一系列 GPT 系列大模型的对话记录**中打磨提炼而成——那批长对话里反复出现的交付失败模式（未证实就宣称完成、跳过确认直接动手、把漏检当成没问题）被逐条归纳为规则、门禁与自测；名字里的 `gpt-series` 记录的就是这段来源。它**不依赖、也不限于** GPT 系列：任何宿主模型都能用。`reasoning-style` 指它施加的**流程纪律**风格，不是提升模型推理上限——它是交付纪律层，不是推理引擎。
+
+**Name & Origin:** this skill was distilled from a long series of GPT-series model conversations — the delivery-failure patterns that kept recurring in those dialogues (claiming completion without evidence, acting before confirmation, mistaking a missed defect for no defect) were codified into its rules, gate, and self-tests; `gpt-series` in the name records that origin. It is **not tied to, and not limited to**, GPT-series models — any host model can use it. `reasoning-style` refers to the **process discipline** it imposes, not to any boost in the model's reasoning ceiling: it is a delivery-discipline layer, not a reasoning engine.
 
 </div>
 

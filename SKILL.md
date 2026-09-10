@@ -1,6 +1,6 @@
 ---
 name: gpt-series-reasoning-style
-description: 'Process-discipline layer only — not a reasoning-capability booster and not GPT-specific despite the legacy name. Use when coordinating multiple independent models or agents (commander / subagent / single modes), or when building any deliverable that needs structured, high-rigor execution — pre-implementation gate, resource survey, role identities, 23-field task packages, DRI closure, trust tiers (T1/T2/T3), evidence verification, hands-on UX verification, and final acceptance. Triggers: 实现前确认, 任务包, 多Agent协作, 指挥官模式, 资源盘点, 实操验收, UNVERIFIED.'
+description: 'Process-discipline layer only — not a reasoning-capability booster and not GPT-specific — the name records its origin (distilled from a long series of GPT-series model dialogues). Use when coordinating multiple independent models or agents (commander / subagent / single modes), or when building any deliverable that needs structured, high-rigor execution — pre-implementation gate, resource survey, role identities, 23-field task packages, DRI closure, trust tiers (T1/T2/T3), evidence verification, hands-on UX verification, and final acceptance. Triggers: 实现前确认, 任务包, 多Agent协作, 指挥官模式, 资源盘点, 实操验收, UNVERIFIED.'
 ---
 
 # GPT系列推理风格（GPT-Series Reasoning Style）
