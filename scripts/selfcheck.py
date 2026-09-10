@@ -148,15 +148,25 @@ def run_checks() -> list:
     else:
         c.pass_("13 reference .md files")
 
-    # SB6 code-fence pairing
+    # SB6 code-fence pairing (+ escaped-fence detection, A2: a backslash-escaped
+    # fence is invisible to the parser and silently drops content from tooling)
     c = new(6, "markdown code-fence pairing")
     bad = []
+    escaped = []
+    # Backslash-escaped fence (no regex: multi-layer escaping proved error-prone)
+    backslash_fence = chr(92) + chr(96) * 3
     for p in sorted(REPO_ROOT.rglob("*.md")):
         if ".git" in p.parts:
             continue
-        n = sum(1 for line in p.read_text(encoding="utf-8").splitlines() if FENCE_RE.match(line))
+        raw_lines = p.read_text(encoding="utf-8").splitlines()
+        for idx, line in enumerate(raw_lines, 1):
+            if line.lstrip().startswith(backslash_fence):
+                escaped.append("{}:{}".format(p.relative_to(REPO_ROOT), idx))
+        n = sum(1 for line in raw_lines if FENCE_RE.match(line))
         if n % 2 != 0:
             bad.append(str(p.relative_to(REPO_ROOT)) + " (" + str(n) + ")")
+    if escaped:
+        bad.append("escaped fences (invisible to parser): " + ", ".join(escaped[:4]))
     if bad:
         c.fail("unpaired fences: " + "; ".join(bad))
     else:
