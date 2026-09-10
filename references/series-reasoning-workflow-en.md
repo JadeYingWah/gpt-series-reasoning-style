@@ -517,6 +517,8 @@ Rules:
 - **Evidence freshness**: every piece of evidence cited in the completion claim must be produced **within the current message** — "ran earlier in this session", "before the interruption/resume" do not count; re-run and cite the fresh output.
 - **Disk self-check list**: the completion claim must attach a disk self-check list — (1) the changed-file list, (2) the key diff excerpt or a verifiable pointer to it, (3) for every "pass" claim the actual run output / exit code — each item with a concrete path or command. A "done" without the list is not a completion claim; it is an intention.
 - **Regression validity**: claiming a regression test is valid requires full RED→GREEN cycle evidence (seen failing before the fix, passing after). A test that has only ever been green proves nothing.
+- **Evidence artifacts are deliverables**: verification artifacts — logs, screenshots, verify scripts, exported bytes — stay in the deliverable directory. They are NOT "runtime junk" and must not be deleted in cleanup; if they must be removed for a stated reason, list each deleted artifact and its content summary in the completion claim first.
+- **Claim-artifact parity**: every count or coverage statement in the completion claim (pass/fail counts, viewport/test matrices, file lists) must match the actual artifacts **in both directions** — over-reporting and under-reporting both count as inconsistency. If the artifact set is narrower than what you ran, say so explicitly.
 - Minimum-sufficient evidence per claim type: see `references/common-failures.md` (including the "agent reports completion → check the VCS diff" row).
 
 ## Self-Check Gate
