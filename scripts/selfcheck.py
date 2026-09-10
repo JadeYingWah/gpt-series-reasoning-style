@@ -525,7 +525,7 @@ def _write_report(args, lines: list) -> None:
         print("ERROR: --out escapes the repository: " + args.out)
         raise SystemExit(2)
     dest.parent.mkdir(parents=True, exist_ok=True)
-    dest.write_text("\n".join(lines), encoding="utf-8")
+    dest.write_text("\n".join(lines), encoding="utf-8", newline="\n")
     print("\nreport written: " + str(dest))
 
 

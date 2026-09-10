@@ -136,7 +136,9 @@ def cmd_schema(out: str) -> int:
     if not dest.is_absolute():
         dest = ROOT / dest
     dest.parent.mkdir(parents=True, exist_ok=True)
-    dest.write_text("\n".join(lines), encoding="utf-8")
+    # newline="\n" is pinned: without it Windows text mode turns every \n into
+    # \r\n, so the generated sheet would disagree with the repo's LF policy.
+    dest.write_text("\n".join(lines), encoding="utf-8", newline="\n")
     print("judgement sheet written:", dest)
     return 0
 
@@ -224,7 +226,7 @@ def cmd_archive(sheet: str, commit: str) -> int:
     if unknown:
         report.append("WARNING unknown verdict tokens: " + ", ".join(sorted(unknown)))
     out = p.with_name(p.stem + "-report.md")
-    out.write_text("\n".join(report), encoding="utf-8")
+    out.write_text("\n".join(report), encoding="utf-8", newline="\n")
     print("\n".join(report))
     print("report written:", out)
     return 0

@@ -78,7 +78,7 @@ def cmd_archive(args):
     # and silently break cmd_report's per-line filtering.
     evidence = " ".join(evidence.split())
     stamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    with ARCHIVE.open("a", encoding="utf-8") as f:
+    with ARCHIVE.open("a", encoding="utf-8", newline="\n") as f:
         f.write("- [{stamp}] **{scid} ({round_}; since rule {rule_ver})** "
                 "{verdict} — {evidence}\n"
                 .format(stamp=stamp, scid=scid, round_=sc["round"], rule_ver=sc["history_rule_version"],
