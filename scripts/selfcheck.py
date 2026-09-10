@@ -505,6 +505,37 @@ def run_checks() -> list:
     else:
         c.pass_("all {} live surfaces state {} identities".format(len(id_surfaces), expected_ids))
 
+    # SB20 text-write call sites pin newline="\n" (evidence: commit bf566b9 —
+    # four write sites did not, so on Windows every \n became \r\n and the
+    # generated sheet / selfcheck reports / the probe's append-only archive
+    # silently disagreed with the repo's LF policy declared in .gitattributes).
+    # Admitted under README's own rule: the defect is reproducible (unpinned
+    # call measured at 1 CRLF, pinned at 0) and has an identifiable hash.
+    # Static on purpose: a worktree CRLF scan would be a no-op on Linux CI,
+    # while this catches the root cause on every platform.
+    # Known blind spot: single-line scan only -- a call split across lines is
+    # not seen (no such call exists today).
+    c = new(20, "text-write call sites pin newline")
+    py_files = sorted(p for p in REPO_ROOT.rglob("*.py")
+                      if ".git" not in p.parts and "__pycache__" not in p.parts)
+    write_mode = re.compile(r"['\"][wax+]{1,2}b?['\"]")
+    nl_bad = []
+    for p in py_files:
+        rel = p.relative_to(REPO_ROOT).as_posix()
+        for ln, line in enumerate(read_text(p).splitlines(), 1):
+            stripped = line.strip()
+            if stripped.startswith("#"):
+                continue
+            if "write_text(" in line and "newline=" not in line:
+                nl_bad.append("{}:{}: write_text without newline=".format(rel, ln))
+                continue
+            if "open(" in line and write_mode.search(line) and "newline=" not in line:
+                nl_bad.append("{}:{}: open(write-mode) without newline=".format(rel, ln))
+    if nl_bad:
+        c.fail("write sites without newline= on: " + "; ".join(nl_bad[:8]))
+    else:
+        c.pass_("all text-write call sites pin newline= ({} python files scanned)".format(len(py_files)))
+
     return checks
 
 
