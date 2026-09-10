@@ -333,6 +333,7 @@ gpt-series-reasoning-style/
 ├── social-preview.png / .svg    # 社交预览图
 ├── .gitattributes               # 行尾策略：仓库与工作树统一 LF（* text=auto eol=lf）
 ├── .github/                     # CI：selfcheck 工作流（push/PR 触发）
+├── AGENTS.md                    # 跨运行时入口别名（Codex/Gemini/Copilot CLI 识别，指向 SKILL.md）
 ├── agents/openai.yaml           # OpenAI/Codex 兼容界面的可选元数据（display_name/default_prompt）
 ├── identities/                  # 22 个内置身份 + _template + README（权威角色目录）
 ├── custom-identities/           # 用户自定义身份（其他身份）

@@ -510,6 +510,10 @@ Rules:
 - Unverified items are `UNVERIFIED`, not `PASS`.
 - Confidence is not evidence.
 - If no independent reviewer is available, use adversarial self-review from a different perspective.
+- **Evidence freshness**: every piece of evidence cited in the completion claim must be produced **within the current message** — "ran earlier in this session", "before the interruption/resume" do not count; re-run and cite the fresh output.
+- **Disk self-check list**: the completion claim must attach a disk self-check list — (1) the changed-file list, (2) the key diff excerpt or a verifiable pointer to it, (3) for every "pass" claim the actual run output / exit code — each item with a concrete path or command. A "done" without the list is not a completion claim; it is an intention.
+- **Regression validity**: claiming a regression test is valid requires full RED→GREEN cycle evidence (seen failing before the fix, passing after). A test that has only ever been green proves nothing.
+- Minimum-sufficient evidence per claim type: see `references/common-failures.md` (including the "agent reports completion → check the VCS diff" row).
 
 ## Self-Check Gate
 

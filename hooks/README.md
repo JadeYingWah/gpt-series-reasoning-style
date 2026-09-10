@@ -46,6 +46,31 @@ powershell -NoProfile -Command "Write-Output '[skill-reminder] 多阶段/含糊/
 若宿主支持 `UserPromptSubmit` + matcher，可只在提示词包含"实现/开发/做一个/重构"等词时注入。
 默认不建议：每条提示都注入同样违反"最小常驻面"原则。
 
+## 进阶 / Advanced：matcher 变体（compact 后重注入）
+
+Claude Code 的 `SessionStart` 支持 matcher：`startup`（会话启动）、`clear`（清空后）、
+`compact`（**上下文压缩后**）。长会话必然触发 compact，而压缩会把启动提醒一并吞掉——
+建议 matcher 写成 `"startup|clear|compact"`，让压缩后也重注入这一行（与 superpowers
+hooks.json 的实践一致）：
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$HOME/.agents/skills/gpt-series-reasoning-style/hooks/session-reminder.sh\""
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
 ## 卸载 / Remove
 
 删除 settings.json 中对应 hook 条目即可；脚本文件可留可删。

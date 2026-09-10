@@ -134,6 +134,8 @@ For user relay, `Recipient activation prompt` must tell the receiving model to l
 
 接收方启动提示词必须是可直接粘贴的完整文本，包含具体 Skill 版本、模式、身份和身份声明格式。
 
+**Brief file / 简报文件化（推荐默认）**：23 字段任务包一经用户确认，指挥官把它**落盘为简报文件**（默认 `<项目根>/docs/plans/<task-id>-brief.md`，与派发台账同批留档）；接收方启动提示词只带三样东西——加载指令、身份声明格式、简报文件路径。接收方一次 Read 读到完整任务包，任务文本**不再经控制器/用户上下文逐字中转**。收益：①长任务包不占对话轮次，省中转 token；②简报文件即派发留档，append-only 可审计；③接收方丢上下文/续会时重读文件即可恢复。用户明确要求直接粘贴任务包全文时，从其指令。/ **Brief file (recommended default)**: once the 23-field package is confirmed, the commander writes it to a brief file (default `<项目根>/docs/plans/<task-id>-brief.md`, archived with the dispatch ledger); the activation prompt carries only the loading instruction, the identity declaration format, and the brief file path — the recipient reads the full package in one Read, and the task text never transits the controller/user context verbatim. Saves relay tokens, doubles as an append-only dispatch record, and survives context loss. If the user explicitly asks for the full package pasted inline, follow the user.
+
 **Commander capability gate / 指挥官能力门**：升级/启用指挥官扩展声明「能力缺口」时，必须附两条证据，缺一不启动：① 缺什么能力、当前会话有什么反证（如需要真实浏览器而会话无浏览器工具）；② 目标接收方身份文件路径。无证据时拒绝启动扩展，标 UNVERIFIED 并回退单 Agent 主干。子 Agent 模式与指挥官扩展的证据要求对称，避免「能力缺口」涉为展示多 Agent 的自我声明。
 
 ## Project AI Identity Registry / 项目 AI 身份登记

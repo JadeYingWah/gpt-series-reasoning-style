@@ -539,6 +539,10 @@ Rules:
 - Unverified items are `UNVERIFIED`, not `PASS`.
 - Confidence is not evidence.
 - If no independent reviewer is available, use adversarial self-review from a different perspective.
+- **Evidence freshness / 证据时间新鲜度**: every piece of evidence cited in the completion claim must be produced **within the current message** — "ran earlier in this session", "before the interruption/resume" do not count; re-run and cite the fresh output. / 完成声明引用的每条证据必须在本条消息内新产生——"本会话早些时候跑过""中断/续会前跑过"都不算数；重跑并引用 fresh 输出。
+- **Disk self-check list / 磁盘自检清单**: the completion claim must attach a disk self-check list — (1) the changed-file list, (2) the key diff excerpt or a verifiable pointer to it, (3) for every "pass" claim the actual run output / exit code — each item with a concrete path or command. A "done" without the list is not a completion claim; it is an intention. / 完成声明必须附磁盘自检清单——①改动文件清单；②关键 diff 摘录或可核验指针；③每条"通过"声称对应的实跑输出/退出码——逐项给出具体路径或命令。没有清单的"完成"不是完成声明，只是意图。
+- **Regression validity / 回归测试有效性**: claiming a regression test is valid requires full RED→GREEN cycle evidence (seen failing before the fix, passing after). A test that has only ever been green proves nothing. / 声称回归测试有效必须附完整 RED→GREEN 循环证据（修复前见过它红、修复后见它绿）；只绿过一次的测试证明力为零。
+- Minimum-sufficient evidence per claim type: see `references/common-failures.md`（含"Agent 报告完成 → 查 VCS diff"行）。
 
 ## Self-Check Gate
 
