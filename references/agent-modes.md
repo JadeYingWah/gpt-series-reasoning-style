@@ -26,6 +26,7 @@ This skill supports three execution modes.
    - 任务需要当前会话不具备的能力，且存在具备该能力的其他 AI（例如：需要真实浏览器逐项验收而本会话没有浏览器工具）；
    - 用户明确要求独立第三方验收。
    → 声明"选择指挥官扩展 + 一行理由"；**仍须依次过角色身份确认、协调通道确认、实现前门禁**——自选形态不豁免任何确认。
+   **三道确认约束的是「派发动作」，不是「草案产出」**：门禁未过不得派发、不得转交；但**缺必需字段的正式任务包同样不得产出**——接收方角色/平台窗口未知时先问清楚，不以「待用户指定」占位、不臆造接收方。因此"生成一个任务包"的一次性请求，若没给接收方与通道，正确行为是**先问缺的字段**，而非先出一份不完整的包。
    **裁决链（任务事实缺口 vs 用户指名）**：用户指名的形态与任务事实缺口（例如需要实测浏览器而会话无工具）冲突时，按授权顺序第 1 条（用户当前明确指令优先）执行用户指名；仅子 Agent 能力门失败时可回退单 Agent 并标 UNVERIFIED，其余缺口以一句「缺口仍存在，我按你的指名执行，但该缺口未消除」上报。
 3. **子 Agent 增强**（全部满足才触发）：
    - 宿主有子 Agent 工具（能力门）；
@@ -52,6 +53,7 @@ Form is not a menu item waiting for the user to order; the AI selects it from ta
    - The task needs a capability this session lacks, and another AI with that capability exists (for example: real-browser item-by-item acceptance while this session has no browser tool);
    - The user explicitly requests independent third-party acceptance.
    → declare "commander extension selected + one-line reason"; **role identity confirmation, coordination channel confirmation and the pre-implementation gate still apply, in order** — self-selecting a form exempts no confirmation.
+   **Those three confirmations gate the DISPATCH action, not drafting**: nothing may be dispatched or relayed before the gates pass, but an incomplete task package with missing mandatory fields must not be produced either — when the recipient role/platform-window is unknown, ask for it first; never use a "to be specified by the user" placeholder and never invent a recipient. So for a one-shot "generate a task package" request that supplies neither recipient nor channel, the correct behaviour is to **ask for the missing fields first**, not to emit an incomplete package.
    **Adjudication chain (task-fact gap vs user-named form)**: when a user-named form conflicts with a task-fact gap (for example a real browser is needed but the session has no such tool), follow authorization order item 1 (the user's current explicit instruction wins) and execute the user-named form; only a failed subagent capability gate may fall back to single-agent and mark `UNVERIFIED`; other gaps are reported in one sentence: "the gap still exists; I proceed as you named, but the gap remains unresolved".
 3. **Subagent enhancement** (all conditions must hold):
    - The host has subagent tools (capability gate);

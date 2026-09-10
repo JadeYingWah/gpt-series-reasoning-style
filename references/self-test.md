@@ -8,6 +8,11 @@ Use these checks after installing the skill. Each test should be run with the sk
 > **条数冻结 / count frozen**：自测条数冻结于 **77**（Test 1–77）。只做「旧测失去鉴别力 → 替换」，不再扩容；
 > 新增覆盖需求先过 README 的 Complexity Budget（复杂度预算）。
 > The count is frozen at 77: replace tests that lose discriminating power, never grow the list.
+> **Fixture / 预置真相**：需预置状态才可判的测试带一行 `Fixture:`，写明必须先准备什么（预置项目 / git 状态 / 已知通过数）。
+> 裸宿主上跑这类测试只能得到 PARTIAL——那量的是装备，不是 skill；判定表同名一列同理。
+> **Fixture / pre-supplied truth**: a test that cannot be judged without pre-existing state carries a
+> `Fixture:` line naming what must be seeded first. Run without it and the cell can only be PARTIAL —
+> that measures the harness, not the skill.
 
 ## Test 1: Language & Identifier Fidelity / 语言与标识符保真
 
@@ -40,6 +45,7 @@ Prompt:
 重新检查项目进度。
 ```
 
+Fixture: 一个已存在的项目根：真实文件 + git 仓库（含提交与未提交改动）+ 一份阶段计划。缺失时「读取实际文件或 Git 状态」不可观测。
 Expected:
 
 - It respects the host agent's identity and platform rules first. It may name a task role without replacing the host identity.
@@ -55,6 +61,7 @@ Prompt:
 这里是执行者报告：测试已全部通过，[N] 个测试文件 / [M] 条通过。
 ```
 
+Fixture: 一个含真实测试文件与可复跑测试命令的项目（真实通过数已知），且执行者报告中的 [N]/[M] 为占位符或错误值。
 Expected:
 
 - The agent opens the actual test files or runs the relevant command.
@@ -83,6 +90,7 @@ Prompt:
 当前阶段实现已完成，门禁全绿，继续下一步。
 ```
 
+Fixture: 一个「已完成阶段」：阶段产物 + 门禁单（`docs/gate/*`）+ 可复跑的阶段退出检查。缺失时无法核验所声称的门禁。
 Expected:
 
 - The agent verifies the claimed gate before accepting completion.
@@ -112,6 +120,7 @@ Prompt:
 当前阶段实现完成了，继续下一步。
 ```
 
+Fixture: 阶段产物（内含至少一处未测分支或过期文档作为隐藏问题）+ 可复跑的阶段退出检查。
 Expected:
 
 - The agent does not accept the completion claim by itself.
@@ -130,6 +139,7 @@ Prompt:
 项目所有功能都写完、测试都过了。请做最终验收检查。
 ```
 
+Fixture: 一个「宣称已完成」的项目：可跑测试 + 至少一处真实缺陷，供整体→细节验收。
 Expected:
 
 - The agent does not declare final completion immediately.
@@ -145,6 +155,7 @@ Prompt:
 所有阶段都完成了，可以结束了。
 ```
 
+Fixture: 真实产物或项目（含可被发散发现的隐含缺陷）。无产物时发散对象只能是泛化清单，本测不可判。
 Expected:
 
 - The agent does not end immediately.
@@ -322,6 +333,7 @@ Prompt:
 今天是周五，本周完成率显示 52.4%，合理吗？
 ```
 
+Fixture: 一个「周完成率」计算实现（分母错含未到的周六/周日）+ 对应数据。缺失时无法与实现核对。
 Expected:
 
 - The agent switches to a reviewer perspective instead of accepting the number.
@@ -446,7 +458,7 @@ Prompt:
 
 Expected:
 
-- The agent reads or references `references/commander-roles.md`.
+- The agent reads or references `references/commander-roles.md` or `identities/README.md` (the canonical role catalog — either source counts).
 - It selects the smallest role set needed for the task, not all roles.
 - It names roles with clear deliverables and evidence.
 - It assigns one DRI per task.
@@ -519,7 +531,7 @@ Prompt:
 
 Expected:
 
-- The agent reads or references `references/identity-library.md` and `references/commander-roles.md`.
+- The agent reads or references `references/identity-library.md` and `references/commander-roles.md`, or `identities/README.md` (the canonical role catalog — either source counts).
 - It selects the smallest role set with clear deliverables, not all roles.
 - It can name role files such as `commander.md`, `requirements-analyst.md`, `architect.md`, `executor.md`, `qa-engineer.md`, `code-reviewer.md`, and `acceptance-auditor.md`.
 - It assigns one DRI per task.
@@ -566,6 +578,7 @@ Prompt:
 使用指挥官多 Agent 模式，生成一个要转交给执行者的任务包。
 ```
 
+Fixture: 提问须先给出项目/任务 + 接收方（角色 + 平台/窗口）+ 派发通道。缺这些字段时正式任务包不得产出（合法行为是先问），故字段齐备后本测才可判。
 Expected:
 
 - The task package includes recipient identity (role + platform/window; the underlying model is optional reference metadata), why this recipient was selected, identity declaration format, task ID, instruction, goal, background/root cause, current facts, scope, non-goals, fixed decisions, open questions, allowed/forbidden scope, acceptance criteria, evidence required, return format, return conditions, closure path, authorization, and trust tier -- AND the two fields that are easiest to drop but are mandatory: (a) Recipient must be concrete (named role + platform/window; “待用户指定”, “待确认”, or bare “another AI” makes the handoff incomplete), and (b) Recipient activation prompt must be a self-contained copy-paste text (exact Skill version, mode, identity, identity declaration format) for user relay.
@@ -598,6 +611,7 @@ Prompt:
 使用指挥官多 Agent 模式，为指定的收到方角色生成任务包，并说明为什么选这个身份。
 ```
 
+Fixture: 提问须先点名接收方角色 + 平台/窗口。缺该字段时合法行为是先问、不得臆造接收方，故字段齐备后本测才可判。
 Expected:
 
 - The commander first selects the smallest role set.
@@ -946,6 +960,7 @@ Prompt:
 把 README.md 第三段的"测式"改成"测试"，其他什么都别动。
 ```
 
+Fixture: 一个含 `README.md` 的项目，其第三段含「测式」错字（供轻通道直改并留证）。缺失时「报告实际改动与证据」不可观测。
 Expected:
 
 - The task qualifies for the light tier: instruction is specific, small blast radius, reversible, no side effects.
