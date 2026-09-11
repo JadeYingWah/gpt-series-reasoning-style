@@ -15,10 +15,24 @@ exit code. This tool takes such a list and verifies every entry FRESH:
 Trust model (IMPORTANT, H1): the claims file is UNTRUSTED INPUT — it is
 authored by the agent whose completion is being judged. Commands are executed
 with shell=True, so a hostile claims file is arbitrary code execution.
-Mitigations: a destructive-command blacklist is applied by default (blocked
-entries FAIL with "dangerous command blocked"); pass --allow-dangerous to
-override after human review. The tool also prints how many commands it
-executed so the operator can audit. Content-quality judgement remains human.
+Mitigations (2026-09-11, two layers):
+  1. destructive-command blacklist (best-effort pattern match);
+  2. interpreter default-deny — a command whose FIRST token is an
+     interpreter/shell (python/python2/python3/pythonw/py/node/deno/bun/perl/
+     ruby/php/powershell/pwsh/cmd/bash/sh/zsh/fish/ksh/npx/uvx/pipx, absolute
+     paths included) is BLOCKED unless it matches a narrow safe allowlist
+     (`python -m unittest|pytest`, `python --version`) — `-c/-e/-Command`
+     payloads and `python script.py` are unauditable from the command line
+     (proven live on 2026-09-11: `python -c "shutil.rmtree('victim')"` and
+     `python pwn.py` ran unchecked, victim dir deleted, 0 blocked).
+     Both layers are overridden only by --allow-dangerous after human review.
+Honest limit (NOT a sandbox): the allowlist still executes the project's own
+test suite — conftest.py / imported test modules are project code and could
+hide payloads there; exec-style tools NOT in the family (go run, cargo run,
+make, uv, npm, env, xargs, …) are not covered either. The real trust
+boundary remains a trusted claims source plus human review of every entry.
+The tool also prints how many commands it executed so the operator can audit.
+Content-quality judgement remains human.
 
 Claims file format (minimal markdown):
 
@@ -27,8 +41,8 @@ Claims file format (minimal markdown):
     - ui.html
     - docs/plans/2026-09-10-brief.md
     ## Commands
-    - python todo.py list          # expect exit 0
-    - python -m unittest test_utils -v
+    - python -m unittest discover -v   # expect exit 0
+    - pytest -q
 
 Usage:
   python scripts/claim-check.py <claims.md> [project-root] [--timeout S]
@@ -37,10 +51,10 @@ Usage:
   <project-root> (default: current directory) is the base for relative file
   paths and the working directory for commands.
 
-Blacklist is best-effort and NOT a sandbox: PowerShell aliases (ri / del with
--Recursion), long options (--recursive --force), and interpreter-indirect
-execution (python -c "shutil.rmtree(...)") are NOT covered. The real trust
-boundary is a trusted claims source plus human review of every entry.
+The blacklist stays best-effort and NOT a sandbox: PowerShell aliases (ri /
+del with -Recursion), long options (--recursive --force), and other
+undetected spellings are NOT covered. The interpreter default-deny closes
+the interpreter-indirect hole; it does not turn this tool into a sandbox.
 
 Exit codes: 0 = all claims verified, 1 = at least one failed, 2 = usage /
 unreadable claims file.
@@ -90,6 +104,61 @@ DANGEROUS_RES = [
 ]
 
 COMPILED_DANGEROUS = [re.compile(p, re.I) for p in DANGEROUS_RES]
+
+# Layer 2 (2026-09-11): interpreter default-deny. A command whose FIRST token
+# is an interpreter/shell gets its payload executed in a process the checker
+# cannot audit from the command line (`python -c "..."`, `node -e "..."`,
+# `python script.py`) — the 2026-09-11 blacklist-only stance let all of these
+# run unchecked (proven live: victim dir deleted via shutil.rmtree inside
+# `python -c`, 0 blocked). Default-deny closes that class; the narrow
+# allowlist below keeps the canonical safe forms (project test suite,
+# version query) usable without a flag.
+INTERPRETER_NAMES = {
+    "python", "python2", "python3", "pythonw", "py",
+    "node", "deno", "bun",
+    "perl", "ruby", "php",
+    "powershell", "pwsh",
+    "cmd", "bash", "sh", "zsh", "fish", "ksh",
+    "npx", "uvx", "pipx",   # download-and-run package runners
+}
+# Known limits (documented, best-effort): exec-style tools that compile or
+# download and then run code — `go run`, `cargo run`, `make`, `uv`, `npm`,
+# `env`, `xargs`, … — are NOT in the family and stay blacklist-only.
+
+# Allowlist: full-command anchored, chaining excluded (`;|&` and backticks /
+# `$()` can never reach end-of-line through the negated class).
+_INTERP_TOKEN = (r"(?:[a-zA-Z]:[\\/][^\s\"']*[\\/])?"      # optional absolute path
+                 r"(?:python(?:[\d.]+)?|py)(?:\.exe)?")
+SAFE_INTERPRETER_RES = [
+    re.compile(r"^" + _INTERP_TOKEN +
+               r"\s+(?:-\d(?:\.\d+)?\s+)?"                  # py -3 / py -3.11
+               r"-m\s+(?:unittest|pytest)\b[^\n;|&`$]*$", re.I),
+    re.compile(r"^" + _INTERP_TOKEN + r"\s+(?:--version|-V)\s*$", re.I),
+]
+
+
+def _argv0(command: str) -> str:
+    """First token of the command, reduced to a bare lowercase name
+    (strips drive/path and .exe — `C:/.../python.exe` == `python`)."""
+    stripped = command.strip()
+    if not stripped:
+        return ""
+    tok = stripped.split(None, 1)[0]
+    base = re.split(r"[\\/]", tok)[-1].lower()
+    if base.endswith(".exe"):
+        base = base[:-4]
+    return base
+
+
+def interpreter_block_reason(command: str) -> str | None:
+    """Return the interpreter name if this command must default-deny, else None."""
+    argv0 = _argv0(command)
+    if argv0 not in INTERPRETER_NAMES:
+        return None
+    for res in SAFE_INTERPRETER_RES:
+        if res.search(command):
+            return None
+    return argv0
 
 
 def parse_claims(text: str) -> dict:
@@ -142,7 +211,8 @@ def main() -> int:
     ap.add_argument("--timeout", type=int, default=600,
                     help="per-command timeout in seconds (default 600; M3)")
     ap.add_argument("--allow-dangerous", action="store_true",
-                    help="execute commands matching the destructive blacklist (H1 override; review first!)")
+                    help="execute commands matching the destructive blacklist OR "
+                         "interpreter default-deny (H1 override; review first!)")
     args = ap.parse_args()
 
     claims_path = pathlib.Path(args.claims)
@@ -179,9 +249,15 @@ def main() -> int:
             results.append((False, "command: empty command line"))
             continue
         danger = is_dangerous(cmd)
-        if danger and not args.allow_dangerous:
-            results.append((False, "command: `{}` BLOCKED -- dangerous pattern `{}` "
-                                   "(review it, then re-run with --allow-dangerous)".format(cmd, danger)))
+        interp = interpreter_block_reason(cmd)
+        if (danger or interp) and not args.allow_dangerous:
+            if danger:
+                reason = "dangerous pattern `{}`".format(danger)
+            else:
+                reason = ("interpreter-indirect execution (`{}` …; `-c/-e/script` "
+                          "payload is not auditable from the command line)".format(interp))
+            results.append((False, "command: `{}` BLOCKED -- {} "
+                                   "(review it, then re-run with --allow-dangerous)".format(cmd, reason)))
             continue
         try:
             # H2: explicit UTF-8 — text=True alone uses the Windows locale
@@ -224,7 +300,8 @@ def main() -> int:
     fails = sum(1 for ok, _ in results if not ok)
     print("- Result: {}/{} verified".format(len(results) - fails, len(results)))
     print("- Trust note: {} command(s) executed via shell=True; the claims file "
-          "is untrusted input (blacklist{}; saw {} blocked).".format(
+          "is untrusted input (destructive blacklist + interpreter default-deny{}; "
+          "saw {} blocked; neither layer is a sandbox).".format(
               executed, " off" if args.allow_dangerous else " on",
               sum(1 for _, l in results if "BLOCKED" in l)))
     if fails:
