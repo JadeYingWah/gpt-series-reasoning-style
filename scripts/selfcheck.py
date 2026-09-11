@@ -238,7 +238,9 @@ def run_checks() -> list:
             missing_tokens.append("SKILL.md:" + tk)
         if tk not in readme:
             missing_tokens.append("README:" + tk)
-    for tk in ["form selection", "risk tier", "surveyed"]:
+    # "confirmation scope" added after batch 47 caught openai.yaml listing only
+    # 10 of the 11 gate fields (GATE_FIELDS[10] was missing from default_prompt).
+    for tk in ["form selection", "risk tier", "surveyed", "confirmation scope"]:
         if tk not in oai:
             missing_tokens.append("openai.yaml:" + tk)
     if missing_tokens:
@@ -612,6 +614,10 @@ def run_checks() -> list:
             ("references/project-artifacts.md", r"gate record 的\s*(\d+)\s*字段标题齐全", "artifact-check prose"),
             ("references/series-reasoning-workflow-en.md", r"confirmation\)\s*[—-]+\s*(\d+)\s*fields:", "EN gate header"),
             ("site/index.html", r"输出\s*(\d+)\s*字段确认单", "gate field count (site)"),
+            # batch 47: the site's EN line silently kept "A 10-field confirmation"
+            # while the CN line, README and GATE_FIELDS all said 11 — the CN-only
+            # regex above cannot see the EN form, so the drift lasted unnoticed.
+            ("site/index.html", r"An?\s*(\d+)-field confirmation", "gate field count (site EN)"),
         ]
         gf_bad = []
         for rel, rx, label in gfam:

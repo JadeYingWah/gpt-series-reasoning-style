@@ -309,9 +309,7 @@ If research is impossible because no search tool or source is available, state t
 
 ## Resource Survey / 资源盘点前置
 
-
-
-
+动手前盘点一切能帮上忙的资源，逐项给**四档**结论：用（怎么用）/ 改造用（改什么）/ **本 skill 已覆盖**（点名覆盖它的小节，**不重复加载**——重复叠纪律纯耗 token 与延迟；例：已装的 `verification-before-completion` 对本 skill 的 `common-failures.md` 即属冗余）/ 不适用（必须真查过才能写）。本地盘点出缺口时，主动搜索技能市场与开源仓库里匹配本任务的技能/工具，给 2-3 个候选（含来源、维护状态、能加什么），**开工前先征求用户同意再安装**——安装即改环境，属授权门内动作；同意后走平台官方渠道安装并验证，然后进入项目需求调研与可用资源调研；不同意则带缺口开工并注明。盘点结果写入门禁确认单；没盘点的计划是不完整的计划。
 
 ## Existing-Artifact Conflict: Stop And Report First / 既有产物冲突先报告
 
@@ -333,8 +331,6 @@ When the user changes a requirement, or a mid-flight discovery would change one,
 5. **Surface conflicts**: if the change contradicts an approved decision, say so explicitly instead of silently reconciling it.
 
 Verification conveniences that add user-visible surface — debug switches, shortened-duration test modes, extra buttons, mock toggles — are **scope changes**, not implementation details. List them in the gate as explicit decisions for the user; do not adopt them silently as "fixed decisions" even when they exist only to make acceptance possible.
-
-动手前盘点一切能帮上忙的资源，逐项给**四档**结论：用（怎么用）/ 改造用（改什么）/ **本 skill 已覆盖**（点名覆盖它的小节，**不重复加载**——重复叠纪律纯耗 token 与延迟；例：已装的 `verification-before-completion` 对本 skill 的 `common-failures.md` 即属冗余）/ 不适用（必须真查过才能写）。本地盘点出缺口时，主动搜索技能市场与开源仓库里匹配本任务的技能/工具，给 2-3 个候选（含来源、维护状态、能加什么），**开工前先征求用户同意再安装**——安装即改环境，属授权门内动作；同意后走平台官方渠道安装并验证，然后进入项目需求调研与可用资源调研；不同意则带缺口开工并注明。盘点结果写入门禁确认单；没盘点的计划是不完整的计划。
 
 ## Generative Divergence Protocol
 
