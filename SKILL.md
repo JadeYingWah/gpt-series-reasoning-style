@@ -110,4 +110,4 @@ description: 'Process-discipline layer only — not a reasoning-capability boost
 
 ## Version
 
-Current version: 1.1.0 (public baseline; post-1.1.0 rule increments are tracked as Unreleased batches in [CHANGELOG.md](CHANGELOG.md) — cite the batch when it matters).
+Current version: 1.2.0 (public release; post-1.2.0 rule increments are tracked as Unreleased batches in [CHANGELOG.md](CHANGELOG.md) — cite the batch when it matters).

@@ -10,11 +10,11 @@
 一个面向 AI Agent 的**交付纪律行为层**（behavior overlay）——
 实现前门禁、资源盘点、多 Agent 协作治理、证据核验与实操验收。
 
-[![Version](https://img.shields.io/badge/version-1.1.0-blue)](#versioning--版本)
+[![Version](https://img.shields.io/badge/version-1.2.0-blue)](#versioning--版本)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](#license--许可证)
 [![Platforms](https://img.shields.io/badge/platforms-13_supported-blueviolet)](#install--安装)
 [![agentskills.io](https://img.shields.io/badge/agentskills.io-compliant-success)](#tooling--工具链)
-[![CI: selfcheck](https://github.com/JadeYingWah/gpt-series-reasoning-style/actions/workflows/selfcheck.yml/badge.svg)](https://github.com/JadeYingWah/gpt-series-reasoning-style/actions/workflows/selfcheck.yml)
+[![CI: selfcheck](https://github.com/JadeYingWah/gpt-series-reasoning-style/actions/workflows/selfcheck.yml/badge.svg)](https://github.com/JadeYingWah/gpt-series-reasoning-style/actions)
 [![Self-checks](https://img.shields.io/badge/selfcheck-SB1--SB22_22%2F22-success)](#tooling--工具链)
 [![Behavioural self-tests](https://img.shields.io/badge/behavioural_self--tests-77_frozen-orange)](#tooling--工具链)
 
@@ -28,15 +28,34 @@
 
 ---
 
+## Quick Start / 快速开始
+
+```bash
+# 1. 安装（以 Claude Code 为例；其余 12 个平台见 Install 节）
+git clone https://github.com/JadeYingWah/gpt-series-reasoning-style
+cd gpt-series-reasoning-style
+./scripts/install.sh claude            # Windows: .\scripts\install.ps1 -Platform claude
+
+# 2. 在对话里按名调用
+#    使用 gpt-series-reasoning-style 执行本次任务。
+```
+
+加载后，AI 在动手建文件 / 写代码 / 跑命令之前，会先停下给你一张确认单；声称"做完了"时必须附上可核对的证据。
+
+**只想要核心、不想装整套？** 把 [Minimal Usage](#minimal-usage--最小用法) 的三条规则贴进宿主配置即可（官方 **Lite 档**，实测 147 tokens）。
+
+---
+
 ## 目录 / Table of Contents
 
+- [Why / 为什么需要它](#why--为什么需要它)
 - [Name & Origin / 名称与来源](#name--origin--名称与来源)
-- [What This Is / 这是什么](#what-this-is--这是什么)
+- [What It Is / 这是什么](#what-it-is--这是什么)
 - [What It Is Not / 边界](#what-it-is-not--边界)
 - [Core Mechanisms / 核心机制速览](#core-mechanisms--核心机制速览)
-- [Collaboration Architecture / 协作架构](#collaboration-architecture--协作架构)
 - [The Pre-Implementation Gate / 实现前门禁](#the-pre-implementation-gate--实现前门禁)
 - [Workflow / 工作流](#workflow--工作流)
+- [Collaboration Architecture / 协作架构](#collaboration-architecture--协作架构)
 - [Honesty & Evidence / 诚实与证据](#honesty--evidence--诚实与证据)
 - [Commander Multi-Agent Mode / 指挥官模式](#commander-multi-agent-mode--指挥官模式)
 - [Built-in Identities / 内置身份](#built-in-identities--内置身份)
@@ -55,26 +74,49 @@
 
 ---
 
+## Why / 为什么需要它
+
+AI 协作里最贵的两类失败，都不是"模型不够聪明"：
+
+1. **未授权就动手**——AI 宣布了一串"接下来我要做什么"，然后直接建目录、写文件、跑命令；
+2. **声称未验证的完成**——"已经修好了 / 测试都过了"，而磁盘上没有可核对的证据，甚至根本没跑过。
+
+一次"假完成"的返工成本（澄清 + AI 重读上下文 + 重做）通常在 2 万–10 万 token；本 skill 整个任务周期的常驻开销约 3.8k token。**它把防假完成做成第一优先级，正是因为那是 token 账上最贵的一项。**
+
+它带来的改变，一眼可见：
+
+```text
+【没有纪律】                    【有本 skill】
+用户：帮我做个登录页             用户：帮我做个登录页
+AI  ：好的，我开始建文件……       AI  ：【实现前确认】
+      （直接动手）                     - 目标 / 风险分档 / 形态
+                                      - 已盘点资源 / 推荐方案
+                                      - 需要你确认：……
+                                   （停下，等授权）
+
+AI  ：做完了，测试都过了。        AI  ：完成。附磁盘自检清单：
+      （无证据）                       - 改动文件 + 关键 diff
+                                      - 测试 RED→GREEN 输出
+                                      - 浏览器实测截图
+                                      - 按钮交互我点不了：UNVERIFIED
+```
+
+---
+
 ## Name & Origin / 名称与来源
 
 **GPT-Series Reasoning Style（GPT系列推理风格）**，Agent Skill 名 `gpt-series-reasoning-style`。
 
-- **名字记录来源，不划能力边界**：本 skill 的规则纪律从**一系列 GPT 系列大模型的真实对话记录**中打磨提炼（2026-08 起内部迭代 0.1.x–3.3.x，公开发布线 1.0.0 → **1.1.0**）。名字里的 `gpt-series` 即这段来源。
+- **名字记录来源，不划能力边界**：规则纪律从一系列 GPT 系列大模型的真实对话记录中打磨提炼，公开发布线为 1.0.0 → 1.1.0 → **1.2.0**（更早的内部迭代已归档于 [`INTERNAL-HISTORY.md`](INTERNAL-HISTORY.md)）。
 - **不依赖、也不限于 GPT 系列**：任何宿主模型（Claude / Gemini / DeepSeek / Qwen / GLM …）均可加载使用。
 - **`reasoning-style` 指"推理的流程纪律风格"，不是推理能力上限**：它约束 AI 怎么干活（先盘点、先门禁、给证据），不会让模型变得更聪明。
 - **曾用名 / Formerly**：`gpt-5-6-sol-multi-agent-style`（"GPT-5.6 Sol"，内部期），旧检索别名 `gpt-5-6-sol-reasoning-style`——供搜索引擎与联网 AI 把旧名归并到本仓库。
 
 ---
 
-## What This Is / 这是什么
+## What It Is / 这是什么
 
-这是一层可以装进任何 Agent 宿主的行为纪律，专门对付 AI 协作中最常见的两类失败：
-
-1. **未授权就动手**——AI 宣布了一串"接下来我要做什么"，然后直接开始建目录、写文件、跑命令；
-2. **声称未验证的完成**——"已经修好了 / 测试都过了"，而磁盘上没有可核对的证据。
-
-本 skill 把这两件事变成硬规则：**动手前先过 11 字段门禁**，**声称完成必须附证据清单**。
-它是一个普通 Agent Skills 包：常驻面只有 `SKILL.md` + `VERSION`（实测 3,843 tokens，o200k_base，2026-09-11 第四十一批后重测），
+这是一层可以装进任何 Agent 宿主的行为纪律。它是一个普通 Agent Skills 包：常驻面只有 `SKILL.md` + `VERSION`（实测 3,843 tokens，o200k_base），
 13 份 references 按需取节加载，`AGENTS.md` 为 Codex / Gemini CLI / Copilot CLI 等运行时提供跨运行时入口别名。
 
 ### 三大机制 / Three Mechanisms
@@ -115,6 +157,11 @@
 | 7 | **实操验收 / Hands-On Acceptance** | 交互类产物必须亲手操作每个按钮、按键、手势并截图留证；没操作过的标 `UNVERIFIED`。 |
 | 8 | **DRI 与收口 / Ownership** | 用户是最终决策者；委派之后总指挥仍是 DRI（最终收口负责人）；一任务一 DRI。 |
 
+此外两条贯穿性原则：
+
+- **创意任务防平庸**：门禁锁定范围与落盘，不锁定方向；大胆是默认，保守才需要理由。创意主导任务须并列 2–3 个真实不同方向，完全可逆的本地产物可免方向确认直接起跑。
+- **让位原则**：本 skill 只规范流程、不主导内容——其他 skill 或宿主能力对内容/风格/创意有主张时让位配合；但诚实、安全防护、真实环境验收是最后防线，任何优先级下不失效。
+
 ---
 
 ## Collaboration Architecture / 协作架构
@@ -135,9 +182,11 @@
 4. 其余 → **单 Agent 主干**。
 
 **任务包三层口径**（各归其权威，不得混用）：
+
 - 11 字段**内部派发包** —— 仅单 Agent 主干内部派发；
 - **六字段迷你包** —— 子 Agent 增强（信任层级限 T1/T2）；
 - **23 字段完整任务包** —— 跨模型指挥官场景（信任层级 T1/T2/T3 全量）。
+
 另有**五字段降级简化包**（目标/范围/验收标准/返回格式/信任层级）作为手动多窗口转交的低门槛入口——降级只减 briefing 复杂度，不减验收标准。
 
 **信任层级 / Trust Tiers**：
@@ -152,7 +201,7 @@
 
 ## The Pre-Implementation Gate / 实现前门禁
 
-在创建项目目录、编辑文件或运行实现命令之前，先输出以下内容**并停止**：
+在创建项目目录、编辑文件或运行实现命令之前，先输出以下内容**并停止**。这是本 skill 最核心的动作——动手前先过 11 字段门禁：
 
 ```text
 【实现前确认】
@@ -161,11 +210,12 @@
 - 形态选择：单 Agent 主干 / 子 Agent 增强 / 指挥官扩展 — 一行理由（轻通道免填）
 - 已盘点可用资源：本地 skills / 可装技能候选（批准后才装）/ 可复用模板与现成实现 / 网络参考（逐项列出）
 - 最高影响问题（可多项）：...（技术风险与已知权衡，供你判断，不是提问）
-- 推荐方案：...
+- 推荐方案：...（创意/审美主导任务须并列 2–3 个真实不同方向）
 - 其他选项：...（我已评估并否掉的备选，信息性、不需要你选）
 - 完整计划：...
 - 澄清方式：A 一次性确认推荐方案 / B 逐项问答
 - 需要你确认：...（等你拍板的选项 + 推荐）
+- 确认范围：本次确认锁定目标、范围、交付物与落盘路径；风格与方向不锁死
 ```
 
 **硬性规则：**
@@ -212,8 +262,8 @@ flowchart TD
 1. **续会全面体检（Resume Check，7 项）**——接手既有会话或用户说"继续/检查项目"时必做：① Git 状态 ② 门禁与阶段 ③ 文档与实现同步 ④ 遗漏与矛盾 ⑤ 重锚定原始指令（重读全文，不靠记忆或转述）⑥ 项目根硬检查（首次写盘前核对当前目录=项目根，不符即停）⑦ 先报告、修过期项、再继续。不体检直接续干等于蒙眼开车。
 2. **风险分档**：评估指令的歧义、矛盾、缺失约束与风险——轻 → 轻通道；中 → 全流程；重 → 全流程并考虑指挥官模式。
 3. **调研与盘点优先**：官方文档、相似产品、本地 skills、可复用模板、网络参考（注明来源）；围绕指令发散、攻击候选方案、用证据收敛；与用户确认目标/范围/验收标准后合并完整计划，输出门禁并等待授权。
-4. **分阶段执行**：每阶段关闭前切换到审查面用实际产物核验；全部阶段后做整体到细节的最终验收，真实目标环境验证不能少。
-5. **实操体验闭环**：以真实用户方式亲自操作每一处交互（按钮/按键/手势/反馈/视觉）并截图留证，修复后亲自复验；循环到自评通过或上限（默认 3 轮）。运行环境无 GUI/截图能力时如实标 `UNVERIFIED` 并给出用户自验步骤。CLI / 库 / API / 文档类非 GUI 产物各有对应的证据形态分档。
+4. **分阶段执行**：每阶段关闭前切换到审查面用实际产物核验；全部阶段后做整体到细节的最终验收，真实目标环境验证不能少；收尾必须以用户方视角整体重看结果。
+5. **实操体验闭环**：以真实用户方式亲自操作每一处交互（按钮/按键/手势/反馈/视觉）并截图留证，修复后亲自复验；循环到自评通过或上限（默认 3 轮）。运行环境无 GUI/截图能力时如实标 `UNVERIFIED` 并给出用户自验步骤。
 6. **主动 bug sweep**：不等用户发现，主动执行发散-收敛的缺陷清扫；完成时给出实际文件、命令、测试、Git 状态与截图证据，未验证项标 `UNVERIFIED`。
 
 完整 700+ 行流程（含授权矩阵、发散-收敛协议、审计模板）见
@@ -232,16 +282,16 @@ flowchart TD
   1. 完成声明必须附**磁盘自检清单**——改动文件清单 + 关键 diff + 实跑输出/退出码，逐项有路径。没有清单的完成只是意图；
   2. 回归测试有效必须附 **RED→GREEN 完整循环**——先看它红，再看它绿；
   3. "未发现问题"必须同时报告**检测方法与覆盖面**（工具、视口/环境矩阵、用例清单）——缺任一项按 `UNVERIFIED` 处理。
-- **声称 ↔ 最小充分证据对照表**：[`references/common-failures.md`](references/common-failures.md) 给出 10+ 行"声称 / 不算数 / 最小充分证据"映射（测试通过、功能正确、扫描干净、bug 已修、文档已更新、Agent 报告完成……每行都锚定本仓库真实发生过的失败案例 F1–F6，自留档案、注明修正提交）。**"零命中/零错误"通则**：凡以 0 命中为结论的声明，必须先用已知存在的靶子验证工具真的能命中——静默通过 ≠ 通过。
+- **声称 ↔ 最小充分证据对照表**：[`references/common-failures.md`](references/common-failures.md) 给出 10+ 行"声称 / 不算数 / 最小充分证据"映射（测试通过、功能正确、扫描干净、bug 已修、文档已更新、Agent 报告完成……每行都锚定本仓库真实发生过的失败案例 F1–F6）。**"零命中/零错误"通则**：凡以 0 命中为结论的声明，必须先用已知存在的靶子验证工具真的能命中——静默通过 ≠ 通过。
 - **证据产物是交付物**：日志/截图/验证脚本留在交付目录，不算运行时垃圾；确需删除须先逐条列出被删产物与内容摘要。声明里的计数与覆盖面须与产物**双向一致**——多报少报同罪。
 - **目标相关缺陷不算无关问题**：影响任务目标正确性的发现必须主动修复，或在门禁/报告中显式提请裁决——仅记录了事视同未处理。
-- **`scripts/claim-check.py`** 把完成门机械化：读 markdown 声明清单（`## Files` 存在性 / `## Commands` fresh 实跑+期望退出码 / `## Hashes` 内容 pin），逐项核验，并默认双层拦截：破坏性命令黑名单 + **解释器间接执行默认拒**（`python -c` / `python 脚本.py` 等载荷命令行上不可审计，2026-09-11 实锤的洞；窄白名单放行 `python -m unittest|pytest` 与 `--version`）。
+- **`scripts/claim-check.py`** 把完成门机械化：读 markdown 声明清单（`## Files` 存在性 / `## Commands` fresh 实跑+期望退出码 / `## Hashes` 内容 pin），逐项核验，并默认双层拦截：**25 类破坏性命令黑名单** + **解释器间接执行默认拒**（`python -c` / `python 脚本.py` 等载荷命令行上不可审计；窄白名单放行 `python -m unittest|pytest` 与 `--version`）。两层都不是沙箱。
 
 ---
 
 ## Commander Multi-Agent Mode / 指挥官模式
 
-当任务需要协调**独立的大模型 / Agent**（多个对话窗口、多个宿主、经用户转交）时，对该任务启用模式三协议：
+当任务需要协调**独立的大模型 / Agent**（多个对话窗口、多个宿主、经用户转交）时，对该任务启用模式三协议。
 
 **启用前两道确认**（平台工具可用 ≠ 用户确认）：
 
@@ -253,7 +303,7 @@ flowchart TD
 - **接收方按"角色 + 平台/窗口"命名**（笼统的"另一个 AI"不够）；底层大模型是可选参考元数据——从不主动询问，模型变动不使任务包或台账失效。
 - **角色与承载模型解耦**：换模型、换会话不改变角色职责；身份声明格式 `身份：<角色名> / 任务 ID <ID>。`；身份互斥——不得越权执行另一角色的动作（越权由总指挥证据审查发现，不由自我报告）。
 - **23 字段完整任务包** + 接收方启动提示词（自包含：加载指令 + 身份声明格式 + 简报文件路径）。推荐把任务包落盘为简报文件 `<项目根>/docs/plans/<task-id>-brief.md`——接收方一次 Read 读全包，任务文本不再经对话逐字中转。
-- **项目治理产物以项目根为锚**：身份登记 `docs/agents/`、模式三计划 `docs/plans/`、派发台账 `docs/agents/dispatch-ledger.md`、发现账本 `docs/agents/findings-ledger.md`（修复循环触顶时升档创建）——绝不放进 AI 自己的工作区。
+- **项目治理产物以项目根为锚**：身份登记 `docs/agents/`、模式三计划 `docs/plans/`、派发台账 `docs/agents/dispatch-ledger.md`、发现账本 `docs/agents/findings-ledger.md`——绝不放进 AI 自己的工作区。
 - **最小角色集**：选能完成任务和验证的最小集合（简单任务 → executor；中等 → executor + reviewer + acceptance-auditor……）；审查类角色默认只读；验收审计员必须在真实目标环境验证真实用户路径。
 - **指挥官能力门**：声明"能力缺口"启用扩展时，必须附两条证据（缺什么能力+反证、目标接收方身份文件路径），无证据标 `UNVERIFIED` 回退主干。
 
@@ -287,7 +337,7 @@ flowchart TD
 
 **不需要 / 用更轻的：**
 
-- **单轮或 10 分钟内的小任务** → 只钉 [`docs/minimal-discipline.md`](docs/minimal-discipline.md) 三条速查卡（**Lite 档**：三条本体实测 147 tokens / o200k_base，2026-09-11 重测）；
+- **单轮或 10 分钟内的小任务** → 只钉 [`docs/minimal-discipline.md`](docs/minimal-discipline.md) 三条速查卡（**Lite 档**：三条本体实测 147 tokens / o200k_base）；
 - **宿主已自带同等规划/审查/验收** → 优先用宿主原生流程（首次使用做宿主对齐声明）；
 - **只想提升模型推理/智力** → 装错东西了，这是流程纪律层；
 - 琐碎任务在 skill 内部就走轻通道，不会为小事开全流程。
@@ -296,7 +346,7 @@ flowchart TD
 
 ## Cost & Benefit / 成本与收益
 
-**成本全部实测（o200k_base 分词器，2026-09-10 计数；常驻面随第二十九批增长已于 2026-09-11 重测，其余行日期不变。其他模型分词器略有差异）。收益只写有证据的部分，没实测的如实标注。**
+**成本全部实测（o200k_base 分词器）。收益只写有证据的部分，没实测的如实标注。**
 / All costs are measured; benefits are tagged with their evidence, and unmeasured ones say so.
 
 ### 成本 / Cost
@@ -312,16 +362,13 @@ flowchart TD
 
 ### 直观对比 / What that actually feels like
 
-前两行是精确算术，第三行是量级推算（如实标注）：
-
 | 参照物 | 量级 | 性质 |
 | --- | --- | --- |
 | 常驻面 3,843 tok | **128k 上下文窗口的约 3.0%**（200k 约 1.9%）；≈ 3,191 汉字 ≈ 4 页 A4 中文 | 精确算术 |
 | 20 轮的任务 | 摊销 ≈ **192 tok/轮** | 精确算术 |
 | 全周期（常驻 + 按需）1.8 万–3.3 万 tok | ≈ **一次返工来回的常见量级**（澄清 + AI 重读上下文 + 重做，常见 2 万–10 万 tok） | 量级推算，非实测 |
 
-一句话：**只要拦下一次「假完成返工」，整个任务期的 skill 开销就回本了。** 这也是它把「防假完成」做成第一优先级的原因——那才是 token 账上最贵的一项。
-
+一句话：**只要拦下一次「假完成返工」，整个任务期的 skill 开销就回本了。**
 
 ### 收益 / Benefit
 
@@ -332,14 +379,12 @@ flowchart TD
 | **安全面** | 审查面强制攻击信任边界（注入 / 密钥 / 权限 / AI-LLM 风险）；实测中指挥官层抓到执行者未发现的 P0 | 机制 + 个案 |
 | **开发时间** | **未实测**。机制上：每拦下一次「假完成」就省一整轮返工来回——R2/R3 的分差主要来自返工减少 | 机制推断（如实标注） |
 
-### 首次加载会发生什么 / First load（自检 · 宿主优先 · skill 互补）
+### 首次加载会发生什么 / First load
 
 1. **加载证明自检**：输出版本号、逐字引用门禁硬规则第一条、协作架构简介、实际读过的文件清单——证明「真的加载了」，读不到就请求权限，不伪造。
-2. **宿主对齐（仅首次、仅一次）**：先盘点**宿主已有能力** → 与 skill 小节做重叠映射，被宿主完整覆盖的小节标 **SKIP**（优先用宿主原生流程）→ 裁剪后范围经你确认生效。适配产物可落 `<项目根>/docs/agents/host-alignment.md` 复用；AI 不得为适配而改 skill 本体。
+2. **宿主对齐（仅首次、仅一次）**：先盘点**宿主已有能力** → 与 skill 小节做重叠映射，被宿主完整覆盖的小节标 **SKIP**（优先用宿主原生流程）→ 裁剪后范围经你确认生效。AI 不得为适配而改 skill 本体。
 3. **三条底线永不可被对齐跳过**：证据报告、`UNVERIFIED` 诚实标记、真实环境验收。
 4. 之后才谈任务：琐碎任务走轻通道，其余过门禁。
-
-> 宿主为主、skill 互补——「不冲突、收益最大化」不是口号，是宿主对齐声明的机制本身。
 
 ---
 
@@ -377,7 +422,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Platform agents
 
 > 徽章口径：脚本接受 **13 个平台参数**（`antigravity` 与 `agents` 同指 `~/.agents/skills/`）；安装表含手动路径共 14 行。
 >
-> **只要核心收益？/ Lite install**：可以不装整包——把 [Minimal Usage](#minimal-usage--最小用法) 的三条写进宿主配置即可（三条本体实测 **147 tokens** / o200k_base，2026-09-11 重测；完整治理随时整包叠加，三条中的「全新产物默认中档」边界不要省）。
+> **只要核心收益？/ Lite install**：可以不装整包——把 [Minimal Usage](#minimal-usage--最小用法) 的三条写进宿主配置即可（三条本体实测 **147 tokens** / o200k_base；完整治理随时整包叠加，三条中的「全新产物默认中档」边界不要省）。
 
 **验证安装**——按名调用：
 
@@ -398,7 +443,7 @@ skill 应加载 `SKILL.md`；references 仅在当前阶段需要时按需读取�
 ## Minimal Usage / 最小用法
 
 只想要核心收益、不想要全套治理（23 字段任务包、21 个身份、指挥官协议、自测台账）？
-把 [`docs/minimal-discipline.md`](docs/minimal-discipline.md) 的三条写进宿主配置即可——这就是官方 **Lite 装法**：三条本体实测 **147 tokens**（o200k_base，2026-09-11 重测；整文件 518），覆盖约八成流程收益（工程估算，非实测）：
+把 [`docs/minimal-discipline.md`](docs/minimal-discipline.md) 的三条写进宿主配置即可——这就是官方 **Lite 装法**：三条本体实测 **147 tokens**（o200k_base；cl100k_base 193，整文件 518/697），覆盖约八成流程收益（工程估算，非实测）：
 
 1. **建文件 / 跑命令前先确认**：先输出"我理解的目标 / 风险分档 / 推荐方案 / 需要你确认"，未经确认不动手。"开始""直接做"不算授权；"你决定"算显式委托。
 2. **轻任务免流程**：具体、影响小、可逆、无副作用的轻任务，指令本身即授权，直接做，做完报实际改动与证据。
@@ -413,7 +458,7 @@ skill 应加载 `SKILL.md`；references 仅在当前阶段需要时按需读取�
 ```text
 gpt-series-reasoning-style/
 ├── SKILL.md                 # 入口：加载证明、协作架构、门禁、工作流、References 索引（≈113 行 / ≈4k tok）
-├── VERSION                  # 1.1.0 —— 加载证明只需要 SKILL.md + VERSION
+├── VERSION                  # 1.2.0 —— 加载证明只需要 SKILL.md + VERSION
 ├── AGENTS.md                # 跨运行时入口别名（Codex / Gemini CLI / Copilot CLI）——只指路，权威仍在 SKILL.md
 ├── README.md / LICENSE / CHANGELOG.md / INTERNAL-HISTORY.md
 ├── agents/
@@ -468,13 +513,13 @@ gpt-series-reasoning-style/
 | --- | --- | --- |
 | `scripts/selfcheck.py` | **SB1–SB22 静态自检**：版本/编号一致性、结构完整性、交叉引用、围栏配对、身份与 references 计数、门禁字段多表面同步、语言策略锚点、agentskills.io 规范子集、身份计数跨面一致、写入点换行策略、**散文计数与其来源一致**等。`--out` 输出留痕报告。 | 只验证字面层；语义漂移、逐条双语对齐等**已知盲区在 docstring 里写明**。绿色 = 字面层完好，仅此而已。 |
 | `scripts/selftest-runner.py` | **77 条行为自测**的操作化：`list` 导出逐条提示词；`schema` 生成判定表（判定列留给人填）；`archive` 统计 + 内容指纹出可复现报表。 | 待判定项计作"未运行"而非"通过"；**工具永不自判 PASS**。 |
-| `scripts/mutation-kill.py` | **变异杀伤检验**：把产物自带的自检当被测对象，注入单点变异体、与**基线（未变异）**判定比对、逐错误类别统计**区分率**（= 判定与基线不同的变异体 / 该类有效变异体）。原产物只读（前后 sha256 比对）；**需要且只需要一个基线变异体**，缺基线或基线未测成直接拒绝（exit 2）；ERROR 不计入分母；示例见 `scripts/examples/`。 | 报告的是**自检自己的判定**，不是产物正确性；工具永不自判 PASS。零区分力 ≠ 产物错，只说明该自检对那类错误没有证据（区分率 0% = 该类证据为零）。区分率 ≠ 命中期望，两者是不同的数。 |
-| `scripts/claim-check.py` | **完成声明机械核验**：`## Files` 存在性 / `## Commands` fresh 实跑 + 期望退出码 / `## Hashes` sha256 内容 pin。 | 声明文件按**不可信输入**处理，默认双层拦截（`--allow-dangerous` 人工复核后解锁）：**25 类破坏性命令黑名单** + **解释器间接执行默认拒**（首词是 python/py/pypy/node/nodejs/shell 家族等即拦，`-c/-e/脚本` 载荷命令行上不可审计；窄白名单放行 `-m unittest|pytest`、`--version`；pytest conftest 仍属项目代码——两层都不是沙箱，2026-09-11 实锤补洞）；打印实际执行数供审计。 |
+| `scripts/mutation-kill.py` | **变异杀伤检验**：把产物自带的自检当被测对象，注入单点变异体、与**基线（未变异）**判定比对、逐错误类别统计**区分率**（= 判定与基线不同的变异体 / 该类有效变异体）。原产物只读；**需要且只需要一个基线变异体**，缺基线直接拒绝（exit 2）；ERROR 不计入分母；示例见 `scripts/examples/`。 | 报告的是**自检自己的判定**，不是产物正确性；工具永不自判 PASS。区分率 0% = 该类证据为零；区分率 ≠ 命中期望，两者是不同的数。 |
+| `scripts/claim-check.py` | **完成声明机械核验**：`## Files` 存在性 / `## Commands` fresh 实跑 + 期望退出码 / `## Hashes` sha256 内容 pin。 | 声明文件按**不可信输入**处理，默认双层拦截（`--allow-dangerous` 人工复核后解锁）：**25 类破坏性命令黑名单** + **解释器间接执行默认拒**（首词是 python/py/pypy/node/nodejs/shell 家族等即拦，`-c/-e/脚本` 载荷命令行上不可审计；窄白名单放行 `-m unittest|pytest`、`--version`）；打印实际执行数供审计。两层都不是沙箱。 |
 | `scripts/artifact-check.py` | **项目治理产物结构校验**：`docs/gate/*.md` 十一字段标签与状态机、派发台账非空、发现账本逐轮四字段。 | 结构合规 ≠ 内容真实——授权是否真的发生过，仍靠人核证据。 |
-| `probes/probe-runner.py` | **3 轮对抗探针**的可重跑回归仪器：`list` / `report` / `archive`（append-only 留痕）/ `verify`（机械预检）。 | `verify` 只能把 fail_pattern 命中判 FAIL，**永不自动判 PASS**；pass/fail 由人读宿主输出决定。`probes/last-run.md` 被 git 追踪：跑一次 `archive` 工作树就会变脏，**属预期**（追加式留痕），与 `docs/selftest-run/`（gitignore）处理方式不同。 |
+| `probes/probe-runner.py` | **3 轮对抗探针**的可重跑回归仪器：`list` / `report` / `archive`（append-only 留痕）/ `verify`（机械预检）。 | `verify` 只能把 fail_pattern 命中判 FAIL，**永不自动判 PASS**；pass/fail 由人读宿主输出决定。`probes/last-run.md` 被 git 追踪：跑一次 `archive` 工作树就会变脏，**属预期**（追加式留痕）。 |
 | `generate-banner.py` | 渲染社交预览图 `social-preview.png`（跨平台 CJK 字体回退链）。 | — |
 
-**CI（`.github/workflows/selfcheck.yml`，push/PR 触发，Python 3.9）**：selfcheck SB1–SB22 → `--out` 冒烟 → 官方 `skilllint@1.19.2`（经 uvx，agentskills.io 规范）→ `openai.yaml` YAML 解析 → 检查器 `--help` → **claim-check 两层拦截行为回归**（入仓夹具断言解释器默认拒 + 黑名单都真的拦下、且普通命令仍放行）→ artifact-check 空目录阴性测试 → 探针场景解析 → 77 条自测解析 + 判定表 schema 冒烟 → mutation-kill CLI + 示例 manifest 解析。所有 GitHub Actions 均按 commit SHA 钉死，`pip install` 的包同样钉版本。**CI 步数由 SB21 守卫（当前 14/14 步；守卫自身空转也会被判失败）——2026-09-10 起首次全绿、0 skipped，此前自工作流加上以来 7/7 失败、其后校验被静默跳过，失败历史全部公开。**
+**CI（`.github/workflows/selfcheck.yml`，push/PR 触发，Python 3.9）**：selfcheck SB1–SB22 → `--out` 冒烟 → 官方 `skilllint@1.19.2`（经 uvx，agentskills.io 规范）→ `openai.yaml` YAML 解析 → 检查器 `--help` → **claim-check 两层拦截行为回归**（入仓夹具断言解释器默认拒 + 黑名单都真的拦下、且普通命令仍放行）→ artifact-check 空目录阴性测试 → 探针场景解析 → 77 条自测解析 + 判定表 schema 冒烟 → mutation-kill CLI + 示例 manifest 解析。所有 GitHub Actions 均按 commit SHA 钉死，`pip install` 的包同样钉版本。**CI 步数由 SB21 守卫（当前 14/14 步；守卫自身空转也会被判失败）。**
 
 ---
 
@@ -488,19 +533,15 @@ gpt-series-reasoning-style/
 1. **端到端实测**——真实多阶段构建走完整协议，按公开 16 分制判分（9 核心检查 + 3 预埋陷阱 + 4 阴性检查）；**未触发的陷阱记"未测出"，不记"通过"**。
 2. **对抗探针系列**——一个最小受控提示词跨规则状态复测，每轮只攻击一个疑似弱点：观察 → 定根因 → 修规则 → 复测。是 skill 自身规则的回归测试仪。
 
-**结果一览（11 项）**：
+**核心结果**：
 
-| # | 仪器 | 受测形态 | 结果 | 抓到并回灌的规则缺陷 |
-| --- | --- | --- | --- | --- |
-| 1 | 端到端（指挥官，2 AI + 人类转交） | 指挥官 | 16/16 触发项通过 | "DOM 状态变化 ≠ 渲染证据"入册；指挥官抓到执行者未发现的 P0 |
-| 2–4 | 探针 R1–R3 | 子 Agent 自选 | 三轮各抓一层 | 门禁模板缺形态字段 / 轻通道无排除项 / 规则三处自相矛盾——全部修复 |
-| 5 | 盲测二（A/B 摘要，3 任务双臂） | 速查卡摘要 | 流程轴 0/3→3/3；缺陷 0 vs 0（天花板效应） | 规则无缺陷；摘要省略轻任务免流程付出代价 |
-| 6 | A/B 基线评测 R1（12 任务 × 双臂） | 全量 skill | 81 vs 84——**未跑赢**（环境噪声） | 反哺：Resume Check 5→7 项（重锚定原始指令、项目根硬检查） |
-| 7 | A/B R2（同简报复测） | 全量 skill | **89 vs 87——首次跑赢**；位置违规 6+ → **0** | 完成门连续失守（假完成）→ 候选规则硬化 |
-| 8 | A/B R3（完成门三条款 + claim-check） | 全量 skill | **93 vs 86——三轮最大分差**；T12 完成门弧线 5→3→8；声称失实 3→1→**1** | 新暴露两项候选细化（待裁决） |
-| 9 | 单 Agent 主干端到端 | 主干 | 16/16；bug sweep 抓到 4 个边界缺陷并修复 | "测试全绿 ≠ 功能正确"（`clear()` 在 38/38 全绿时仍错）入册 |
-| 10 | 行为自测 77/77 全量执行（独立宿主会话 × 77 + 带预置工程复跑 10 格） | 全部形态 | R1 逐格判定 39/35/3；装备缺口修复后期望修订，10 格复跑 8/2/0 | 装备缺口 → `self-test.md` 增 `Fixture:` 声明；Test 9/19 期望按授权纪律修订；反哺 SB19/SB20 两个新检查（[运行报告](docs/field-tests/selftest-run-2026-09-10/report.md)） |
-| 11 | 鹈鹕骑车创意 A/B（同模型双臂，产物与 db 数据在案） | 全量 skill | 方向质量倒挂：no 臂复古海报设计系统 + 两段式腿部关节 vs yes 臂通用卡通 + 固定短腿妥协；yes 臂 51 min / output 73,955（db 真值）；UNVERIFIED 按钮标注为 yes 臂独有真价值 | **创意压制 RED**：单一推荐方案被「a」锁死方向 + 盘点以「够用不装」弃用已装设计 skill → 第三十四批四条款（[判读表](docs/field-tests/pelican-ab-2026-09-11/report.md)） |
+| 仪器 | 结果 | 抓到并回灌的规则缺陷 |
+| --- | --- | --- |
+| 端到端 ×2（指挥官 / 单主干） | 均 **16/16** 触发项通过；bug sweep 另抓到 4 个边界缺陷 | "DOM 状态变化 ≠ 渲染证据"、"测试全绿 ≠ 功能正确"（`clear()` 在 38/38 全绿时仍错）入册；指挥官抓到执行者未发现的 P0 |
+| 探针 R1–R3 | 三轮各抓一层，全部修复 | 门禁模板缺形态字段 / 轻通道无排除项 / 规则三处自相矛盾 |
+| **A/B 基线评测三轮**（12 任务 × 双臂 × 3 轮） | 总分 **81 vs 84 → 89 vs 87 → 93 vs 86**；位置违规 6+ → **0**；T12 完成门弧线 5 → 3 → **8** | R1 未跑赢（环境噪声）→ Resume Check 5→7 项；R2 首次跑赢；R3 三轮最大分差。完成门假完成 → 三条款 + claim-check |
+| 77 条行为自测全量执行（独立会话 ×77 + 带预置工程复跑 10 格） | R1 逐格判定 39 PASS / 35 PARTIAL / 3 FAIL；10 格复跑 8/2/0 | 装备缺口 → 增 `Fixture:` 声明；Test 9/19 期望按授权纪律修订；反哺 SB19/SB20 |
+| 鹈鹕骑车创意 A/B（同模型双臂） | 抓到**创意压制**：单一推荐方案被一字回复锁死方向、已装设计 skill 被无理由弃用 | 催生"方向并列 / 可逆冒险 / 盘点默认用 / 让位"四条款；v5 复跑验证方向质量反转（[判读表](docs/field-tests/pelican-ab-2026-09-11/report.md)） |
 
 **A/B 协议**：12 个自包含任务 × 双臂（A 带 skill / B 同宿主同模型不带）× 3 轮；裁判人工逐格核验证据（diff/实跑/运行时验证），不采信被测 AI 自我声明；四维判分（流程/证据/诚实/结果，各 0–2）。详见
 [`docs/field-tests/ab-baseline/`](docs/field-tests/ab-baseline/)。
@@ -534,10 +575,10 @@ gpt-series-reasoning-style/
 
 为防"规则越写越多、检查越加越重"的失控，本仓库给自己立了预算：
 
-- **`SKILL.md` ≤ 250 行**（当前约 113 行 / 实测 3,843 tokens 常驻，o200k_base，2026-09-11 第四十一批后重测）——入口只保留决策点，细节下沉到按需的 references；
+- **`SKILL.md` ≤ 250 行**（当前约 113 行 / 实测 3,843 tokens 常驻，o200k_base）——入口只保留决策点，细节下沉到按需的 references；
 - **静态检查上限 22 项（SB1–SB22）**：新增第 23 项必须先证明它抓到过**真实缺陷**（可指认提交哈希）——SB18/19/20/21/22 均按此准入立项；
 - **77 条行为自测冻结**：只做"旧测失去鉴别力 → 替换"，不再扩容；
-- **收敛优先于加码**：版本对外固定 `1.1.0` 基线，post-1.1.0 增量以 CHANGELOG 的 Unreleased 批次计价，引用时注明批次。
+- **收敛优先于加码**：版本对外固定 `1.2.0` 基线，post-1.2.0 增量以 CHANGELOG 的 Unreleased 批次计价，引用时注明批次。
 
 ---
 
@@ -558,9 +599,9 @@ gpt-series-reasoning-style/
 
 ## Versioning / 版本
 
-- **当前公开版本：`1.1.0`**（2026-09-08 发布基线；`VERSION` 文件为唯一权威）。
-- post-1.1.0 的增量**不跳号**：按批次记入 [`CHANGELOG.md`](CHANGELOG.md) 的 *Unreleased* 节（批次总数以 CHANGELOG Unreleased 最新条目为准），引用规则出处时注明批次。
-- 语义：1.1.0 基线 + Unreleased 批次计价；升版需总指挥裁决。
+- **当前公开版本：`1.2.0`**（发布基线；`VERSION` 文件为唯一权威）。
+- post-1.2.0 的增量**不跳号**：按批次记入 [`CHANGELOG.md`](CHANGELOG.md) 的 *Unreleased* 节（批次总数以 CHANGELOG Unreleased 最新条目为准），引用规则出处时注明批次。
+- 语义：1.2.0 基线 + Unreleased 批次计价；升版需维护者裁决。
 - 完整内部迭代史（`0.1.x`–`3.3.x` 及旧公开线）见 [`INTERNAL-HISTORY.md`](INTERNAL-HISTORY.md)。
 
 ---
