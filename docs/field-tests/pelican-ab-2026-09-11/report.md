@@ -7,7 +7,7 @@
 - 同一模型、同一任务（鹈鹕骑自行车 SVG 动画 HTML 页），A/B 两臂：
   - **no 臂**：直接做，不加载 `gpt-series-reasoning-style`（但宿主自用 frontend-design 定调）。
   - **yes 臂**：先加载本 skill（SKILL.md + VERSION，含加载证明/宿主对齐/实现前确认全流程），用户回「a」确认推荐方案。
-- 产物落盘：`C:\Users\yutia\Desktop\mimo-1\skill-no\鹈鹕骑车.html`（24,882 B）与 `skill-yes\pelican-bike.html`（20,994 B）。yes 臂耗时/token 来自本机 mimocode.db 会话 `ses_ffe5f70829732ffeYrcVXxo7qV`（非估算）。
+- 产物落盘：`%USERPROFILE%\Desktop\mimo-1\skill-no\鹈鹕骑车.html`（24,882 B）与 `skill-yes\pelican-bike.html`（20,994 B）。yes 臂耗时/token 来自本机 mimocode.db 会话 `ses_ffe5f70829732ffeYrcVXxo7qV`（非估算）。
 
 ## 结果
 
@@ -35,7 +35,7 @@
 
 ## v5 复跑（新条款生效后）· 2026-09-11 晚
 
-> 目的：验证第 34/37 批条款（方向并列 / 盘点默认用 / 确认范围 / 让位原则）是否消除首轮 RED。话术：`workspace/test-beds/pelican-ab/单轮版话术-v5-新条款复跑.md` 定稿多轮版（加载声明 + 同一任务，交互轮次与首轮 yes 臂对齐）；测试床 `C:\Users\yutia\Desktop\pelican-ab-v5\`，两臂产物 `{yes,no}\index.html`（19:09/19:11 落盘，总指挥执行）。
+> 目的：验证第 34/37 批条款（方向并列 / 盘点默认用 / 确认范围 / 让位原则）是否消除首轮 RED。话术：`workspace/test-beds/pelican-ab/单轮版话术-v5-新条款复跑.md` 定稿多轮版（加载声明 + 同一任务，交互轮次与首轮 yes 臂对齐）；测试床 `%USERPROFILE%\Desktop\pelican-ab-v5\`，两臂产物 `{yes,no}\index.html`（19:09/19:11 落盘，总指挥执行）。
 
 ### 磁盘与实测证据（lead 亲自读盘 + 真实浏览器截图）
 
