@@ -602,6 +602,7 @@ def run_checks() -> list:
             ("references/project-artifacts.md", r"【实现前确认】（(\d+)\s*字段快照）", "gate snapshot header"),
             ("references/project-artifacts.md", r"gate record 的\s*(\d+)\s*字段标题齐全", "artifact-check prose"),
             ("references/series-reasoning-workflow-en.md", r"confirmation\)\s*[—-]+\s*(\d+)\s*fields:", "EN gate header"),
+            ("site/index.html", r"输出\s*(\d+)\s*字段确认单", "gate field count (site)"),
         ]
         gf_bad = []
         for rel, rx, label in gfam:
