@@ -44,6 +44,8 @@ Earlier handover field tests (versions also consolidated into 1.1.0) validated t
 - [Blind-test first run · 2026-09-08 / 盲测首次执行 · 2026-09-08](blind-test/2026-09-08/report.md)
 - [Blind-test second run · A/B summary test · 2026-09-09 / 盲测二 · A/B 摘要实测 · 2026-09-09](blind-test/2026-09-09/report.md)
 - [A/B baseline eval rounds 1-3 · 12 tasks × 2 arms × 3 rounds · 2026-09-10 / A/B 基线评测三轮 · 2026-09-10](ab-baseline/judgement-sheet.md)
+- [Behavioural self-test 77/77 full run · 2026-09-10 / 77 条行为自测全量执行 · 2026-09-10](selftest-run-2026-09-10/report.md)
+- [Pelican creative A/B · same model, both arms · 2026-09-11 / 鹈鹕骑车创意 A/B · 同模型双臂 · 2026-09-11](pelican-ab-2026-09-11/report.md)
 
 ## Honesty & hygiene rules for these reports / 本目录的报告纪律
 
