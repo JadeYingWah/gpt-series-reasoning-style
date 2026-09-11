@@ -126,9 +126,11 @@ INTERPRETER_NAMES = {
 # `env`, `xargs`, … — are NOT in the family and stay blacklist-only.
 
 # Allowlist: full-command anchored, chaining excluded (`;|&` and backticks /
-# `$()` can never reach end-of-line through the negated class).
-_INTERP_TOKEN = (r"(?:[a-zA-Z]:[\\/][^\s\"']*[\\/])?"      # optional absolute path
-                 r"(?:python(?:[\d.]+)?|py)(?:\.exe)?")
+# `$()` can never reach end-of-line through the negated class). Optional
+# surrounding quotes on the executable token are accepted (2026-09-11 audit:
+# quoted absolute paths are ordinary on Windows).
+_INTERP_TOKEN = (r"[\"']?(?:[a-zA-Z]:[\\/][^\s\"']*[\\/])?"  # optional quotes+absolute path
+                 r"(?:python(?:[\d.]+)?|py)(?:\.exe)?[\"']?")
 SAFE_INTERPRETER_RES = [
     re.compile(r"^" + _INTERP_TOKEN +
                r"\s+(?:-\d(?:\.\d+)?\s+)?"                  # py -3 / py -3.11
@@ -139,14 +141,21 @@ SAFE_INTERPRETER_RES = [
 
 def _argv0(command: str) -> str:
     """First token of the command, reduced to a bare lowercase name
-    (strips drive/path and .exe — `C:/.../python.exe` == `python`)."""
+    (strips surrounding quotes, drive/path and .exe — `C:/.../python.exe`
+    and `"C:/.../python.exe"` both reduce to `python`)."""
     stripped = command.strip()
     if not stripped:
         return ""
-    tok = stripped.split(None, 1)[0]
-    base = re.split(r"[\\/]", tok)[-1].lower()
+    tok = stripped.split(None, 1)[0].strip("\"'")
+    base = re.split(r"[\\/]", tok)[-1].lower().strip("\"'")
     if base.endswith(".exe"):
         base = base[:-4]
+    # Version-suffixed interpreter spellings are the same interpreter:
+    # python3.13 / python3 / pythonw3.12 all default-deny like `python`.
+    # (2026-09-11 audit RED: `python3.13 -c "…"` sailed past the family set.)
+    m = re.fullmatch(r"(pythonw?)(?:\d+(?:\.\d+)*)?", base)
+    if m:
+        base = m.group(1)
     return base
 
 
