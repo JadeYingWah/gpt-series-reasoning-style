@@ -48,6 +48,11 @@ jobs:
           grep -q "command: \`git --version\` exit=0" /tmp/claim-check.out
           grep -q "interpreter-indirect" /tmp/claim-check.out
           grep -q "dangerous pattern" /tmp/claim-check.out
+          # Batch 47: the backtick-wrapped inline-code form used to sail past
+          # the interpreter layer entirely (first token carried a backtick,
+          # missed the family set, 15/15 executed, saw 0 blocked). The fixture
+          # now carries that form too -- three BLOCKED entries or this regressed.
+          grep -q "saw 3 blocked" /tmp/claim-check.out
       - name: artifact-check empty-dir is not a false pass
         run: python scripts/artifact-check.py . | grep -q "NO governance artifacts found"
       - name: Probe scenarios parse

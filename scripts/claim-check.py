@@ -184,8 +184,13 @@ def _argv0(command: str) -> str:
     stripped = command.strip()
     if not stripped:
         return ""
-    tok = stripped.split(None, 1)[0].strip("\"'")
-    base = re.split(r"[\\/]", tok)[-1].lower().strip("\"'")
+    # Backticks too (batch 47 RED): markdown claims routinely wrap the whole
+    # command in inline code — `- \`pypy -c "…"\`` parses to a first token of
+    # \`pypy, which missed both wrapper and interpreter family sets and let
+    # the payload run (15/15 executed, saw 0 blocked). Same class as the
+    # quoted-path bypass fixed in batch 35.
+    tok = stripped.split(None, 1)[0].strip("\"'`")
+    base = re.split(r"[\\/]", tok)[-1].lower().strip("\"'`")
     if base.endswith(".exe"):
         base = base[:-4]
     # Version-suffixed interpreter spellings are the same interpreter:
@@ -205,6 +210,12 @@ def interpreter_block_reason(command: str) -> str | None:
     """Return the interpreter/wrapper reason if this command must default-deny,
     else None. Layer 2 (first-token interpreter) + layer 2b (wrapper unwrap)."""
     effective = command.strip()
+    # Markdown inline code wraps the WHOLE command: `- \`pypy -m unittest\``.
+    # Strip the wrapping pair here so the whitelist search below anchors on
+    # the real command (batch 47: leaving it on broke the allowlist and
+    # blocked legitimate `pypy -m unittest` / `python --version` claims).
+    while len(effective) >= 2 and effective.startswith("`") and effective.endswith("`"):
+        effective = effective[1:-1].strip()
     depth = 0
     while True:
         tok = _argv0(effective)
