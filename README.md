@@ -455,7 +455,7 @@ gpt-series-reasoning-style/
 | `probes/probe-runner.py` | **3 轮对抗探针**的可重跑回归仪器：`list` / `report` / `archive`（append-only 留痕）/ `verify`（机械预检）。 | `verify` 只能把 fail_pattern 命中判 FAIL，**永不自动判 PASS**；pass/fail 由人读宿主输出决定。`probes/last-run.md` 被 git 追踪：跑一次 `archive` 工作树就会变脏，**属预期**（追加式留痕），与 `docs/selftest-run/`（gitignore）处理方式不同。 |
 | `generate-banner.py` | 渲染社交预览图 `social-preview.png`（跨平台 CJK 字体回退链）。 | — |
 
-**CI（`.github/workflows/selfcheck.yml`，push/PR 触发，Python 3.9）**：selfcheck SB1–SB22 → `--out` 冒烟 → 官方 `skilllint@1.19.2`（经 uvx，agentskills.io 规范）→ `openai.yaml` YAML 解析 → 检查器 `--help` → artifact-check 空目录阴性测试 → 探针场景解析 → 77 条自测解析 + 判定表 schema 冒烟 → mutation-kill CLI + 示例 manifest 解析。所有 GitHub Actions 均按 commit SHA 钉死，`pip install` 的包同样钉版本。**CI 步数由 SB21 守卫（当前 13/13 步）——2026-09-10 起首次全绿、0 skipped，此前自工作流加上以来 7/7 失败、其后校验被静默跳过，失败历史全部公开。**
+**CI（`.github/workflows/selfcheck.yml`，push/PR 触发，Python 3.9）**：selfcheck SB1–SB22 → `--out` 冒烟 → 官方 `skilllint@1.19.2`（经 uvx，agentskills.io 规范）→ `openai.yaml` YAML 解析 → 检查器 `--help` → **claim-check 两层拦截行为回归**（入仓夹具断言解释器默认拒 + 黑名单都真的拦下、且普通命令仍放行）→ artifact-check 空目录阴性测试 → 探针场景解析 → 77 条自测解析 + 判定表 schema 冒烟 → mutation-kill CLI + 示例 manifest 解析。所有 GitHub Actions 均按 commit SHA 钉死，`pip install` 的包同样钉版本。**CI 步数由 SB21 守卫（当前 14/14 步；守卫自身空转也会被判失败）——2026-09-10 起首次全绿、0 skipped，此前自工作流加上以来 7/7 失败、其后校验被静默跳过，失败历史全部公开。**
 
 ---
 

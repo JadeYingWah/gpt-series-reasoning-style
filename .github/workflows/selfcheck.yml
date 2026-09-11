@@ -31,6 +31,23 @@ jobs:
         run: |
           python scripts/claim-check.py --help > /dev/null
           python scripts/artifact-check.py --help > /dev/null
+      # Security-layer behaviour regression (batch 44): --help only proves the CLI
+      # imports. The interpreter default-deny was bypassed three times
+      # (python3.13 / quoted path / wrapper prefix) while every CI step stayed
+      # green, because nothing asserted the block actually fires. This step runs a
+      # fixture claims file and requires BOTH layers to block, and one ordinary
+      # command to still execute (a fail-open refactor fails here, loudly).
+      - name: claim-check security layers fire (interpreter deny + blacklist)
+        run: |
+          set +e
+          python scripts/claim-check.py scripts/examples/claim-check-guard.md . > /tmp/claim-check.out 2>&1
+          code=$?
+          set -e
+          cat /tmp/claim-check.out
+          test "$code" -eq 1
+          grep -q "command: \`git --version\` exit=0" /tmp/claim-check.out
+          grep -q "interpreter-indirect" /tmp/claim-check.out
+          grep -q "dangerous pattern" /tmp/claim-check.out
       - name: artifact-check empty-dir is not a false pass
         run: python scripts/artifact-check.py . | grep -q "NO governance artifacts found"
       - name: Probe scenarios parse

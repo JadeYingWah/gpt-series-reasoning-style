@@ -619,11 +619,16 @@ def run_checks() -> list:
             if not p.exists():
                 gf_bad.append(rel + ": missing (surface listed for the gate-count check)")
                 continue
+            hits = 0
             for ln, line in enumerate(read_text(p).splitlines(), 1):
                 for mm in re.finditer(rx, line):
+                    hits += 1
                     if int(mm.group(1)) != n_gate:
                         gf_bad.append("{}:{}: {} states {} != {}".format(
                             rel, ln, label, mm.group(1), n_gate))
+            # 同 SB21 的守卫生效性自检：零命中 = 该族空转，不得静默报"一致"。
+            if hits == 0:
+                gf_bad.append("{}: {} guard is a no-op (regex matched 0 lines)".format(rel, label))
         # 中文数字形态（batch 44 实证缺陷）：README 工具表曾写「`docs/gate/*.md` 十字段标签」，
         # 而 GATE_FIELDS 实为 11。中文数词不便并进上面的正则族，单独按字面拦截——
         # 字段数若真变成 10，这里会红，那正是"改了实现就该改散文"的预期行为。
@@ -690,7 +695,7 @@ def run_checks() -> list:
             ("README.md", r"selfcheck\.py`（(\d+)/(\d+)）", (n_sb, n_sb), "pre-release checklist"),
             ("site/index.html", r"selfcheck\.py</code>\s*SB1[–—-]+SB(\d+)", (n_sb,), "selfcheck table"),
             (wf_rel, r"SB1\.\.SB(\d+)", (n_sb,), "workflow step name"),
-            ("README.md", r"全绿（(\d+)/(\d+) 步", (n_ci, n_ci), "CI step count"),
+            ("README.md", r"CI 步数由 SB21 守卫（当前\s*(\d+)/(\d+)\s*步", (n_ci, n_ci), "CI step count"),
             # Anchored forms: the number must sit where the claim lives, so an
             # unrelated sentence elsewhere in the file cannot trip the check.
             ("README.md", r"SKILL\.md[^\n]*?（≈(\d+)\s*行", (n_skill,), "SKILL.md line count"),
@@ -712,11 +717,20 @@ def run_checks() -> list:
             if not p.exists():
                 pc_bad.append(rel + ": missing (surface listed for the prose-count check)")
                 continue
+            hits = 0
             for ln, line in enumerate(read_text(p).splitlines(), 1):
                 for m in re.finditer(rx, line):
+                    hits += 1
                     got = tuple(int(g) for g in m.groups() if g is not None)
                     if got != want:
                         pc_bad.append("{}:{}: {} states {} != {}".format(rel, ln, label, got, want))
+            # 守卫生效性自检（batch 44）：正则零命中 = 这个族已经空转，永远报"无漂移"。
+            # 实证缺陷：CI 步数族写的是「全绿（N/N 步」，而 README 实际措辞是
+            # 「（当前 N/N 步」——CI 从 12→13→14 步它全程绿灯，因为根本没比过。
+            # 空转守卫比没有守卫更危险（它给出"已检查"的假信号），故显式判失败。
+            if hits == 0:
+                pc_bad.append("{}: {} guard is a no-op (regex matched 0 lines -- the "
+                              "prose wording drifted away from the pattern)".format(rel, label))
         # The next-check ordinal only counts on a line that already states the SB
         # range ("新增第 22 项（SB1–SB21）"); a bare "新增第 3 项" elsewhere must not.
         for rel in ("README.md", "site/index.html"):

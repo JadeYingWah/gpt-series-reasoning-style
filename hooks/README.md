@@ -41,8 +41,11 @@
 Windows（PowerShell 宿主）用等效命令：
 
 ```text
-powershell -NoProfile -Command "Write-Output '[skill-reminder] 多阶段/含糊/高影响任务？考虑按名调用 gpt-series-reasoning-style。琐碎任务直接做。'"
+powershell -NoProfile -Command "Write-Output '[skill-reminder] 多阶段/含糊/高影响任务？考虑按名调用 gpt-series-reasoning-style（实现前门禁 + 证据验收）。琐碎任务直接做。 | Multi-stage/ambiguous task? Consider invoking gpt-series-reasoning-style by name (gate + evidence acceptance). Trivial tasks: just proceed.'"
 ```
+
+> 该命令的输出与 `hooks/session-reminder.sh` **逐字一致**（同为中英双语一行）；历史上这里是一段更短的中文，
+> 同一提醒在两个平台上说法不同，属于不该有的分叉——提醒内容以 `session-reminder.sh` 为唯一权威。
 
 ## 进阶 / Advanced：按提示词触发（更省 token）
 
