@@ -85,3 +85,30 @@ git show 83ed1ec:README.md        | grep '≈.* 行'                 # -> ≈122
 - 多表面同步（检查项数 20→21）：README 徽章 / 树 / 表 / CI 行 / 复杂度预算 / 发布前清单、`site/index.html`、`.github/workflows/selfcheck.yml` 步骤名；次序数 21→22。
 - 复杂度预算上限 20 项→**21 项**；准入行加入 SB21。
 - `CHANGELOG.md` 第三十批条目。
+
+---
+
+## 7. 落地后的加固（2026-09-11 第三十一批 · 全面审查反哺）
+
+第三十批落地当天做的全面审查在本检查自身找出 **3 处缺陷**（P1-1 / P1-2 / P1-3），已修并重新做杀伤测试。**这条守卫抓住过别人，也抓住过自己。**
+
+| 缺陷 | 修复 |
+| --- | --- |
+| **真值来源是字符串正则**，对改名/空格对齐脆弱（实测 `c = new(` → `c  =  new(` 即 21→0，会要求 8 个表面把检查项数改成 0） | 真值改用**运行时 `len(checks)`**（SB21 是最后一项，天然免疫格式与改名）；文件定义扫描降级为**交叉校验**，两者不一致即响亮报错（"SB truth source is unreliable … refusing to compare surfaces"），**绝不用失配的数字去改表面**。附注：定义扫描容忍任意空白（`\bc\s*=\s*new\(\s*\d+`），纯空格重构实测**完全免疫** |
+| 三条正则对**整份 README** 逐行匹配，潜在误报 | 收紧锚点：`≈N 行` 要求带全角括号前缀、`N 份 references` 要求数字在行首；**次序数（"新增第 N 项"）改为共现规则**——只在已含 SB 区间的行上校验，散文里孤立的"新增第 3 项"不再误报 |
+| **CI 步骤数不在四族登记表内**（README 声称 13 步、workflow 实际 12 步，自 `95d1b03` 起漂移） | 登记第 5 族：CI 步骤数，真值来自新增的 `_yaml_step_count()`（**相对 `steps:` 行的缩进**计数，整文件重排不改变计数；stdlib 实现，不引入 yaml 依赖）。workflow 补上 mutation-kill 冒烟步骤后实际 13 步，README 的 13/13 **首次与真值一致且受守卫** |
+
+**加固后的杀伤测试（临时副本，6+2 变异体，全绿复原）**：
+
+| 变异体 | SB21 判定 |
+| --- | --- |
+| M1 删掉新增 CI 步（13→12） | **RED**：`CI step count states (13,13) != (12,12)` |
+| M2 README 徽章 21→20 | **RED** |
+| M3 README CI 步数 13/13→12/13 | **RED** |
+| M4 在 SB21 之后追加 SB22 | **RED**：`SB truth source is unreliable: definition scan found 22 but 21 registered` |
+| M5 次序数 22→23 | **RED** |
+| M6 纯空格对齐 `c = new(` → `c  =  new(` | **GREEN（完全免疫，旧实现会误导向全 0）** |
+| M7 真把局部 helper 改名 `new`→`mk`（代码仍可运行） | **RED**：`SB truth source is unreliable … found 0 but 21 registered` |
+| 复原 | GREEN 21/21 |
+
+**已知剩余盲区**：定义扫描对**注释里的** `c = new(` 也会计数（当前无此形态）；CI 步数只统计**第一个** `steps:` 块（单 job 工作流，当前成立）。

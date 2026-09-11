@@ -25,7 +25,7 @@ jobs:
         run: cd .. && uvx skilllint@1.19.2 check gpt-series-reasoning-style
       - name: openai.yaml parses
         run: |
-          python -m pip install pyyaml --quiet
+          python -m pip install pyyaml==6.0.2 --quiet
           python -c "import yaml; yaml.safe_load(open('agents/openai.yaml', encoding='utf-8')); print('yaml ok')"
       - name: Checker CLIs respond to --help
         run: |
@@ -39,3 +39,7 @@ jobs:
         run: python scripts/selftest-runner.py list > /dev/null
       - name: Judgement sheet writes (schema smoke, Python 3.9 safe)
         run: python scripts/selftest-runner.py schema > /dev/null
+      - name: mutation-kill CLI + in-repo example manifest
+        run: |
+          python scripts/mutation-kill.py --help > /dev/null
+          python -c "import json; json.load(open('scripts/examples/mutation-kill-demo.manifest.json', encoding='utf-8')); print('manifest ok')"

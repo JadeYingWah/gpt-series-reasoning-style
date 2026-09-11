@@ -443,19 +443,19 @@ gpt-series-reasoning-style/
 
 ## Tooling / 工具链
 
-全部工具为 Python 3.9+ 标准库实现（无第三方依赖），设计哲学一致：**机器只做机器能诚实做的事，判卷的是人。**
+全部**校验类**工具为 Python 3.9+ 标准库实现（无第三方依赖），设计哲学一致：**机器只做机器能诚实做的事，判卷的是人。**（维护者工具 `generate-banner.py` 额外需要 Pillow，不属运行时面、不进 CI。）
 
 | 工具 | 作用 | 诚实边界 |
 | --- | --- | --- |
 | `scripts/selfcheck.py` | **SB1–SB21 静态自检**：版本/编号一致性、结构完整性、交叉引用、围栏配对、身份与 references 计数、门禁字段多表面同步、语言策略锚点、agentskills.io 规范子集、身份计数跨面一致、写入点换行策略、**散文计数与其来源一致**等。`--out` 输出留痕报告。 | 只验证字面层；语义漂移、逐条双语对齐等**已知盲区在 docstring 里写明**。绿色 = 字面层完好，仅此而已。 |
 | `scripts/selftest-runner.py` | **77 条行为自测**的操作化：`list` 导出逐条提示词；`schema` 生成判定表（判定列留给人填）；`archive` 统计 + 内容指纹出可复现报表。 | 待判定项计作"未运行"而非"通过"；**工具永不自判 PASS**。 |
-| `scripts/mutation-kill.py` | **变异杀伤检验**：把产物自带的自检当被测对象，注入单点变异体、逐错误类别统计**区分率**（= 判定与基线不同的变异体 / 该类有效变异体）。原产物只读（前后 sha256 比对），ERROR 不计入分母；示例见 `scripts/examples/`。 | 报告的是**自检自己的判定**，不是产物正确性；工具永不自判 PASS。零区分力 ≠ 产物错，只说明该自检对那类错误没有证据（区分率 0% = 该类证据为零）。 |
-| `scripts/claim-check.py` | **完成声明机械核验**：`## Files` 存在性 / `## Commands` fresh 实跑 + 期望退出码 / `## Hashes` sha256 内容 pin。 | 声明文件按**不可信输入**处理：默认拦截 17 类破坏性命令（`--allow-dangerous` 人工复核后解锁）；打印实际执行数供审计。 |
+| `scripts/mutation-kill.py` | **变异杀伤检验**：把产物自带的自检当被测对象，注入单点变异体、与**基线（未变异）**判定比对、逐错误类别统计**区分率**（= 判定与基线不同的变异体 / 该类有效变异体）。原产物只读（前后 sha256 比对）；**需要且只需要一个基线变异体**，缺基线或基线未测成直接拒绝（exit 2）；ERROR 不计入分母；示例见 `scripts/examples/`。 | 报告的是**自检自己的判定**，不是产物正确性；工具永不自判 PASS。零区分力 ≠ 产物错，只说明该自检对那类错误没有证据（区分率 0% = 该类证据为零）。区分率 ≠ 命中期望，两者是不同的数。 |
+| `scripts/claim-check.py` | **完成声明机械核验**：`## Files` 存在性 / `## Commands` fresh 实跑 + 期望退出码 / `## Hashes` sha256 内容 pin。 | 声明文件按**不可信输入**处理：默认拦截 24 类破坏性命令（`--allow-dangerous` 人工复核后解锁）；打印实际执行数供审计。 |
 | `scripts/artifact-check.py` | **项目治理产物结构校验**：`docs/gate/*.md` 十字段标签与状态机、派发台账非空、发现账本逐轮四字段。 | 结构合规 ≠ 内容真实——授权是否真的发生过，仍靠人核证据。 |
-| `probes/probe-runner.py` | **3 轮对抗探针**的可重跑回归仪器：`list` / `report` / `archive`（append-only 留痕）/ `verify`（机械预检）。 | `verify` 只能把 fail_pattern 命中判 FAIL，**永不自动判 PASS**；pass/fail 由人读宿主输出决定。 |
+| `probes/probe-runner.py` | **3 轮对抗探针**的可重跑回归仪器：`list` / `report` / `archive`（append-only 留痕）/ `verify`（机械预检）。 | `verify` 只能把 fail_pattern 命中判 FAIL，**永不自动判 PASS**；pass/fail 由人读宿主输出决定。`probes/last-run.md` 被 git 追踪：跑一次 `archive` 工作树就会变脏，**属预期**（追加式留痕），与 `docs/selftest-run/`（gitignore）处理方式不同。 |
 | `generate-banner.py` | 渲染社交预览图 `social-preview.png`（跨平台 CJK 字体回退链）。 | — |
 
-**CI（`.github/workflows/selfcheck.yml`，push/PR 触发，Python 3.9）**：selfcheck SB1–SB21 → `--out` 冒烟 → 官方 `skilllint@1.19.2`（经 uvx，agentskills.io 规范）→ `openai.yaml` YAML 解析 → 检查器 `--help` → artifact-check 空目录阴性测试 → 探针场景解析 → 77 条自测解析 + 判定表 schema 冒烟。所有 GitHub Actions 均按 commit SHA 钉死。**2026-09-10 起首次全绿（13/13 步，0 skipped）——此前自工作流加上以来 7/7 失败、其后校验被静默跳过，失败历史全部公开。**
+**CI（`.github/workflows/selfcheck.yml`，push/PR 触发，Python 3.9）**：selfcheck SB1–SB21 → `--out` 冒烟 → 官方 `skilllint@1.19.2`（经 uvx，agentskills.io 规范）→ `openai.yaml` YAML 解析 → 检查器 `--help` → artifact-check 空目录阴性测试 → 探针场景解析 → 77 条自测解析 + 判定表 schema 冒烟 → mutation-kill CLI + 示例 manifest 解析。所有 GitHub Actions 均按 commit SHA 钉死，`pip install` 的包同样钉版本。**CI 步数由 SB21 守卫（当前 13/13 步）——2026-09-10 起首次全绿、0 skipped，此前自工作流加上以来 7/7 失败、其后校验被静默跳过，失败历史全部公开。**
 
 ---
 

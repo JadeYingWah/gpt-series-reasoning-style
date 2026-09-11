@@ -57,6 +57,10 @@ import sys
 
 # Best-effort destructive-command blacklist (H1). Case-insensitive. Not a
 # sandbox — the point is to stop the obvious footguns before a human reviews.
+# 2026-09-11: `git restore` and `git checkout .` added — both discard worktree
+# changes exactly like the already-blocked `git checkout -- .`; blocking one
+# spelling of a destructive op while allowing its synonym was a hole, not a
+# judgement call.
 DANGEROUS_RES = [
     r"\brm\b[^|;&]*-[a-zA-Z]*[rf]",
     r"\bdel\b\s+/[sq]",
@@ -65,11 +69,18 @@ DANGEROUS_RES = [
     r"\bformat\b\s+[a-zA-Z]:",
     r"\bshutdown\b",
     r"\bgit\s+push\b[^|;&]*(-f\b|--force)",
+    r"\bgit\s+push\b[^|;&]*--delete\b",
+    r"\bgit\s+push\b[^|;&]*:[a-zA-Z]",          # `git push origin :branch`
+    r"\bgit\s+push\b[^|;&]*\s\+",               # `git push origin +branch` (forced)
     r"\bgit\s+reset\s+--hard",
     r"\bgit\s+clean\s+-[a-zA-Z]*[fd]",
     r"\bgit\s+checkout\s+--\s+\.?\s*$",
+    r"\bgit\s+checkout\s+\.",                   # `git checkout .` / `./src` == restore
+    r"\bgit\s+restore\b(?!.*--staged)",         # discards worktree changes; --staged only unstages
+    r"\bgit\s+branch\s+-[a-zA-Z]*(?-i:D)",      # 仅大写 -D 强删；小写 -d 只删已合并分支，放行
     r"\bmkfs\b",
     r"\bdd\b\s+if=",
+    r"\btruncate\b\s+(?:-s\s*|--size=)0",
     r"\b(curl|wget)\b[^|;&]*\|\s*(ba)?sh\b",
     r"\b(Invoke-Expression|iex)\b",
     r"\breg\s+(add|delete)\b",

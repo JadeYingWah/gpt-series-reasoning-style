@@ -128,7 +128,8 @@ def main():
 
 
     def text_width(d, text, ft):
-        return d.textbbox((0, 0), text, font=ft)[2]
+        bbox = d.textbbox((0, 0), text, font=ft)
+        return bbox[2] - bbox[0]      # 与 center_text 同口径：含左伸（overhang）修正
 
 
     def center_text(d, cx, y, text, ft, fill):

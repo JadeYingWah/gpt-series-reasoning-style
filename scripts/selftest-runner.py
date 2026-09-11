@@ -193,9 +193,6 @@ def cmd_archive(sheet: str, commit: str) -> int:
     if not rows:
         print("ERROR: no data rows found in " + str(p))
         return 2
-    seen = {}
-    for r in rows:
-        seen[r["verdict"]] = seen.get(r["verdict"], 0) + 1
     human = [r["verdict"] for r in rows]
     decided = sum(1 for v in human if v in {"PASS", "PARTIAL", "FAIL"})
     pass_n = sum(1 for v in human if v == "PASS")

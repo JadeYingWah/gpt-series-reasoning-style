@@ -75,8 +75,11 @@ def cmd_archive(args):
         sys.exit("evidence is required")
     # Keep every archive entry on ONE line (append-only format invariant):
     # embedded newlines in evidence would corrupt the line-oriented archive
-    # and silently break cmd_report's per-line filtering.
-    evidence = " ".join(evidence.split())
+    # and silently break cmd_report's per-line filtering. Backticks are
+    # replaced too: last-run.md is a tracked .md file that SB6 fence-pairing
+    # scans, so three backticks in evidence would flip the repo-wide fence
+    # parity and fail an unrelated check.
+    evidence = " ".join(evidence.split()).replace("`" * 3, "'''")
     stamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     with ARCHIVE.open("a", encoding="utf-8", newline="\n") as f:
         f.write("- [{stamp}] **{scid} ({round_}; since rule {rule_ver})** "

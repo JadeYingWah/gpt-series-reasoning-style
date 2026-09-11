@@ -36,9 +36,15 @@ if ((Test-Path -LiteralPath $dest) -and -not $Force) {
 # Safety guard (C3-3): refuse to install into the skill repo itself — a
 # pwd-based DEST run from the repo root would otherwise nest the repo
 # inside itself via Copy-Item -Recurse.
-$destFull = [System.IO.Path]::GetFullPath($dest)
-$sourceFull = [System.IO.Path]::GetFullPath($source)
-if ($destFull -like "$sourceFull*") {
+# Must be a real descendant, not a prefix match: -like "$source*" also matches
+# sibling directories that merely share a name prefix (e.g. the
+# gpt-series-reasoning-style-workspace folder), which would refuse a legal
+# install for a wrong reason.
+$destFull = [System.IO.Path]::GetFullPath($dest).TrimEnd('\')
+$sourceFull = [System.IO.Path]::GetFullPath($source).TrimEnd('\')
+if ($destFull -ieq $sourceFull -or
+    $destFull.StartsWith($sourceFull + [System.IO.Path]::DirectorySeparatorChar,
+                         [System.StringComparison]::OrdinalIgnoreCase)) {
   Write-Error "Refusing: destination is inside the skill repo itself ($dest)"
   exit 1
 }
