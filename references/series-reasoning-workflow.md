@@ -395,7 +395,7 @@ Findings that directly affect the task's acceptance goal are **not** "unrelated 
 
 After all planned stages complete:
 
-1. Inspect from overall goal to detail: product level, user flow, architecture, module, function, code, edge cases.
+1. Inspect from overall goal to detail: product level, user flow, architecture, module, function, code, edge cases. Before closing, step back and re-view the whole result from the end user's seat — does it make sense as a whole, does it serve the real goal, is anything odd, excessive, or missing to them; item-by-item checks passing is not the same as the result being reasonable. / 收尾前以用户方视角整体重看结果：作为交付物在用户眼里是否成立、是否解决真实目标、有无奇怪/多余/缺失之处——逐项检查通过不等于结果合理。
 2. Re-check acceptance criteria and compare them with the actual result.
 3. Run final commands, tests, and checks.
 4. If any problem is found, add extra stage tasks and execute them under the same staged protocol.
