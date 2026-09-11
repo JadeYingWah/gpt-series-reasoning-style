@@ -44,7 +44,7 @@
 | 文件 | index.html 19,874 B | index.html 16,965 B |
 | keyframes | **13 组**（scroll-far/mid/near 三层视差、hop-leg-l/r 两段关节腿、pouch-sway、wing-flap、blink） | 11 组（spin/bob/flap/pedal 等常规组） |
 | 美术方向 | **黄昏湖畔**：落日渐变（#2a3a5c→#c45c48→#f0a06a）、电线杆、芦苇、湖面倒影，标题「鹈鹕骑行 · Pelican Ride」 | 通用白天卡通：蓝天绿丘，标题「鹈鹕骑自行车」，无风格关键词 |
-| 真实浏览器验收（用户方视角） | 鹈鹕正确骑在路面上，构图完整（截图 `evidence-v5/yes-dusk-lakeside.png`） | **布局缺陷：骑车组整体悬在左上角被画面裁切，鹈鹕未骑在路上**（截图 `evidence-v5/no-bike-clipped-topleft.png`） |
+| 真实浏览器验收（用户方视角） | 整体构图正确骑在路面上；**部件级缺陷见下「总指挥动画实测」**（截图 `evidence-v5/yes-dusk-lakeside.png`） | **布局缺陷：骑车组整体悬在左上角被画面裁切，鹈鹕未骑在路上**（截图 `evidence-v5/no-bike-clipped-topleft.png`） |
 | 缺陷机理 | — | `@keyframes bob` 对 `.bike-rig` 做 CSS `transform` 动画，**覆盖了 SVG 标签的 `transform="translate(300 250)"` 属性**，骑车组被甩到原点（经典 SVG transform 覆盖坑，用户一眼可见、且作者未自验发现） |
 
 ### 七项判定表
@@ -68,7 +68,7 @@
 | no | 鹈鹕不在路上；自行车两个轮子同时往左上角飞，重复飞来飞去 | 同一类 bug 三连：`bob`（整车）、`spin`（轮子）等 CSS 动画 transform **覆盖** SVG 属性 `translate(300 250)` / `translate(70 160)` / `translate(300 160)`，骑车组+两轮全被甩到原点附近反复旋转 |
 | yes | 腿脚一直在画面最左上角走；眼睛固定在画面中心点不变（但会眨）；长出一条手臂固定在车把上，翅膀在摇摆 | ①`leg-l/r` 属性 `translate(450/462 400)` 被 `hop-leg-l/r` 的 `rotate()` 覆盖→腿甩到原点旋转；②`eye-blink` 属性 `translate(58 -82)` 被 `blink` 的 `scaleY()` 覆盖→眼落在组原点；③`wing-flap` 组**无属性 transform**，故翅膀摇摆正常——同一坑两中一躲；④手臂非错位：源码注释 `<!-- Arms / wings gripping handlebars -->`，AI 有意只画一条臂搭在车把上（解剖学错误：鸟类无臂） |
 
-**判读修订（取代上一节第 4 点）**：
+**判读修订（限定首轮「判读」第 3 点「完成门为真价值」：诚实机器为真价值成立，但本案中完成门的真实环境验收环节未兑现，见第 1 点）**：
 
 1. **两臂是同一 bug 类，yes 臂只是中得少**：CSS transform 覆盖 SVG 属性——no 臂三连中（整车+两轮），yes 臂两中（腿、眼）一躲（翅膀组恰好没写属性 transform）。这削弱了「完成门治懒→质量反超」的强归因：yes 臂同样交付了带部件级位移缺陷的产物，说明本次完成门**没有真正执行「真实环境渲染查看部件」**（或看了整体没看部件）。
 2. **总指挥归因（强制不偷懒）保留为弱形式**：yes 臂整体构图、美术方向、动画复杂度仍显著优于 no 臂，skill 收益为真；但「不能偷懒」在本案只兑现为「少偷懒」，完成门的真实环境验收环节疑似被跳过——**待会话记录核验 #7，此项权重上升为判定四条款成败的关键**。
@@ -79,4 +79,4 @@
 
 - [ ] 总指挥转交 v5 yes 臂会话记录（补 #1/#2/#3/#7）+ 平台 token/时长统计（补 #6）
 - [ ] 补齐后本表定稿；若 #1-#3 过程项也达成，则四条款通过真实案件 RED 复核
-- [ ] 9 个本地 commit 待总指挥手动 push（最新 `7eb2a4a`），push 后 `git log origin/main -1 --oneline` 验收
+- [ ] 本地 commit 待总指挥手动 push（累计数以 `git log origin/main..main --oneline` 实时为准，不手抄），push 后 `git log origin/main -1 --oneline` 验收

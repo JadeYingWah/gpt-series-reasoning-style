@@ -53,8 +53,10 @@ Usage:
 
 The blacklist stays best-effort and NOT a sandbox: PowerShell aliases (ri /
 del with -Recursion), long options (--recursive --force), and other
-undetected spellings are NOT covered. The interpreter default-deny closes
-the interpreter-indirect hole; it does not turn this tool into a sandbox.
+undetected spellings are NOT covered. The interpreter default-deny (layer 2)
+plus wrapper unwrap (layer 2b: env/nice/timeout/call/... -> re-apply the same
+deny to the effective command; sudo/doas/xargs block on sight) closes the
+interpreter-indirect hole; it does not turn this tool into a sandbox.
 
 Exit codes: 0 = all claims verified, 1 = at least one failed, 2 = usage /
 unreadable claims file.
@@ -122,8 +124,9 @@ INTERPRETER_NAMES = {
     "npx", "uvx", "pipx",   # download-and-run package runners
 }
 # Known limits (documented, best-effort): exec-style tools that compile or
-# download and then run code — `go run`, `cargo run`, `make`, `uv`, `npm`,
-# `env`, `xargs`, … — are NOT in the family and stay blacklist-only.
+# download and then run code — `go run`, `cargo run`, `make`, `uv`, `npm`
+# — are NOT in the family and stay blacklist-only. (`env` / `xargs` left this
+# list in the 2026-09-11 second audit: see WRAPPERS below.)
 
 # Allowlist: full-command anchored, chaining excluded (`;|&` and backticks /
 # `$()` can never reach end-of-line through the negated class). Optional
@@ -137,6 +140,34 @@ SAFE_INTERPRETER_RES = [
                r"-m\s+(?:unittest|pytest)\b[^\n;|&`$]*$", re.I),
     re.compile(r"^" + _INTERP_TOKEN + r"\s+(?:--version|-V)\s*$", re.I),
 ]
+
+# Layer 2b (2026-09-11 second audit, batch 39): wrapper-prefixed interpreters.
+# `env python -c "…"`, `nice python -c`, `timeout 5 python -c`, `call python -c`
+# (cmd builtin) all executed their payloads live (4/4 PASS, 0 blocked) because
+# layer 2 inspected only the FIRST token. Wrappers are transparent executors:
+# known ones are unwrapped (skipping their own leading arguments) and the same
+# default-deny + allowlist re-applies to the effective command, bounded depth.
+# Two fail-closed categories:
+#   * unwrappable whose own args don't match the known form -> BLOCK
+#     (`env -i python -c` — unknown arg shape, don't guess);
+#   * block-on-sight (sudo/doas/xargs — privilege escalation / stream fan-in,
+#     their argument grammar can hide the interpreter anywhere, e.g.
+#     `sudo -u root python -c`, `xargs -a list python -c`; no legitimate
+#     fresh-verification claim needs them).
+WRAPPER_ARGRES = {
+    "env":     re.compile(r"(?:[A-Za-z_]\w*=[^\s]*\s+)*"),
+    "nice":    re.compile(r"(?:-n\s+\d+\s+|-\d+\s+)*"),
+    "timeout": re.compile(r"(?:--?\S+\s+)*\d+(?:\.\d+)?[a-z]?\s+"),
+    "call":    re.compile(r""),
+    "command": re.compile(r""),
+    "exec":    re.compile(r""),
+    "nohup":   re.compile(r""),
+    "time":    re.compile(r""),
+    "stdbuf":  re.compile(r"(?:-\S+\s+)*"),
+    "setsid":  re.compile(r"(?:-\S+\s+)*"),
+}
+BLOCK_ON_SIGHT_WRAPPERS = {"sudo", "doas", "xargs"}
+WRAPPER_UNWRAP_DEPTH = 4
 
 
 def _argv0(command: str) -> str:
@@ -160,14 +191,39 @@ def _argv0(command: str) -> str:
 
 
 def interpreter_block_reason(command: str) -> str | None:
-    """Return the interpreter name if this command must default-deny, else None."""
-    argv0 = _argv0(command)
-    if argv0 not in INTERPRETER_NAMES:
+    """Return the interpreter/wrapper reason if this command must default-deny,
+    else None. Layer 2 (first-token interpreter) + layer 2b (wrapper unwrap)."""
+    effective = command.strip()
+    depth = 0
+    while True:
+        tok = _argv0(effective)
+        if tok in BLOCK_ON_SIGHT_WRAPPERS:
+            return f"wrapper:{tok}"
+        if tok not in WRAPPER_ARGRES:
+            break
+        depth += 1
+        if depth > WRAPPER_UNWRAP_DEPTH:
+            return "wrapper:unwrap-depth-exceeded"   # fail closed
+        parts = effective.split(None, 1)
+        rest = parts[1] if len(parts) > 1 else ""
+        if not rest.strip():
+            return None   # bare `env` / `nohup` with nothing to run
+        m = WRAPPER_ARGRES[tok].match(rest)
+        if m is None or (m.end() == 0 and rest.startswith("-")):
+            # Unknown arg shape for this wrapper (`env -i python -c`,
+            # `nice --adjustment=5 python -c`) -> fail closed, don't guess.
+            return f"wrapper:{tok}"
+        effective = rest[m.end():].strip()
+        if not effective:
+            return None   # wrapper consumed everything (e.g. `env FOO=1` only)
+    if tok not in INTERPRETER_NAMES:
         return None
+    # Allowlist is anchored to the UNWRAPPED effective command, so
+    # `timeout 5 python --version` stays as usable as bare `python --version`.
     for res in SAFE_INTERPRETER_RES:
-        if res.search(command):
+        if res.search(effective):
             return None
-    return argv0
+    return tok
 
 
 def parse_claims(text: str) -> dict:

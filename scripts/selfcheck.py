@@ -578,6 +578,47 @@ def run_checks() -> list:
     else:
         c.pass_("all text-write call sites pin newline= ({} python files scanned)".format(len(py_files)))
 
+    # SB22 gate field-count prose matches artifact-check GATE_FIELDS (evidence:
+    # commits 65def17..8437a6d -- batch 34 grew the gate to 11 fields
+    # (artifact-check GATE_FIELDS, SKILL.md, workflow CN/EN, project-artifacts
+    # snapshot all updated) but README still said "10 字段门禁 / 10 字段确认单"
+    # in THREE live places and project-artifacts.md said "10 字段标题齐全"
+    # while its own snapshot line said 11 -- batch 35's audit even asserted
+    # such remnants only existed on dated surfaces, which this disproves.
+    # Admitted under README's own rule for a 22nd check: reproducible defect,
+    # identifiable hashes (65def17 introduced the drift, 8437a6d still had it).
+    # Truth source: the GATE_FIELDS list in scripts/artifact-check.py itself
+    # (parsed, not imported, so the check cannot be fooled by import order).
+    c = new(22, "gate field-count prose matches GATE_FIELDS")
+    ac_text = read_text(REPO_ROOT / "scripts" / "artifact-check.py")
+    m_gate = re.search(r"GATE_FIELDS\s*=\s*\[(.*?)\]", ac_text, re.S)
+    if not m_gate:
+        c.fail("cannot locate GATE_FIELDS in scripts/artifact-check.py")
+    else:
+        n_gate = len(re.findall(r'"[^"]+"', m_gate.group(1)))
+        gfam = [
+            ("README.md", r"过\s*(\d+)\s*字段门禁", "gate field count (intro)"),
+            ("README.md", r"输出\s*(\d+)\s*字段确认单", "gate field count (mechanism)"),
+            ("references/project-artifacts.md", r"【实现前确认】（(\d+)\s*字段快照）", "gate snapshot header"),
+            ("references/project-artifacts.md", r"gate record 的\s*(\d+)\s*字段标题齐全", "artifact-check prose"),
+            ("references/series-reasoning-workflow-en.md", r"confirmation\)\s*[—-]+\s*(\d+)\s*fields:", "EN gate header"),
+        ]
+        gf_bad = []
+        for rel, rx, label in gfam:
+            p = REPO_ROOT / rel
+            if not p.exists():
+                gf_bad.append(rel + ": missing (surface listed for the gate-count check)")
+                continue
+            for ln, line in enumerate(read_text(p).splitlines(), 1):
+                for mm in re.finditer(rx, line):
+                    if int(mm.group(1)) != n_gate:
+                        gf_bad.append("{}:{}: {} states {} != {}".format(
+                            rel, ln, label, mm.group(1), n_gate))
+        if gf_bad:
+            c.fail("gate field-count drift: " + "; ".join(gf_bad[:8]))
+        else:
+            c.pass_("GATE_FIELDS={} consistent across {} prose surfaces".format(n_gate, len(gfam)))
+
     # SB21 prose counts match their source of truth (evidence: commits
     # dacb935..eef524f -- selfcheck.py defined 17 checks while README's
     # Complexity-Budget line AND site/index.html both still stated "SB1-SB16";

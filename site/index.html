@@ -88,7 +88,7 @@
   <h2>自我验证 · The Skill Verifies Itself</h2>
   <table>
     <tr><th>层 · Layer</th><th>机制 · Mechanism</th><th>说明 · Note</th></tr>
-    <tr><td>机器自检</td><td><code>scripts/selfcheck.py</code> SB1–SB21</td><td>版本一致性、门禁字段多表面同步、身份计数跨面一致、写入点换行策略、散文计数与来源一致、结构完整性等；新增第 22 项须先证明抓到过真实缺陷</td></tr>
+    <tr><td>机器自检</td><td><code>scripts/selfcheck.py</code> SB1–SB22</td><td>版本一致性、门禁字段多表面同步、身份计数跨面一致、写入点换行策略、散文计数与来源一致、门禁字段数与 GATE_FIELDS 一致、结构完整性等；新增第 23 项须先证明抓到过真实缺陷</td></tr>
     <tr><td>行为自测</td><td>77 条 · <code>references/self-test.md</code></td><td>人判定、工具只记录不造假（冻结不再扩容）</td></tr>
     <tr><td>对抗探针</td><td>3 轮 · <code>probes/</code></td><td>可重跑的回归探针，逐轮留痕</td></tr>
     <tr><td>实测证据</td><td><code>docs/field-tests/</code></td><td>端到端指挥官实测 + 探针报告 + 盲测（含证据强度降级声明）</td></tr>
