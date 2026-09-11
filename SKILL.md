@@ -40,13 +40,13 @@ description: 'Process-discipline layer only — not a reasoning-capability boost
 
 ## 协作架构：单 Agent 主干 + 两个按需扩展
 
-主干（默认，原模式1）· 单 Agent 模式 —— 同一模型内部切换规划面、执行面、审查面；绝大多数任务由此完成；形态由 AI 按任务事实自选并在门禁声明一行理由（见 agent-modes 的模式自选），用户指名优先。
+主干（默认，原模式1）· 单 Agent 模式 —— 同一模型内部切换规划面、执行面、审查面；绝大多数任务由此完成。
 
 扩展A（原模式2）· 子 Agent 增强 —— 任务适合并行或隔离（并行分支、独立审查）且宿主支持子 Agent 时，把部分角色面映射为子 Agent；启用前必须先确认子 Agent 能力，能力未证实退回主干并标记 `UNVERIFIED`。
 
 扩展B（原模式3）· 指挥官多 Agent —— 需要协调独立大模型/Agent 或经用户转交时，对该任务启用模式三协议（角色身份确认、协调通道确认、完整任务包与闭环）；只影响启用的任务，不改变主干地位。
 
-可混合搭配：同一任务的不同阶段可用不同形态（如主干实现 + 子 Agent 并行分支 + 指挥官式转交审查）。启用扩展前先用一句话说明启用理由，并各过各的确认门禁；用户可随时指定或切换形态。
+可混合搭配：同一任务的不同阶段可用不同形态。形态由 AI 按任务事实自选并在门禁声明一行理由（判定顺序见 agent-modes 的模式自选），用户指名优先、可随时切换；启用扩展须先用一句话说明理由，并各过各的确认门禁。
 
 ## Mandatory Pre-Implementation Gate
 
@@ -62,7 +62,7 @@ description: 'Process-discipline layer only — not a reasoning-capability boost
 - 推荐方案：...（创意/审美主导任务须并列 2–3 个真实不同的方向：保守/均衡/大胆至少各一；"大胆"必须是真候选——写明它多做什么、冒什么险、为什么值，不许陪跑凑数）
 - 其他选项：...（我已评估并否掉的备选，信息性、**不需要你选**）
 - 完整计划：...
-- 澄清方式：A 一次性确认推荐方案 / B 逐项问答
+- 澄清方式：A 一次性确认推荐方案 / B 逐项问答（B：一次只问一个最高影响问题，每题给 2-3 个实质方案、推荐方案、自由方案出口和“继续调研”出口）
 - 需要你确认：...（等你拍板的选项 + 推荐；与「其他选项」的区别：那栏是我否掉的，本栏是我无法替你定的）
 - 确认范围（创意任务固定句）：本次确认锁定目标、范围、交付物与落盘路径；风格与方向不因确认锁死——实现中允许迭代甚至换向，换向须在证据报告里说明原因
 ```
@@ -90,8 +90,7 @@ description: 'Process-discipline layer only — not a reasoning-capability boost
 ## 模式3规则
 
 - 使用模式三前完成【角色身份确认】和【指挥官协调通道确认】，并等待用户明确回复；平台工具可用不等于用户确认——用户选择用户转交后，不得擅自改用直接工具或子 Agent。
-- 接收方按"角色 + 平台/窗口"命名（笼统的"另一个 AI"不够）；底层大模型是可选参考元数据——**从不主动询问**，仅在用户主动告知时记录，模型变动不使任务包或台账失效。
-- 角色与承载模型解耦：身份声明只含角色与任务 ID；模式三规划写入项目 `docs/plans/`，不能只在对话里输出。
+- 接收方按"角色 + 平台/窗口"命名（笼统的"另一个 AI"不够），身份声明只含角色与任务 ID；底层大模型是可选参考元数据——**从不主动询问**，仅在用户主动告知时记录，模型变动不使任务包或台账失效。模式三规划写入项目 `docs/plans/`，不能只在对话里输出。
 - 完整协议——通道能力自查（直接工具/子 Agent/MCP/API 逐接收方判定）、接手协议（自洽检查/亲自核验到文件:行号/三分裁决/派发台账/下一轮可转述文本）、23 字段任务包与接收方启动提示词、身份登记与最小角色集——见 `references/multi-agent-closure-rules.md`（权威版）。
 
 ## 工作流
@@ -107,18 +106,18 @@ description: 'Process-discipline layer only — not a reasoning-capability boost
 
 ## References
 
-- `references/series-reasoning-workflow.md`：完整流程和审计模板（先读其头部 Section Map，按节定位取用）
-- `references/agent-modes.md`：协作架构（主干+扩展）、确认模板、任务包（形态判定读头部 `Mode Self-Selection` 节即可）
+- `references/series-reasoning-workflow.md`：完整流程与审计模板（先读头部 Section Map，按节取用）
+- `references/agent-modes.md`：协作架构与确认模板（形态判定只读头部 `Mode Self-Selection` 节）
+- `references/multi-agent-closure-rules.md`：多 Agent 闭环规则（模式三权威版）
 - `references/identity-library.md`：身份库契约
-- `references/commander-roles.md`：角色库和最小角色集
-- `references/multi-agent-closure-rules.md`：多 Agent 闭环规则
-- `references/project-policy-template.md`：项目政策模板（复制到具体项目内替换占位使用，不把项目专属规则写回本 Skill）
-- `references/series-reasoning-lessons.md`：反模式和教训
-- `references/common-failures.md`：高频造假对照表与失败案例（任何完成声明前对照）
+- `references/commander-roles.md`：角色库与最小角色集
+- `references/series-reasoning-lessons.md`：反模式与教训
+- `references/common-failures.md`：高频造假对照表（完成声明前对照）
 - `references/series-reasoning-examples.md`：行为示例
-- `references/project-artifacts.md`：产物落盘约定——gate 单四态状态机、台账/账本路径（配套 `scripts/artifact-check.py` 结构校验）
-- `references/series-reasoning-workflow-en.md`：workflow 的英文镜像（中文宿主读中文权威版，勿加载本镜像）
-- `references/self-test.md`：安装后自测（维护者/用户人工执行，宿主任务路径无需读取）
+- `references/project-artifacts.md`：治理产物落盘约定（配套 `scripts/artifact-check.py`）
+- `references/project-policy-template.md`：项目政策模板（复制到项目内使用；项目专属规则不写回本 Skill）
+- `references/series-reasoning-workflow-en.md`：workflow 英文镜像（中文宿主勿读）
+- `references/self-test.md`：安装后自测（人工执行，宿主任务路径无需读取）
 - `references/platform-installation.md`：安装方式
 - `docs/minimal-discipline.md`：最小纪律速查卡（不装完整 skill 时的三条常驻规则）
 
