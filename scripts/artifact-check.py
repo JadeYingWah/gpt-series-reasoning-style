@@ -12,8 +12,10 @@ Exit codes: 0 = all structural rules pass, 1 = structural problems found,
 2 = usage / path error.
 
 Checked rules:
-  1. docs/gate/*.md     — each record carries the 10 gate-field labels, a legal
-                          status line, and a superseded pointer when superseded.
+  1. docs/gate/*.md     — each record carries the 11 gate-field labels (authoritative
+                          list: GATE_FIELDS below, mirrored in SKILL.md and workflow
+                          CN/EN), a legal status line, and a superseded pointer when
+                          superseded.
   2. dispatch-ledger.md — if present, must be non-empty governance content.
   3. findings-ledger.md — if present, each round must name all four required
                           fields (round number / change & reason / open items /

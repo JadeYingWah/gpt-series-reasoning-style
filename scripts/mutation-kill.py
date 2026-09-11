@@ -159,13 +159,38 @@ def main(argv=None):
         ap.print_help()
         return 0
 
-    with open(args.manifest, encoding="utf-8") as f:
-        man = json.load(f)
+    # 结构化失败（2026-09-11 batch 44）：此前 manifest 缺字段/坏 JSON 直接抛 KeyError
+    # 轨迹并以 exit 1 退出，而 docstring 声明「2 = manifest/环境不合法」——文档与行为不符，
+    # 且 CI 只看 exit 0/1 会把"用法错误"误读成"跑完有未测成项"。
+    try:
+        with open(args.manifest, encoding="utf-8") as f:
+            man = json.load(f)
+    except FileNotFoundError:
+        print("ERROR: manifest 不存在：%s" % args.manifest, file=sys.stderr)
+        return 2
+    except json.JSONDecodeError as exc:
+        print("ERROR: manifest 不是合法 JSON（%s）：line %d col %d: %s"
+              % (args.manifest, exc.lineno, exc.colno, exc.msg), file=sys.stderr)
+        return 2
+    except OSError as exc:
+        print("ERROR: 无法读取 manifest：%s" % exc, file=sys.stderr)
+        return 2
+    if not isinstance(man, dict):
+        print("ERROR: manifest 顶层必须是 JSON 对象，实际为 %s" % type(man).__name__,
+              file=sys.stderr)
+        return 2
     man_dir = os.path.dirname(os.path.abspath(args.manifest))
+    if not man.get("artifact"):
+        print("ERROR: manifest 缺少必需字段 artifact（产物路径）", file=sys.stderr)
+        return 2
     artifact = man["artifact"]
     if not os.path.isabs(artifact):                      # 相对路径按 manifest 所在目录解析
         artifact = os.path.normpath(os.path.join(man_dir, artifact))
     mutants = man.get("mutants") or []
+    if not isinstance(mutants, list):
+        print("ERROR: manifest 的 mutants 必须是数组，实际为 %s" % type(mutants).__name__,
+              file=sys.stderr)
+        return 2
     if not mutants:
         print("ERROR: manifest 里没有任何 mutants，无事可做", file=sys.stderr)
         return 2
@@ -188,7 +213,12 @@ def main(argv=None):
     marker = man.get("marker", "MUTRESULT:")
     inject = man.get("inject", "")
     inject_target = man.get("inject_target", "</body>")
-    budget = int(man.get("budget_ms", 6000))
+    try:
+        budget = int(man.get("budget_ms", 6000))
+    except (TypeError, ValueError):
+        print("ERROR: manifest 的 budget_ms 必须是整数（毫秒），实际为 %r"
+              % (man.get("budget_ms"),), file=sys.stderr)
+        return 2
     workdir = man.get("workdir") or os.path.join(tempfile.gettempdir(), "mutation-kill")
     if not os.path.isabs(workdir):                       # 同上
         workdir = os.path.normpath(os.path.join(man_dir, workdir))

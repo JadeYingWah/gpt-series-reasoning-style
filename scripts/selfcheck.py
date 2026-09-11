@@ -561,6 +561,12 @@ def run_checks() -> list:
     py_files = sorted(p for p in REPO_ROOT.rglob("*.py")
                       if ".git" not in p.parts and "__pycache__" not in p.parts)
     write_mode = re.compile(r"['\"][wax+]{1,2}b?['\"]")
+
+    def _after_open(line: str) -> str:
+        """只看 `open(` 之后的参数片段（避免行内其它短字面量误触发写模式匹配）。"""
+        idx = line.rfind("open(")
+        return line[idx + 5:] if idx >= 0 else ""
+
     nl_bad = []
     for p in py_files:
         rel = p.relative_to(REPO_ROOT).as_posix()
@@ -571,7 +577,10 @@ def run_checks() -> list:
             if "write_text(" in line and "newline=" not in line:
                 nl_bad.append("{}:{}: write_text without newline=".format(rel, ln))
                 continue
-            if "open(" in line and write_mode.search(line) and "newline=" not in line:
+            if "open(" in line and write_mode.search(_after_open(line)) and "newline=" not in line:
+                # 2026-09-11 batch 44: 只在 `open(` 之后的片段里找写模式字面量。
+                # 之前是全行搜索，同行出现 `d["a"]` / `"x" in s` 这类短字面量即误报
+                # （字符类 [wax+] 太宽），把无关行判成"未固定 newline"。
                 nl_bad.append("{}:{}: open(write-mode) without newline=".format(rel, ln))
     if nl_bad:
         c.fail("write sites without newline= on: " + "; ".join(nl_bad[:8]))
@@ -615,6 +624,11 @@ def run_checks() -> list:
                     if int(mm.group(1)) != n_gate:
                         gf_bad.append("{}:{}: {} states {} != {}".format(
                             rel, ln, label, mm.group(1), n_gate))
+        # 中文数字形态（batch 44 实证缺陷）：README 工具表曾写「`docs/gate/*.md` 十字段标签」，
+        # 而 GATE_FIELDS 实为 11。中文数词不便并进上面的正则族，单独按字面拦截——
+        # 字段数若真变成 10，这里会红，那正是"改了实现就该改散文"的预期行为。
+        if n_gate != 10 and "十字段" in read_text(REPO_ROOT / "README.md"):
+            gf_bad.append("README.md: stale 十字段 wording (GATE_FIELDS={})".format(n_gate))
         if gf_bad:
             c.fail("gate field-count drift: " + "; ".join(gf_bad[:8]))
         else:
@@ -650,6 +664,12 @@ def run_checks() -> list:
     n_refs = len(list((REPO_ROOT / "references").glob("*.md")))
     wf_rel = ".github/workflows/selfcheck.yml"
     n_ci = _yaml_step_count(read_text(REPO_ROOT / wf_rel))
+    # 黑名单类数（batch 44 实证缺陷）：README 写「24 类破坏性命令黑名单」而
+    # claim-check.py 的 DANGEROUS_RES 实为 25 —— 与 SB22 的门禁字段漂移同族
+    # （工具自己的常量被手抄进散文）。真值源解析而非导入，防导入顺序欺骗。
+    m_bl = re.search(r"DANGEROUS_RES\s*=\s*\[(.*?)\n\]",
+                     read_text(REPO_ROOT / "scripts" / "claim-check.py"), re.S)
+    n_black = len(re.findall(r'^\s*r"', m_bl.group(1), re.M)) if m_bl else None
     if n_sb_scan != n_sb:
         c.fail("SB truth source is unreliable: definition scan found {} entries but {} "
                "checks are registered. Move SB21 to the end of run_checks() or fix the "
@@ -657,6 +677,8 @@ def run_checks() -> list:
                "number.".format(n_sb_scan, n_sb, sc_rel))
     elif n_ci is None:
         c.fail("cannot locate a `steps:` list in " + wf_rel)
+    elif n_black is None:
+        c.fail("cannot locate DANGEROUS_RES in scripts/claim-check.py")
     else:
         # (relative path, per-line regex, expected group tuple, human label)
         fam = [
@@ -682,6 +704,7 @@ def run_checks() -> list:
             ("references/self-test.md", r"自测条数冻结于\s*\*\*(\d+)\*\*", (n_tests,), "frozen self-test count"),
             ("README.md", r"^(\d+) 份 references", (n_refs,), "reference file count"),
             ("README.md", r"references/\s+#\s+(\d+) 份按需规则文档", (n_refs,), "reference file count"),
+            ("README.md", r"\*\*(\d+) 类破坏性命令黑名单\*\*", (n_black,), "blacklist class count"),
         ]
         pc_bad = []
         for rel, rx, want, label in fam:
