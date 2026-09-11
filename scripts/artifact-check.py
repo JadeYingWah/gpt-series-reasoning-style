@@ -38,6 +38,7 @@ GATE_FIELDS = [
     "完整计划",
     "澄清方式",
     "需要你确认",
+    "确认范围",
 ]
 STATUSES = {"proposed", "confirmed", "rejected", "superseded"}
 FINDINGS_FIELDS = ["轮次编号", "本轮改动与原因", "未解项", "证据指针"]

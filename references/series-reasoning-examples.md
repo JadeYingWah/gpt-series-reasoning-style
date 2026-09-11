@@ -428,6 +428,7 @@ Commander response:
   1. 默认数据位置 —— 推荐 %LOCALAPPDATA%\LocalTaskCLI\tasks.sqlite3（便携、易测）；其他：项目内 data/tasks.sqlite3（单机演示方便，但污染项目目录）。
   2. 第一版字段 —— 推荐 id/title/done/created_at（够用且易扩展）；其他：加优先级与标签（延到第二版）。
   3. 命令集 —— 推荐 add/list/done/rm/stats；其他：一并加 edit（延到第二版）。
+- 确认范围：本次确认锁定目标、范围、交付物与落盘路径；实现方向不因确认锁死——中途换向须在证据报告说明原因。
 
 A：回复“按推荐方案全部确认”，我会记录所有决策后开始。
 B：回复“逐项问”，我会一次只问一个最高影响问题，并给出推荐和替代方案。
