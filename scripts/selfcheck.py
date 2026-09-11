@@ -6,8 +6,8 @@ genuinely pass when a host model decides to follow them. This tool does NOT
 verify rule semantics. It verifies what a machine *can* verify cheaply and
 honestly: version/numbering consistency, structural completeness, cross-file
 references, code-fence pairing, identity/reference counts, gate-field surface
-sync, and the install-platform parameter set. Running it is a fast regression
-check that the repo has not silently drifted.
+sync, prose-count sync, and the install-platform parameter set. Running it is a
+fast regression check that the repo has not silently drifted.
 
 Python 3.7+ stdlib only. Exit: 0=all passed, 1=failed, 2=usage.
 
@@ -550,6 +550,66 @@ def run_checks() -> list:
         c.fail("write sites without newline= on: " + "; ".join(nl_bad[:8]))
     else:
         c.pass_("all text-write call sites pin newline= ({} python files scanned)".format(len(py_files)))
+
+    # SB21 prose counts match their source of truth (evidence: commits
+    # dacb935..eef524f -- selfcheck.py defined 17 checks while README's
+    # Complexity-Budget line AND site/index.html both still stated "SB1-SB16";
+    # and d99f353..9d32cbb -- site/index.html stated "SB1-SB17" while
+    # selfcheck.py defined 18. Two surfaces each lagged the real check count for
+    # six-plus commits because nothing derived a prose number from its source.
+    # SB4/SB5 count FILES and SB19 guards identity-count prose only -- no check
+    # tied a *check count*, a *line count*, a *frozen test count* or a
+    # *reference count* stated in prose to reality. Admitted under README's own
+    # rule for a 21st check: a reproducible defect with identifiable hashes.
+    # Scope is deliberately narrow: only counts that (a) appear as prose on a
+    # LIVE surface and (b) have one unambiguous source. Dated records
+    # (CHANGELOG / INTERNAL-HISTORY / docs/reviews / docs/field-tests) stay
+    # excluded -- a past count is correct for its date, same rationale as SB19.
+    c = new(21, "prose counts match their source")
+    n_sb = len(re.findall(r"c = new\(\d+", read_text(REPO_ROOT / "scripts" / "selfcheck.py")))
+    n_skill = len(read_text(REPO_ROOT / "SKILL.md").splitlines())
+    n_tests = len(cases)
+    n_refs = len(list((REPO_ROOT / "references").glob("*.md")))
+    # (relative path, per-line regex, expected group tuple, human label)
+    fam = [
+        ("README.md", r"selfcheck-SB1--SB(\d+)_(\d+)%2F(\d+)", (n_sb,) * 3, "selfcheck badge"),
+        ("README.md", r"selfcheck\.py\s+#\s+SB1[–—-]+SB(\d+)", (n_sb,), "selfcheck tree"),
+        ("README.md", r"\*\*SB1[–—-]+SB(\d+) 静态自检\*\*", (n_sb,), "selfcheck table"),
+        ("README.md", r"selfcheck SB1[–—-]+SB(\d+)", (n_sb,), "selfcheck CI line"),
+        ("README.md", r"静态检查上限\s*(\d+)\s*项（SB1[–—-]+SB(\d+)）", (n_sb, n_sb), "complexity budget"),
+        ("README.md", r"selfcheck\.py`（(\d+)/(\d+)）", (n_sb, n_sb), "pre-release checklist"),
+        ("README.md", r"新增第\s*(\d+)\s*项", (n_sb + 1,), "next-check ordinal"),
+        ("site/index.html", r"selfcheck\.py</code>\s*SB1[–—-]+SB(\d+)", (n_sb,), "selfcheck table"),
+        ("site/index.html", r"新增第\s*(\d+)\s*项", (n_sb + 1,), "next-check ordinal"),
+        (".github/workflows/selfcheck.yml", r"SB1\.\.SB(\d+)", (n_sb,), "workflow step name"),
+        ("README.md", r"SKILL\.md[^\n]*?≈(\d+)\s*行", (n_skill,), "SKILL.md line count"),
+        ("README.md", r"≤\s*250\s*行\*\*（当前约\s*(\d+)\s*行", (n_skill,), "SKILL.md line count"),
+        ("README.md", r"behavioural_self--tests-(\d+)_frozen", (n_tests,), "frozen self-test count"),
+        ("README.md", r"self-test\.md\s+#\s+(\d+) 条行为自测", (n_tests,), "frozen self-test count"),
+        ("README.md", r"\*\*(\d+) 条行为自测\*\*", (n_tests,), "frozen self-test count"),
+        ("README.md", r"(\d+) 条自测解析", (n_tests,), "frozen self-test count"),
+        ("README.md", r"\*\*(\d+) 条行为自测冻结\*\*", (n_tests,), "frozen self-test count"),
+        ("site/index.html", r"(\d+) 条 · <code>references/self-test\.md", (n_tests,), "frozen self-test count"),
+        ("references/self-test.md", r"自测条数冻结于\s*\*\*(\d+)\*\*", (n_tests,), "frozen self-test count"),
+        ("README.md", r"(\d+) 份 references", (n_refs,), "reference file count"),
+        ("README.md", r"references/\s+#\s+(\d+) 份按需规则文档", (n_refs,), "reference file count"),
+    ]
+    pc_bad = []
+    for rel, rx, want, label in fam:
+        p = REPO_ROOT / rel
+        if not p.exists():
+            pc_bad.append(rel + ": missing (surface listed for the prose-count check)")
+            continue
+        for ln, line in enumerate(read_text(p).splitlines(), 1):
+            for m in re.finditer(rx, line):
+                got = tuple(int(g) for g in m.groups() if g is not None)
+                if got != want:
+                    pc_bad.append("{}:{}: {} states {} != {}".format(rel, ln, label, got, want))
+    if pc_bad:
+        c.fail("prose counts drift: " + "; ".join(pc_bad[:8]))
+    else:
+        c.pass_("SB={} SKILL={} tests={} refs={} consistent across {} prose surfaces".format(
+            n_sb, n_skill, n_tests, n_refs, len(fam)))
 
     return checks
 
