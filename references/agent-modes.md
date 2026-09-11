@@ -20,7 +20,7 @@ This skill supports three execution modes.
 
 形态不是等用户点菜的默认项，而是 AI 自己根据任务事实选的。**判定顺序自上而下，首个命中即停**：
 
-1. **轻量通道**：指令具体、影响面小、完全可逆、无副作用 → 直接执行并报告证据（不涉及形态选择）。**排除项**（命中任一即升中档、走全流程做形态选择）：从零新建产物未完整指定类型/位置/形态；多交付物（≥2 个独立产物）；并行信号（"同时/并行/一起做"）。
+1. **轻量通道**：指令具体、影响面小、完全可逆、无副作用 → 直接执行并报告证据（不涉及形态选择）。**排除项**（命中任一即升中档、走全流程做形态选择）：从零新建产物未完整指定类型/位置/形态；多交付物（≥2 个独立产物）；并行信号（"同时/并行/一起做"）。创意/审美主导任务另有**方向豁免**（判据与边界见 series-reasoning-workflow.md 风险分档节：审美大胆不是风险；完全可逆产物可免方向确认，落盘路径与范围仍须确认）。
 2. **指挥官扩展**（任一命中即触发）：
    - 用户明确说实现交给其他 AI、另一个窗口、或要多模型协作；
    - 任务需要当前会话不具备的能力，且存在具备该能力的其他 AI（例如：需要真实浏览器逐项验收而本会话没有浏览器工具）；
@@ -47,7 +47,7 @@ This skill supports three execution modes.
 
 Form is not a menu item waiting for the user to order; the AI selects it from task facts. **The evaluation order is top-down; the first match stops the search:**
 
-1. **Light channel**: the instruction is specific, the blast radius is small, fully reversible, no side effects → execute directly and report evidence (no form selection involved). **Exclusions** (any hit escalates to the medium tier and runs the full flow with form selection): a brand-new deliverable whose type/location/form is not fully specified; multiple deliverables (≥2 independent artifacts); parallelism signals ("simultaneously / in parallel / do these together").
+1. **Light channel**: the instruction is specific, the blast radius is small, fully reversible, no side effects → execute directly and report evidence (no form selection involved). **Exclusions** (any hit escalates to the medium tier and runs the full flow with form selection): a brand-new deliverable whose type/location/form is not fully specified; multiple deliverables (≥2 independent artifacts); parallelism signals ("simultaneously / in parallel / do these together"). Creative/aesthetic-led tasks have a separate **direction exemption** (criteria and boundary in the workflow Risk-Trimming section: boldness of aesthetic direction is not a risk; fully reversible artifacts may skip the direction confirmation — on-disk location and scope still require confirmation).
 2. **Commander extension** (any hit triggers it):
    - The user explicitly says the implementation goes to another AI, another window, or that they want multi-model collaboration;
    - The task needs a capability this session lacks, and another AI with that capability exists (for example: real-browser item-by-item acceptance while this session has no browser tool);
