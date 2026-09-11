@@ -106,6 +106,12 @@ def run_checks() -> list:
         c.fail("self-test.md does not reference version " + version)
     elif re.search(r"version-" + re.escape(version), readme) is None:
         c.fail("README badge does not show version-" + version)
+    # Batch 47: the site badge (v1.1.0) was outside this guard while the site
+    # had already drifted twice on other numbers (10-field, Lite tokens) --
+    # same family: a live surface nobody watches.
+    elif re.search(r"\bv" + re.escape(version) + r"\b",
+                   read_text(REPO_ROOT / "site" / "index.html")) is None:
+        c.fail("site badge does not show v" + version)
     else:
         residue = []
         for name, text in (("SKILL.md", skill_text), ("README.md", readme),

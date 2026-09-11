@@ -10,8 +10,10 @@
 > 期望结果（CI 逐步断言）：
 > - `git --version` —— 放行并实跑，exit=0（证明白名单外的普通命令仍可用，不是全拦）
 > - `python -c …` —— 被**解释器间接执行默认拒**拦下（输出含 `interpreter-indirect`）
+> - `` `python -c …` `` —— **反引号包裹形态**（markdown 行内代码）同样被拦下；batch 47 实测该形态曾整体绕过
+>   解释器层（首词带上反引号后不在家族集合里，15/15 执行、saw 0 blocked），修复后必须仍然 BLOCKED
 > - `rm -rf …` —— 被**破坏性命令黑名单**拦下（输出含 `dangerous pattern`）
-> 两条被拦命令**不会被执行**；工具整体退出码 1。
+> 被拦命令**不会被执行**；工具整体退出码 1，且 trust note 计数应为 **saw 3 blocked**。
 
 ## Files
 
@@ -21,4 +23,5 @@
 
 - git --version   # expect exit 0
 - python -c "print(1)"   # expect exit 0
+- `python -c "print(1)"`   # expect exit 0 (backtick-wrapped form — batch 47)
 - rm -rf /tmp/claim-check-guard-never-created
