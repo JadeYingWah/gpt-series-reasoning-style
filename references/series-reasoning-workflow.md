@@ -5,7 +5,7 @@
 
 ## Section Map / 分节定位（宿主按需取用，勿整读）
 
-> 本文件 700+ 行。宿主按当前阶段用 Grep 定位对应节标题，只读所需节——**禁止为"保险"而整读**。
+> 本文件近 700 行。宿主按当前阶段用 Grep 定位对应节标题，只读所需节——**禁止为"保险"而整读**。
 > 700+ lines. Locate the section you need by its exact heading and read only that section — do not read the whole file "just in case".
 
 - **加载与续接**：`Loading Contract`、`Resume Check / 续会全面体检`、`Identity Boundary`
@@ -33,23 +33,13 @@ When asked to prove loading:
 
 Render loading proof and templates naturally: required fields must appear, but use short sentences, compact lists, or tables instead of copying the entire skill template verbatim.
 
-History, case libraries, and experience files are background, not state sources. Product phase, test counts, task status, and next steps always come from the current authoritative documents and the actual workspace — never from what a historical file says they used to be.
 
 历史、案例库与经验文件只是背景，不是状态源。产品阶段、测试数量、任务状态和下一步，永远以当前权威文档和实际工作区为准，不以历史文件的记载为准。
 
 ## Resume Check / 续会全面体检
 
-When taking over an existing project, resuming an interrupted task, or when the user says "继续" / "检查项目" / "先检查再继续", run a project-level consistency check before continuing work:
 
-1. Git status: uncommitted changes, current branch, divergence from the recorded state.
-2. Gate and stage status: which stages are closed, which are open, which authorizations are still missing.
-3. Docs-versus-reality sync: stale statements in plans, logs, or status tables that a completed stage already invalidated.
-4. Omissions and inconsistencies: tasks claimed done without evidence, unreported failures, conflicting records.
-5. Re-anchor the original instruction: re-read the task's original instruction text in full before acting — never rely on a remembered or inherited summary of it.
-6. Project-root hard check: before the first write or directory creation after a resume, verify the current working directory matches the project root stated in the task instruction; on mismatch, stop and report instead of writing.
-7. Report the findings first; fix stale items before new work; only then continue.
 
-Do not resume blind. "没问题后继续" means the check must actually run — a resumed session that starts working without this check treats the user's ritual as noise.
 
 接手既有会话、恢复中断任务，或用户说"继续 / 检查项目 / 先检查再继续"时，先做项目级一致性检查：Git 状态；门禁与阶段状态；文档与实现是否同步（已完成阶段未同步的过期表述）；遗漏与不一致（声称完成却无证据、未报告的失败、互相矛盾的记录）；**重锚定原始指令**——恢复后先重读任务原始指令全文再行动，绝不依赖记忆或继承来的摘要；**项目根硬检查**——恢复后首次写盘或建目录前，核验当前工作目录与任务指定的项目根一致，不一致即停下报告而不是写入。先报告发现，先修过期项，再继续。不做体检直接续干等于蒙眼开车；"没问题后继续"意味着检查必须真的执行，而不是把用户的仪式当耳旁风。（本条后两项源自 2026-09-10 A/B 基线评测的实测缺陷：恢复后丢失简报导致行为漂移、误把宿主根当项目根写盘、汇报与磁盘状态矛盾——见 `docs/field-tests/ab-baseline/judgement-sheet.md`。）
 
@@ -85,8 +75,8 @@ Use three internal role faces for non-trivial work in Single-Agent Mode. A role 
 2. Execution Face: execute only confirmed work; split the work into verifiable small stages; record actual files, commands, tests, and output; do not close a stage without a review pass.
 3. Review Face: before closing any stage and before final delivery, switch to adversarial review; research the actual artifacts first, then diverge against assumptions, boundaries, timing/date windows, persistence/import/export, permissions, and edge cases; converge with evidence; fix confirmed issues and re-verify.
 
-Rules:
 
+Rules:
 - A role face is valid only when it produces the required artifact or evidence.
 - Do not close a stage from the Execution Face; switch to the Review Face first.
 - Review Face must use research, divergence, convergence, and actual evidence, not just a role name.
@@ -212,8 +202,8 @@ Before creating any project folder, editing files, or running implementation com
 - 确认范围（创意任务固定句）：本次确认锁定目标、范围、交付物与落盘路径；风格与方向不因确认锁死——实现中允许迭代甚至换向，换向须在证据报告里说明原因
 ```
 
-Rules:
 
+Rules:
 - Announcing the stage sequence is not confirmation.
 - "开始", "现在开始", and "直接做" are not implementation authorization.
 - Do not create directories, write code, run tests, or produce project artifacts until the user confirms or delegates.
@@ -295,8 +285,8 @@ For any non-trivial build or change task, announce the stage sequence before imp
 阶段5：收尾
 ```
 
-Rules:
 
+Rules:
 - Do not skip from the user request to implementation.
 - Do not execute until the instruction has been assessed and instruction + research + divergence have converged into a complete plan.
 - Ask the user to confirm the goal and key acceptance criteria before the final plan is locked.
@@ -319,17 +309,9 @@ If research is impossible because no search tool or source is available, state t
 
 ## Resource Survey / 资源盘点前置
 
-Before producing the implementation plan (and as part of the pre-implementation gate), inventory every source of help that could make the result better or cheaper:
 
-1. Locally installed skills: check which other skills are available in the current environment and whether any applies to this task (browser automation, document generation, image generation, testing, deployment, etc.).
-2. Reusable assets: existing templates, boilerplate, prior implementations in this project or on this machine that can be adapted instead of rebuilt.
-3. Web references: reference implementations, best-practice write-ups, and official docs for this exact task type.
-4. Installable skills and tools (self-discovery): when the local inventory shows a gap, search skill marketplaces and open-source repositories for skills/tools matching this task type; shortlist 2-3 candidates with source, maintenance state, and what each would add.
-5. Verdict per item — four buckets: **use it** (say how) / **adapt it** (say what changes) / **already covered by this skill** (name the section that covers it and do NOT load the other skill — stacking redundant discipline costs tokens and latency for nothing; e.g. an installed `verification-before-completion` skill is redundant against this skill's `common-failures.md`) / **not applicable** (only after actually checking — an unevidenced "nothing available" is not a survey).
 
-Skill discovery and self-install flow (step 4): present the shortlist to the user with a recommendation **before starting work** — installing means modifying the environment and is authorization-gated. On approval, install via the platform's official channel, verify the install, record it in the survey, then proceed to research the project needs and usable resources. On decline, proceed with what exists and note the gap. Never install silently.
 
-The survey result goes into the gate output as「已盘点可用资源」(installable-skill candidates appear here too, marked 待你批准). A plan produced without a survey is an incomplete plan.
 
 ## Existing-Artifact Conflict: Stop And Report First / 既有产物冲突先报告
 
@@ -389,13 +371,13 @@ After all stages complete, do not wait for the user or a reviewer to find bugs. 
 4. Re-run the bug sweep and final acceptance until no confirmed issues remain.
 5. Only then report final completion.
 
-Findings that directly affect the task's acceptance goal are **not** "unrelated issues": fix them or explicitly request adjudication — recording alone does not discharge them (example: a century-year bug found while the task demands "leap-year correctness" is in-goal, not out-of-scope). / 直接影响任务验收目标的发现**不属于无关问题**：必须修复或显式提请裁决，仅记录不视为处理。
+直接影响任务验收目标的发现**不属于无关问题**：必须修复或显式提请裁决，仅记录不视为处理。
 
 ## Final Acceptance Inspection
 
 After all planned stages complete:
 
-1. Inspect from overall goal to detail: product level, user flow, architecture, module, function, code, edge cases. Before closing, step back and re-view the whole result from the end user's seat — does it make sense as a whole, does it serve the real goal, is anything odd, excessive, or missing to them; item-by-item checks passing is not the same as the result being reasonable. / 收尾前以用户方视角整体重看结果：作为交付物在用户眼里是否成立、是否解决真实目标、有无奇怪/多余/缺失之处——逐项检查通过不等于结果合理。
+收尾前以用户方视角整体重看结果：作为交付物在用户眼里是否成立、是否解决真实目标、有无奇怪/多余/缺失之处——逐项检查通过不等于结果合理。
 2. Re-check acceptance criteria and compare them with the actual result.
 3. Run final commands, tests, and checks.
 4. If any problem is found, add extra stage tasks and execute them under the same staged protocol.
@@ -406,17 +388,13 @@ After all planned stages complete:
 
 ## User-Path Acceptance / 用户路径验收
 
-Before final acceptance, validate the delivery from the actual user path in its real target environment. This applies to every project type: web, game, desktop, mobile, CLI, API, library, plugin, configuration, and documentation. Unit tests are necessary but not sufficient; a passing test suite does not prove the product is usable.
 
-A "no issues found" conclusion must state the detection method and coverage (tools used, viewport/environment matrix, executed case list); if any is missing, downgrade the conclusion to UNVERIFIED — never present it as verified-clean. Field tests (R2/R3) caught this exact gap: zero-finding reports while a peer found real issues. / 「未发现问题」类结论必须附检测方法与覆盖面声明（工具、视口/环境矩阵、用例清单）；缺任一项即降级为 UNVERIFIED，不得表述为已验收无问题。
+「未发现问题」类结论必须附检测方法与覆盖面声明（工具、视口/环境矩阵、用例清单）；缺任一项即降级为 UNVERIFIED，不得表述为已验收无问题。
 
 最终交付前，必须在真实目标环境中从用户路径验证交付物。这条规则适用于所有项目类型：Web、游戏、桌面、移动、CLI、API、库、插件、配置和文档。单元测试是必要但不充分条件；测试全绿不能证明产品可用。
 
 ### Desktop / Mobile / 桌面或移动应用
 
-- Launch the application in the real runtime, not only import or unit-test it.
-- Walk through the main user flow: start, data input, persistence, error path, exit.
-- Verify the actual UI, logs, and persisted state.
 
 - 在真实运行时中启动应用，而不只是导入或单元测试。
 - 走通主要用户流程：启动、数据输入、持久化、错误路径、退出。
@@ -424,11 +402,6 @@ A "no issues found" conclusion must state the detection method and coverage (too
 
 ### Web / Frontend / Game / Web 前端 / 游戏
 
-- Open the page with `file://` or a local server, matching the documented delivery method.
-- Check the browser console for JavaScript errors.
-- Verify that the actual rendered output is present: canvas pixels, DOM elements, images, or UI states.
-- Simulate the key user actions: start, input, restart, failure path.
-- Capture a screenshot or equivalent runtime evidence.
 
 - 按文档交付方式用 `file://` 或本地服务器打开页面。
 - 检查浏览器控制台是否有 JS 报错。
@@ -438,9 +411,6 @@ A "no issues found" conclusion must state the detection method and coverage (too
 
 ### CLI / 命令行工具
 
-- Run the real command in a clean environment.
-- Verify exit codes, stdout/stderr, and documented usage.
-- Cover success, validation error, and failure paths.
 
 - 在干净环境中运行真实命令。
 - 验证退出码、stdout/stderr 和文档用法。
@@ -448,9 +418,6 @@ A "no issues found" conclusion must state the detection method and coverage (too
 
 ### API / Service / API 或服务
 
-- Start the service when required.
-- Send real requests covering success, error, auth, boundary, and persistence paths.
-- Verify returned data and stored state.
 
 - 需要时启动服务。
 - 发送真实请求，覆盖成功、错误、鉴权、边界和持久化路径。
@@ -458,9 +425,6 @@ A "no issues found" conclusion must state the detection method and coverage (too
 
 ### Library / Package / 库或包
 
-- Import or install the package in a consumer-like environment.
-- Run the documented example.
-- Verify there are no runtime errors.
 
 - 在类似使用者的环境中安装或导入包。
 - 运行文档示例。
@@ -468,19 +432,12 @@ A "no issues found" conclusion must state the detection method and coverage (too
 
 ### Documentation / 文档
 
-- Follow every link, path, and command in the documentation.
-- Verify that examples match the actual artifact.
-- Verify install and usage commands are executable.
 
 - 按文档执行每个链接、路径和命令。
 - 验证示例与实际产物一致。
 - 验证安装和使用命令可执行。
 
-Rules:
 
-- If a user path cannot be validated, mark the relevant claim as `UNVERIFIED`.
-- Do not close final acceptance based only on unit tests, file existence, or a role report.
-- For browser projects, a blank canvas or missing DOM state is a P0 delivery defect.
 
 规则：
 
@@ -501,7 +458,6 @@ For any artifact a human will directly operate or see (UI, game, document, tool,
 
 Self-assessed claims like "the UI should be good" without hands-on operation are a delivery defect, not a conclusion.
 
-Environment precondition: this loop requires a runtime that can actually open the artifact and capture screenshots (GUI browser, rendered preview, and so on). Under a headless/CLI-only runtime, do not fake or silently skip: operate whatever the environment allows, state the limitation explicitly, mark every un-operated surface `UNVERIFIED` with concrete user self-verification steps, and never claim visual quality.
 
 环境前置：本闭环要求运行时能真实打开产物并截图（GUI 浏览器、渲染预览等）。在纯 headless/CLI 环境下不得伪造或静默跳过：能操作的操作，明说环境限制，未操作的部分一律标 `UNVERIFIED` 并给出用户自验步骤，绝不宣称视觉良好。
 
@@ -516,7 +472,6 @@ Environment precondition: this loop requires a runtime that can actually open th
 
 这类产物的运行时证据是**命令留痕**（存 `<项目根>/evidence/`），不是截图。判定标准：产物类型本就没有 GUI 时，应给出上面对应的类型化证据；只有"环境确实无法运行该类型产物"时才标 `UNVERIFIED` 并给出用户自验步骤。
 
-For CLI/non-GUI artifacts the runtime evidence is a **command transcript** (saved under `<项目根>/evidence/`), not screenshots. Never write "no GUI so UNVERIFIED" when the artifact type simply has no GUI — provide the type-appropriate evidence above; reserve `UNVERIFIED` for surfaces the environment genuinely cannot exercise.
 
 ## End-State Self-Check Loop
 
@@ -540,17 +495,17 @@ Before final completion, output:
 - Evidence that would change the conclusion:
 - Completion decision:
 
-Rules:
 
+Rules:
 - The reviewer voice must try to reject the result, not confirm it.
 - Unverified items are `UNVERIFIED`, not `PASS`.
 - Confidence is not evidence.
 - If no independent reviewer is available, use adversarial self-review from a different perspective.
-- **Evidence freshness / 证据时间新鲜度**: every piece of evidence cited in the completion claim must be produced **within the current message** — "ran earlier in this session", "before the interruption/resume" do not count; re-run and cite the fresh output. / 完成声明引用的每条证据必须在本条消息内新产生——"本会话早些时候跑过""中断/续会前跑过"都不算数；重跑并引用 fresh 输出。
-- **Disk self-check list / 磁盘自检清单**: the completion claim must attach a disk self-check list — (1) the changed-file list, (2) the key diff excerpt or a verifiable pointer to it, (3) for every "pass" claim the actual run output / exit code — each item with a concrete path or command. A "done" without the list is not a completion claim; it is an intention. / 完成声明必须附磁盘自检清单——①改动文件清单；②关键 diff 摘录或可核验指针；③每条"通过"声称对应的实跑输出/退出码——逐项给出具体路径或命令。没有清单的"完成"不是完成声明，只是意图。
-- **Regression validity / 回归测试有效性**: claiming a regression test is valid requires full RED→GREEN cycle evidence (seen failing before the fix, passing after). A test that has only ever been green proves nothing. / 声称回归测试有效必须附完整 RED→GREEN 循环证据（修复前见过它红、修复后见它绿）；只绿过一次的测试证明力为零。
-- **Evidence artifacts are deliverables / 证据产物是交付物**: verification artifacts — logs, screenshots, verify scripts, exported bytes — stay in the deliverable directory. They are NOT "runtime junk" and must not be deleted in cleanup; if they must be removed for a stated reason, list each deleted artifact and its content summary in the completion claim first. / 验证产物——日志、截图、验证脚本、导出字节——留在交付目录内。它们**不是"运行时产物"，清理时不得删除**；确需删除时，必须先在完成声明里逐条列出被删产物及其内容摘要。
-- **Claim-artifact parity / 声称与产物对等**: every count or coverage statement in the completion claim (pass/fail counts, viewport/test matrices, file lists) must match the actual artifacts **in both directions** — over-reporting and under-reporting both count as inconsistency. If the artifact set is narrower than what you ran, say so explicitly. / 完成声明里的每个计数或覆盖面陈述（通过/失败数、视口/用例矩阵、文件清单）必须与产物**双向**一致——多报和少报都算不一致；产物集比你实际跑的范围窄时，明说。
+证据时间新鲜度**: every piece of evidence cited in the completion claim must be produced **within the current message** — "ran earlier in this session", "before the interruption/resume" do not count; re-run and cite the fresh output. / 完成声明引用的每条证据必须在本条消息内新产生——"本会话早些时候跑过""中断/续会前跑过"都不算数；重跑并引用 fresh 输出。
+磁盘自检清单**: the completion claim must attach a disk self-check list — (1) the changed-file list, (2) the key diff excerpt or a verifiable pointer to it, (3) for every "pass" claim the actual run output / exit code — each item with a concrete path or command. A "done" without the list is not a completion claim; it is an intention. / 完成声明必须附磁盘自检清单——①改动文件清单；②关键 diff 摘录或可核验指针；③每条"通过"声称对应的实跑输出/退出码——逐项给出具体路径或命令。没有清单的"完成"不是完成声明，只是意图。
+回归测试有效性**: claiming a regression test is valid requires full RED→GREEN cycle evidence (seen failing before the fix, passing after). A test that has only ever been green proves nothing. / 声称回归测试有效必须附完整 RED→GREEN 循环证据（修复前见过它红、修复后见它绿）；只绿过一次的测试证明力为零。
+证据产物是交付物**: verification artifacts — logs, screenshots, verify scripts, exported bytes — stay in the deliverable directory. They are NOT "runtime junk" and must not be deleted in cleanup; if they must be removed for a stated reason, list each deleted artifact and its content summary in the completion claim first. / 验证产物——日志、截图、验证脚本、导出字节——留在交付目录内。它们**不是"运行时产物"，清理时不得删除**；确需删除时，必须先在完成声明里逐条列出被删产物及其内容摘要。
+声称与产物对等**: every count or coverage statement in the completion claim (pass/fail counts, viewport/test matrices, file lists) must match the actual artifacts **in both directions** — over-reporting and under-reporting both count as inconsistency. If the artifact set is narrower than what you ran, say so explicitly. / 完成声明里的每个计数或覆盖面陈述（通过/失败数、视口/用例矩阵、文件清单）必须与产物**双向**一致——多报和少报都算不一致；产物集比你实际跑的范围窄时，明说。
 - Minimum-sufficient evidence per claim type: see `references/common-failures.md`（含"Agent 报告完成 → 查 VCS diff"行）。
 
 ## Self-Check Gate
@@ -563,8 +518,8 @@ Before final completion, maintain a perspective rotation log:
 | 2 | Different perspective by changing one variable | ... | ... | ... | ... |
 | 3 | Adversarial perspective not yet considered | ... | ... | ... | ... |
 
-Rules:
 
+Rules:
 - Each pass must use a materially different perspective from previous passes; do not replay the same role names.
 - At least one perspective in each full cycle must be generated from the actual artifact or domain, not a preset role.
 - After any fix, reset the rotation and generate a fresh cycle with a new perspective.
@@ -617,7 +572,6 @@ When reviewing a plan, code change, or report, check:
 
 ## Task Dispatch Package (Internal) / 内部任务派发包
 
-Use this compact structure **for internal dispatch inside Single-Agent Mode only**. Subagent dispatch uses the six-field mini package (see agent-modes.md); cross-model commander dispatch uses the mandatory 23-field package (see multi-agent-closure-rules.md). Three tiers, one authority per tier — do not mix them.
 
 **仅在单 Agent 模式的内部派发**使用这个精简结构。派发给子 Agent 用六字段迷你包（见 agent-modes.md）；跨模型指挥官派发用 23 字段完整包（见 multi-agent-closure-rules.md）。三层口径各归其权威，不得混用。
 
@@ -636,7 +590,6 @@ Use this compact structure **for internal dispatch inside Single-Agent Mode only
 - 闭环路径：交付后由谁复核、谁修复、何时需要用户授权
 ```
 
-For Commander Multi-Agent Mode, this note alone does not complete a handoff. Use the mandatory full task package in `references/multi-agent-closure-rules.md`, which additionally requires recipient identity (role + platform/window), selection rationale, identity declaration format, recipient activation prompt, evidence required, return format, authorization, and trust tier (T1/T2/T3).
 
 指挥官多 Agent 模式下，只用这份说明不构成完整交接。必须使用 `references/multi-agent-closure-rules.md` 中的强制完整任务包，它额外要求接收方身份（角色 + 平台/窗口）、选择理由、身份声明格式、接收方启动提示词、所需证据、返回格式、授权和信任层级（T1/T2/T3）。
 
