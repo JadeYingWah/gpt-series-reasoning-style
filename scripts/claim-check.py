@@ -18,13 +18,15 @@ with shell=True, so a hostile claims file is arbitrary code execution.
 Mitigations (2026-09-11, two layers):
   1. destructive-command blacklist (best-effort pattern match);
   2. interpreter default-deny — a command whose FIRST token is an
-     interpreter/shell (python/python2/python3/pythonw/py/node/deno/bun/perl/
-     ruby/php/powershell/pwsh/cmd/bash/sh/zsh/fish/ksh/npx/uvx/pipx, absolute
-     paths included) is BLOCKED unless it matches a narrow safe allowlist
-     (`python -m unittest|pytest`, `python --version`) — `-c/-e/-Command`
-     payloads and `python script.py` are unauditable from the command line
-     (proven live on 2026-09-11: `python -c "shutil.rmtree('victim')"` and
-     `python pwn.py` ran unchecked, victim dir deleted, 0 blocked).
+     interpreter/shell (python/python2/python3/pythonw/py/pypy/pypy2/pypy3/
+     ipython/jython/node/nodejs/deno/bun/perl/ruby/php/powershell/pwsh/
+     osascript/cmd/bash/sh/zsh/fish/ksh/dash/ash/busybox/csh/tcsh/cscript/
+     wscript/mshta/npx/uvx/pipx, absolute paths and version suffixes included)
+     is BLOCKED unless it matches a narrow safe allowlist
+     (`python|pypy|jython|ipython -m unittest|pytest`, `python --version`) —
+     `-c/-e/-Command` payloads and `python script.py` are unauditable from the
+     command line (proven live on 2026-09-11: `python -c "shutil.rmtree('victim')"`
+     and `python pwn.py` ran unchecked, victim dir deleted, 0 blocked).
      Both layers are overridden only by --allow-dangerous after human review.
 Honest limit (NOT a sandbox): the allowlist still executes the project's own
 test suite — conftest.py / imported test modules are project code and could
@@ -117,10 +119,13 @@ COMPILED_DANGEROUS = [re.compile(p, re.I) for p in DANGEROUS_RES]
 # version query) usable without a flag.
 INTERPRETER_NAMES = {
     "python", "python2", "python3", "pythonw", "py",
-    "node", "deno", "bun",
+    "pypy", "pypy2", "pypy3", "ipython", "jython",   # 2026-09-11 batch 44: 同族变体同样是解释器
+    "node", "nodejs", "deno", "bun",
     "perl", "ruby", "php",
-    "powershell", "pwsh",
+    "powershell", "pwsh", "osascript",                # macOS 脚本宿主
     "cmd", "bash", "sh", "zsh", "fish", "ksh",
+    "dash", "ash", "busybox", "csh", "tcsh",          # POSIX/嵌入式 shell 变体
+    "cscript", "wscript", "mshta",                    # Windows 脚本宿主（LOLBin 族）
     "npx", "uvx", "pipx",   # download-and-run package runners
 }
 # Known limits (documented, best-effort): exec-style tools that compile or
@@ -132,8 +137,10 @@ INTERPRETER_NAMES = {
 # `$()` can never reach end-of-line through the negated class). Optional
 # surrounding quotes on the executable token are accepted (2026-09-11 audit:
 # quoted absolute paths are ordinary on Windows).
+# 2026-09-11 batch 44: 白名单同步含同族变体（pypy/jython/ipython），否则把 `pypy -m pytest`
+# 这类合法测试命令一并拒掉 —— 要堵的是 `-c/-e/script` 载荷，不是跑测试套件。
 _INTERP_TOKEN = (r"[\"']?(?:[a-zA-Z]:[\\/][^\s\"']*[\\/])?"  # optional quotes+absolute path
-                 r"(?:python(?:[\d.]+)?|py)(?:\.exe)?[\"']?")
+                 r"(?:pypy(?:[\d.]+)?|python(?:[\d.]+)?|py|jython|ipython)(?:\.exe)?[\"']?")
 SAFE_INTERPRETER_RES = [
     re.compile(r"^" + _INTERP_TOKEN +
                r"\s+(?:-\d(?:\.\d+)?\s+)?"                  # py -3 / py -3.11
@@ -187,6 +194,10 @@ def _argv0(command: str) -> str:
     m = re.fullmatch(r"(pythonw?)(?:\d+(?:\.\d+)*)?", base)
     if m:
         base = m.group(1)
+    # 同族变体同样归一化：pypy3.9 / ipython3 与 pypy / ipython 是同一个解释器
+    m2 = re.fullmatch(r"(pypy|ipython)\d+(?:\.\d+)*", base)
+    if m2:
+        base = m2.group(1)
     return base
 
 

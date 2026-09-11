@@ -268,7 +268,7 @@
 
 **不需要 / 用更轻的：**
 
-- **单轮或 10 分钟内的小任务** → 只钉 [`docs/minimal-discipline.md`](docs/minimal-discipline.md) 三条速查卡（**Lite 档**：三条本体实测 154 tokens / o200k_base）；
+- **单轮或 10 分钟内的小任务** → 只钉 [`docs/minimal-discipline.md`](docs/minimal-discipline.md) 三条速查卡（**Lite 档**：三条本体实测 147 tokens / o200k_base，2026-09-11 重测）；
 - **宿主已自带同等规划/审查/验收** → 优先用宿主原生流程（首次使用做宿主对齐声明）；
 - **只想提升模型推理/智力** → 装错东西了，这是流程纪律层；
 - 琐碎任务在 skill 内部就走轻通道，不会为小事开全流程。
@@ -285,8 +285,8 @@
 | 项 | Tokens（o200k） | 何时发生 |
 | --- | --- | --- |
 | 常驻面：`SKILL.md` + `VERSION` | **3,843** | 装上后的每次会话 |
-| 按需 references | 单份 280–13,424；一个中等任务全周期通常累计 2–3 份（约 1.5 万–3 万 tokens，**摊在整个任务，不是每条消息**） | 对应阶段首次需要时 |
-| Lite 档（不装整包） | 三条本体 154（整卡 518） | 常驻 |
+| 按需 references | 单份 280–13,420；一个中等任务全周期通常累计 2–3 份（约 1.5 万–3 万 tokens，**摊在整个任务，不是每条消息**） | 对应阶段首次需要时 |
+| Lite 档（不装整包） | 三条本体 147（整卡 518） | 常驻 |
 
 - 永远不会被宿主加载的面：`self-test.md`（13.4k，维护者自测专用，明确不在任务路径）与英文镜像 `series-reasoning-workflow-en.md`（中文宿主不读）——上表"单份"含它们，实际任务面更小。
 - 琐碎任务走轻通道：不进门禁、不写治理产物，成本就是常驻面 + 一句证据报告。
@@ -358,7 +358,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Platform agents
 
 > 徽章口径：脚本接受 **13 个平台参数**（`antigravity` 与 `agents` 同指 `~/.agents/skills/`）；安装表含手动路径共 14 行。
 >
-> **只要核心收益？/ Lite install**：可以不装整包——把 [Minimal Usage](#minimal-usage--最小用法) 的三条写进宿主配置即可（三条本体实测 **154 tokens** / o200k_base；完整治理随时整包叠加，三条中的「全新产物默认中档」边界不要省）。
+> **只要核心收益？/ Lite install**：可以不装整包——把 [Minimal Usage](#minimal-usage--最小用法) 的三条写进宿主配置即可（三条本体实测 **147 tokens** / o200k_base，2026-09-11 重测；完整治理随时整包叠加，三条中的「全新产物默认中档」边界不要省）。
 
 **验证安装**——按名调用：
 
@@ -379,7 +379,7 @@ skill 应加载 `SKILL.md`；references 仅在当前阶段需要时按需读取�
 ## Minimal Usage / 最小用法
 
 只想要核心收益、不想要全套治理（23 字段任务包、21 个身份、指挥官协议、自测台账）？
-把 [`docs/minimal-discipline.md`](docs/minimal-discipline.md) 的三条写进宿主配置即可——这就是官方 **Lite 装法**：三条本体实测 **154 tokens**（o200k_base，2026-09-10 计数；整文件 481），覆盖约八成流程收益（工程估算，非实测）：
+把 [`docs/minimal-discipline.md`](docs/minimal-discipline.md) 的三条写进宿主配置即可——这就是官方 **Lite 装法**：三条本体实测 **147 tokens**（o200k_base，2026-09-11 重测；整文件 518），覆盖约八成流程收益（工程估算，非实测）：
 
 1. **建文件 / 跑命令前先确认**：先输出"我理解的目标 / 风险分档 / 推荐方案 / 需要你确认"，未经确认不动手。"开始""直接做"不算授权；"你决定"算显式委托。
 2. **轻任务免流程**：具体、影响小、可逆、无副作用的轻任务，指令本身即授权，直接做，做完报实际改动与证据。
@@ -450,8 +450,8 @@ gpt-series-reasoning-style/
 | `scripts/selfcheck.py` | **SB1–SB22 静态自检**：版本/编号一致性、结构完整性、交叉引用、围栏配对、身份与 references 计数、门禁字段多表面同步、语言策略锚点、agentskills.io 规范子集、身份计数跨面一致、写入点换行策略、**散文计数与其来源一致**等。`--out` 输出留痕报告。 | 只验证字面层；语义漂移、逐条双语对齐等**已知盲区在 docstring 里写明**。绿色 = 字面层完好，仅此而已。 |
 | `scripts/selftest-runner.py` | **77 条行为自测**的操作化：`list` 导出逐条提示词；`schema` 生成判定表（判定列留给人填）；`archive` 统计 + 内容指纹出可复现报表。 | 待判定项计作"未运行"而非"通过"；**工具永不自判 PASS**。 |
 | `scripts/mutation-kill.py` | **变异杀伤检验**：把产物自带的自检当被测对象，注入单点变异体、与**基线（未变异）**判定比对、逐错误类别统计**区分率**（= 判定与基线不同的变异体 / 该类有效变异体）。原产物只读（前后 sha256 比对）；**需要且只需要一个基线变异体**，缺基线或基线未测成直接拒绝（exit 2）；ERROR 不计入分母；示例见 `scripts/examples/`。 | 报告的是**自检自己的判定**，不是产物正确性；工具永不自判 PASS。零区分力 ≠ 产物错，只说明该自检对那类错误没有证据（区分率 0% = 该类证据为零）。区分率 ≠ 命中期望，两者是不同的数。 |
-| `scripts/claim-check.py` | **完成声明机械核验**：`## Files` 存在性 / `## Commands` fresh 实跑 + 期望退出码 / `## Hashes` sha256 内容 pin。 | 声明文件按**不可信输入**处理，默认双层拦截（`--allow-dangerous` 人工复核后解锁）：**24 类破坏性命令黑名单** + **解释器间接执行默认拒**（首词是 python/py/node/powershell/cmd/bash 等即拦，`-c/-e/脚本` 载荷命令行上不可审计；窄白名单放行 `-m unittest|pytest`、`--version`；pytest conftest 仍属项目代码——两层都不是沙箱，2026-09-11 实锤补洞）；打印实际执行数供审计。 |
-| `scripts/artifact-check.py` | **项目治理产物结构校验**：`docs/gate/*.md` 十字段标签与状态机、派发台账非空、发现账本逐轮四字段。 | 结构合规 ≠ 内容真实——授权是否真的发生过，仍靠人核证据。 |
+| `scripts/claim-check.py` | **完成声明机械核验**：`## Files` 存在性 / `## Commands` fresh 实跑 + 期望退出码 / `## Hashes` sha256 内容 pin。 | 声明文件按**不可信输入**处理，默认双层拦截（`--allow-dangerous` 人工复核后解锁）：**25 类破坏性命令黑名单** + **解释器间接执行默认拒**（首词是 python/py/pypy/node/nodejs/shell 家族等即拦，`-c/-e/脚本` 载荷命令行上不可审计；窄白名单放行 `-m unittest|pytest`、`--version`；pytest conftest 仍属项目代码——两层都不是沙箱，2026-09-11 实锤补洞）；打印实际执行数供审计。 |
+| `scripts/artifact-check.py` | **项目治理产物结构校验**：`docs/gate/*.md` 十一字段标签与状态机、派发台账非空、发现账本逐轮四字段。 | 结构合规 ≠ 内容真实——授权是否真的发生过，仍靠人核证据。 |
 | `probes/probe-runner.py` | **3 轮对抗探针**的可重跑回归仪器：`list` / `report` / `archive`（append-only 留痕）/ `verify`（机械预检）。 | `verify` 只能把 fail_pattern 命中判 FAIL，**永不自动判 PASS**；pass/fail 由人读宿主输出决定。`probes/last-run.md` 被 git 追踪：跑一次 `archive` 工作树就会变脏，**属预期**（追加式留痕），与 `docs/selftest-run/`（gitignore）处理方式不同。 |
 | `generate-banner.py` | 渲染社交预览图 `social-preview.png`（跨平台 CJK 字体回退链）。 | — |
 

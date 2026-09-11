@@ -1,7 +1,7 @@
 # Behavioural Self-Test Run — 77/77 executed / 行为自测 77 条全量执行报告
 
 - Date / 日期: 2026-09-10
-- Source / 依据: [`references/self-test.md`](../../references/self-test.md) (Test 1–77, count frozen)
+- Source / 依据: [`references/self-test.md`](../../../references/self-test.md) (Test 1–77, count frozen)
 - Method / 方法: each cell = one independent host session given **only** its verbatim prompt
   (expectations withheld; the agent under test was forbidden from reading `self-test.md` —
   reading them voids the cell). Full reply of every cell archived to disk; verdicts filled by a
