@@ -40,6 +40,8 @@ cd gpt-series-reasoning-style
 #    使用 gpt-series-reasoning-style 执行本次任务。
 ```
 
+**Claude Code 免 clone 一键装（插件市场）**：在 Claude Code 里执行 `/plugin marketplace add JadeYingWah/gpt-series-reasoning-style`，再 `/plugin install gpt-series-reasoning-style@gpt-series-reasoning-style`（或直接在 `/plugin` 菜单里安装；钉版本可在 add 时加 `@v1.2.0`）。其余平台与手动方式见 [Install](#install--安装)。
+
 加载后，AI 在动手建文件 / 写代码 / 跑命令之前，会先停下给你一张确认单；声称"做完了"时必须附上可核对的证据。
 
 **只想要核心、不想装整套？** 把 [Minimal Usage](#minimal-usage--最小用法) 的三条规则贴进宿主配置即可（官方 **Lite 档**，实测 147 tokens）。
@@ -402,6 +404,15 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Platform agents
 ```
 
 安装器会剥离仓库专属面（`.git*`、`.github/`、`site/`、`__pycache__/`），装出的副本只含宿主需要的文件。
+
+**Claude Code 插件市场（可选，免 clone）**：本仓库同时是一个单体插件 marketplace（清单在 `.claude-plugin/`，根目录 `SKILL.md` 直接作为单 skill 加载）。在 Claude Code 中：
+
+```text
+/plugin marketplace add JadeYingWah/gpt-series-reasoning-style
+/plugin install gpt-series-reasoning-style@gpt-series-reasoning-style
+```
+
+钉某个版本：`/plugin marketplace add JadeYingWah/gpt-series-reasoning-style@v1.2.0`。提交到官方/社区目录前，可用 `claude plugin validate` 本地校验清单。
 
 | 平台 | Skill 目录 | 脚本参数 |
 | --- | --- | --- |
