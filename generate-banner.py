@@ -4,7 +4,10 @@
 Run:  python generate-banner.py
 Output: social-preview.png next to this script.
 
-Design is kept in sync with social-preview.svg (same copy, colors, layout).
+同步关系（2026-09-11 如实更正）：`social-preview.svg` 与本品视觉同款，但它把**文字全部
+转成了路径轮廓**（全篇 14 个 `<path>`、零 `<text>` 节点），因此文案**无法被机器比对**——
+改了本文件的文案，SVG 会静默分叉，任何自动检查都发现不了。故：本文件是文案的**权威源**，
+SVG 属于需人工重新导出的冻结产物；改文案后必须同步重新导出 SVG，不得假设它会自动跟上。
 English uses Segoe UI; Chinese uses Microsoft YaHei (with Noto/SimHei fallback).
 """
 
