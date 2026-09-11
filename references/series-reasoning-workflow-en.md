@@ -199,7 +199,7 @@ Whenever the user changes any part of the plan, mid-clarification or mid-impleme
 Before creating any project folder, editing files, or running implementation commands, output and stop:
 
 ```text
-【实现前确认】(Pre-implementation confirmation) — 10 fields:
+【实现前确认】(Pre-implementation confirmation) — 11 fields:
 - 我理解的目标 My understanding of the goal: ...
 - 风险分档 Risk tier: light / medium / heavy — reason (decides light channel vs full flow)
 - 形态选择 Form selection: Single-Agent backbone / Subagent enhancement / Commander extension — one-line reason
@@ -207,16 +207,25 @@ Before creating any project folder, editing files, or running implementation com
   "simultaneously / in parallel / multiple tasks" is a Subagent signal — evaluate and state the tradeoff explicitly)
 - 已盘点可用资源 Surveyed available resources: local skills / installable skill candidates (installed only after approval) /
   reusable templates and prior implementations / web references (list item by item; write "none applies"
-  only after actually checking)
+  only after actually checking). When the task's dominant quality dimension (visual / interaction / copy /
+  data / security, etc.) is already covered by a host-installed skill, the default is to let it OWN that
+  dimension; declining requires a one-line reason (style conflict / capability gap / host instruction
+  takes priority). "The built-ins are good enough" without a reason is not an acceptable decline.
 - 最高影响问题 Highest-impact questions (may be several): ... (technical risks and known tradeoffs that affect the plan,
   for your judgment — these are NOT questions to you)
-- 推荐方案 Recommended plan: ...
+- 推荐方案 Recommended plan: ... (for creative/aesthetic-led tasks, present 2–3 genuinely different directions —
+  conservative / balanced / bold, at least one of each; "bold" must be a real contender: state what it does
+  extra, what it risks, and why it is worth it. A token filler option does not count.)
 - 其他选项 Alternatives: ... (options I evaluated and rejected — informational, do NOT require your choice)
 - 完整计划 Complete plan: ...
 - 澄清方式 Clarification mode: A one-shot confirmation of the recommended plan / B step-by-step Q&A
 - 需要你确认 Needs your confirmation: ... (open decision points ONLY YOU can make; each with options + a
   recommendation + a one-line reason. Difference from "Alternatives": that column lists what I rejected and
   you need not choose; this column lists what I cannot decide for you)
+- 确认范围 Confirmation scope (fixed clause for creative tasks): this confirmation locks the goal, scope,
+  deliverables, and on-disk location; style and direction are NOT frozen by the confirmation — iterating or
+  even switching direction during implementation is allowed, and any switch must be explained in the
+  evidence report
 ```
 
 Rules:
@@ -249,6 +258,8 @@ Guardrails:
 The light channel saves process, not evidence.
 
 **Light-channel exclusions and boundary** (any hit escalates to medium / full flow): ① A brand-new product defaults to medium — unless the instruction fully specifies the artifact's type, location, and form, the light channel is unavailable (new products involve multiple files and product decisions and must not bypass the gate by default; form selection is proposed by the AI inside the gate and ruled on by the user — the escalation reason is the multi-file and product-decision surface, not "the user must name the form"); ② multiple deliverables (≥2 independent artifacts, e.g. "build tools A/B/C at the same time"); ③ parallelism signals ("simultaneously / in parallel / together" is a Subagent-enhancement signal — take the full flow and declare form selection and the tradeoff explicitly).
+
+**Creative/aesthetic-led tasks — tiering and the direction exemption**: the risk tier is judged on **irreversibility, blast radius, and side effects** — boldness of aesthetic direction is NOT a risk: the cost of redoing a rejected direction is lower than the cost of every participant submitting a safe answer. For fully reversible, local, side-effect-free creative artifacts, you may skip the **direction** confirmation and start directly with the boldest direction you can defend (the on-disk location and scope still require confirmation), and mark it in the evidence report as "direction chosen boldly this round". When in doubt, still escalate to medium.
 
 ## Authorization Request Format
 

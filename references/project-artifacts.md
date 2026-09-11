@@ -44,9 +44,9 @@
 - Task tier / 任务分档: 轻 | 中 | 重
 - Form / 形态: 主干 | 子Agent | 指挥官
 
-## 【实现前确认】（10 字段快照）
+## 【实现前确认】（11 字段快照）
 
-<逐字拷贝当次门禁输出的 10 个字段——字段定义见 series-reasoning-workflow.md>
+<逐字拷贝当次门禁输出的 11 个字段——字段定义见 series-reasoning-workflow.md>
 
 ## 授权结果 / Authorization outcome
 
