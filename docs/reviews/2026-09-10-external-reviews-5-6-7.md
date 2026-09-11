@@ -54,3 +54,50 @@ probe fail_patterns being dead data, installer `--dry-run`) have **not** been ve
 by us yet. They are neither accepted nor rejected; the next verification pass should
 take them one by one, and anything confirmed lands with the same
 real-defect-evidence bar the SB checks require.
+
+## VERIFIED (2026-09-11,逐条对盘核验 · 第三十二批收尾后执行)
+
+deep-audit B1–B5/C1–C5/D1–D5/E1–E2/F1–F3 与第二报告 P2 四项全部核验完毕。**核验纪律：逐条对盘,证伪也记录。**
+
+### 已过时 / 已被后续批次顺带解决（7 项）
+
+| 项 | 核验结论 |
+| --- | --- |
+| B5 | **大部分过时**:`default_prompt` 已从 5.4KB 瘦身至约 2.3KB(整文件 2791B),截断风险大减;EN-only 与 CN/EN 双表达的同步顾虑仍在(低危)。 |
+| C1 | **已一致**:README:535/:544 与 INTERNAL-HISTORY.md 头部现均为 `0.1.x–3.3.x`。 |
+| C2 | **证伪(现状)**:「1.5–1.8×」句已不存在于当前 README(唯一残留「1.5」是 token 区间,无关)。 |
+| C4 | **大部分已解决**:SB19 扫描面含 `site/index.html`;SB21 把 site 登记进 selfcheck 表/冻结计数/循环比对 3 处。徽章口号类文本仍无专守(低危)。 |
+| D1 | **前提消失**:原引用的「$ 前缀只是 Codex 风格触发」表述已不在 SKILL.md/README(第 25 批重写),无活体问题。 |
+| D3 | **已解决**:`hooks/README.md:77` 已有「卸载 / Remove」节。 |
+| P2-3 (fail_patterns 死数据) | **已解决**:第十六批 `verify` 子命令已消费 fail_patterns(probe-runner.py:105 硬失败、exit 1)。 |
+
+### 证伪——建议所依据的前提在当前树不成立（1 项）
+
+| 项 | 核验结论 |
+| --- | --- |
+| D4 | **证伪**:SB3 的 `has_prompt` 判据(`"prompt" in raw and "\x60\x60\x60" in raw`)未变,但当前 77 条全部带 fence、selfcheck 21/21 全绿——「Test 33/35 被卡」无活体失败。放宽 fence 要求反而降低结构判据强度,**不建议采纳**。 |
+
+### 成立——建议仍有效、尚未处置（12 项,按优先级）
+
+| 项 | 现状核验 | 处置建议 |
+| --- | --- | --- |
+| B1 | 三面排除项仍有软漂移:SKILL.md:76「产品形态」vs workflow:242「形态」vs agent-modes:23/50「形态/type/location/form」;SB11 只查关键词存在性 | 维护时同步;若再抓到真实 RED 可按准入规则立项 SB |
+| B2 | identities/README.md 速查表仍无必需性标定、无权威脚注 | 加脚注「必需性以 commander-roles.md 为权威」 |
+| B3 | project-artifacts.md 无「任务派发包」节 | 补 §3.5(7 字段浓缩 + 单一权威指向) |
+| B4 | capability gate(:139)无「接收方路径空值」退化行为 | 补一句 Mode 3 直连退化 |
+| C3 | SKILL.md:9 EN 指针仍无章节锚点 | 指到具体 (EN) 节名 |
+| C5 | 26/30 vs 34/35 矛盾已在第 18/21 批修;建议的 prompt/expected 字面子检查未落地 | 无活体 RED,暂不满足 SB 准入;留作候选 |
+| D2 | identity-library.md:77 派发角色分配段无 8 字段检查表 | 可读性增量,随下次触及该文件时一并做 |
+| D5 | lessons/examples 关键词同步检查未落地(examples 有 SB14 层覆盖,lessons 无);**其引用的 RED 例句已不在 lessons.md——立项须重新举证** | 重新找 RED 或放弃 |
+| F1 | evidence-first 徽章(自定义色)仍无「非官方 shields 配色」说明 | README 加半句 |
+| F3 | README:437 仍称 site「GitHub Pages 可直接指向」,但仓内无 Pages 部署配置/URL,200 无从验证 | 部署时补可复跑 URL 检查,或改措辞 |
+| P2-1 (23 字段 token-字段集核对) | 三层口径已在第十六批④明文收敛(11 内部/6 子/23 跨模型各归权威);机器核对未落地 | 同 C5:无 RED 不准入 |
+| P2-4 (installer --dry-run) | install.ps1/install.sh 均无 dry-run | 建议类,随下次改安装器时加 |
+
+### 纯建议类、无缺陷（3 项）
+
+- **E1**(三份大文档切双段结构)、**E2**(README 语言矩阵折叠)、**F2**(judgement-sheet 行文体例)——均为可读性/体例增量,无正确性问题,留档待裁。
+
+### 核验过程新抓的活体漂移（已当场修复）
+
+- **README:540「截至目前 24 批」**——实际已到第 32 批(第 25 批写入后未随批次递增)。这正是 SB21 守的那类「手抄派生数字」,但不在其四族内。修法与 SB21 同理:**删手抄件、改为指向权威源(CHANGELOG Unreleased 最新条目)**,杜绝复发,而非把 24 改成 32 等下次再漂。

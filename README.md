@@ -539,7 +539,7 @@ gpt-series-reasoning-style/
 ## Versioning / 版本
 
 - **当前公开版本：`1.1.0`**（2026-09-08 发布基线；`VERSION` 文件为唯一权威）。
-- post-1.1.0 的增量**不跳号**：按批次记入 [`CHANGELOG.md`](CHANGELOG.md) 的 *Unreleased* 节（截至目前 24 批），引用规则出处时注明批次。
+- post-1.1.0 的增量**不跳号**：按批次记入 [`CHANGELOG.md`](CHANGELOG.md) 的 *Unreleased* 节（批次总数以 CHANGELOG Unreleased 最新条目为准），引用规则出处时注明批次。
 - 语义：1.1.0 基线 + Unreleased 批次计价；升版需总指挥裁决。
 - 完整内部迭代史（`0.1.x`–`3.3.x` 及旧公开线）见 [`INTERNAL-HISTORY.md`](INTERNAL-HISTORY.md)。
 
