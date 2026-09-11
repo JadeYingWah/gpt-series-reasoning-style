@@ -21,7 +21,7 @@ The tool applies three layers before executing any command:
 | Layer | What it blocks | Coverage |
 |---|---|---|
 | 1. Destructive-command blacklist | `rm -rf`, `git push --force`, `git reset --hard`, `format`, `mkfs`, `curl|sh`, `Invoke-Expression`, `reg add/delete`, `schtasks`, etc. (25 patterns) | Best-effort pattern match; not a sandbox |
-| 2. Interpreter default-deny | Any command whose first token is an interpreter/shell (python, node, deno, bun, perl, ruby, php, powershell, cmd, bash, sh, zsh, npx, uvx, pipx, and 30+ variants) is blocked unless it matches a narrow allowlist | Allowlist: `python -m unittest/pytest`, `python --version` (with absolute paths, quoted paths, version suffixes, wrapper prefixes) |
+| 2. Interpreter default-deny | Any command whose first token is an interpreter/shell (python, node, deno, bun, perl, ruby, php, powershell, cmd, bash, sh, zsh, npx, uvx, pipx, and 33+ variants — 37 total) is blocked unless it matches a narrow allowlist | Allowlist: `python -m unittest/pytest`, `python --version` (with absolute paths, quoted paths, version suffixes, wrapper prefixes) |
 | 2b. Wrapper unwrap | `env python -c`, `nice python -c`, `timeout 5 python -c`, `call python -c` etc. are unwrapped and the same default-deny re-applied to the effective command | `sudo`/`doas`/`xargs` blocked on sight; unknown wrapper arg shapes fail closed |
 
 All three layers are overridden only by the explicit `--allow-dangerous` flag, which is intended for use after human review of every command.
