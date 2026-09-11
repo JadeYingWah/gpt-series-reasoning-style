@@ -398,7 +398,7 @@ The canonical field list is a content checklist, not literal formatting. Render 
 - Recipients should return `CONFIDENCE: High / Medium / Low` with a one-line reason, or `BLOCKED: reason, what would unblock`.
 - Dispatch tasks with a trust tier; T1/T2/T3 are defined in `references/identity-library.md`.
 - Every task package must name the recipient identity (role + platform/window) and the reason that recipient was selected. Decoupling does not mean anonymity: the identity declaration drops model/session, and the task package/ledger keep the recipient role+platform as routing metadata; the underlying model is optional reference metadata that must never block dispatch or invalidate a ledger row. 解耦不等于匿名：声明里去掉模型/会话，任务包与台账保留"角色+平台/窗口"作为路由元数据；底层大模型是可选参考，永不阻塞、永不使台账失效。
-- Every task package must state the declaration cadence: recipients declare identity at the declaration moments (first entry, role change, handoff, possible confusion), not necessarily every response, unless the host injects identity automatically.
+- Every task package must state the declaration cadence: recipients declare identity at the declaration moments (first entry, role change, handoff, possible confusion); per-response repetition is not required once the role is established. If the host already injects identity automatically, the duplicate declaration may be omitted — but only when the injected value is role + task ID.
 - If the user changes the plan, the commander stops dispatch, re-evaluates the whole plan, and only then sends the next round.
 - The commander remains the default DRI even when work is delegated.
 
@@ -434,7 +434,7 @@ Multi-agent dispatch state must not live only in the conversation. Maintain a le
 - 接收方应返回 `CONFIDENCE: High / Medium / Low` 及一行理由；无法继续时返回 `BLOCKED: 原因, 解除条件`。
 - 派发任务时必须声明信任层级；T1/T2/T3 定义见 `references/identity-library.md`。
 - 每个任务包必须写明接收方身份（角色 + 平台/窗口）以及选择该接收方的理由；底层大模型为可选参考元数据。
-- 每个任务包必须写明声明节奏：接收方在声明时点（首次进入、角色变化、交接、可能混淆）声明身份，不必每条回复重复，除非宿主已自动注入身份。
+- 每个任务包必须写明声明节奏：接收方在声明时点（首次进入、角色变化、交接、可能混淆）声明身份，角色已确立且无歧义后不必每条回复重复；宿主已自动注入身份时可省略重复声明，但仅当注入的是「角色 + 任务 ID」（只注入模型名/会话名不构成豁免，见 `multi-agent-closure-rules.md`）。
 - 用户改变计划时，指挥官停止派发、整体再规划，然后才发送下一轮。
 - 即使任务已委派，指挥官仍是默认 DRI。
 
@@ -454,7 +454,7 @@ Multi-agent dispatch state must not live only in the conversation. Maintain a le
 - Recipients should return `CONFIDENCE: High / Medium / Low` with a one-line reason; when they cannot continue, they return `BLOCKED: reason, unblock condition`.
 - Dispatching a task must declare the trust tier; T1/T2/T3 are defined in `references/identity-library.md`.
 - Every task package must state the recipient identity (role + platform/window) and the reason for choosing that recipient; the underlying model is optional reference metadata.
-- Every task package must state the declaration cadence: the recipient declares identity at declaration points (first entry, role change, handover, possible confusion) and need not repeat it in every reply, unless the host injects identity automatically.
+- Every task package must state the declaration cadence: the recipient declares identity at declaration points (first entry, role change, handover, possible confusion); per-response repetition is not required once the role is established. If the host already injects identity automatically, the duplicate declaration may be omitted — but only when the injected value is role + task ID.
 - When the user changes the plan, the commander stops dispatching, re-plans from the whole, and only then sends the next round.
 - Even after a task is delegated, the commander remains the default DRI.
 
@@ -465,14 +465,14 @@ Multi-agent dispatch state must not live only in the conversation. Maintain a le
 - Review findings use severity: P0 / P1 / P2 / UNVERIFIED.
 - Confirmed issues are fixed by the assigned recipient or the commander, then re-verified before stage closure.
 - Recipients return a confidence signal or a blocked signal instead of guessing.
-- Recipients declare identity at the declaration moments (first entry, role change, handoff, possible confusion); per-response repetition is not required once the role is established, unless the host injects identity automatically.
+- Recipients declare identity at the declaration moments (first entry, role change, handoff, possible confusion); per-response repetition is not required once the role is established. If the host already injects identity automatically, the duplicate declaration may be omitted — but only when the injected value is role + task ID.
 
 - 接收方返回文件路径、运行命令、测试输出、截图或其他可验证产物。
 - 指挥官对照实际文件系统和命令输出核验返回证据。
 - 审查结论使用严重级别：P0 / P1 / P2 / UNVERIFIED。
 - 确认问题由指定接收方或指挥官修复，修复后重新验证再关闭阶段。
 - 接收方必须返回置信度信号或阻塞信号，不能靠猜测继续。
-- 接收方在声明时点（首次进入、角色变化、交接、可能混淆）声明身份；角色已确立后不必每条回复重复，除非宿主已自动注入身份。
+- 接收方在声明时点（首次进入、角色变化、交接、可能混淆）声明身份；角色已确立后不必每条回复重复。宿主已自动注入身份时可省略重复声明，但仅当注入的是「角色 + 任务 ID」，只注入模型名/会话名不构成豁免。
 
 ## Anti-Patterns / 反模式
 
