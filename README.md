@@ -1,4 +1,4 @@
-<div align="center">
+﻿<div align="center">
 
 <img src="social-preview.png" alt="GPT-Series Reasoning Style" width="640">
 
@@ -471,7 +471,7 @@ skill 应加载 `SKILL.md`；references 仅在当前阶段需要时按需读取�
 
 ```text
 gpt-series-reasoning-style/
-├── SKILL.md                 # 入口：加载证明、协作架构、门禁、工作流、References 索引（≈117 行 / ≈4.5k tok）
+├── SKILL.md                 # 入口：加载证明、协作架构、门禁、工作流、References 索引（≈118 行 / ≈4.6k tok）
 ├── VERSION                  # 1.2.0 —— 加载证明只需要 SKILL.md + VERSION
 ├── AGENTS.md                # 跨运行时入口别名（Codex / Gemini CLI / Copilot CLI）——只指路，权威仍在 SKILL.md
 ├── README.md / LICENSE / CHANGELOG.md / INTERNAL-HISTORY.md / SECURITY.md
@@ -591,7 +591,7 @@ gpt-series-reasoning-style/
 
 为防"规则越写越多、检查越加越重"的失控，本仓库给自己立了预算：
 
-- **`SKILL.md` ≤ 250 行**（当前约 117 行 / 实测 4,463 tokens 常驻，o200k_base）——入口只保留决策点，细节下沉到按需的 references；
+- **`SKILL.md` ≤ 250 行**（当前约 118 行 / 实测 4,580 tokens 常驻，o200k_base）——入口只保留决策点，细节下沉到按需的 references；
 - **静态检查上限 22 项（SB1–SB22）**：新增第 23 项必须先证明它抓到过**真实缺陷**（可指认提交哈希）——SB18/19/20/21/22 均按此准入立项；
 - **77 条行为自测冻结**：只做"旧测失去鉴别力 → 替换"，不再扩容；
 - **收敛优先于加码**：版本对外固定 `1.2.0` 基线，post-1.2.0 增量以 CHANGELOG 的 Unreleased 批次计价，引用时注明批次。
