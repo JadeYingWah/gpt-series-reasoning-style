@@ -119,7 +119,7 @@ AI  ：做完了，测试都过了。        AI  ：完成。附磁盘自检清�
 ## What It Is / 这是什么
 
 这是一层可以装进任何 Agent 宿主的行为纪律。它是一个普通 Agent Skills 包：常驻面只有 `SKILL.md` + `VERSION`（实测 3,843 tokens，o200k_base），
-13 份 references 按需取节加载，`AGENTS.md` 为 Codex / Gemini CLI / Copilot CLI 等运行时提供跨运行时入口别名。
+14 份 references 按需取节加载，`AGENTS.md` 为 Codex / Gemini CLI / Copilot CLI 等运行时提供跨运行时入口别名。
 
 ### 三大机制 / Three Mechanisms
 
@@ -471,7 +471,7 @@ skill 应加载 `SKILL.md`；references 仅在当前阶段需要时按需读取�
 
 ```text
 gpt-series-reasoning-style/
-├── SKILL.md                 # 入口：加载证明、协作架构、门禁、工作流、References 索引（≈127 行 / ≈5.0k tok）
+├── SKILL.md                 # 入口：加载证明、协作架构、门禁、工作流、References 索引（≈134 行 / ≈5.3k tok）
 ├── VERSION                  # 1.2.0 —— 加载证明只需要 SKILL.md + VERSION
 ├── AGENTS.md                # 跨运行时入口别名（Codex / Gemini CLI / Copilot CLI）——只指路，权威仍在 SKILL.md
 ├── README.md / LICENSE / CHANGELOG.md / INTERNAL-HISTORY.md / SECURITY.md
@@ -479,7 +479,8 @@ gpt-series-reasoning-style/
 │   └── openai.yaml          # OpenAI/Codex 兼容面的可选 UI 元数据（display_name / default_prompt）
 ├── identities/              # 21 个内置角色身份（双语）+ _template.md
 ├── custom-identities/       # 用户自定义身份（中文名：其他身份）
-├── references/              # 13 份按需规则文档
+├── references/              # 14 份按需规则文档
+│   ├── master-process-reference.md       # 主过程参照系（设计原点，所有修改应对照此文件）
 │   ├── series-reasoning-workflow.md      # 完整流程与审计模板（中文权威版，Section Map 分节）
 │   ├── series-reasoning-workflow-en.md   # 上者的英文镜像（中文宿主勿读）
 │   ├── agent-modes.md                    # 协作架构、形态自选、确认模板、任务包
@@ -591,7 +592,7 @@ gpt-series-reasoning-style/
 
 为防"规则越写越多、检查越加越重"的失控，本仓库给自己立了预算：
 
-- **`SKILL.md` ≤ 250 行**（当前约 127 行 / 实测 4,980 tokens 常驻，o200k_base）——入口只保留决策点，细节下沉到按需的 references；
+- **`SKILL.md` ≤ 250 行**（当前约 134 行 / 实测 5,250 tokens 常驻，o200k_base）——入口只保留决策点，细节下沉到按需的 references；
 - **静态检查上限 22 项（SB1–SB22）**：新增第 23 项必须先证明它抓到过**真实缺陷**（可指认提交哈希）——SB18/19/20/21/22 均按此准入立项；
 - **77 条行为自测冻结**：只做"旧测失去鉴别力 → 替换"，不再扩容；
 - **收敛优先于加码**：版本对外固定 `1.2.0` 基线，post-1.2.0 增量以 CHANGELOG 的 Unreleased 批次计价，引用时注明批次。
