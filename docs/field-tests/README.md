@@ -49,6 +49,9 @@ Earlier handover field tests (versions also consolidated into 1.1.0) validated t
 - [Behavioural self-test 77/77 full run · 2026-09-10 / 77 条行为自测全量执行 · 2026-09-10](selftest-run-2026-09-10/report.md)
 - [Pelican creative A/B · same model, both arms · 2026-09-11 / 鹈鹕骑车创意 A/B · 同模型双臂 · 2026-09-11](pelican-ab-2026-09-11/report.md)
 - [A/B effectiveness cycle 4 + A5 rerun · 2026-09-12 / A/B 有效性三轴 cycle4 与 A5 复跑 · 2026-09-12](ab-cycle4-effectiveness/report.md)
+- [A/B isolation bare-comparison cycle 5-clean · 2026-09-12 / A/B 干净对照 cycle5 · 2026-09-12](ab-cycle5-clean/report.md)
+
+- [Judge calibration rubric · M4/F6/交付质量行为锚点 · 2026-09-12 / 判分校准细则 · 2026-09-12](judging-rubric.md)
 
 ## Honesty & hygiene rules for these reports / 本目录的报告纪律
 
@@ -68,8 +71,10 @@ Earlier handover field tests (versions also consolidated into 1.1.0) validated t
 
 **天花板效应警告（2026-09-09 二次盲测实证）**：当任务小而自明、正确性可机械核验且两臂都做对时，缺陷数会出现 0 vs 0——这**不代表纪律无效**，只是这批任务没有区分空间。要测出缺陷差，任务必须含真实误解陷阱（模糊需求、多交付物高压、中途改需求）；否则 0:0 只能当「流程轴无信息」，不能当「纪律无效」的证据。
 
-**对照臂污染警告（2026-09-12 cycle4 床1 实证）**：在本机跑双臂时，**「无 skill 对照」并不干净**——宿主的用户级 skill 生态（已装的其他 skill）对两臂同样可见；cycle4 床1 的 B 臂就自行加载了本机一个验证类 skill 并凭其拿了 T3 高分，使「平手」实际读作「本 skill 相对本机生态无增量」而非「skill 无用」。判定 skill 增量前必须先盘点对照臂可用的用户级 skill 清单；要测裸差需用禁用用户级 skill 的环境。
+**对照臂污染警告（2026-09-12 cycle4 床1 实证，cycle5 复证并升级为 W12）**：在本机跑双臂时，**「无 skill 对照」并不干净**——宿主的用户级 skill 生态（已装的其他 skill）对两臂同样可见；cycle4 床1 的 B 臂就自行加载了本机一个验证类 skill 并凭其拿了 T3 高分，使「平手」实际读作「本 skill 相对本机生态无增量」而非「skill 无用」。**且只隔离 `~/.agents/skills` 不够**：cycle5 只搬走了该目录，B1 仍从宿主用户级路径（`~/.workbuddy/skills/`）加载同一验证类 skill——宿主 skill 至少有用户级目录与内置插件两个来源，隔离须全部覆盖或改用无宿主 skill 的环境；隔离后应以一次性对话盘点两臂可见 skill 清单并留证。
 
 **token 口径（cycle3 + cycle4 合并实测，n=1/格）**：装载面增量很小（≤1.6K tokens）；行为增量几乎全部落在对话（Conversation），实测 **A−B +14K–21K tokens/任务**。覆盖率条款落地后的复跑床回到区间下沿（+13.8K）——步数变少、行为成本不涨。
+
+**实验者不得插手授权（2026-09-12 cycle5 实证）**：A 臂实验卡里不要人为补发「可 / 继续」——cycle5 中两轮人为确认使 A 臂墙钟混入纯等待（0.7min 被拖到 7-9min）。对齐与受理类停等属被测行为，照记不打断；只有平台故障/429 才允许操作者介入。
 
 只想吃最小收益时，用 `docs/minimal-discipline.md` 的三条常驻规则即可，不必装完整 skill。
