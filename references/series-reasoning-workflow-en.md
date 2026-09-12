@@ -698,6 +698,76 @@ Then report:
 
 If project-specific stage codes materially affect authorization, define them in a project policy outside this universal skill. Use `project-policy-template.md` as the starting point; do not edit this skill with project rules.
 
+
+
+## Modular Selection Matrix & Task Type Adaptation (batch 72+)
+
+> This section mirrors the Chinese authority's modular selection matrix and task-type adaptation.
+> It was added in post-1.2.0 batches (72–90). On conflict, Chinese authority wins.
+
+### Three-Layer Structure: Static Core / Dynamic Adaptation / Modular Selection
+
+The AI must clearly distinguish what cannot change, what must change, and what is selectable:
+
+- **Static core** (core principles, three bottom lines, loading proof, host alignment, gate structure, evidence requirements, file organization rules): the soul of the skill, rarely changed.
+- **Dynamic adaptation** (task type, risk tier, resource inventory, process strictness, form selection, task constitution): continuously re-evaluated during execution — a reflection of metacognitive ability.
+- **Modular selection** (search depth, verification count, stage granularity, review rounds, hands-on rounds, workflow steps): AI-customizable but with baselines — not free discretion, but default config matched to task scale, with explicit reason to deviate.
+
+### Modular Selection Matrix (Process Decoupling)
+
+**Principle**: Not every task needs the full process. Match default config to task scale; deviate only with explicit reason. Selection must be declared in the gate; if the task grows more complex during execution, auto-upgrade and record.
+
+| Task Scale | Criteria | Mandatory Modules (cannot skip) | Default Streamlining (can skip) | Upgrade Condition |
+|---|---|---|---|---|
+| **Light (Verification-Focused)** | Single file / <50 lines / one-off script / simple query / pure text rewrite | Loading proof + **light gate (5 fields)** + **core verification (by task type, mandatory)** + **1 review round (must include verification)** + evidence report (light) + honesty marking | Task constitution (→ one-line goal statement), full resource survey (→ one-line summary), cyclic review (2→1 round), hands-on loop (mark UNVERIFIED if no GUI), host alignment (skippable first time) | External system writes, irreversible ops, user explicitly demands rigor, **verification finds issues → upgrade** |
+| **Medium** | Multi-file / user-facing deliverable / maintainable / interactive UI / API calls | Core + task type judgment + staged execution + cyclic review (2 rounds) + evidence report | Search depth reducible (1 search instead of multiple), hands-on loop mark UNVERIFIED when no GUI | Complexity exceeds expectation, new risks found, user requests upgrade |
+| **Heavy** | Large project / multi-agent / production-grade / high-risk / security | Full process (no streamlining) | None | None (already highest) |
+
+**Light config core principle: streamlining ≠ skipping verification, but focusing on the most critical verification.** Light tasks must retain task-type-specific core verification (data → Python independent calc, code → syntax + boundary tests, visual → contrast ratio calc, modeling → OBJ syntax check, adventure → ending reachability check, research → source verification), and must not skip verification under the "light" label. When choosing light config, declare in the gate: "which non-verification modules were skipped, why, what core verification was done."
+
+**AI Normal Performance Baseline (B' reference)**: Modern AI platforms actively search, verify, and structure output when facing tasks. This skill's increment lies in **verification discipline** (cyclic review catches omissions, multi-dimensional verification finds inconsistencies, evidence closure is reproducible), not in "making AI from incapable to capable." If the task is simple enough that AI normal performance suffices, choose light config; if the task involves multi-dimensional verification or high risk, upgrade to medium/heavy.
+
+**Three bottom lines that cannot be skipped at any scale**: honesty marking (UNVERIFIED), evidence report (with reproducible verification commands), real-environment acceptance (mark UNVERIFIED when cannot execute, rather than skipping).
+
+### Task Type Adaptation (stacked on scale config)
+
+| Task Type | B' Baseline | A1 Full | Skill Increment | Hands-On Verification | Cyclic Review | Special Requirements | Experiment Basis |
+|---|---|---|---|---|---|---|---|
+| **Data** | 7.5 | 9.4 | +1.9 | **Mandatory** (any scale, use Python/Excel to independently calc key metrics) | 2 rounds, round 1 must include data accuracy spot-check | Data quality statement is mandatory chapter; light config also cannot skip data verification | batch81: skipping verification caused 29% data error |
+| **Code** | 7.0 | 8.8 | +1.8 | Mandatory (medium+ scale), light can be syntax-only | 2 rounds | Boundary case coverage mandatory | batch79: full process found more boundary issues |
+| **Creative** | 7.0 | 8.6 | +1.6 | Optional (replace with creative structure check: key parts missing? tone consistent?) | 1 round sufficient | Bold by default, gate locks only scope not direction | batch80: round 2 cyclic review low value |
+| **Research** | 6.5 | 8.6 | +2.1 | **Mandatory** (key data points multi-source cross-verification, single source marked pending) | 2 rounds, round 1 must include fact accuracy spot-check | Uncertainty statement + methodology mandatory; sources labeled with credibility and verification status | batch83: no source = untrustworthy, B arm contained fabricated data |
+| **Visual/Design** | 6.5 | 8.4 | +1.9 | Mandatory (medium+ scale: color contrast calc + SVG renderability + dark mode) | 2 rounds, round 1 must include visual check (color/layout/accessibility) | Must have verifiable visual output (SVG/code); accessibility spec mandatory chapter; search focuses on design trends and anti-patterns | batch84: A2 white-on-orange 2.84:1 failed, A1 found and fixed |
+| **Modeling** | 6.0 | 8.8 | +2.8 | Mandatory (medium+ scale: OBJ/FBX syntax validation + polygon count + UV range + normal normalization + PBR param range) | 2 rounds, round 1 must include technical check (topology/UV/normal/PBR/LOD) | Must have executable model file (OBJ/FBX); automated validation script is mandatory deliverable; quality checklist with verification results | batch85: B arm no OBJ unusable, A1 complete OBJ + validation script passed |
+| **Adventure/Narrative** | 6.0 | 8.7 | +2.7 | Mandatory (medium+ scale: branch completeness + dead-end detection + ending reachability + meaningless choices + state consistency) | 2 rounds, round 1 must include branch logic check | Must have automated validation script; endings determined by state machine not fixed pointing; each choice must have different consequences | batch86: A1 found and fixed 2 unreachable endings, all reachable after state machine fix |
+| **Compound** | 6.0 | 8.6 | +2.6 | Mandatory (medium+ scale: sub-task decomposition, multi-dimensional verification: data+visual+code) | 2 rounds, round 1 must include cross-dimensional consistency check | Identify each sub-type and apply corresponding verification; cross-validate subsystem input/output matching | batch88: A1 found budget data error (85%→94%), multi-dimensional verification found cross-dimensional inconsistency |
+
+> **B' baseline explanation**: B' = score without skill but AI normal performance (active search + verification + structured output); A1 = score with skill full process; skill increment = A1 - B'. Larger increment means the task type needs skill's verification discipline more. Modeling/adventure/compound have largest increments (+2.6~+2.8), creative smallest (+1.6).
+
+**Streamlining declaration requirement**: When choosing light or medium config, the gate must state "which modules were skipped, why, quality impact assessment"; the evidence report must check actual execution against the declaration. Declared but not executed = formal execution, treated as not done.
+
+### Task Constitution (Task Reference Framework, Metacognitive Carrier)
+
+In the first stage (task understanding and confirmation), the AI must formulate this task's "constitution" — containing: precise definition of task goal, task type and judgment basis (search sources), quality standards (what counts as "good", what counts as "done", checkable specific standards), process strictness (which steps fully done, which can be streamlined, why), key decision points (which need to stop and confirm, which can be autonomously decided), change log.
+
+**The constitution is not a one-time write-and-lock** — at each stage review, it must be checked against (does current execution still match the constitution? does the constitution need updating?), updates must record reasons, no silent modification; the final report must include the constitution's change history. Constitution quality directly affects deliverable quality — vague constitution = execution drift = deliverable quality decline.
+
+### Continuous Governance Loop
+
+One-time declarations of inventory, tiering, gate, acceptance, **task type**, **task constitution** are not the end — when scope/risk/resources/deliverable/**task type**/**constitution** change during execution, they must be re-evaluated and changes recorded; task constitution updates must record reasons, no silent modification; evidence reports must check against all prior declarations, item by item whether actually applied, whether still valid; declared but not applied = formal execution, treated as not done. Light-channel tasks that become complex during execution must auto-upgrade to full process and record.
+
+### Formal Execution Negative List (examples, non-exhaustive)
+
+The following do not count as completion: listing skill names without explaining sub-problem matching = not inventoried; running commands without checking output = not verified; claiming coverage of an input domain but test cases don't touch boundaries = not covered; clicking buttons without verifying functional results = not accepted; writing a simplification list but adding it after the fact = not declared simplification. Technically satisfying assertions but underlying results wrong or incomplete = FAIL, not passed because "assertion literally holds." Other isomorphic behaviors (writing tests that always pass, listing risks without mitigation, etc.) follow the same principle.
+
+### Yield Principle
+
+This skill only regulates process, does not dominate content — when other skills or host capabilities have claims on content, style, or creativity, this skill yields and cooperates; but honesty (evidence/UNVERIFIED), safety (destructive protection), and real-environment acceptance are the last line of defense, effective at any priority.
+
+### Asset Orchestration
+
+Inventorying available skills is not listing — each selected skill must explain which sub-problem of the task it solves, why it rather than others, how its output is verified or incorporated into the deliverable; when multiple skills collaborate, write handoff points and combination strategy; when new sub-problems emerge during execution, re-evaluate whether new skills are needed. Calling a skill but not substantially using its output = formal call, treated as not called. Orchestrating for orchestration's sake (one skill can solve but forcing multiple) violates deliverable-first.
+
 ## Output Style
 
 Prefer this shape:
