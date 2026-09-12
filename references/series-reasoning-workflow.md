@@ -131,11 +131,17 @@ When the plan needs multiple independent agents, select roles from `references/c
 - Read `references/multi-agent-closure-rules.md` before dispatch; it is the canonical source for the mandatory task package, plus DRI closure, return handling, file ownership, the pre-dispatch conflict ledger, consolidation (fan-in), the fix-loop cap, authorization separation, and context discipline.
 - Recipient identity must be concrete (role + platform/window; a bare "另一个 AI" is not enough) and selected to match task capability, judged by observed return quality rather than model name; the activation prompt must be a self-contained copy-paste text. These rules are canonical in `references/multi-agent-closure-rules.md` and `references/agent-modes.md` — point there instead of treating this list as the source.
 
-## Task Type Adaptation / 任务类型自适应
+## Task Type Adaptation / 任务类型自适应（动态）
 
-Before clarifying the task with the user, first judge the task type and adjust process strictness accordingly. This skill is a process-discipline layer, not a content dominator — when process constraints clearly hurt output quality, the AI may skip specific process steps, but must explain in the evidence report what was skipped, why, and the quality impact assessment.
+Before clarifying the task with the user, first determine the task type based on **external information**, not internal static classification. Then adjust process strictness accordingly. This skill is a process-discipline layer, not a content dominator — when process constraints clearly hurt output quality, the AI may skip specific process steps, but must explain in the evidence report what was skipped, why, and the quality impact assessment.
 
-**Task type categories and process strictness:**
+**Judgment protocol (external-information based, not static rules):**
+1. Before judging the task type, actively search the web for: the latest classification of this task domain, industry standards, best practices, and similar cases.
+2. Based on search results, determine the initial task type. The search basis must be recorded.
+3. **Task type is NOT locked after one judgment** — during each stage completion review, re-evaluate whether the task type has changed (e.g., a creative task that mid-way discovers it needs complex data processing, a code task that evolves to need creative design).
+4. When the task type changes, automatically adjust process strictness and record the change in the evidence report.
+
+**Task type categories and process strictness (reference categories, not exhaustive — search may reveal new types):**
 
 | Task Type | Strictness | Adaptation |
 |---|---|---|
@@ -149,7 +155,7 @@ Before clarifying the task with the user, first judge the task type and adjust p
 2. Evidence report (actual files, commands, tests, screenshots)
 3. Real-environment acceptance (not claiming "works" without actual verification)
 
-**Judgment result must be declared in the gate's "任务类型" field.**
+**Initial judgment result, search basis, and any mid-execution type changes must all be declared in the gate's "任务类型" field and the evidence report.**
 
 When skipping a process step for quality reasons, the evidence report must contain:
 - What was skipped (specific step name)
