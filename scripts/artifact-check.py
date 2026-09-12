@@ -12,7 +12,7 @@ Exit codes: 0 = all structural rules pass, 1 = structural problems found,
 2 = usage / path error.
 
 Checked rules:
-  1. docs/gate/*.md     — each record carries the 11 gate-field labels (authoritative
+  1. docs/gate/*.md     — each record carries the 14 gate-field labels (authoritative
                           list: GATE_FIELDS below, mirrored in SKILL.md and workflow
                           CN/EN), a legal status line, and a superseded pointer when
                           superseded.
@@ -31,6 +31,7 @@ import sys
 
 GATE_FIELDS = [
     "我理解的目标",
+    "任务类型",
     "风险分档",
     "形态选择",
     "已盘点可用资源",
@@ -41,6 +42,8 @@ GATE_FIELDS = [
     "澄清方式",
     "需要你确认",
     "确认范围",
+    "声明持续有效条件",
+    "完成标准与失败行为",
 ]
 STATUSES = {"proposed", "confirmed", "rejected", "superseded"}
 FINDINGS_FIELDS = ["轮次编号", "本轮改动与原因", "未解项", "证据指针"]

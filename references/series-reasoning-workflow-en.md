@@ -199,7 +199,7 @@ Whenever the user changes any part of the plan, mid-clarification or mid-impleme
 Before creating any project folder, editing files, or running implementation commands, output and stop:
 
 ```text
-【实现前确认】(Pre-implementation confirmation) — 11 fields:
+【实现前确认】(Pre-implementation confirmation) — 14 fields:
 - 我理解的目标 My understanding of the goal: ...
 - 风险分档 Risk tier: light / medium / heavy — reason (decides light channel vs full flow)
 - 形态选择 Form selection: Single-Agent backbone / Subagent enhancement / Commander extension — one-line reason

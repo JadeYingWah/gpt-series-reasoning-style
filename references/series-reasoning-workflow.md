@@ -10,9 +10,10 @@
 
 - **加载与续接**：`Loading Contract`、`Resume Check / 续会全面体检`、`Identity Boundary`
 - **形态与角色**：`Execution Modes`、`Three Internal Role Faces`、`Subagent Mode Protocol`、`Commander Multi-Agent Mode Protocol`、`Commander Role Selection`
-- **门禁与授权**：`Input Clarification`、`Clarify With The User`、`Pre-Implementation Gate`、`Risk Trimming / 风险分档`、`Authorization Request Format`、`Authorization Matrix`
+- **任务理解**：`Task Type Adaptation / 任务类型自适应`、`Input Clarification`、`Clarify With The User`
+- **门禁与授权**：`Pre-Implementation Gate`、`Risk Trimming / 风险分档`、`Authorization Request Format`、`Authorization Matrix`
 - **指令与盘点**：`Assess And Optimize The Instruction`、`Resource Survey / 资源盘点前置`、`Research Before Planning`、`Existing-Artifact Conflict`、`Change Management / 变更管理`
-- **执行与验收**：`Staged Execution Protocol`、`Generative Divergence Protocol`、`Stage Completion Inspection`、`Divergence -> Convergence Bug Sweep`、`Final Acceptance Inspection`、`User-Path Acceptance`（按产物类型子节）、`Hands-On Experience Loop`、`End-State Self-Check Loop`
+- **执行与验收**：`Staged Execution Protocol`、`Generative Divergence Protocol`、`Stage Completion Inspection`、`Divergence -> Convergence Bug Sweep`、`Final Acceptance Inspection`、`Post-Completion Cyclic Review / 完成后循环审查`、`User-Path Acceptance`（按产物类型子节）、`Hands-On Experience Loop`、`File Organization And Archiving / 文件整理与归档`、`Final Report / 最终汇报`、`End-State Self-Check Loop`
 - **诚实与自检**：`Honesty Gate`、`Self-Check Gate`、`Best-Achievable Standard`、`Independent Judgment`、`Audit / Review Checklist`
 - **派发与审计模板**：`Task Dispatch Package (Internal)`、`Agent Addressing Protocol`、`Verification Pass`、`Stage Transition Self-Check`、`Output Style`、文末审计模板（`当前判断` / `关键事实` / `决策/建议` / `下一步`）
 
@@ -129,6 +130,32 @@ When the plan needs multiple independent agents, select roles from `references/c
 - Every dispatched recipient has a named identity (role + platform/window) and a selection rationale; the underlying model is optional reference metadata, and the recipient declares identity at the declaration moments (first entry, role change, handoff, possible confusion).
 - Read `references/multi-agent-closure-rules.md` before dispatch; it is the canonical source for the mandatory task package, plus DRI closure, return handling, file ownership, the pre-dispatch conflict ledger, consolidation (fan-in), the fix-loop cap, authorization separation, and context discipline.
 - Recipient identity must be concrete (role + platform/window; a bare "另一个 AI" is not enough) and selected to match task capability, judged by observed return quality rather than model name; the activation prompt must be a self-contained copy-paste text. These rules are canonical in `references/multi-agent-closure-rules.md` and `references/agent-modes.md` — point there instead of treating this list as the source.
+
+## Task Type Adaptation / 任务类型自适应
+
+Before clarifying the task with the user, first judge the task type and adjust process strictness accordingly. This skill is a process-discipline layer, not a content dominator — when process constraints clearly hurt output quality, the AI may skip specific process steps, but must explain in the evidence report what was skipped, why, and the quality impact assessment.
+
+**Task type categories and process strictness:**
+
+| Task Type | Strictness | Adaptation |
+|---|---|---|
+| Creative / Design / Art / Adventure | **Loose** | Boldness is default; gate locks scope and output path only, not direction; verification steps may be streamlined; multiple divergent directions encouraged |
+| Code / Modeling / Data / Engineering | **Strict** | Verification, testing, boundary coverage all mandatory; RED-before-fix discipline applies; reproducible verification commands required |
+| Mixed (creative + engineering) | **Split** | Creative sub-tasks loose, engineering sub-tasks strict; declare the split in the gate |
+| Documentation / Writing / Analysis | **Medium** | Structure and accuracy verification mandatory; creative freedom within verified structure |
+
+**Three bottom lines that may NEVER be skipped, regardless of task type:**
+1. Honesty marking (`UNVERIFIED` for unverified conclusions)
+2. Evidence report (actual files, commands, tests, screenshots)
+3. Real-environment acceptance (not claiming "works" without actual verification)
+
+**Judgment result must be declared in the gate's "任务类型" field.**
+
+When skipping a process step for quality reasons, the evidence report must contain:
+- What was skipped (specific step name)
+- Why it was skipped (quality impact assessment)
+- What alternative verification was used instead
+- Whether the skipped step's purpose was fulfilled by other means
 
 ## Input Clarification
 
@@ -382,6 +409,30 @@ After all planned stages complete:
 7. Workspace hygiene: inspect new, untracked, and temporary files created during the work; classify each as keep, regenerate-able, or clean up now — a passing build must not leave work garbage behind.
 8. Only then report final completion.
 
+## Post-Completion Cyclic Review / 完成后循环审查
+
+After the Final Acceptance Inspection passes, perform a cyclic review of the deliverable until **2 consecutive rounds find no new issues**. This is separate from the staged execution review and the final acceptance inspection — it is a dedicated quality gate that prevents "looks done but has hidden problems" delivery.
+
+**Review dimensions (check all):**
+1. Functional correctness — does every feature work as specified?
+2. Code quality — readability, structure, no dead code, no TODOs left
+3. Boundary conditions — edge cases, empty inputs, max inputs, error paths
+4. User experience — is it intuitive? Are there confusing flows? Does it match user expectations?
+5. Visual feedback — UI states, loading states, error states, success states
+6. Goal alignment — does the deliverable actually solve the user's original goal?
+7. Consistency with original plan — did anything drift from the confirmed scope? If so, was it recorded?
+
+**Review protocol:**
+- Round 1: Full review across all 7 dimensions. Record every issue found.
+- Fix all issues found in Round 1.
+- Round 2: Full review again. If new issues found, fix them and go to Round 3.
+- Stop only when 2 consecutive rounds find zero new issues.
+- If after 5 rounds issues keep appearing, stop and report the situation to the user with a quality assessment — do not loop forever.
+
+**Each review round must be recorded** in the evidence report: round number, issues found, issues fixed, dimensions covered. A claim of "cyclic review passed" without round records is treated as `UNVERIFIED`.
+
+For creative tasks (loose strictness), the cyclic review may be reduced to 1 round, but the user-perspective review (dimension 4-6) is still mandatory.
+
 ## User-Path Acceptance / 用户路径验收
 
 
@@ -468,6 +519,56 @@ Self-assessed claims like "the UI should be good" without hands-on operation are
 
 这类产物的运行时证据是**命令留痕**（存 `<项目根>/evidence/`），不是截图。判定标准：产物类型本就没有 GUI 时，应给出上面对应的类型化证据；只有"环境确实无法运行该类型产物"时才标 `UNVERIFIED` 并给出用户自验步骤。
 
+
+## File Organization And Archiving / 文件整理与归档
+
+After all verification and review complete, organize the deliverable files before final report. This is not optional — a messy deliverable directory undermines the quality of the work itself.
+
+**File classification rules:**
+- Code files → `src/` or `code/` (or project-appropriate directory)
+- Documentation → `docs/`
+- Assets (images, fonts, data) → `assets/`
+- Evidence (screenshots, logs, test outputs, verification scripts) → `evidence/` (unified directory)
+- Temporary files (cache, browser profiles, temp ports, build artifacts) → clean up, do NOT leave in deliverable
+- Configuration files → project root or `config/`
+
+**Cleanup rules:**
+- Remove all runtime temporary files: `__pycache__/`, `*.pyc`, `.DS_Store`, `node_modules/` (unless it's a Node project deliverable), temp downloads, browser profiles
+- Cleanup is scoped to THIS task's own directories and own profiles/ports — **never use global `taskkill`/`pkill`/machine-wide `rm -rf`**
+- If a temp file cannot be safely removed, note it in the final report with reason
+
+**Evidence unification:**
+- All evidence (screenshots, logs, test outputs, verification scripts, command traces) goes into a single `evidence/` directory
+- Evidence is part of the deliverable, not runtime garbage — do not clean it up
+- Evidence directory should be self-explanatory: subdirectories by test type or feature area
+
+**Deliverable directory check:**
+- Before final report, list the final directory structure and verify:
+  - No temp files left in deliverable
+  - All evidence in `evidence/`
+  - File classification follows the rules above
+  - No duplicate or orphan files
+- Record the final directory structure in the final report
+
+## Final Report / 最终汇报
+
+The final report is the last step. It must tell the user EVERYTHING — not just "done", but the full story of what was done, how, and what was found.
+
+**Required content (all items mandatory):**
+1. **What was done** — specific features/files/functions implemented, not vague descriptions
+2. **How it was done** — approach, key decisions, resources used (skills, tools, references)
+3. **What resources were used** — which skills were invoked, what templates/references were leveraged, what network searches were performed
+4. **Bugs found** — every bug discovered during development and verification, with severity and fix status
+5. **Verification results** — what was tested, how, pass/fail counts, reproducible verification commands
+6. **Unverified items** — everything marked `UNVERIFIED`, with reason and user self-verification steps
+7. **File structure** — final deliverable directory listing
+8. **Simplification list** (if any) — what was cut from the original plan, what it was worth, why it was cut
+9. **Skipped process steps** (if any) — what was skipped for quality reasons, why, quality impact assessment
+10. **Task type and risk tier** — what was declared in the gate, did it change during execution
+
+**Format:** structured, specific, no vague claims. Every "done" must point to a specific file/command/test. "It works" is not acceptable — "Running `python test.py` outputs 5/5 passed, coverage 87%" is.
+
+**The final report is the closure of the continuous governance loop** — it must reference back to the gate's inventory, risk tier, and confirmed scope, and itemize whether each was actually applied, changed, or became irrelevant.
 
 ## End-State Self-Check Loop
 

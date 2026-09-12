@@ -1,7 +1,7 @@
 ---
 name: gpt-series-reasoning-style
 version: 1.2.0
-description: 'Process-discipline layer only — not a reasoning-capability booster and not GPT-specific — the name records its origin (distilled from a long series of GPT-series model dialogues). Use when coordinating multiple independent models or agents (commander / subagent / single modes), or when building any deliverable that needs structured, high-rigor execution — pre-implementation gate (13-field), resource survey, role identities, multi-agent task packages, DRI closure, trust tiers (T1/T2/T3), evidence verification, hands-on UX verification, and final acceptance. Triggers: 实现前确认, 任务包, 多Agent协作, 指挥官模式, 资源盘点, 实操验收, UNVERIFIED.'
+description: 'Process-discipline layer only — not a reasoning-capability booster and not GPT-specific — the name records its origin (distilled from a long series of GPT-series model dialogues). Use when coordinating multiple independent models or agents (commander / subagent / single modes), or when building any deliverable that needs structured, high-rigor execution — pre-implementation gate (14-field with task-type), task-type adaptation, resource survey, role identities, multi-agent task packages, DRI closure, trust tiers (T1/T2/T3), evidence verification, post-completion cyclic review, hands-on UX verification, file organization, and final acceptance. Triggers: 实现前确认, 任务包, 多Agent协作, 指挥官模式, 资源盘点, 实操验收, UNVERIFIED, 任务类型自适应.'
 ---
 
 # GPT系列推理风格（GPT-Series Reasoning Style）
@@ -17,7 +17,7 @@ description: 'Process-discipline layer only — not a reasoning-capability boost
 - 动手前先盘点一切可用资源：**本地已装 skills、可复用模板与现成实现（必做）+ 主动网络搜索相关信息/开源项目/可安装 skill/最佳实践（必做，不是可选项）**，能用的直接用，不从零造轮子；出现能力缺口时主动搜索可安装的技能/工具并给候选清单（安装须经用户批准）——执行面见门禁「已盘点可用资源」字段；选用 skill 时须满足「资产编排」条款要求（子问题匹配+选用理由+输出验证）。
 - 证据强于信心；没有验证过的结论标记 `UNVERIFIED`——不为了速度牺牲边界、证据和验收。
 - 通过率不是鉴别力：任何「N/N 检查全过 / 自检通过 / 已验证」的声明，必须能回答「把我要防的那个错误做一次，它会不会红？」——答不出来就不构成证据，按 `UNVERIFIED` 处理（反例 F6、四法则与杀伤率见 `references/common-failures.md`）。
-- 交互类产物没亲手操作过＝`UNVERIFIED`（实操闭环细则见工作流第 5 步）。
+- 交互类产物没亲手操作过＝`UNVERIFIED`（实操闭环细则见工作流第 7 步）。
 - 任务类型自适应：动手前先判断任务类型（创意/代码/绘画/建模/数据/冒险/混合等），按类型调整流程严格度——创意/绘画/冒险类流程最松（大胆默认、门禁只锁范围不锁方向、验证可精简），代码/建模/数据类流程最严（验证/测试/边界覆盖一个不少），混合类按子任务分治（创意部分松、工程部分严）；判断结果须在门禁声明。**本 skill 是流程纪律层，不是内容主导者——当流程约束明显影响产物质量时，AI 有权跳过特定流程步骤，但须在证据报告说明「跳过了什么、为什么、质量影响评估」**；跳过诚实标记/证据报告/真实环境验收三项底线除外。
 - 范围克制：完成用户目标所需的改动主动处理；发现的无关问题只记录并报告，不顺手扩大重构或改变产品方向。**与验收目标直接相关的缺陷不属于「无关问题」**——影响任务目标正确性的发现必须主动修复，或在门禁/报告中显式提请裁决，仅记录了事视同未处理。
 - 创意任务防的不是返工，是平庸：门禁锁定范围与落盘，不锁定方向；大胆是默认，保守才需要理由（**大胆是在确认范围内的大胆，不是无限扩大范围**；创意主导任务须并列多方向、可逆产物可免方向确认，细则见 series-reasoning-workflow.md 门禁节）。实现中不得以"保守/简单/稳妥"为由单方面降级交付质量：**简化或砍掉已计划能力，须在简化前先声明**，并在证据报告列**「简化项清单」**——被砍了什么、它本来值什么、为什么砍；「从简」不是免检通行证。

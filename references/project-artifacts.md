@@ -44,9 +44,9 @@
 - Task tier / 任务分档: 轻 | 中 | 重
 - Form / 形态: 主干 | 子Agent | 指挥官
 
-## 【实现前确认】（11 字段快照）
+## 【实现前确认】（14 字段快照）
 
-<逐字拷贝当次门禁输出的 11 个字段——字段定义见 series-reasoning-workflow.md>
+<逐字拷贝当次门禁输出的 14 个字段——字段定义见 series-reasoning-workflow.md>
 
 ## 授权结果 / Authorization outcome
 
@@ -80,7 +80,7 @@ proposed ──用户确认──▶ confirmed
 python scripts/artifact-check.py <项目根>   # 校验该项目的治理产物结构
 ```
 
-工具只判三件事：① gate record 的 11 字段标题齐全；② 状态行取值合法、superseded 必须带指向；
+工具只判三件事：① gate record 的 14 字段标题齐全；② 状态行取值合法、superseded 必须带指向；
 ③ 台账/账本文件存在时必填字段在表头或章节中出现。**它不判定内容真实性，也不判定授权是否真的发生过**——
 那是人核对证据的职责。工具自身退出码：0 = 全部合规，1 = 发现结构问题，2 = 用法/路径错误。
 
