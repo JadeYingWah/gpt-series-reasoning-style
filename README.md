@@ -414,7 +414,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Platform agents
 /plugin install gpt-series-reasoning-style@gpt-series-reasoning-style
 ```
 
-钉某个版本：`/plugin marketplace add JadeYingWah/gpt-series-reasoning-style@v1.2.0`。提交到官方/社区目录前，可用 `claude plugin validate` 本地校验清单。
+钉某个版本：`/plugin marketplace add JadeYingWah/gpt-series-reasoning-style@v1.2.0`（发布态；main 上的 *Unreleased* 批次不在 tag 内，要装最新批次请直接 clone 仓库）。提交到官方/社区目录前，可用 `claude plugin validate` 本地校验清单。
 
 | 平台 | Skill 目录 | 脚本参数 |
 | --- | --- | --- |
@@ -615,6 +615,7 @@ gpt-series-reasoning-style/
 
 - **当前公开版本：`1.2.0`**（发布基线；`VERSION` 文件为唯一权威）。
 - post-1.2.0 的增量**不跳号**：按批次记入 [`CHANGELOG.md`](CHANGELOG.md) 的 *Unreleased* 节（批次总数以 CHANGELOG Unreleased 最新条目为准），引用规则出处时注明批次。
+- **tag 与 main 的关系**：`v1.2.0` tag 钉在发布态（`ffb09d5`）；main 分支在发布态之上累计 *Unreleased* 批次（2026-09-12 已推至第五十九批）。钉版本安装（`@v1.2.0`）得到发布态；要装含最新批次的开发态，clone 仓库 main 分支。批次何时切版打新 tag，由维护者裁决。
 - 语义：1.2.0 基线 + Unreleased 批次计价；升版需维护者裁决。
 - 完整内部迭代史（`0.1.x`–`3.3.x` 及旧公开线）见 [`INTERNAL-HISTORY.md`](INTERNAL-HISTORY.md)。
 
