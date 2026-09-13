@@ -1,4 +1,4 @@
-<div align="center">
+﻿<div align="center">
 
 <img src="social-preview.png" alt="GPT-Series Reasoning Style" width="640">
 
@@ -614,7 +614,7 @@ gpt-series-reasoning-style/
 
 **发布前自检**：`python scripts/selfcheck.py`（22/22）→ `uvx skilllint@1.19.2 check gpt-series-reasoning-style`（自父目录运行）→ 更新 `CHANGELOG.md` 批次 → push 后确认 CI 绿。
 
-**归档纪律**：外部评审 → `docs/reviews/`；实测报告 → `docs/field-tests/`；提案 → `docs/proposals/`；内部迭代史 → `INTERNAL-HISTORY.md`（公开线 1.1.0 之前的 0.1.x–3.3.x 全部归档于此）。历史记录按史实保留，"过去的数对当时是对的"。
+**归档纪律**：外部评审 → `docs/reviews/`；实测报告 → `docs/field-tests/`；提案 → `docs/proposals/`；内部迭代史 → `INTERNAL-HISTORY.md`（公开线 1.1.0 之前的 0.0.1.x–0.3.3.x 全部归档于此）。历史记录按史实保留，"过去的数对当时是对的"。
 
 ---
 
@@ -624,7 +624,7 @@ gpt-series-reasoning-style/
 - post-1.2.2 的增量**不跳号**：按批次记入 [`CHANGELOG.md`](CHANGELOG.md) 的 *Unreleased* 节（批次总数以 CHANGELOG Unreleased 最新条目为准），引用规则出处时注明批次。
 - **tag 与 main 的关系（维护者裁决 2026-09-12）**：tag 是**固定版本里程碑，记录本 skill 的发展历史、供参考**——`v1.2.2` 钉在发布态（`ffb09d5`），不随后续批次移动；**日常使用与安装以仓库 main 为准**（main 在发布态之上累计 *Unreleased* 批次，2026-09-12 已推至第五十九批）。钉版本安装（`@v1.2.2`）只适合复现某个历史发布态；要最新批次请 clone main。何时切版打新 tag 由维护者裁决。
 - 语义：1.2.2 基线 + Unreleased 批次计价；升版需维护者裁决。
-- 完整内部迭代史（`0.1.x`–`3.3.x` 及旧公开线）见 [`INTERNAL-HISTORY.md`](INTERNAL-HISTORY.md)。
+- 完整内部迭代史（`0.0.1.x–0.3.3.x` 及旧公开线）见 [`INTERNAL-HISTORY.md`](INTERNAL-HISTORY.md)。
 
 ---
 

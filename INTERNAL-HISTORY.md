@@ -1,8 +1,8 @@
-# Internal Release History / 内部版本历史
+﻿# Internal Release History / 内部版本历史
 
-公开发布线见 [CHANGELOG.md](CHANGELOG.md)。本文件归档**发布前的内部迭代**（`0.1.x`–`3.3.x`，含重定位前那条 `2.4.0`→`3.2.2` 长线及分支末端的 `3.3.0` 实验记录）以及更早的旧公开线，一律**按史实原样保留、仅用于追溯**；对外版本从当前 `1.1.0` 起算，不在此文件计数。
+公开发布线见 [CHANGELOG.md](CHANGELOG.md)。本文件归档**发布前的内部迭代**（`0.0.1.x`–`0.3.3.x`，含重定位前那条 `0.2.4.0`→`0.3.2.2` 长线及分支末端的 `0.3.3.0` 实验记录）以及更早的旧公开线，一律**按史实原样保留、仅用于追溯**；对外版本从当前 `1.1.0` 起算，不在此文件计数。
 
-The public release line lives in CHANGELOG.md. This file archives the pre-publication internal iterations (`0.1.x`–`3.x`, incl. the pre-rebase `2.4.0`→`3.2.2` line) and the earlier public line, preserved verbatim for traceability. Public releases number from `1.1.0` and are not counted here.
+The public release line lives in CHANGELOG.md. This file archives the pre-publication internal iterations (`0.0.1.x`–`0.3.x`, incl. the pre-rebase `0.2.4.0`→`0.3.2.2` line) and the earlier public line, preserved verbatim for traceability. Public releases number from `1.1.0` and are not counted here.
 
 ---
 
@@ -656,101 +656,101 @@ Extracted from newly organized commander-session transcripts and from the v2.8.1
 
 ## Development History / 发布前内部历史
 
-The `0.1.x` to `3.x` sequence below was internal iteration work before this public release. It is preserved for traceability; public releases start at `1.0.0`, and the current public version is `1.1.0`.
+The `0.0.1.x` to `0.3.x` sequence below was internal iteration work before this public release. It is preserved for traceability; public releases start at `1.0.0`, and the current public version is `1.1.0`.
 
-下面的 `0.1.x` 到 `3.x` 版本是公开发布前的内部迭代历史，仅用于追溯；公开版本从 `1.0.0` 开始，当前公开版本为 `1.1.0`。
+下面的 `0.0.1.x` 到 `0.3.x` 版本是公开发布前的内部迭代历史，仅用于追溯；公开版本从 `1.0.0` 开始，当前公开版本为 `1.1.0`。
 
-### 0.1.0 - 2026-08-06
+### 0.0.1.0 - 2026-08-06
 
 - Initial commander workflow distilled from GPT-5.6 Sol conversations.
 - 初始“指挥官”工作流，从 GPT-5.6 Sol 对话中蒸馏而来。
 
-### 1.1.0-internal - 2026-08-06
+### 0.1.1.0-internal - 2026-08-06
 
 - Removed project-specific content and made the skill platform-neutral.
 - 移除项目特定内容，使 Skill 保持平台中立。
 
-### 1.2.x - 2026-08-06
+### 0.1.2.x - 2026-08-06
 
 - Added a neutral `project-policy-template.md` and kept product names only as install targets.
 - 新增中立的 `project-policy-template.md`；产品名仅作为安装目标保留。
 
-### 1.3.0 - 2026-08-06
+### 0.1.3.0 - 2026-08-06
 
 - Added the Agent Addressing Protocol.
 - 新增 Agent 指代协议：下达指令前先指明目标 AI 或角色。
 
-### 1.4.0 - 2026-08-07
+### 0.1.4.0 - 2026-08-07
 
 - Added stage announcement and research-before-planning defaults.
 - 新增阶段声明默认值，以及“规划前先调研”的强制步骤。
 
-### 2.0.0 - 2026-08-07
+### 0.2.0.0 - 2026-08-07
 
 - Renamed the skill and refocused it on high-reasoning behavior.
 - 更名为 `gpt-5-6-sol-reasoning-style`，聚焦高推理行为风格。
 
-### 2.1.0 - 2026-08-07
+### 0.2.1.0 - 2026-08-07
 
 - Added mandatory stage completion inspection.
 - 新增每个阶段的完成审查：实际输出被重新打开并对照证据核验后，阶段才算完成。
 
-### 2.2.0 - 2026-08-07
+### 0.2.2.0 - 2026-08-07
 
 - Added final acceptance inspection from overall goal to detail.
 - 新增从整体目标到细节的最终验收检查；发现问题会追加阶段任务并执行。
 
-### 2.3.x - 2026-08-07
+### 0.2.3.x - 2026-08-07
 
 - Added divergence-to-convergence bug sweep, self-check gate, best-achievable standard, honesty gate, identity boundary, and independent judgment.
 - 新增发散到收敛缺陷扫描、自检门禁、最好可达标准、诚实门禁、身份边界和独立判断。
 
-### 2.4.0 - 2026-08-07
+### 0.2.4.0 - 2026-08-07
 
 - Replaced checklist divergence with a generative divergence protocol.
 - 将清单式发散替换为生成式发散协议，并增加候选数量门限。
 
-### 2.5.0 - 2026-08-07
+### 0.2.5.0 - 2026-08-07
 
 - Added mandatory instruction assessment before planning.
 - 新增规划前的指令评估：把用户指令视为草案，识别歧义、矛盾、缺失约束和风险。
 
-### 2.6.x - 2026-08-07
+### 0.2.6.x - 2026-08-07
 
 - Added mandatory user-guided convergence and iterative clarification.
 - 新增用户引导收敛和迭代澄清：歧义问题必须返回用户确认，而不是自行决定。
 
-### 2.7.0 - 2026-08-07
+### 0.2.7.0 - 2026-08-07
 
 - Added the hard pre-implementation gate.
 - 新增硬性实现前门禁；“开始”和“现在开始”不再被视为实现授权。
 
-### 2.8.x - 2026-08-07
+### 0.2.8.x - 2026-08-07
 
 - Moved the gate to the top of SKILL.md and added the exact `【实现前确认】` template.
 - 将门禁移到 SKILL.md 顶部，并增加精确的 `【实现前确认】` 输出模板。
 
-### 2.9.0 - 2026-08-07
+### 0.2.9.0 - 2026-08-07
 
 - Added the gate to the execution-layer `default_prompt`.
 - 将门禁加入执行层 `agents/openai.yaml` 的 `default_prompt`。
 
-### 3.0.x - 2026-08-07
+### 0.3.0.x - 2026-08-07
 
 - Added one-shot and step-by-step clarification modes, exact authorization request format, full loading contract, and option depth rules.
 - 新增一次性确认/逐项问答模式、精确授权请求格式、完整加载契约和选项深度规则。
 
-### 3.1.0 - 2026-08-07
+### 0.3.1.0 - 2026-08-07
 
 - Added whole-plan re-evaluation after any user change.
 - 新增整体计划再评估：用户改变任意计划部分时，评估数据模型、命令、状态机、测试、文档和验收标准的影响。
 
-### 3.2.0 - 2026-08-07
+### 0.3.2.0 - 2026-08-07
 
 - Rewrote SKILL.md with progressive disclosure.
 - 重写 SKILL.md，采用渐进式加载；加载证明只需要 `SKILL.md` 和 `VERSION`。
 
-### 3.3.0 - 2026-08-07
+### 0.3.3.0 - 2026-08-07
 
 - Added mandatory reviewer-perspective closure before every stage.
 - 新增每个阶段结束前的审查面收口：审查必须按调研 -> 发散 -> 收敛 -> 回到实际证据执行。
