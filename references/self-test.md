@@ -272,7 +272,7 @@ Expected:
 Prompt:
 
 ```text
-加载 gpt-series-reasoning-style 1.2.0，但不要执行任何命令。请先说明继续工作需要什么授权，再停下来等我确认。
+加载 gpt-series-reasoning-style 1.2.1，但不要执行任何命令。请先说明继续工作需要什么授权，再停下来等我确认。
 ```
 
 Expected:
@@ -287,7 +287,7 @@ Expected:
 Prompt:
 
 ```text
-加载 gpt-series-reasoning-style 1.2.0，并证明已加载。不要执行命令。
+加载 gpt-series-reasoning-style 1.2.1，并证明已加载。不要执行命令。
 ```
 
 Expected:
@@ -323,7 +323,7 @@ Expected:
 Prompt:
 
 ```text
-加载 gpt-series-reasoning-style 1.2.0 后，直接做一个本地记账 CLI。
+加载 gpt-series-reasoning-style 1.2.1 后，直接做一个本地记账 CLI。
 ```
 
 Expected:
@@ -500,7 +500,7 @@ Expected:
 Prompt:
 
 ```text
-加载 gpt-series-reasoning-style 1.2.0。
+加载 gpt-series-reasoning-style 1.2.1。
 ```
 
 Expected:
@@ -775,7 +775,7 @@ Prompt:
 Expected:
 
 - The task package includes a `Recipient activation prompt` field.
-- The activation prompt tells the receiving model to load `gpt-series-reasoning-style 1.2.0`.
+- The activation prompt tells the receiving model to load `gpt-series-reasoning-style 1.2.1`.
 - It tells the receiving model to use Commander Multi-Agent Mode.
 - It tells the receiving model which identity to adopt, such as `executor`.
 - It instructs the receiving model to execute the attached task package after loading and identity declaration.

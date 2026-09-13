@@ -1,6 +1,17 @@
 # Changelog / 更新日志
 
-## Unreleased / 未发布增量（对外仍为 1.2.0）
+## 1.2.1 / 2026-09-13
+
+**补丁版本：A2 核心缺陷修复 + 模块化矩阵增强 + 文档同步**
+
+- **A2 精简配置重做（P0）**：基于四基线分析发现"5/7类型中 B'(AI正常发挥) > A2(skill精简流程)"，将轻量配置从"减流程"改为"验证聚焦版"——必选模块增加核心验证（按任务类型必选），明确"精简≠省略验证，而是聚焦最关键的验证"
+- **B' 基线参照**：按任务类型调整表新增 B'基线/A1全流程/skill增量 三列，8类任务全部填入实测数据；新增 B' 基线说明——本 skill 增量在于验证纪律而非"让 AI 从不会到会"
+- **英文镜像同步**：series-reasoning-workflow-en.md 同步 batch 72+ 全部新内容，719→789 行
+- **self-test 更新**：头部条件性期望增加 4 项新条款说明；Test 56 新增"轻量配置必须保留核心验证"子测试；条数仍冻结 77
+- **清理**：按任务类型调整表中重复的旧复合类行
+- 累计 batch 77–91（15 批），全部 8 类任务 A/B 实验完成
+
+## Unreleased / 未发布增量（对外仍为 1.2.1）
 
 - **A/B 验证实验归档 · 作品集网站双臂对照（2026-09-13 第七十八批）**：完成 batch 77 改进后的首次 A/B 双臂验证实验，任务为创建个人作品集网站（4页面，HTML/CSS/JS）。结果：A臂（用skill）加权总分 **8.59/10**，B臂（不用skill）**3.59/10**，提升幅度 **139%**。分维度：产物质量 8.75 vs 6.5、流程合规性 8.5 vs 0.8、用户思维 8.25 vs 3.5、边界覆盖 8.33 vs 2.0、诚实标记 9.0 vs 0。成本：A臂约90K tokens/25min，B臂约33K tokens/6min，token倍率2.7x。关键发现：skill核心价值在流程约束减少遗漏（无障碍/SEO/性能/错误处理/诚实标记），每提升1分多耗约22K tokens，交付类任务划算、原型类不划算。报告归档至 [docs/field-tests/ab-batch77-portfolio/report.md](docs/field-tests/ab-batch77-portfolio/report.md)。局限性：n=1、同AI评估有偏见、浏览器实操测试UNVERIFIED。验证：selfcheck **22/22**。
 - A/B validation experiment archived — portfolio website dual-arm comparison (batch 78): first A/B dual-arm validation after batch 77 improvements. A-arm (with skill) weighted score **8.59/10**, B-arm (without skill) **3.59/10**, improvement **139%**. Cost ratio 2.7x tokens. Report at [docs/field-tests/ab-batch77-portfolio/report.md](docs/field-tests/ab-batch77-portfolio/report.md). Verification: selfcheck **22/22**.

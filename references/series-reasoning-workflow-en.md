@@ -703,7 +703,7 @@ If project-specific stage codes materially affect authorization, define them in 
 ## Modular Selection Matrix & Task Type Adaptation (batch 72+)
 
 > This section mirrors the Chinese authority's modular selection matrix and task-type adaptation.
-> It was added in post-1.2.0 batches (72–90). On conflict, Chinese authority wins.
+> It was added in post-1.2.1 batches (72–90). On conflict, Chinese authority wins.
 
 ### Three-Layer Structure: Static Core / Dynamic Adaptation / Modular Selection
 

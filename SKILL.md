@@ -1,6 +1,6 @@
 ---
 name: gpt-series-reasoning-style
-version: 1.2.0
+version: 1.2.1
 description: 'Process-discipline layer only — not a reasoning-capability booster and not GPT-specific — the name records its origin (distilled from a long series of GPT-series model dialogues). Use when coordinating multiple independent models or agents (commander / subagent / single modes), or when building any deliverable that needs structured, high-rigor execution — pre-implementation gate (14-field with task-type), task-type adaptation, resource survey, role identities, multi-agent task packages, DRI closure, trust tiers (T1/T2/T3), evidence verification, post-completion cyclic review, hands-on UX verification, file organization, and final acceptance. Triggers: 实现前确认, 任务包, 多Agent协作, 指挥官模式, 资源盘点, 实操验收, UNVERIFIED, 任务类型自适应.'
 ---
 
@@ -166,4 +166,4 @@ description: 'Process-discipline layer only — not a reasoning-capability boost
 
 ## Version
 
-Current version: 1.2.0 (public release; post-1.2.0 rule increments are tracked as Unreleased batches in [CHANGELOG.md](CHANGELOG.md) — cite the batch when it matters).
+Current version: 1.2.1 (public release; post-1.2.1 rule increments are tracked as Unreleased batches in [CHANGELOG.md](CHANGELOG.md) — cite the batch when it matters).

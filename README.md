@@ -10,7 +10,7 @@
 一个面向 AI Agent 的**交付纪律行为层**（behavior overlay）——
 实现前门禁、资源盘点、多 Agent 协作治理、证据核验与实操验收。
 
-[![Version](https://img.shields.io/badge/version-1.2.0-blue)](#versioning--版本)
+[![Version](https://img.shields.io/badge/version-1.2.1-blue)](#versioning--版本)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](#license--许可证)
 [![Platforms](https://img.shields.io/badge/platforms-13_supported-blueviolet)](#install--安装)
 [![agentskills.io](https://img.shields.io/badge/agentskills.io-compliant-success)](#tooling--工具链)
@@ -40,7 +40,7 @@ cd gpt-series-reasoning-style
 #    使用 gpt-series-reasoning-style 执行本次任务。
 ```
 
-**Claude Code 免 clone 一键装（插件市场）**：在 Claude Code 里执行 `/plugin marketplace add JadeYingWah/gpt-series-reasoning-style`，再 `/plugin install gpt-series-reasoning-style@gpt-series-reasoning-style`（或直接在 `/plugin` 菜单里安装；钉版本可在 add 时加 `@v1.2.0`）。其余平台与手动方式见 [Install](#install--安装)。
+**Claude Code 免 clone 一键装（插件市场）**：在 Claude Code 里执行 `/plugin marketplace add JadeYingWah/gpt-series-reasoning-style`，再 `/plugin install gpt-series-reasoning-style@gpt-series-reasoning-style`（或直接在 `/plugin` 菜单里安装；钉版本可在 add 时加 `@v1.2.1`）。其余平台与手动方式见 [Install](#install--安装)。
 
 加载后，AI 在动手建文件 / 写代码 / 跑命令之前，会先停下给你一张确认单；声称"做完了"时必须附上可核对的证据。
 
@@ -109,7 +109,7 @@ AI  ：做完了，测试都过了。        AI  ：完成。附磁盘自检清�
 
 **GPT-Series Reasoning Style（GPT系列推理风格）**，Agent Skill 名 `gpt-series-reasoning-style`。
 
-- **名字记录来源，不划能力边界**：规则纪律从一系列 GPT 系列大模型的真实对话记录中打磨提炼，公开发布线为 1.0.0 → 1.1.0 → **1.2.0**（更早的内部迭代已归档于 [`INTERNAL-HISTORY.md`](INTERNAL-HISTORY.md)）。
+- **名字记录来源，不划能力边界**：规则纪律从一系列 GPT 系列大模型的真实对话记录中打磨提炼，公开发布线为 1.0.0 → 1.1.0 → **1.2.1**（更早的内部迭代已归档于 [`INTERNAL-HISTORY.md`](INTERNAL-HISTORY.md)）。
 - **不依赖、也不限于 GPT 系列**：任何宿主模型（Claude / Gemini / DeepSeek / Qwen / GLM …）均可加载使用。
 - **`reasoning-style` 指"推理的流程纪律风格"，不是推理能力上限**：它约束 AI 怎么干活（先盘点、先门禁、给证据），不会让模型变得更聪明。
 - **曾用名 / Formerly**：`gpt-5-6-sol-multi-agent-style`（"GPT-5.6 Sol"，内部期），旧检索别名 `gpt-5-6-sol-reasoning-style`——供搜索引擎与联网 AI 把旧名归并到本仓库。
@@ -419,7 +419,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Platform agents
 /plugin install gpt-series-reasoning-style@gpt-series-reasoning-style
 ```
 
-钉某个版本：`/plugin marketplace add JadeYingWah/gpt-series-reasoning-style@v1.2.0`（发布态快照，仅供复现历史版本参考；**日常使用建议 clone 仓库 main**，含全部 *Unreleased* 批次）。提交到官方/社区目录前，可用 `claude plugin validate` 本地校验清单。
+钉某个版本：`/plugin marketplace add JadeYingWah/gpt-series-reasoning-style@v1.2.1`（发布态快照，仅供复现历史版本参考；**日常使用建议 clone 仓库 main**，含全部 *Unreleased* 批次）。提交到官方/社区目录前，可用 `claude plugin validate` 本地校验清单。
 
 | 平台 | Skill 目录 | 脚本参数 |
 | --- | --- | --- |
@@ -476,7 +476,7 @@ skill 应加载 `SKILL.md`；references 仅在当前阶段需要时按需读取�
 ```text
 gpt-series-reasoning-style/
 ├── SKILL.md                 # 入口：加载证明、协作架构、门禁、工作流、References 索引（≈169 行 / ≈6.3k tok）
-├── VERSION                  # 1.2.0 —— 加载证明只需要 SKILL.md + VERSION
+├── VERSION                  # 1.2.1 —— 加载证明只需要 SKILL.md + VERSION
 ├── AGENTS.md                # 跨运行时入口别名（Codex / Gemini CLI / Copilot CLI）——只指路，权威仍在 SKILL.md
 ├── README.md / LICENSE / CHANGELOG.md / INTERNAL-HISTORY.md / SECURITY.md
 ├── agents/
@@ -599,7 +599,7 @@ gpt-series-reasoning-style/
 - **`SKILL.md` ≤ 250 行**（当前约 169 行 / 实测 6,300 tokens 常驻，o200k_base）——入口只保留决策点，细节下沉到按需的 references；
 - **静态检查上限 22 项（SB1–SB22）**：新增第 23 项必须先证明它抓到过**真实缺陷**（可指认提交哈希）——SB18/19/20/21/22 均按此准入立项；
 - **77 条行为自测冻结**：只做"旧测失去鉴别力 → 替换"，不再扩容；
-- **收敛优先于加码**：版本对外固定 `1.2.0` 基线，post-1.2.0 增量以 CHANGELOG 的 Unreleased 批次计价，引用时注明批次。
+- **收敛优先于加码**：版本对外固定 `1.2.1` 基线，post-1.2.1 增量以 CHANGELOG 的 Unreleased 批次计价，引用时注明批次。
 
 ---
 
@@ -620,10 +620,10 @@ gpt-series-reasoning-style/
 
 ## Versioning / 版本
 
-- **当前公开版本：`1.2.0`**（发布基线；`VERSION` 文件为唯一权威）。
-- post-1.2.0 的增量**不跳号**：按批次记入 [`CHANGELOG.md`](CHANGELOG.md) 的 *Unreleased* 节（批次总数以 CHANGELOG Unreleased 最新条目为准），引用规则出处时注明批次。
-- **tag 与 main 的关系（维护者裁决 2026-09-12）**：tag 是**固定版本里程碑，记录本 skill 的发展历史、供参考**——`v1.2.0` 钉在发布态（`ffb09d5`），不随后续批次移动；**日常使用与安装以仓库 main 为准**（main 在发布态之上累计 *Unreleased* 批次，2026-09-12 已推至第五十九批）。钉版本安装（`@v1.2.0`）只适合复现某个历史发布态；要最新批次请 clone main。何时切版打新 tag 由维护者裁决。
-- 语义：1.2.0 基线 + Unreleased 批次计价；升版需维护者裁决。
+- **当前公开版本：`1.2.1`**（发布基线；`VERSION` 文件为唯一权威）。
+- post-1.2.1 的增量**不跳号**：按批次记入 [`CHANGELOG.md`](CHANGELOG.md) 的 *Unreleased* 节（批次总数以 CHANGELOG Unreleased 最新条目为准），引用规则出处时注明批次。
+- **tag 与 main 的关系（维护者裁决 2026-09-12）**：tag 是**固定版本里程碑，记录本 skill 的发展历史、供参考**——`v1.2.1` 钉在发布态（`ffb09d5`），不随后续批次移动；**日常使用与安装以仓库 main 为准**（main 在发布态之上累计 *Unreleased* 批次，2026-09-12 已推至第五十九批）。钉版本安装（`@v1.2.1`）只适合复现某个历史发布态；要最新批次请 clone main。何时切版打新 tag 由维护者裁决。
+- 语义：1.2.1 基线 + Unreleased 批次计价；升版需维护者裁决。
 - 完整内部迭代史（`0.1.x`–`3.3.x` 及旧公开线）见 [`INTERNAL-HISTORY.md`](INTERNAL-HISTORY.md)。
 
 ---
