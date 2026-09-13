@@ -10,7 +10,7 @@
 一个面向 AI Agent 的**交付纪律行为层**（behavior overlay）——
 实现前门禁、资源盘点、任务类型自适应、多 Agent 协作治理、证据核验与实操验收。
 
-[![Version](https://img.shields.io/badge/version-1.2.2-blue)](#versioning--版本)
+[![Version](https://img.shields.io/badge/version-1.2.4-blue)](#versioning--版本)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](#license--许可证)
 [![Platforms](https://img.shields.io/badge/platforms-13_supported-blueviolet)](#install--安装)
 [![agentskills.io](https://img.shields.io/badge/agentskills.io-compliant-success)](#tooling--工具链)
@@ -506,8 +506,8 @@ skill 应加载 `SKILL.md`；references 仅在当前阶段需要时按需读取�
 
 ```text
 gpt-series-reasoning-style/
-├── SKILL.md                 # 入口：加载证明、协作架构、门禁、模块化矩阵、工作流、References 索引（≈173 行 / ≈9.8k tok）
-├── VERSION                  # 1.2.2 —— 加载证明只需要 SKILL.md + VERSION
+├── SKILL.md                 # 入口：加载证明、协作架构、门禁、模块化矩阵、工作流、References 索引（≈176 行 / ≈9.8k tok）
+├── VERSION                  # 1.2.4 —— 加载证明只需要 SKILL.md + VERSION
 ├── AGENTS.md                # 跨运行时入口别名（Codex / Gemini CLI / Copilot）——只指路，权威仍在 SKILL.md
 ├── README.md / LICENSE / CHANGELOG.md / INTERNAL-HISTORY.md / SECURITY.md
 ├── agents/
@@ -598,20 +598,20 @@ gpt-series-reasoning-style/
 
 为防"规则越写越多、检查越加越重"的失控，本仓库给自己立了预算：
 
-- **`SKILL.md` ≤ 250 行**（当前约 173 行 / 实测约 9.8k tokens 常驻，o200k_base）——入口只保留决策点，细节下沉到按需的 references；
+- **`SKILL.md` ≤ 250 行**（当前约 176 行 / 实测约 9.8k tokens 常驻，o200k_base）——入口只保留决策点，细节下沉到按需的 references；
 - **静态检查上限 23 项（SB1–SB23）**：新增第 24 项必须先证明它抓到过**真实缺陷**（可指认提交哈希）——SB18/19/20/21/22/23 均按此准入立项（SB23 守常驻面 token 声明的数量级，证据 `812c44f..f7dcf37`：Cost 表声明 3,843 而实测 9,833 的 2.5 倍漂移，SB21 只守行数未抓到）；
 - **77 条行为自测冻结**：只做"旧测失去鉴别力 → 替换"，不再扩容；
-- **收敛优先于加码**：版本对外固定 `1.2.2` 基线，post-1.2.2 增量以 CHANGELOG 的 Unreleased 批次计价，引用时注明批次。
+- **收敛优先于加码**：版本对外固定 `1.2.4` 基线，post-1.2.4 增量以 CHANGELOG 的 Unreleased 批次计价，引用时注明批次。
 
 ---
 
 ## Versioning / 版本
 
-- **当前公开版本：`1.2.2`**（稳定基线；`VERSION` 文件为唯一权威）。
+- **当前公开版本：`1.2.4`**（稳定基线；`VERSION` 文件为唯一权威）。
 - **版本路线图**：v1.2.3（硬指标化）**不实施**（n=3 实验确认与原则引导等效）；v1.2.4（探索层增强）**草案实验验证中**（五条核心修订，n=1 方向正向，待独立盲评 + 扩样 n=3）。
-- post-1.2.2 的增量**不跳号**：按批次记入 [`CHANGELOG.md`](CHANGELOG.md) 的 *Unreleased* 节（批次总数以 CHANGELOG Unreleased 最新条目为准），引用规则出处时注明批次。
-- **tag 与 main 的关系（维护者裁决 2026-09-12，2026-09-14 更新）**：tag 是**大版本里程碑，记录本 skill 的发展历史、供参照**——只在 `1.0 / 1.1 / 1.2` 这类大版本节点打 tag（`v1.0.0` / `v1.1.0` / `v1.2.0`），**中间补丁版本（如 1.2.1 / 1.2.2）不打 tag**，以仓库 main 为唯一权威；**日常使用与安装以仓库 main 为准**（main 在大版本之上累计 *Unreleased* 批次）。钉大版本安装（`@v1.2.0`）只适合复现某个历史发布态；要最新批次请 clone main。何时切大版本打新 tag 由维护者裁决。
-- 语义：1.2.2 基线 + Unreleased 批次计价；升版需维护者裁决。
+- post-1.2.4 的增量**不跳号**：按批次记入 [`CHANGELOG.md`](CHANGELOG.md) 的 *Unreleased* 节（批次总数以 CHANGELOG Unreleased 最新条目为准），引用规则出处时注明批次。
+- **tag 与 main 的关系（维护者裁决 2026-09-12，2026-09-14 更新）**：tag 是**大版本里程碑，记录本 skill 的发展历史、供参照**——只在 `1.0 / 1.1 / 1.2` 这类大版本节点打 tag（`v1.0.0` / `v1.1.0` / `v1.2.0`），**中间补丁版本（如 1.2.1 / 1.2.4）不打 tag**，以仓库 main 为唯一权威；**日常使用与安装以仓库 main 为准**（main 在大版本之上累计 *Unreleased* 批次）。钉大版本安装（`@v1.2.0`）只适合复现某个历史发布态；要最新批次请 clone main。何时切大版本打新 tag 由维护者裁决。
+- 语义：1.2.4 基线 + Unreleased 批次计价；升版需维护者裁决。
 - 完整内部迭代史（`0.0.1.x–0.3.3.x` 及旧公开线）见 [`INTERNAL-HISTORY.md`](INTERNAL-HISTORY.md)。
 
 ---
