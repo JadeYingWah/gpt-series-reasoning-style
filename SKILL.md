@@ -1,6 +1,6 @@
 ---
 name: gpt-series-reasoning-style
-version: 1.2.1
+version: 1.2.2
 description: 'Process-discipline layer only — not a reasoning-capability booster and not GPT-specific — the name records its origin (distilled from a long series of GPT-series model dialogues). Use when coordinating multiple independent models or agents (commander / subagent / single modes), or when building any deliverable that needs structured, high-rigor execution — pre-implementation gate (14-field with task-type), task-type adaptation, resource survey, role identities, multi-agent task packages, DRI closure, trust tiers (T1/T2/T3), evidence verification, post-completion cyclic review, hands-on UX verification, file organization, and final acceptance. Triggers: 实现前确认, 任务包, 多Agent协作, 指挥官模式, 资源盘点, 实操验收, UNVERIFIED, 任务类型自适应.'
 ---
 
@@ -105,11 +105,11 @@ description: 'Process-discipline layer only — not a reasoning-capability boost
 | 任务规模 | 判定标准 | 必选模块（不可跳过） | 默认精简（可跳过） | 升级条件 |
 |---|---|---|---|---|
 | **轻量（验证聚焦版）** | 单文件 / <50行 / 一次性脚本 / 简单查询 / 纯文本改写 | 加载证明、**精简门禁(5字段)**、**核心验证(按任务类型必选)**、**1轮审查(必须含验证)**、证据报告(精简版)、诚实标记 | 任务参照系(改为一句话目标声明)、完整资源盘点(改为一句话摘要)、循环审查(2轮→1轮)、实操闭环(无GUI标UNVERIFIED)、宿主对齐(首次可跳过) | 涉及外部系统写入、不可逆操作、用户明确要求严谨、**验证发现问题需升级** |
-| **轻量+（验证深度增强版，A2+）** | 中等复杂度 / 需要高可信度 / 开放方法任务 | 轻量全部必选模块 + **多路径交叉验证(核心结论至少2种独立方法)** + **验证证据必须入交付物(evidence/目录)** + **质量标准可检查化(一句话目标声明含可检查完成标准)** | 同轻量 | 同轻量 |
+| **轻量+（验证深度增强版，A2+）** | 中等复杂度 / 需要高可信度 / 开放方法任务 / GUI交互任务 | 轻量全部必选模块 + **多路径交叉验证(核心结论至少2种独立方法)** + **验证证据必须入交付物(evidence/目录)** + **质量标准可检查化(一句话目标声明含可检查完成标准)** + **覆盖面枚举强制前置(输入域分段+ALL GREEN盲区自查声明)** | 同轻量 | 同轻量 |
 | **中等** | 多文件 / 有用户的产物 / 需维护 / 有交互界面 / 涉及API调用 | 核心 + 任务类型判断 + 分阶段执行 + 循环审查(2轮) + 证据报告 | 网络搜索可减深度(1次而非多次)、实操闭环无GUI时标UNVERIFIED | 复杂度超预期、发现新风险、用户要求升级 |
 | **重型** | 大型项目 / 多Agent协作 / 生产级 / 高风险 / 涉及安全 | 全流程（无精简） | 无 | 无（已是最高档） |
 
-**轻量+（A2+）配置的核心原则：在轻量的精简骨架上增加验证深度，不增加流程步骤。** 四个增强点：①多路径交叉验证——核心结论必须用至少2种独立方法验证（如统计方法+领域知识、Python计算+公式推导、主实现+变异测试），不是"做更多审查"而是"用更多路径验证同一个结论"；②验证证据必须入交付物——所有验证脚本、测试结果、交叉验证证据必须放在交付目录的 `evidence/` 下，证据报告只引用不声称（修复"宣称了但没附脚本"和"做了但没入交付物"两类失分）；③质量标准可检查化——一句话目标声明中必须包含可检查的完成标准（如"所有按钮点击后状态正确切换且无控制台报错"），不是笼统的"功能完整"；④**保守度调节**——多路径验证用于确认（确保不漏报），但最终主报告只取最保守方法的结果（确保高精确率），其他方法检测到但保守方法未确认的作为"候选/待确认"附在附录，不污染主报告。适用场景：安全监控/异常检测宁可错报不漏报用全量报告；精确评分/正式交付用保守主报告+候选附录。
+**轻量+（A2+）配置的核心原则：在轻量的精简骨架上增加验证深度，不增加流程步骤。** 五个增强点：①多路径交叉验证——核心结论必须用至少2种独立方法验证（如统计方法+领域知识、Python计算+公式推导、主实现+变异测试），不是"做更多审查"而是"用更多路径验证同一个结论"；②验证证据必须入交付物——所有验证脚本、测试结果、交叉验证证据必须放在交付目录的 `evidence/` 下，证据报告只引用不声称（修复"宣称了但没附脚本"和"做了但没入交付物"两类失分）；③质量标准可检查化——一句话目标声明中必须包含可检查的完成标准（如"所有按钮点击后状态正确切换且无控制台报错"），不是笼统的"功能完整"；④**保守度调节**——多路径验证用于确认（确保不漏报），但最终主报告只取最保守方法的结果（确保高精确率），其他方法检测到但保守方法未确认的作为"候选/待确认"附在附录，不污染主报告。适用场景：安全监控/异常检测宁可错报不漏报用全量报告；精确评分/正式交付用保守主报告+候选附录；⑤**覆盖面枚举强制前置 + ALL GREEN 盲区自查声明**——多路径验证开始前，必须先枚举输入域的分段（正常值/边界值/异常值/安全注入/任务书点名的特殊场景），每个分段至少有一个测试用例触达；当验证全部通过（ALL GREEN）时，必须在证据报告中声明「覆盖了哪些输入域分段、哪些可能未覆盖、为什么认为覆盖足够」，禁止只报通过率不报覆盖面；未枚举覆盖面的验证结果按 `UNVERIFIED` 处理（ab-v4 G2 反例：多路径全绿但中文域名/双点域名等任务书点名边界全部放行——多路径≠覆盖面，验证错了也全绿）。
 
 **轻量配置的核心原则：精简≠省略验证，而是聚焦最关键的验证。** 轻量任务必须保留按任务类型的核心验证（数据类→Python独立计算、代码类→语法+边界测试、视觉类→对比度计算、建模类→OBJ语法检查、冒险类→结局可达性检查、研究类→来源核查），不得因"轻量"而跳过验证。选择轻量配置时必须在门禁中声明「跳过了哪些非验证模块、为什么、核心验证做了什么」。
 
@@ -169,4 +169,4 @@ description: 'Process-discipline layer only — not a reasoning-capability boost
 
 ## Version
 
-Current version: 1.2.1 (public release; post-1.2.1 rule increments are tracked as Unreleased batches in [CHANGELOG.md](CHANGELOG.md) — cite the batch when it matters).
+Current version: 1.2.2 (public release; post-1.2.2 rule increments are tracked as Unreleased batches in [CHANGELOG.md](CHANGELOG.md) — cite the batch when it matters).
