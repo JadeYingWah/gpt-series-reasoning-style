@@ -21,7 +21,7 @@
 
 **脱敏验证记录**：
 - `55af76c`（v1.1.0）：提交信息明确标注 "private project name / code filenames / case numbers / internal file names sanitized across all surfaces"；CHANGELOG记录了"私有项目名脱敏（历史档案保留、身份信息剥离）"批次
-- `ffb09d5`（v1.2.0）：敏感信息扫描（淮南/总指挥/<用户名>/Harness/CogniCrew）零命中
+- `ffb09d5`（v1.2.0）：全量敏感信息扫描（真实姓名/用户名/本地路径/邮箱/手机号/地名/项目名）零命中
 - `v1.0.0`：源代码已丢失，无法直接扫描；但其变更记录在 `INTERNAL-HISTORY.md` 中已脱敏
 
 ## v1.0.0 源代码丢失说明
