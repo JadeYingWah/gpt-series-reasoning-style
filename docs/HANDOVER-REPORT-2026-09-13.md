@@ -1,7 +1,7 @@
 ﻿# gpt-series-reasoning-style 项目交接报告
 
 > 交接时间：2026-09-13
-> 当前版本：1.2.1（batch 92）
+> 当前版本：1.2.2（batch 92）
 > 仓库：https://github.com/JadeYingWah/gpt-series-reasoning-style
 > 本地路径：<skill安装目录>
 
@@ -131,10 +131,10 @@
 ## 六、skill当前状态
 
 ### 6.1 版本信息
-- 版本：1.2.1
+- 版本：1.2.2
 - 累计batch：77-92（16批）
-- selfcheck：22/22（指纹3a0c2769ff9e）
-- SKILL.md：约172行
+- selfcheck：22/22（指纹a36cb38e39ac）
+- SKILL.md：约173行
 - 参照系：v1.6，全部27项✅
 
 ### 6.2 核心结构
@@ -217,13 +217,13 @@
 ### 9.1 skill核心文件
 | 文件 | 说明 |
 |---|---|
-| SKILL.md | 主skill文件（约172行） |
-| VERSION | 版本号（1.2.1） |
+| SKILL.md | 主skill文件（约173行） |
+| VERSION | 版本号（1.2.2） |
 | README.md | 项目说明 |
 | CHANGELOG.md | 更新日志 |
 | references/master-process-reference.md | 主过程参照系（设计原点，v1.6） |
 | references/series-reasoning-workflow.md | 完整流程与审计模板 |
-| references/series-reasoning-workflow-en.md | 英文镜像（789行） |
+| references/series-reasoning-workflow-en.md | 英文镜像（795行） |
 | references/self-test.md | 自测清单（77条，冻结） |
 | scripts/selfcheck.py | 自检脚本（22项） |
 | scripts/artifact-check.py | 产物检查脚本 |

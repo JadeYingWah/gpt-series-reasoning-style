@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-labelledby="banner-title banner-desc">
   <title id="banner-title">GPT-Series Reasoning Style · GPT 系列推理风格 — Agent Skill</title>
-  <desc id="banner-desc">Social preview: a mandatory pre-implementation gate, one single-Agent backbone plus two on-demand collaboration forms (subagent, commander), and evidence-based hands-on acceptance. Version 1.2.0, MIT license.</desc>
+  <desc id="banner-desc">Social preview: a mandatory pre-implementation gate, one single-Agent backbone plus two on-demand collaboration forms (subagent, commander), and evidence-based hands-on acceptance. Version 1.2.2, MIT license.</desc>
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#0B1020"/>

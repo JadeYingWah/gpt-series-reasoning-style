@@ -235,24 +235,44 @@ def run_checks() -> list:
     else:
         c.pass_("23-field/6-field present; no 24-field leak in live surfaces")
 
-    # SB9 gate-field surface sync
-    c = new(9, "gate-field surface sync")
+    # SB9 gate-field surface sync (14 fields across SKILL.md, both workflows, openai.yaml, README)
+    c = new(9, "gate-field 14-field surface sync")
     oai = read_text(REPO_ROOT / "agents" / "openai.yaml")
+    wf_cn = read_text(REPO_ROOT / "references" / "series-reasoning-workflow.md")
+    wf_en = read_text(REPO_ROOT / "references" / "series-reasoning-workflow-en.md")
+    # Authoritative 14 gate fields (mirrors artifact-check.py GATE_FIELDS)
+    gate_fields_cn = [
+        "我理解的目标", "任务类型", "风险分档", "形态选择", "已盘点可用资源",
+        "最高影响问题", "推荐方案", "其他选项", "完整计划", "澄清方式",
+        "需要你确认", "确认范围", "声明持续有效条件", "完成标准与失败行为",
+    ]
     missing_tokens = []
-    for tk in ["风险分档", "形态选择", "已盘点可用资源", "最高影响问题", "需要你确认", "宿主对齐"]:
+    # Check all 14 CN fields exist in SKILL.md, CN workflow, README
+    for tk in gate_fields_cn:
         if tk not in skill_text:
             missing_tokens.append("SKILL.md:" + tk)
+        if tk not in wf_cn:
+            missing_tokens.append("workflow-cn:" + tk)
         if tk not in readme:
             missing_tokens.append("README:" + tk)
-    # "confirmation scope" added after batch 47 caught openai.yaml listing only
-    # 10 of the 11 gate fields (GATE_FIELDS[10] was missing from default_prompt).
-    for tk in ["form selection", "risk tier", "surveyed", "confirmation scope"]:
-        if tk not in oai:
+    # Check EN workflow has key EN gate field labels
+    gate_fields_en_key = [
+        "My understanding of the goal", "Task type", "Risk tier", "Form selection",
+        "Surveyed available resources", "Highest-impact", "Recommended plan",
+        "Alternatives", "Complete plan", "Clarification mode", "Needs your confirmation",
+        "Confirmation scope", "Validity conditions", "Completion criteria",
+    ]
+    for tk in gate_fields_en_key:
+        if tk not in wf_en:
+            missing_tokens.append("workflow-en:" + tk)
+    # Check openai.yaml mentions key gate concepts
+    for tk in ["task type", "validity conditions", "completion criteria", "confirmation scope"]:
+        if tk.lower() not in oai.lower():
             missing_tokens.append("openai.yaml:" + tk)
     if missing_tokens:
-        c.fail("missing gate tokens: " + ", ".join(missing_tokens))
+        c.fail("missing gate field(s) across surfaces: " + ", ".join(missing_tokens))
     else:
-        c.pass_("CN gate tokens + EN tokens synced across surfaces")
+        c.pass_("14 gate fields synced across SKILL.md / CN workflow / EN workflow / openai.yaml / README")
 
     # SB10 install platform parameter set
     c = new(10, "install platform parameter set")
