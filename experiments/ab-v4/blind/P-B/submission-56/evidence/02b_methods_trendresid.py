@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 方法 M3（趋势分离残差路径，纯 numpy，与 M1 全局分布/M2 相位基线均独立）
 trend = 中心移动平均(25 点 ≈ 2h)；resid = x - trend

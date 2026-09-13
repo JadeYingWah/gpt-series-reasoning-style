@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 独立复算交叉验证（与检测脚本不同的代码路径）：
 1. 从 10_flags_per_path.csv 重建检出点集合 → 独立重跑合并逻辑（GAP=6, PAD=2）→ 与 10_intervals_full.csv 比对

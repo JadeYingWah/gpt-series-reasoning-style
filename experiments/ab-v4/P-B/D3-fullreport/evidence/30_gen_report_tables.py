@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """从 10_intervals_full.csv 程序化生成 report.md 的两张区间表（单一事实来源=CSV，杜绝手抄编造）
 report.md 中表格块由 <!--TABLE_MAIN--> 与 <!--TABLE_HC--> 锚点标记，整块替换。"""
 import pandas as pd

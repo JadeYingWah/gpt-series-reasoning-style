@@ -1,4 +1,4 @@
-import fs from 'node:fs';
+﻿import fs from 'node:fs';
 const p = '<实验根目录>/ab-cycle2/Q03-unit-convert/A-skill/app.html';
 const buf = fs.readFileSync(p);
 console.log('bytes:', buf.length);

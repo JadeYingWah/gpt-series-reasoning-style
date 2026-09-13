@@ -85,7 +85,7 @@
 复算方式：
 
 ```bash
-cd "<?????>/ab-cycle2/BASE01-countdown/A-skill"
+cd "<实验根目录>/ab-cycle2/BASE01-countdown/A-skill"
 node verify.mjs
 # 产物：verify-report.md（人读）+ verify-raw.json（机读）+ shot-*.png（截图）
 ```
@@ -122,7 +122,7 @@ node verify.mjs
 因此我向 `app.html` 注入 4 个真实缺陷生成变异体，重跑同一套验证，看对应用例是否变红：
 
 ```bash
-cd "<?????>/ab-cycle2/BASE01-countdown/A-skill"
+cd "<实验根目录>/ab-cycle2/BASE01-countdown/A-skill"
 node mutation-test.mjs
 # 产物：mutation-report.md + _verify/mutant-M*.html + verify-report-M*.md
 ```

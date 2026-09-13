@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """anonymize.py — Phase 0 匿名化：9 臂产物 → blind/<task>/submission-XX
 - 随机映射（seed 固定可复现），映射只存 blind_mapping.json（不进 blind 目录）
 - 剔除 PROMPT.md（含臂身份）；文本文件清洗臂标识 token

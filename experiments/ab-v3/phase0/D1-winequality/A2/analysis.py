@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """D1 红酒质量分析（A 臂·轻量验证聚焦版）
 数据: <实验根目录>/ab-v3/datasets/winequality-red.csv (分号分隔, 引号表头, 1599 行)
 输出:

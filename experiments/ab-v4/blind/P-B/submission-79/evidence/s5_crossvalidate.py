@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """阶段4 交叉验证与保守合并（D3-interrupt）
 四个检测结果矩阵比对（3 个独立机制）：
   M1 = 方法一 滚动鲁棒Z（loose z3.5 检出即算 M1 票, strict z5 为其强子集）

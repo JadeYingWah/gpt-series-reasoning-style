@@ -1,4 +1,4 @@
-// CDP 交互验证：真实点击筛选按钮，比对指标卡/图表/active 样式与 Python 预期，采集控制台错误并截图。
+﻿// CDP 交互验证：真实点击筛选按钮，比对指标卡/图表/active 样式与 Python 预期，采集控制台错误并截图。
 // 运行：node cdp_verify.js（本脚本位于交付目录 evidence/ 下）
 "use strict";
 const { spawn } = require("child_process");

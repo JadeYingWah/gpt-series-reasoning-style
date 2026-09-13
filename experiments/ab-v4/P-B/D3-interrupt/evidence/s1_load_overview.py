@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """阶段1：数据加载与概览（D3-interrupt）
 输出: evidence/s1_overview.txt
 """

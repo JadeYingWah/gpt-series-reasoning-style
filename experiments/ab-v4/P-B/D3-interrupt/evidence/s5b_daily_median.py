@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """阶段4b 诊断：日中位数走势（判定 1 月底低值段是真异常还是 regime 漂移）
 输出: evidence/s5b_daily_median.txt
 """

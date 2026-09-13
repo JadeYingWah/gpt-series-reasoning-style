@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """第 1 轮循环审查：数据准确性抽查——独立重算每个报告区间的极值并与报告值比对"""
 import pandas as pd
 import numpy as np

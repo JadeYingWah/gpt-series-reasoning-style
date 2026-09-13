@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """D2 真值脚本：Dirty Cafe Sales — 按任务书预注册清洗规则（R1-R4）计算，输出冻结 JSON。
 真值以冻结文件字节为准（<实验根目录>/ab-v3/datasets/cafe_sales_dirty.csv）。
 

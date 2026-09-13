@@ -1,4 +1,4 @@
-const fs = require('fs');
+﻿const fs = require('fs');
 const html = fs.readFileSync('<实验根目录>/ab-longrun-300/WG003-pomodoro-lite/B-noskill/pomodoro.html', 'utf8');
 const checks = [];
 const ext = html.match(/<script[^>]+src=|<link[^>]+href=|<img[^>]+src=\s*["']https?:/gi);

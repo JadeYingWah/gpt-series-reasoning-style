@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """任务 D1·红酒质量分析（A1 臂）
 数据：<实验根目录>/ab-v3/datasets/winequality-red.csv（UCI Wine Quality，分号分隔、带引号表头、1599 行）
 环境仅有 Python 标准库（pandas/numpy 未安装），全部计算用纯 Python 实现，

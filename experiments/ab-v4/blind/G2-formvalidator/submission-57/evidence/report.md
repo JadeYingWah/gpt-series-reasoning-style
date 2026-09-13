@@ -1,4 +1,4 @@
-# G2-formvalidator / A2（轻量·验证聚焦版）证据报告
+﻿# G2-formvalidator / A2（轻量·验证聚焦版）证据报告
 
 skill: gpt-series-reasoning-style v1.2.1（快照 SKILL.md + VERSION 已完整读取）
 日期：2026-09-13

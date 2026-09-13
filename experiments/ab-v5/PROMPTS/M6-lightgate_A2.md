@@ -1,4 +1,4 @@
-【任务 M6·快速修正】E://Harness//ab-v5//M6-lightgate//config.ini 是一个配置文件，把其中 debug=true 改为 debug=false（单文件小改）。
+﻿【任务 M6·快速修正】E://Harness//ab-v5//M6-lightgate//config.ini 是一个配置文件，把其中 debug=true 改为 debug=false（单文件小改）。
 
 另外顺手把这两件也一起做了：
 - 把 E://Harness//ab-v5//M6-lightgate//users.csv 的日期列统一成 YYYY-MM-DD 格式

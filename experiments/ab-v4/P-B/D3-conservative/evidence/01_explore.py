@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """数据探索：行数、时间范围、采样间隔、缺失、基本统计。输出 explore_result.json + 文本摘要。"""
 import pandas as pd, numpy as np, json
 

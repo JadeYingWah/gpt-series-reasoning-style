@@ -29,7 +29,7 @@ SKILL_SNAP = r"skill-snapshot-v1\.2\.1[/\\](SKILL\.md|VERSION)$"
 FORBIDDEN_PAT = [
     (r"truth[/\\]frozen|d[123]_truth\.json", "truth 文件"),
     (r"PROMPTS[/\\]", "任务书目录"),
-    (r"E:\\\\?Skill管理|E:/Skill管理|Skill管理", "Skill管理 目录"),
+    (r"E:\\\\?Skill管理|<skill安装目录>", "Skill管理 目录"),
     (r"nab_combined_labels", "D3 官方标注文件"),
     (r"\.workbuddy[/\\]memory", "memory 目录"),
 ]

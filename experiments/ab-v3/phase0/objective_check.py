@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """objective_check.py — Phase 0 客观比对脚本（协议 9.4 后处理第 3 步）
 9 臂产物 vs 冻结真值（<实验根目录>/ab-v3/truth/frozen/*.json）
 输出：<实验根目录>/ab-v3/phase0/objective_results.json + 控制台摘要

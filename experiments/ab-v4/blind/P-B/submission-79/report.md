@@ -1,4 +1,4 @@
-# 机器温度时序异常检测报告（P-B / D3-interrupt）
+﻿# 机器温度时序异常检测报告（P-B / D3-interrupt）
 
 - 数据：`<实验根目录>/ab-v3/datasets/nab_machine_temp.csv`（22,695 行；timestamp,value；5 分钟采样；2013-12-02 21:15 ~ 2014-02-19 15:25）
 - 执行配置：A2+ 轻量+（验证深度增强版）· skill 快照 v1.2.1

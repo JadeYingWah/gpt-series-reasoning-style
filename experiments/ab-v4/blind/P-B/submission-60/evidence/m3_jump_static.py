@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """M3: 跳变(一阶差分) + 全局极值分位数——独立方法 3（结构不同：对变化率与全局分布敏感）
 路径A: |Δx| > Q99.9(差分) 判跳变；路径B: x 超出全局 [Q0.05, Q99.95] 判极值。
 输出: m3_scores.csv, m3_intervals.csv, m3_summary.json

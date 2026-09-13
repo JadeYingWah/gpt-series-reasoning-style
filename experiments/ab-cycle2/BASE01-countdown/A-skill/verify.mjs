@@ -1,4 +1,4 @@
-// CDP 真机验证脚本（Node 22 原生 WebSocket，无第三方依赖）
+﻿// CDP 真机验证脚本（Node 22 原生 WebSocket，无第三方依赖）
 // 用法: node verify.mjs
 import { spawn } from 'node:child_process';
 import { writeFileSync, mkdtempSync, rmSync } from 'node:fs';

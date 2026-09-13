@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """阶段2 方法一：滚动中位数 + MAD 鲁棒 Z 阈值法（D3-interrupt）· v2
 基线与尺度均滚动估计 -> 对水平漂移鲁棒。跑两档阈值（strict/loose）供交叉验证。
 输出: evidence/s2_method1_points_{strict,loose}.csv, s2_method1_segments_{strict,loose}.json, s2_method1_summary.txt

@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """D1 真值脚本：UCI Wine Quality (red) — spawn 前独立计算，输出冻结 JSON。
 真值以冻结文件字节为准（<实验根目录>/ab-v3/datasets/winequality-red.csv）。
 """

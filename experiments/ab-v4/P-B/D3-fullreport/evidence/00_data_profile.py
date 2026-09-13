@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """数据画像：基础统计与结构检查（方法 A/B/D 的前置步骤）"""
 import pandas as pd
 import numpy as np

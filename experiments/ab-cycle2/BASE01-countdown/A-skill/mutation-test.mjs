@@ -1,4 +1,4 @@
-// 变异测试：证明 verify.mjs 的断言具备「杀伤力」——把要防的错误真的做一次，看它是否变红。
+﻿// 变异测试：证明 verify.mjs 的断言具备「杀伤力」——把要防的错误真的做一次，看它是否变红。
 // 用法: node mutation-test.mjs   （报告写入 mutation-report.md，退出码 0 = 全部被杀死）
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';

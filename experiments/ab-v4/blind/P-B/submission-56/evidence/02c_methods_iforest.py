@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 方法 M4（机器学习路径：IsolationForest，与 M1-M3 统计路径独立）
 特征: value / rolling_mean_12(1h) / rolling_std_12 / 日内相位 sin+cos

@@ -1,4 +1,4 @@
-# M1-notes 验证记录（Bprime 臂）
+﻿# M1-notes 验证记录（Bprime 臂）
 
 - 日期：2026-09-13
 - 环境：Windows 11 + Python 3.13.14（实测 `python --version`）

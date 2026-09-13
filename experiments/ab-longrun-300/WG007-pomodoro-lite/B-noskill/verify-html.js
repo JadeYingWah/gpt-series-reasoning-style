@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 var fs = require("fs");
 var path = "<实验根目录>/ab-longrun-300/WG007-pomodoro-lite/B-noskill/pomodoro.html";
 var html = fs.readFileSync(path, "utf8");

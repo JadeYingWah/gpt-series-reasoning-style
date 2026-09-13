@@ -1,4 +1,4 @@
-// G1-A2plus 多路径交叉验证
+﻿// G1-A2plus 多路径交叉验证
 // 路径 1（本文件）：Chrome headless + CDP 实操验证——真实 DOM 上跑全部向量（鼠标点击）、
 // 可信键盘事件（Input.dispatchKeyEvent）验证键盘-鼠标一致性、.pressed 视觉反馈、
 // 18 按钮可见性、全程控制台 0 报错、5 阶段截图留证。

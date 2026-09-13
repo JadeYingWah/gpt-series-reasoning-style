@@ -1,7 +1,7 @@
 ﻿{
   "label": "m07",
   "app": "<实验根目录>\\ab-cycle2\\_judge\\_probe\\recheck-q02a\\evidence\\mutants\\m07.html",
-  "fileUrl": "file:///<?????>/ab-cycle2/_judge/_probe/recheck-q02a/evidence/mutants/m07.html",
+  "fileUrl": "file:///<实验根目录>/ab-cycle2/_judge/_probe/recheck-q02a/evidence/mutants/m07.html",
   "total": 29,
   "failed": 1,
   "results": [
@@ -67,7 +67,7 @@
       "detail": "共捕获 1 个请求；非本地请求 0 个",
       "evidence": {
         "net": [
-          "file:///<?????>/ab-cycle2/_judge/_probe/recheck-q02a/evidence/mutants/m07.html"
+          "file:///<实验根目录>/ab-cycle2/_judge/_probe/recheck-q02a/evidence/mutants/m07.html"
         ]
       }
     },

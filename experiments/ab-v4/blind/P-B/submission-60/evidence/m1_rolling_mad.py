@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """M1: 滚动稳健 z 分数（滚动中位数 + MAD）——独立方法 1
 输出: m1_scores.csv(全序列分数), m1_intervals.csv(点级→区间), m1_summary.json
 """

@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """可视化证据：全序列 + 主报告区段(红) + 附录候选区段(橙)。输出 detection_overview.png"""
 import pandas as pd, numpy as np, json
 import matplotlib

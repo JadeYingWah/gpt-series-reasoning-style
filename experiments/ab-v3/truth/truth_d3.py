@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """D3 真值脚本：NAB machine_temperature_system_failure — 提取官方标注异常窗口，输出冻结 JSON。
 真值 = NAB 官方 combined_labels.json 中该数据集的窗口列表（第三方标注，非执行者生成）。
 """

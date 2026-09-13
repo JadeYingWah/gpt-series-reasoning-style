@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 方法 M1 / M2（统计路径，纯 numpy+pandas，独立于 ML 路径）
 M1  全局鲁棒 z-score（median/MAD）——捕获全局离群（骤降/骤升型）
