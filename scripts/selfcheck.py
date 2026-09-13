@@ -6,7 +6,8 @@ genuinely pass when a host model decides to follow them. This tool does NOT
 verify rule semantics. It verifies what a machine *can* verify cheaply and
 honestly: version/numbering consistency, structural completeness, cross-file
 references, code-fence pairing, identity/reference counts, gate-field surface
-sync, prose-count sync, and the install-platform parameter set. Running it is a
+sync, prose-count sync, resident-surface token-claim magnitude, and the
+install-platform parameter set. Running it is a
 fast regression check that the repo has not silently drifted.
 
 Python 3.7+ stdlib only. Exit: 0=all passed, 1=failed, 2=usage.
@@ -33,6 +34,22 @@ import _selftest_parser
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 FENCE_RE = re.compile(r"^```")
+
+
+# Directories that are NOT the shipped skill body. selfcheck guards the literal
+# layer of the skill itself; experiments/ holds A-B archives with deliberately
+# malformed fixtures (unclosed-fence markdown samples fed to a md->html parser,
+# one-off bed-generator scripts) and .git-rewrite/*.filter-repo hold throwaway
+# full-history copies from history-rewrite tooling. Scanning those produces
+# FAILs by design, not repo defects. Docs (incl. dated field-tests) stay in scope.
+NON_BODY_DIR_PARTS = {".git", ".git-rewrite", "__pycache__", "experiments"}
+
+
+def _is_body_path(p: pathlib.Path) -> bool:
+    for part in p.parts:
+        if part in NON_BODY_DIR_PARTS or part.endswith(".filter-repo"):
+            return False
+    return True
 
 
 def read_text(path: pathlib.Path) -> str:
@@ -189,7 +206,7 @@ def run_checks() -> list:
     # Backslash-escaped fence (no regex: multi-layer escaping proved error-prone)
     backslash_fence = chr(92) + chr(96) * 3
     for p in sorted(REPO_ROOT.rglob("*.md")):
-        if ".git" in p.parts:
+        if not _is_body_path(p):
             continue
         raw_lines = p.read_text(encoding="utf-8").splitlines()
         for idx, line in enumerate(raw_lines, 1):
@@ -586,8 +603,7 @@ def run_checks() -> list:
     # Known blind spot: single-line scan only -- a call split across lines is
     # not seen (no such call exists today).
     c = new(20, "text-write call sites pin newline")
-    py_files = sorted(p for p in REPO_ROOT.rglob("*.py")
-                      if ".git" not in p.parts and "__pycache__" not in p.parts)
+    py_files = sorted(p for p in REPO_ROOT.rglob("*.py") if _is_body_path(p))
     write_mode = re.compile(r"['\"][wax+]{1,2}b?['\"]")
 
     def _after_open(line: str) -> str:
@@ -670,6 +686,49 @@ def run_checks() -> list:
             c.fail("gate field-count drift: " + "; ".join(gf_bad[:8]))
         else:
             c.pass_("GATE_FIELDS={} consistent across {} prose surfaces".format(n_gate, len(gfam)))
+
+    # SB23 resident-surface token-claim magnitude guard (evidence: commits
+    # 812c44f..f7dcf37 -- the README Cost table claimed the resident surface
+    # (SKILL.md + VERSION) was 3,843 tokens (o200k) while it had actually grown
+    # to 9,833 after the CN-heavy rewrite; SB21 guards line counts but not size,
+    # so the 2.5x token drift survived multiple commits). Stdlib cannot run
+    # tiktoken, so this is a MAGNITUDE guard, not a token audit: it recomputes
+    # the resident surface's char count (deterministic) and checks the token
+    # figure README claims is internally consistent with that size. Measured
+    # o200k token-per-char ratios: CN-primary surfaces 0.50-0.66 (SKILL.md
+    # 0.629, minimal-discipline 0.657), EN-primary surfaces 0.20-0.33. The stale
+    # 3,843 claim implied 0.246 -- an EN-primary ratio on a CN-primary file,
+    # exactly the contradiction this catches. Band [0.45, 0.85] tolerates
+    # normal evolution but rejects order-of-magnitude drift.
+    # Blind spot (honest): it cannot replace a real tiktoken measurement and
+    # would false-positive if SKILL.md ever became EN-primary -- but that would
+    # already violate the SB14 CN-primary language policy.
+    c = new(23, "resident-surface token claim matches its size")
+    res_text = read_text(REPO_ROOT / "SKILL.md") + read_text(REPO_ROOT / "VERSION")
+    res_chars = len(res_text)
+    readme_text = read_text(REPO_ROOT / "README.md")
+    # Anchor on the authoritative Cost-table row, e.g.
+    # | 常驻面：`SKILL.md` + `VERSION` | **9,833**（...） |
+    m_tok = re.search(
+        r"常驻面：`SKILL\.md`\s*\+\s*`VERSION`\s*\|[^|]*?\*\*([\d,]+)\*\*",
+        readme_text)
+    band_lo, band_hi = 0.45, 0.85
+    if not m_tok:
+        c.fail("no resident-surface token claim found in README Cost table "
+               "(anchor: resident row SKILL.md + VERSION | **N,NNN**) -- guard is a no-op")
+    else:
+        claimed = int(m_tok.group(1).replace(",", ""))
+        ratio = claimed / res_chars
+        if not (band_lo <= ratio <= band_hi):
+            c.fail("resident token claim {} implies {:.3f} tok/char over {} chars, "
+                   "outside the CN-primary band [{:.2f}, {:.2f}]; remeasure with "
+                   "tiktoken o200k_base and update the Cost table (plausible range "
+                   "{}-{} tokens).".format(
+                       claimed, ratio, res_chars, band_lo, band_hi,
+                       int(res_chars * band_lo), int(res_chars * band_hi)))
+        else:
+            c.pass_("claim {} tok over {} chars = {:.3f} tok/char, within CN-primary "
+                    "band [{:.2f}, {:.2f}]".format(claimed, res_chars, ratio, band_lo, band_hi))
 
     # SB21 prose counts match their source of truth (evidence: commits
     # dacb935..eef524f -- selfcheck.py defined 17 checks while README's

@@ -5,9 +5,9 @@
 ## 总览
 
 - **实验总数**: 41 个
-- **归档时间**: 2026-09-13
+- **归档时间**: 2026-09-13（第三代元认知 P1 系列终报增量归档 2026-09-14）
 - **总大小**: ~65MB（已清理 node_modules、浏览器 profile、缓存等临时文件）
-- **数据构成**: 报告(.md) 1267份、代码(.py/.js/.mjs) 500份、截图(.png) 309份、数据集(.csv) 60份
+- **数据构成**: 报告(.md) 1280份、代码(.py/.js/.mjs) 500份、截图(.png) 309份、数据集(.csv) 60份
 
 ## 实验分类索引
 
@@ -77,9 +77,15 @@
 
 | 目录 | 说明 |
 |------|------|
-| `ab-metacognition/` | 元认知能力对 skill 效果影响的完整实验（650 files） |
+| `ab-metacognition/` | 元认知能力对 skill 效果影响的完整实验（662 files） |
 | | 含 E1-E4 能力测试床、T1 任务、v1.2.3 修订验证、能力-效果映射分析 |
-| | 关键报告：EXPERIMENT-REPORT.md、V123-VERDICT-REPORT.md |
+| | 第一代关键报告：EXPERIMENT-REPORT.md、V123-VERDICT-REPORT.md、v1.2.3-REVISION-DRAFT.md |
+| | **第三代 P1 系列（2026-09-13/14，回答"skill 到底提升什么"）**： |
+| | · `P1-1/`（T1 CSV / T2 待办 / T3 md2html × 无 skill / 原则引导 v1.2.2 / 硬指标 v1.2.3，各臂 EVIDENCE），聚合见 `P1-1-FINAL-REPORT.md`（n=3 均值 58.17 > 57.00 > 55.33，反例验证执行率 skill 100% vs 无 skill 33%） |
+| | · `P1-2-REDTEAM-FINAL.md`（黑盒红队：无报告独立发现 ≥ 有报告判分子，证据报告无锚定效应）、`P1-2-SELFCAL-ANALYSIS.md`（自我校准缺口率 无 skill 100% vs skill 约 33%） |
+| | · `P1-2b-ONLINE-SEARCH-FINAL.md`（每步强制网络搜索净负向 54.5 vs 60.0，不纳入） |
+| | · `SKILL-IMPROVEMENT-PLAN-v1.2.4.md`（探索层 R0-R4 草案，未发布）、`TESTING-METHODS-CATALOG-v2.md`（含 PBT/蜕变测试等 10 法）、`V124-BLIND-VERDICT.md`、`EXPERIMENTER-DEEP-ANALYSIS.md`、`UPPER-BOUND-ANALYSIS.md`、`P1-3-DESIGN.md`（待批） |
+| | 裁决：v1.2.3 硬指标化不实施；v1.2.4 探索层待独立盲评 + 扩样 n=3；1.2.2 本体不变 |
 
 ### 8. Stage 系列（大规模盲评）
 

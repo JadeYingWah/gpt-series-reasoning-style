@@ -15,7 +15,7 @@
 [![Platforms](https://img.shields.io/badge/platforms-13_supported-blueviolet)](#install--安装)
 [![agentskills.io](https://img.shields.io/badge/agentskills.io-compliant-success)](#tooling--工具链)
 [![CI: selfcheck](https://github.com/JadeYingWah/gpt-series-reasoning-style/actions/workflows/selfcheck.yml/badge.svg)](https://github.com/JadeYingWah/gpt-series-reasoning-style/actions)
-[![Self-checks](https://img.shields.io/badge/selfcheck-SB1--SB22_22%2F22-success)](#tooling--工具链)
+[![Self-checks](https://img.shields.io/badge/selfcheck-SB1--SB23_23%2F23-success)](#tooling--工具链)
 [![Behavioural self-tests](https://img.shields.io/badge/behavioural_self--tests-77_frozen-orange)](#tooling--工具链)
 
 </div>
@@ -540,7 +540,7 @@ gpt-series-reasoning-style/
 ├── hooks/                    # 可选单行 SessionStart 提醒（opt-in）
 ├── scripts/
 │   ├── install.sh / install.ps1          # 13 平台安装器（剥离仓库专属面）
-│   ├── selfcheck.py                      # SB1–SB22 静态自检（机器可判的仓库完整性）
+│   ├── selfcheck.py                      # SB1–SB23 静态自检（机器可判的仓库完整性）
 │   ├── selftest-runner.py                # 77 条行为自测的 list / schema / archive
 │   ├── claim-check.py                    # 完成声明机械核验器（Files / Commands / Hashes）
 │   ├── artifact-check.py                 # 项目治理产物结构校验
@@ -563,7 +563,7 @@ gpt-series-reasoning-style/
 
 | 工具 | 作用 | 诚实边界 |
 | --- | --- | --- |
-| `scripts/selfcheck.py` | **SB1–SB22 静态自检**：版本/编号一致性、结构完整性、交叉引用、围栏配对、身份与 references 计数、门禁字段多表面同步、语言策略锚点、agentskills.io 规范子集、身份计数跨面一致、写入点换行策略、**散文计数与其来源一致**等。`--out` 输出留痕报告。 | 只验证字面层；语义漂移、逐条双语对齐等**已知盲区在 docstring 里写明**。绿色 = 字面层完好，仅此而已。 |
+| `scripts/selfcheck.py` | **SB1–SB23 静态自检**：版本/编号一致性、结构完整性、交叉引用、围栏配对、身份与 references 计数、门禁字段多表面同步、语言策略锚点、agentskills.io 规范子集、身份计数跨面一致、写入点换行策略、**散文计数与其来源一致**、**常驻面 token 声明数量级**等。`--out` 输出留痕报告。 | 只验证字面层；语义漂移、逐条双语对齐等**已知盲区在 docstring 里写明**。绿色 = 字面层完好，仅此而已。 |
 | `scripts/selftest-runner.py` | **77 条行为自测**的操作化：`list` 导出逐条提示词；`schema` 生成判定表（判定列留给人填）；`archive` 统计 + 内容指纹出可复现报表。 | 待判定项计作"未运行"而非"通过"；**工具永不自判 PASS**。 |
 | `scripts/mutation-kill.py` | **变异杀伤检验**：把产物自带的自检当被测对象，注入单点变异体、与**基线（未变异）**判定比对、逐错误类别统计**区分率**。原产物只读；**需要且只需要一个基线变异体**，缺基线直接拒绝（exit 2）；ERROR 不计入分母；示例见 `scripts/examples/`。 | 报告的是**自检自己的判定**，不是产物正确性；工具永不自判 PASS。区分率 0% = 该类证据为零。 |
 | `scripts/claim-check.py` | **完成声明机械核验**：`## Files` 存在性 / `## Commands` fresh 实跑 + 期望退出码 / `## Hashes` sha256 内容 pin。 | 声明文件按**不可信输入**处理，默认双层拦截（`--allow-dangerous` 人工复核后解锁）：**25 类破坏性命令黑名单** + **解释器间接执行默认拒**；窄白名单放行 `-m unittest|pytest`、`--version`。两层都不是沙箱。完整安全模型见 `SECURITY.md`。 |
@@ -571,7 +571,7 @@ gpt-series-reasoning-style/
 | `probes/probe-runner.py` | **3 轮对抗探针**的可重跑回归仪器：`list` / `report` / `archive`（append-only 留痕）/ `verify`（机械预检）。 | `verify` 只能把 fail_pattern 命中判 FAIL，**永不自动判 PASS**；pass/fail 由人读宿主输出决定。`probes/last-run.md` 被 git 追踪，跑一次 `archive` 工作树就会变脏，**属预期**。 |
 | `generate-banner.py` | 渲染社交预览图 `social-preview.png`（跨平台 CJK 字体回退链）。 | — |
 
-**CI（`.github/workflows/selfcheck.yml`，push/PR 触发，Python 3.9）**：selfcheck SB1–SB22 → `--out` 冒烟 → 官方 `skilllint@1.19.2`（经 uvx，agentskills.io 规范）→ `openai.yaml` YAML 解析 → 检查器 `--help` → **claim-check 两层拦截行为回归** → artifact-check 空目录阴性测试 → 探针场景解析 → 77 条自测解析 + 判定表 schema 冒烟 → mutation-kill CLI + 示例 manifest 解析。所有 GitHub Actions 均按 commit SHA 钉死，`pip install` 的包同样钉版本。**CI 步数由 SB21 守卫（当前 14/14 步；守卫自身空转也会被判失败）。**
+**CI（`.github/workflows/selfcheck.yml`，push/PR 触发，Python 3.9）**：selfcheck SB1–SB23 → `--out` 冒烟 → 官方 `skilllint@1.19.2`（经 uvx，agentskills.io 规范）→ `openai.yaml` YAML 解析 → 检查器 `--help` → **claim-check 两层拦截行为回归** → artifact-check 空目录阴性测试 → 探针场景解析 → 77 条自测解析 + 判定表 schema 冒烟 → mutation-kill CLI + 示例 manifest 解析。所有 GitHub Actions 均按 commit SHA 钉死，`pip install` 的包同样钉版本。**CI 步数由 SB21 守卫（当前 14/14 步；守卫自身空转也会被判失败）。**
 
 ---
 
@@ -599,7 +599,7 @@ gpt-series-reasoning-style/
 为防"规则越写越多、检查越加越重"的失控，本仓库给自己立了预算：
 
 - **`SKILL.md` ≤ 250 行**（当前约 173 行 / 实测约 9.8k tokens 常驻，o200k_base）——入口只保留决策点，细节下沉到按需的 references；
-- **静态检查上限 22 项（SB1–SB22）**：新增第 23 项必须先证明它抓到过**真实缺陷**（可指认提交哈希）——SB18/19/20/21/22 均按此准入立项；
+- **静态检查上限 23 项（SB1–SB23）**：新增第 24 项必须先证明它抓到过**真实缺陷**（可指认提交哈希）——SB18/19/20/21/22/23 均按此准入立项（SB23 守常驻面 token 声明的数量级，证据 `812c44f..f7dcf37`：Cost 表声明 3,843 而实测 9,833 的 2.5 倍漂移，SB21 只守行数未抓到）；
 - **77 条行为自测冻结**：只做"旧测失去鉴别力 → 替换"，不再扩容；
 - **收敛优先于加码**：版本对外固定 `1.2.2` 基线，post-1.2.2 增量以 CHANGELOG 的 Unreleased 批次计价，引用时注明批次。
 
@@ -627,7 +627,7 @@ gpt-series-reasoning-style/
 - **重述面**：`agents/openai.yaml`（default_prompt）· `README.md` · `docs/minimal-discipline.md` · `references/series-reasoning-examples.md` · `references/series-reasoning-lessons.md` · `references/self-test.md` · `site/index.html`
 - **计数类**改动会触发 SB 身份/references 计数与跨面一致性检查（SB4/SB19）；写入点换行由 SB20 把关；**散文中的派生计数**（检查项数 / `SKILL.md` 行数 / 自测条数 / references 份数）由 SB21 对齐其来源。
 
-**发布前自检**：`python scripts/selfcheck.py`（22/22）→ `uvx skilllint@1.19.2 check gpt-series-reasoning-style`（自父目录运行）→ 更新 `CHANGELOG.md` 批次 → push 后确认 CI 绿。
+**发布前自检**：`python scripts/selfcheck.py`（23/23）→ `uvx skilllint@1.19.2 check gpt-series-reasoning-style`（自父目录运行）→ 更新 `CHANGELOG.md` 批次 → push 后确认 CI 绿。
 
 **归档纪律**：外部评审 → `docs/reviews/`；实测报告 → `docs/field-tests/`；提案 → `docs/proposals/`；内部迭代史 → `INTERNAL-HISTORY.md`（公开线 1.1.0 之前的 0.0.1.x–0.3.3.x 全部归档于此）。历史记录按史实保留，"过去的数对当时是对的"。
 
