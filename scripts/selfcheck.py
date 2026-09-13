@@ -172,14 +172,14 @@ def run_checks() -> list:
     else:
         c.pass_("21 identity files present")
 
-    # SB5 references count == 14
-    # (11 originals + series-reasoning-workflow-en.md mirror + project-artifacts.md + master-process-reference.md)
-    c = new(5, "reference file count == 14")
+    # SB5 references count == 15
+    # (11 originals + series-reasoning-workflow-en.md mirror + project-artifacts.md + master-process-reference.md + verification-reproducibility-patterns.md)
+    c = new(5, "reference file count == 15")
     refs = list((REPO_ROOT / "references").glob("*.md"))
-    if len(refs) != 14:
-        c.fail("found " + str(len(refs)) + " reference files, expected 14")
+    if len(refs) != 15:
+        c.fail("found " + str(len(refs)) + " reference files, expected 15")
     else:
-        c.pass_("14 reference .md files")
+        c.pass_("15 reference .md files")
 
     # SB6 code-fence pairing (+ escaped-fence detection, A2: a backslash-escaped
     # fence is invisible to the parser and silently drops content from tooling)

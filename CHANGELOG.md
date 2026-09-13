@@ -11,7 +11,16 @@
 - **清理**：按任务类型调整表中重复的旧复合类行
 - 累计 batch 77–91（15 批），全部 8 类任务 A/B 实验完成
 
-## Unreleased / 未发布增量（对外仍为 1.2.1）
+## 1.2.2 / 2026-09-13
+
+**发布版本：A2+ 第五增强点（覆盖面枚举强制前置）+ 全项目版本号对齐**
+
+- **A2+ 配置扩展（第五增强点）**：轻量+（A2+）配置从 4 个增强点扩展为 5 个——新增「覆盖面枚举强制前置 + ALL GREEN 盲区自查声明」：多路径验证开始前必须先枚举输入域分段（正常值/边界值/异常值/安全注入/任务书点名的特殊场景），每个分段至少一个测试用例触达；ALL GREEN 时必须声明覆盖了哪些分段、哪些可能未覆盖、为什么认为覆盖足够；未枚举覆盖面的验证结果按 UNVERIFIED 处理。依据：ab-v4 G2 反例——多路径全绿但任务书点名的中文域名/双点域名等边界全部放行，多路径≠覆盖面，验证错了也全绿。
+- **A2+ 适用场景扩展**：新增「GUI 交互任务」为 A2+ 配置适用场景（原仅中等复杂度/高可信度/开放方法任务）。
+- **全项目版本号对齐**：VERSION、SKILL.md（frontmatter + 底部 Version 节）、README（徽章/安装钉版/目录树/收敛原则/Versioning 节）、references/self-test.md（5 处加载证明示例）、site/index.html（徽章）全部从 1.2.1 同步至 1.2.2。
+- **验证**：selfcheck 22/22 通过（指纹 `fe05327219dd`）。
+
+## Unreleased / 未发布增量（对外仍为 1.2.2）
 
 - **A/B 验证实验归档 · 作品集网站双臂对照（2026-09-13 第七十八批）**：完成 batch 77 改进后的首次 A/B 双臂验证实验，任务为创建个人作品集网站（4页面，HTML/CSS/JS）。结果：A臂（用skill）加权总分 **8.59/10**，B臂（不用skill）**3.59/10**，提升幅度 **139%**。分维度：产物质量 8.75 vs 6.5、流程合规性 8.5 vs 0.8、用户思维 8.25 vs 3.5、边界覆盖 8.33 vs 2.0、诚实标记 9.0 vs 0。成本：A臂约90K tokens/25min，B臂约33K tokens/6min，token倍率2.7x。关键发现：skill核心价值在流程约束减少遗漏（无障碍/SEO/性能/错误处理/诚实标记），每提升1分多耗约22K tokens，交付类任务划算、原型类不划算。报告归档至 [docs/field-tests/ab-batch77-portfolio/report.md](docs/field-tests/ab-batch77-portfolio/report.md)。局限性：n=1、同AI评估有偏见、浏览器实操测试UNVERIFIED。验证：selfcheck **22/22**。
 - A/B validation experiment archived — portfolio website dual-arm comparison (batch 78): first A/B dual-arm validation after batch 77 improvements. A-arm (with skill) weighted score **8.59/10**, B-arm (without skill) **3.59/10**, improvement **139%**. Cost ratio 2.7x tokens. Report at [docs/field-tests/ab-batch77-portfolio/report.md](docs/field-tests/ab-batch77-portfolio/report.md). Verification: selfcheck **22/22**.
