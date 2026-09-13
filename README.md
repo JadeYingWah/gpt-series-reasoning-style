@@ -40,7 +40,7 @@ cd gpt-series-reasoning-style
 #    使用 gpt-series-reasoning-style 执行本次任务。
 ```
 
-**Claude Code 免 clone 一键装（插件市场）**：在 Claude Code 里执行 `/plugin marketplace add JadeYingWah/gpt-series-reasoning-style`，再 `/plugin install gpt-series-reasoning-style@gpt-series-reasoning-style`（或直接在 `/plugin` 菜单里安装；钉版本可在 add 时加 `@v1.2.2`）。其余平台与手动方式见 [Install](#install--安装)。
+**Claude Code 免 clone 一键装（插件市场）**：在 Claude Code 里执行 `/plugin marketplace add JadeYingWah/gpt-series-reasoning-style`，再 `/plugin install gpt-series-reasoning-style@gpt-series-reasoning-style`（或直接在 `/plugin` 菜单里安装；钉大版本可在 add 时加 `@v1.2.0`）。其余平台与手动方式见 [Install](#install--安装)。
 
 加载后，AI 在动手建文件 / 写代码 / 跑命令之前，会先停下给你一张确认单；声称"做完了"时必须附上可核对的证据。
 
@@ -419,7 +419,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Platform agents
 /plugin install gpt-series-reasoning-style@gpt-series-reasoning-style
 ```
 
-钉某个版本：`/plugin marketplace add JadeYingWah/gpt-series-reasoning-style@v1.2.2`（发布态快照，仅供复现历史版本参考；**日常使用建议 clone 仓库 main**，含全部 *Unreleased* 批次）。提交到官方/社区目录前，可用 `claude plugin validate` 本地校验清单。
+钉大版本：`/plugin marketplace add JadeYingWah/gpt-series-reasoning-style@v1.2.0`（发布态快照，仅供复现历史版本参考；**日常使用建议 clone 仓库 main**，含全部 *Unreleased* 批次）。提交到官方/社区目录前，可用 `claude plugin validate` 本地校验清单。
 
 | 平台 | Skill 目录 | 脚本参数 |
 | --- | --- | --- |
@@ -622,7 +622,7 @@ gpt-series-reasoning-style/
 
 - **当前公开版本：`1.2.2`**（发布基线；`VERSION` 文件为唯一权威）。
 - post-1.2.2 的增量**不跳号**：按批次记入 [`CHANGELOG.md`](CHANGELOG.md) 的 *Unreleased* 节（批次总数以 CHANGELOG Unreleased 最新条目为准），引用规则出处时注明批次。
-- **tag 与 main 的关系（维护者裁决 2026-09-12）**：tag 是**固定版本里程碑，记录本 skill 的发展历史、供参考**——`v1.2.2` 钉在发布态（`1fd6b6e`），不随后续批次移动；**日常使用与安装以仓库 main 为准**（main 在发布态之上累计 *Unreleased* 批次，2026-09-12 已推至第五十九批）。钉版本安装（`@v1.2.2`）只适合复现某个历史发布态；要最新批次请 clone main。何时切版打新 tag 由维护者裁决。
+- **tag 与 main 的关系（维护者裁决 2026-09-12，2026-09-14 更新）**：tag 是**大版本里程碑，记录本 skill 的发展历史、供参照**——只在 `1.0 / 1.1 / 1.2` 这类大版本节点打 tag（`v1.0.0` / `v1.1.0` / `v1.2.0`），**中间补丁版本（如 1.2.1 / 1.2.2）不打 tag**，以仓库 main 为唯一权威；**日常使用与安装以仓库 main 为准**（main 在大版本之上累计 *Unreleased* 批次，2026-09-12 已推至第五十九批）。钉大版本安装（`@v1.2.0`）只适合复现某个历史发布态；要最新批次请 clone main。何时切大版本打新 tag 由维护者裁决。
 - 语义：1.2.2 基线 + Unreleased 批次计价；升版需维护者裁决。
 - 完整内部迭代史（`0.0.1.x–0.3.3.x` 及旧公开线）见 [`INTERNAL-HISTORY.md`](INTERNAL-HISTORY.md)。
 
