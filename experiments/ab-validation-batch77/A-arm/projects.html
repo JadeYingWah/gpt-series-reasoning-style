@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="项目展示 - 个人作品集，包含Web应用、移动端、设计等各类项目">
+    <title>项目展示 - 个人作品集</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <a href="#main-content" class="skip-link">跳到主要内容</a>
+
+    <nav class="navbar" role="navigation" aria-label="主导航">
+        <div class="nav-container">
+            <a href="index.html" class="logo" aria-label="返回首页">Portfolio</a>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html">首页</a></li>
+                <li><a href="projects.html" class="active" aria-current="page">项目</a></li>
+                <li><a href="about.html">关于</a></li>
+                <li><a href="contact.html">联系</a></li>
+            </ul>
+            <button class="hamburger" aria-label="切换导航菜单" aria-expanded="false" aria-controls="navMenu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <main id="main-content">
+        <section class="page-header">
+            <h1>项目展示</h1>
+            <p>精选作品与案例，按类别筛选</p>
+        </section>
+
+        <section aria-label="项目列表">
+            <!-- 筛选按钮 -->
+            <div class="filters" role="group" aria-label="项目分类筛选">
+                <button class="filter-btn active" data-filter="all" aria-pressed="true">全部</button>
+                <button class="filter-btn" data-filter="web" aria-pressed="false">Web 应用</button>
+                <button class="filter-btn" data-filter="mobile" aria-pressed="false">移动端</button>
+                <button class="filter-btn" data-filter="design" aria-pressed="false">设计</button>
+            </div>
+
+            <div class="projects-grid">
+                <article class="project-card fade-in" data-category="web">
+                    <div class="project-image" style="background: var(--gradient-primary);" role="img" aria-label="电商平台项目预览"></div>
+                    <div class="project-info">
+                        <h3>电商平台</h3>
+                        <p>全栈电商解决方案，支持多商户入驻、在线支付、订单管理、库存追踪</p>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">技术栈：React, Node.js, MongoDB, Stripe</p>
+                        <a href="#" class="project-link">查看详情 →</a>
+                    </div>
+                </article>
+
+                <article class="project-card fade-in" data-category="mobile">
+                    <div class="project-image" style="background: var(--gradient-secondary);" role="img" aria-label="社交应用项目预览"></div>
+                    <div class="project-info">
+                        <h3>社交应用</h3>
+                        <p>实时聊天、动态分享、好友系统、消息推送，日活用户10万+</p>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">技术栈：React Native, Firebase, WebSocket</p>
+                        <a href="#" class="project-link">查看详情 →</a>
+                    </div>
+                </article>
+
+                <article class="project-card fade-in" data-category="web">
+                    <div class="project-image" style="background: var(--gradient-tertiary);" role="img" aria-label="数据可视化项目预览"></div>
+                    <div class="project-info">
+                        <h3>数据可视化仪表盘</h3>
+                        <p>企业级数据分析平台，支持多维度数据展示、实时更新、导出报告</p>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">技术栈：Vue, D3.js, Python, PostgreSQL</p>
+                        <a href="#" class="project-link">查看详情 →</a>
+                    </div>
+                </article>
+
+                <article class="project-card fade-in" data-category="design">
+                    <div class="project-image" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);" role="img" aria-label="品牌设计项目预览"></div>
+                    <div class="project-info">
+                        <h3>品牌视觉识别系统</h3>
+                        <p>完整品牌VI设计，包含Logo、色彩系统、字体规范、应用设计</p>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">工具：Figma, Illustrator, Photoshop</p>
+                        <a href="#" class="project-link">查看详情 →</a>
+                    </div>
+                </article>
+
+                <article class="project-card fade-in" data-category="mobile">
+                    <div class="project-image" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);" role="img" aria-label="健身追踪App项目预览"></div>
+                    <div class="project-info">
+                        <h3>健身追踪 App</h3>
+                        <p>运动记录、饮食管理、健康数据分析、社交分享，App Store 4.8分</p>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">技术栈：Flutter, HealthKit, Firebase</p>
+                        <a href="#" class="project-link">查看详情 →</a>
+                    </div>
+                </article>
+
+                <article class="project-card fade-in" data-category="web">
+                    <div class="project-image" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);" role="img" aria-label="在线教育平台项目预览"></div>
+                    <div class="project-info">
+                        <h3>在线教育平台</h3>
+                        <p>课程管理、视频播放、作业提交、学习进度追踪、证书生成</p>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">技术栈：Next.js, Prisma, AWS, WebRTC</p>
+                        <a href="#" class="project-link">查看详情 →</a>
+                    </div>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer" role="contentinfo">
+        <div class="footer-content">
+            <p>&copy; <span id="currentYear">2026</span> Portfolio. All rights reserved.</p>
+            <div class="social-links">
+                <a href="#" aria-label="GitHub 主页">GitHub</a>
+                <a href="#" aria-label="Twitter 主页">Twitter</a>
+                <a href="#" aria-label="LinkedIn 主页">LinkedIn</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

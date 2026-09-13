@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>暮光索道 · 甲虫缆车 · SVG017</title>
+<!--
+  SVG017-beetle-cable-car · A-skill
+  方向：暮光金秋峡谷索道（区别于 SVG008 夜雪）
+  前进：世界层向左滚动 ⇒ 载具相对 +X（画面右侧）
+  滑轮：顺时针 spinCW ↔ 车向右
+  附肢：foreleg / midleg / hindleg / antenna / mandible 独立周期
+  无外部资源：纯内联 CSS + SVG + 可选 JS
+-->
+<style>
+  :root {
+    --void: #1a1030;
+    --dusk: #3d2463;
+    --rose: #c45c48;
+    --amber: #e8a54b;
+    --gold: #f0c75e;
+    --cream: #f6e7c8;
+    --cabin: #8b2e3b;
+    --cabin-dark: #5c1c28;
+    --brass: #c9a227;
+    --brass-dim: #8a7018;
+    --beetle: #1f6b4a;
+    --beetle-hi: #3db87a;
+    --beetle-deep: #0d3d2a;
+    --copper: #b87333;
+    --ink: #1a1028;
+    --leaf-a: #c45c2a;
+    --leaf-b: #d4892e;
+    --leaf-c: #8b3a1f;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--void);
+  }
+
+  body {
+    display: grid;
+    place-items: center;
+    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  }
+
+  .scene-wrap {
+    width: 100vw;
+    height: 100vh;
+    max-width: 100%;
+  }
+
+  svg.scene {
+    width: 100%;
+    height: 100%;
+    display: block;
+    background: #1a1030;
+  }
+
+  /* ========== 视差滚动（世界向左 ⇒ 车向右） ========== */
+  @keyframes scrollX {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-1200px); }
+  }
+
+  .scroll-sky   { animation: scrollX 60s linear infinite; }
+  .scroll-far   { animation: scrollX 32s linear infinite; }
+  .scroll-mid   { animation: scrollX 16s linear infinite; }
+  .scroll-near  { animation: scrollX 8s  linear infinite; }
+  .scroll-cable { animation: scrollX 12s linear infinite; }
+
+  /* ========== 吊舱摇摆 / 悬挂 ========== */
+  @keyframes cabinSway {
+    0%, 100% { transform: rotate(-1.1deg); }
+    50%      { transform: rotate(1.3deg); }
+  }
+  @keyframes cabinBob {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(3.5px); }
+  }
+  #cabin-pivot {
+    transform-box: fill-box;
+    transform-origin: 50% 0%;
+    animation: cabinSway 3.2s ease-in-out infinite;
+  }
+  #cabin-body {
+    transform-box: fill-box;
+    transform-origin: 50% 0%;
+    animation: cabinBob 2.4s ease-in-out infinite;
+  }
+
+  /* ========== 滑轮顺时针（向右前进） ========== */
+  @keyframes spinCW {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  .sheave {
+    transform-box: fill-box;
+    transform-origin: 50% 50%;
+    animation: spinCW 1.4s linear infinite;
+  }
+  .sheave-slow {
+    transform-box: fill-box;
+    transform-origin: 50% 50%;
+    animation: spinCW 2.1s linear infinite;
+  }
+
+  /* ========== 甲虫附肢（独立于舱体） ========== */
+  @keyframes foreGrab {
+    0%, 100% { transform: rotate(-6deg) translateY(0); }
+    40%      { transform: rotate(8deg) translateY(2px); }
+    70%      { transform: rotate(-2deg) translateY(1px); }
+  }
+  @keyframes midStep {
+    0%, 100% { transform: rotate(-10deg); }
+    50%      { transform: rotate(12deg); }
+  }
+  @keyframes hindStep {
+    0%, 100% { transform: rotate(9deg); }
+    50%      { transform: rotate(-11deg); }
+  }
+  @keyframes antWave {
+    0%, 100% { transform: rotate(-14deg); }
+    50%      { transform: rotate(18deg); }
+  }
+  @keyframes mandible {
+    0%, 100% { transform: rotate(0deg); }
+    45%      { transform: rotate(-12deg); }
+    60%      { transform: rotate(4deg); }
+  }
+  @keyframes elytraPulse {
+    0%, 100% { opacity: 0.92; }
+    50%      { opacity: 1; }
+  }
+  @keyframes headBob {
+    0%, 100% { transform: rotate(-2deg) translateY(0); }
+    50%      { transform: rotate(2.5deg) translateY(1.5px); }
+  }
+
+  .leg-fore {
+    transform-box: fill-box;
+    transform-origin: 80% 20%;
+    animation: foreGrab 1.05s ease-in-out infinite;
+  }
+  .leg-fore-r { animation-delay: -0.35s; }
+
+  .leg-mid {
+    transform-box: fill-box;
+    transform-origin: 70% 15%;
+    animation: midStep 0.72s ease-in-out infinite;
+  }
+  .leg-mid-r { animation-delay: -0.36s; }
+
+  .leg-hind {
+    transform-box: fill-box;
+    transform-origin: 75% 20%;
+    animation: hindStep 0.88s ease-in-out infinite;
+  }
+  .leg-hind-r { animation-delay: -0.44s; }
+
+  .antenna {
+    transform-box: fill-box;
+    transform-origin: 10% 80%;
+    animation: antWave 1.55s ease-in-out infinite;
+  }
+  .antenna-r { animation-delay: -0.7s; }
+
+  .mandible-l {
+    transform-box: fill-box;
+    transform-origin: 90% 50%;
+    animation: mandible 1.35s ease-in-out infinite;
+  }
+  .mandible-r {
+    transform-box: fill-box;
+    transform-origin: 10% 50%;
+    animation: mandible 1.35s ease-in-out infinite;
+    animation-delay: -0.08s;
+  }
+
+  .elytra {
+    animation: elytraPulse 2.8s ease-in-out infinite;
+  }
+
+  .beetle-head {
+    transform-box: fill-box;
+    transform-origin: 20% 70%;
+    animation: headBob 1.9s ease-in-out infinite;
+  }
+
+  /* ========== 环境 ========== */
+  @keyframes sunPulse {
+    0%, 100% { opacity: 0.85; transform: scale(1); }
+    50%      { opacity: 1; transform: scale(1.04); }
+  }
+  #sun-glow {
+    transform-box: fill-box;
+    transform-origin: 50% 50%;
+    animation: sunPulse 5s ease-in-out infinite;
+  }
+
+  @keyframes leafDrift {
+    0%   { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+    10%  { opacity: 0.85; }
+    90%  { opacity: 0.6; }
+    100% { transform: translate(-180px, 90px) rotate(-120deg); opacity: 0; }
+  }
+  .leaf {
+    animation: leafDrift 7s linear infinite;
+  }
+  .leaf:nth-child(2) { animation-duration: 9s; animation-delay: -2s; }
+  .leaf:nth-child(3) { animation-duration: 6.2s; animation-delay: -4s; }
+  .leaf:nth-child(4) { animation-duration: 8.4s; animation-delay: -1s; }
+  .leaf:nth-child(5) { animation-duration: 7.6s; animation-delay: -5s; }
+
+  @keyframes headlampFlicker {
+    0%, 100% { opacity: 0.55; }
+    40%      { opacity: 0.75; }
+    60%      { opacity: 0.5; }
+  }
+  #headlamp-cone {
+    animation: headlampFlicker 2.2s ease-in-out infinite;
+  }
+
+  @keyframes towerLamp {
+    0%, 100% { opacity: 0.4; }
+    50%      { opacity: 1; }
+  }
+  .tower-lamp {
+    animation: towerLamp 2.8s ease-in-out infinite;
+  }
+
+  /* ========== reduce-motion ========== */
+  @media (prefers-reduced-motion: reduce) {
+    .scroll-sky, .scroll-far, .scroll-mid, .scroll-near, .scroll-cable,
+    #cabin-pivot, #cabin-body,
+    .sheave, .sheave-slow,
+    .leg-fore, .leg-mid, .leg-hind,
+    .antenna, .mandible-l, .mandible-r,
+    .elytra, .beetle-head,
+    #sun-glow, .leaf, #headlamp-cone, .tower-lamp {
+      animation: none !important;
+    }
+  }
+
+  /* 小标签 */
+  .hud {
+    position: fixed;
+    left: 14px;
+    bottom: 12px;
+    color: rgba(246, 231, 200, 0.72);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    pointer-events: none;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  }
+  .hud strong { color: var(--gold); font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="scene-wrap">
+<svg class="scene" id="scene" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" role="img" aria-label="暮光峡谷中一只甲虫驾驶红铜缆车向右前进">
+  <defs>
+    <!-- 天空 -->
+    <linearGradient id="g-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#1a1030"/>
+      <stop offset="28%"  stop-color="#3d2463"/>
+      <stop offset="55%"  stop-color="#8b3a5c"/>
+      <stop offset="78%"  stop-color="#c45c48"/>
+      <stop offset="100%" stop-color="#e8a54b"/>
+    </linearGradient>
+    <radialGradient id="g-sun" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#fff3c4" stop-opacity="1"/>
+      <stop offset="35%"  stop-color="#f0c75e" stop-opacity="0.85"/>
+      <stop offset="70%"  stop-color="#e8a54b" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#c45c48" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="g-sun-core" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#fff8e0"/>
+      <stop offset="55%"  stop-color="#f0c75e"/>
+      <stop offset="100%" stop-color="#e8a54b" stop-opacity="0.2"/>
+    </radialGradient>
+
+    <!-- 山 -->
+    <linearGradient id="g-far" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#5a3a78"/>
+      <stop offset="100%" stop-color="#3d2463"/>
+    </linearGradient>
+    <linearGradient id="g-mid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#6b3048"/>
+      <stop offset="100%" stop-color="#4a2040"/>
+    </linearGradient>
+    <linearGradient id="g-near" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#8b3a1f"/>
+      <stop offset="100%" stop-color="#3a1820"/>
+    </linearGradient>
+
+    <!-- 吊舱 -->
+    <linearGradient id="g-cabin" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#a83a48"/>
+      <stop offset="45%"  stop-color="#8b2e3b"/>
+      <stop offset="100%" stop-color="#5c1c28"/>
+    </linearGradient>
+    <linearGradient id="g-cabin-roof" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#d4a017"/>
+      <stop offset="50%"  stop-color="#c9a227"/>
+      <stop offset="100%" stop-color="#8a7018"/>
+    </linearGradient>
+    <linearGradient id="g-brass" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#f0d060"/>
+      <stop offset="50%"  stop-color="#c9a227"/>
+      <stop offset="100%" stop-color="#8a7018"/>
+    </linearGradient>
+    <linearGradient id="g-window" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#7fdbff" stop-opacity="0.35"/>
+      <stop offset="40%"  stop-color="#e8a54b" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#1a1030" stop-opacity="0.45"/>
+    </linearGradient>
+
+    <!-- 甲虫 -->
+    <linearGradient id="g-elytra" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#3db87a"/>
+      <stop offset="35%"  stop-color="#1f6b4a"/>
+      <stop offset="70%"  stop-color="#0d3d2a"/>
+      <stop offset="100%" stop-color="#1a8a5c"/>
+    </linearGradient>
+    <linearGradient id="g-pronotum" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#2a9a68"/>
+      <stop offset="100%" stop-color="#0d3d2a"/>
+    </linearGradient>
+    <linearGradient id="g-head-bug" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#1a6b48"/>
+      <stop offset="100%" stop-color="#0a2e20"/>
+    </linearGradient>
+    <radialGradient id="g-eye" cx="40%" cy="35%" r="60%">
+      <stop offset="0%"   stop-color="#f6e7c8"/>
+      <stop offset="40%"  stop-color="#e8a54b"/>
+      <stop offset="100%" stop-color="#3a2010"/>
+    </radialGradient>
+
+    <!-- 缆索 -->
+    <linearGradient id="g-cable" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#4a3858"/>
+      <stop offset="50%"  stop-color="#8a7090"/>
+      <stop offset="100%" stop-color="#4a3858"/>
+    </linearGradient>
+
+    <filter id="blur-far" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="2.5"/>
+    </filter>
+    <filter id="blur-mid" x="-5%" y="-5%" width="110%" height="110%">
+      <feGaussianBlur stdDeviation="0.8"/>
+    </filter>
+    <filter id="soft-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+  </defs>
+
+  <!-- ========== 天空底 ========== -->
+  <rect width="1200" height="700" fill="url(#g-sky)"/>
+
+  <!-- ========== L0 太阳 / 慢漂云 ========== -->
+  <g id="layer-sky">
+    <g id="sun-glow">
+      <circle cx="920" cy="310" r="110" fill="url(#g-sun)"/>
+      <circle cx="920" cy="310" r="36"  fill="url(#g-sun-core)"/>
+    </g>
+    <g class="scroll-sky" opacity="0.55">
+      <!-- tile 0 -->
+      <g transform="translate(0,0)">
+        <ellipse cx="180" cy="120" rx="70" ry="18" fill="#c45c48" opacity="0.35"/>
+        <ellipse cx="230" cy="128" rx="50" ry="12" fill="#e8a54b" opacity="0.25"/>
+        <ellipse cx="700" cy="90"  rx="90" ry="16" fill="#8b3a5c" opacity="0.4"/>
+        <ellipse cx="760" cy="98"  rx="60" ry="11" fill="#c45c48" opacity="0.3"/>
+        <ellipse cx="1050" cy="150" rx="55" ry="14" fill="#3d2463" opacity="0.45"/>
+      </g>
+      <!-- tile 1200 -->
+      <g transform="translate(1200,0)">
+        <ellipse cx="180" cy="120" rx="70" ry="18" fill="#c45c48" opacity="0.35"/>
+        <ellipse cx="230" cy="128" rx="50" ry="12" fill="#e8a54b" opacity="0.25"/>
+        <ellipse cx="700" cy="90"  rx="90" ry="16" fill="#8b3a5c" opacity="0.4"/>
+        <ellipse cx="760" cy="98"  rx="60" ry="11" fill="#c45c48" opacity="0.3"/>
+        <ellipse cx="1050" cy="150" rx="55" ry="14" fill="#3d2463" opacity="0.45"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- ========== L1 远山（视差 32s） ========== -->
+  <g id="layer-far" filter="url(#blur-far)" opacity="0.85">
+    <g class="scroll-far">
+      <g transform="translate(0,0)">
+        <path d="M0,380 L80,300 L160,340 L240,260 L320,320 L400,240 L480,310 L560,270 L640,330 L720,250 L800,300 L880,230 L960,310 L1040,270 L1120,330 L1200,280 L1200,500 L0,500 Z" fill="url(#g-far)"/>
+        <!-- 雪顶/亮脊 -->
+        <path d="M240,260 L260,278 L280,268 L300,285 L320,275" fill="none" stroke="#c9a0d0" stroke-width="2" opacity="0.35"/>
+        <path d="M400,240 L420,258 L440,248 L460,265" fill="none" stroke="#c9a0d0" stroke-width="2" opacity="0.3"/>
+        <path d="M880,230 L900,248 L920,238 L940,255" fill="none" stroke="#c9a0d0" stroke-width="2" opacity="0.35"/>
+      </g>
+      <g transform="translate(1200,0)">
+        <path d="M0,380 L80,300 L160,340 L240,260 L320,320 L400,240 L480,310 L560,270 L640,330 L720,250 L800,300 L880,230 L960,310 L1040,270 L1120,330 L1200,280 L1200,500 L0,500 Z" fill="url(#g-far)"/>
+        <path d="M240,260 L260,278 L280,268 L300,285 L320,275" fill="none" stroke="#c9a0d0" stroke-width="2" opacity="0.35"/>
+        <path d="M400,240 L420,258 L440,248 L460,265" fill="none" stroke="#c9a0d0" stroke-width="2" opacity="0.3"/>
+        <path d="M880,230 L900,248 L920,238 L940,255" fill="none" stroke="#c9a0d0" stroke-width="2" opacity="0.35"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- ========== L2 中景：山脊 + 针叶 + 塔架（视差 16s） ========== -->
+  <g id="layer-mid" filter="url(#blur-mid)">
+    <g class="scroll-mid">
+      <g transform="translate(0,0)">
+        <path d="M0,460 L100,400 L200,430 L300,380 L420,420 L540,370 L680,410 L820,360 L960,400 L1100,375 L1200,410 L1200,620 L0,620 Z" fill="url(#g-mid)"/>
+        <!-- 树 -->
+        <g fill="#1b3d28" opacity="0.9">
+          <polygon points="140,420 155,380 170,420"/>
+          <polygon points="148,400 155,365 162,400"/>
+          <polygon points="260,400 278,350 296,400"/>
+          <polygon points="268,380 278,340 288,380"/>
+          <polygon points="520,385 540,335 560,385"/>
+          <polygon points="528,365 540,320 552,365"/>
+          <polygon points="780,375 800,325 820,375"/>
+          <polygon points="788,355 800,310 812,355"/>
+          <polygon points="980,390 998,345 1016,390"/>
+        </g>
+        <!-- 塔架 A -->
+        <g transform="translate(200,0)">
+          <rect x="-4" y="280" width="8" height="160" fill="#3a2848"/>
+          <rect x="-28" y="280" width="56" height="8" fill="#3a2848"/>
+          <line x1="-28" y1="288" x2="0" y2="340" stroke="#3a2848" stroke-width="3"/>
+          <line x1="28"  y1="288" x2="0" y2="340" stroke="#3a2848" stroke-width="3"/>
+          <circle cx="0" cy="275" r="5" class="tower-lamp" fill="#f0c75e" filter="url(#soft-glow)"/>
+        </g>
+        <!-- 塔架 B -->
+        <g transform="translate(720,0)">
+          <rect x="-4" y="260" width="8" height="180" fill="#3a2848"/>
+          <rect x="-30" y="260" width="60" height="8" fill="#3a2848"/>
+          <line x1="-30" y1="268" x2="0" y2="330" stroke="#3a2848" stroke-width="3"/>
+          <line x1="30"  y1="268" x2="0" y2="330" stroke="#3a2848" stroke-width="3"/>
+          <circle cx="0" cy="255" r="5" class="tower-lamp" fill="#f0c75e" filter="url(#soft-glow)" style="animation-delay:-1.2s"/>
+        </g>
+      </g>
+      <g transform="translate(1200,0)">
+        <path d="M0,460 L100,400 L200,430 L300,380 L420,420 L540,370 L680,410 L820,360 L960,400 L1100,375 L1200,410 L1200,620 L0,620 Z" fill="url(#g-mid)"/>
+        <g fill="#1b3d28" opacity="0.9">
+          <polygon points="140,420 155,380 170,420"/>
+          <polygon points="148,400 155,365 162,400"/>
+          <polygon points="260,400 278,350 296,400"/>
+          <polygon points="268,380 278,340 288,380"/>
+          <polygon points="520,385 540,335 560,385"/>
+          <polygon points="528,365 540,320 552,365"/>
+          <polygon points="780,375 800,325 820,375"/>
+          <polygon points="788,355 800,310 812,355"/>
+          <polygon points="980,390 998,345 1016,390"/>
+        </g>
+        <g transform="translate(200,0)">
+          <rect x="-4" y="280" width="8" height="160" fill="#3a2848"/>
+          <rect x="-28" y="280" width="56" height="8" fill="#3a2848"/>
+          <line x1="-28" y1="288" x2="0" y2="340" stroke="#3a2848" stroke-width="3"/>
+          <line x1="28"  y1="288" x2="0" y2="340" stroke="#3a2848" stroke-width="3"/>
+          <circle cx="0" cy="275" r="5" class="tower-lamp" fill="#f0c75e" filter="url(#soft-glow)"/>
+        </g>
+        <g transform="translate(720,0)">
+          <rect x="-4" y="260" width="8" height="180" fill="#3a2848"/>
+          <rect x="-30" y="260" width="60" height="8" fill="#3a2848"/>
+          <line x1="-30" y1="268" x2="0" y2="330" stroke="#3a2848" stroke-width="3"/>
+          <line x1="30"  y1="268" x2="0" y2="330" stroke="#3a2848" stroke-width="3"/>
+          <circle cx="0" cy="255" r="5" class="tower-lamp" fill="#f0c75e" filter="url(#soft-glow)" style="animation-delay:-1.2s"/>
+        </g>
+      </g>
+    </g>
+  </g>
+
+  <!-- ========== L3 主缆（跟世界，中速） ========== -->
+  <g id="layer-cable">
+    <g class="scroll-cable">
+      <!-- 弧垂主缆，双 tile -->
+      <g transform="translate(0,0)">
+        <path d="M0,210 Q300,250 600,220 T1200,230" fill="none" stroke="url(#g-cable)" stroke-width="3.5" stroke-linecap="round"/>
+        <path d="M0,218 Q300,258 600,228 T1200,238" fill="none" stroke="#2a1838" stroke-width="1.2" opacity="0.5"/>
+      </g>
+      <g transform="translate(1200,0)">
+        <path d="M0,210 Q300,250 600,220 T1200,230" fill="none" stroke="url(#g-cable)" stroke-width="3.5" stroke-linecap="round"/>
+        <path d="M0,218 Q300,258 600,228 T1200,238" fill="none" stroke="#2a1838" stroke-width="1.2" opacity="0.5"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- ========== 主体：吊舱 + 甲虫（固定中右，表达向右前进） ========== -->
+  <g id="car-rig" transform="translate(620, 0)">
+    <g id="cabin-pivot">
+      <!-- 吊臂 + 夹绳器 + 滑轮 -->
+      <g id="hanger">
+        <rect x="-6" y="200" width="12" height="38" fill="url(#g-brass)" rx="2"/>
+        <!-- 夹绳器 -->
+        <rect x="-28" y="188" width="56" height="16" fill="#5a4060" rx="4"/>
+        <rect x="-22" y="184" width="44" height="8"  fill="url(#g-brass)" rx="2"/>
+        <!-- 双滑轮骑在缆上 -->
+        <g transform="translate(-18, 210)">
+          <circle class="sheave" r="11" fill="none" stroke="url(#g-brass)" stroke-width="4"/>
+          <line class="sheave" x1="-8" y1="0" x2="8" y2="0" stroke="#5a4060" stroke-width="2"/>
+          <line class="sheave" x1="0" y1="-8" x2="0" y2="8" stroke="#5a4060" stroke-width="2"/>
+        </g>
+        <g transform="translate(18, 210)">
+          <circle class="sheave" r="11" fill="none" stroke="url(#g-brass)" stroke-width="4"/>
+          <line class="sheave" x1="-8" y1="0" x2="8" y2="0" stroke="#5a4060" stroke-width="2"/>
+          <line class="sheave" x1="0" y1="-8" x2="0" y2="8" stroke="#5a4060" stroke-width="2"/>
+        </g>
+      </g>
+
+      <g id="cabin-body">
+        <!-- 阴影 -->
+        <ellipse cx="10" cy="410" rx="95" ry="12" fill="#1a1030" opacity="0.35"/>
+
+        <!-- 车体 -->
+        <path d="M-90,250
+                 L-90,360
+                 Q-90,390 -60,392
+                 L70,392
+                 Q100,390 100,360
+                 L100,250
+                 Q100,238 88,236
+                 L-78,236
+                 Q-90,238 -90,250 Z"
+              fill="url(#g-cabin)" stroke="#3a1018" stroke-width="2"/>
+
+        <!-- 车顶铜檐 -->
+        <path d="M-100,236 L100,236 L95,222 L-95,222 Z" fill="url(#g-cabin-roof)"/>
+        <rect x="-95" y="218" width="190" height="6" rx="2" fill="url(#g-brass)"/>
+        <!-- 车头导流（朝右） -->
+        <path d="M100,250 L128,270 L128,350 L100,370 Z" fill="#8b2e3b" stroke="#3a1018" stroke-width="1.5"/>
+        <path d="M100,250 L128,270 L128,278 L100,262 Z" fill="url(#g-brass)" opacity="0.7"/>
+
+        <!-- 车窗（舱内相对坐标） -->
+        <g id="windows">
+          <!-- 前窗（右） -->
+          <path d="M20,258 L82,258 Q90,258 90,266 L90,340 Q90,348 82,348 L20,348 Z"
+                fill="url(#g-window)" stroke="url(#g-brass)" stroke-width="3"/>
+          <!-- 侧窗（主窗，可见驾驶舱） -->
+          <rect x="-72" y="258" width="84" height="90" rx="8"
+                fill="url(#g-window)" stroke="url(#g-brass)" stroke-width="3"/>
+          <!-- 窗棂 -->
+          <line x1="-30" y1="258" x2="-30" y2="348" stroke="url(#g-brass)" stroke-width="2" opacity="0.7"/>
+        </g>
+
+        <!-- 舱内甲虫驾驶员 -->
+        <g id="beetle" transform="translate(-48, 268)">
+          <!-- 座椅 -->
+          <rect x="-8" y="50" width="40" height="28" rx="4" fill="#3a2040" opacity="0.85"/>
+          <rect x="-8" y="20" width="8" height="40" rx="2" fill="#3a2040" opacity="0.85"/>
+
+          <!-- 操纵杆 -->
+          <g id="lever">
+            <rect x="48" y="42" width="4" height="28" fill="#8a7018" rx="1"/>
+            <circle cx="50" cy="40" r="6" fill="url(#g-brass)"/>
+            <circle cx="50" cy="40" r="2.5" fill="#5c1c28"/>
+          </g>
+
+          <!-- 后腿 ×2 -->
+          <g class="leg-hind">
+            <path d="M2,58 L-14,72 L-18,82" fill="none" stroke="#0d3d2a" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="-18" cy="82" r="2.2" fill="#1f6b4a"/>
+          </g>
+          <g class="leg-hind leg-hind-r">
+            <path d="M6,60 L-8,76 L-10,88" fill="none" stroke="#0a2e20" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="-10" cy="88" r="2" fill="#1a5538"/>
+          </g>
+
+          <!-- 中腿 ×2 -->
+          <g class="leg-mid">
+            <path d="M8,52 L0,70 L-2,84" fill="none" stroke="#0d3d2a" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="-2" cy="84" r="2.2" fill="#1f6b4a"/>
+          </g>
+          <g class="leg-mid leg-mid-r">
+            <path d="M12,54 L6,72 L4,86" fill="none" stroke="#0a2e20" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="4" cy="86" r="2" fill="#1a5538"/>
+          </g>
+
+          <!-- 腹部/鞘翅 -->
+          <g class="elytra">
+            <ellipse cx="18" cy="48" rx="28" ry="22" fill="url(#g-elytra)" stroke="#0a2e20" stroke-width="1.5"/>
+            <!-- 鞘翅中缝 -->
+            <path d="M18,28 Q20,48 18,68" fill="none" stroke="#0a2e20" stroke-width="1.2" opacity="0.7"/>
+            <!-- 高光斑 -->
+            <ellipse cx="10" cy="40" rx="8" ry="5" fill="#3db87a" opacity="0.35" transform="rotate(-25 10 40)"/>
+            <ellipse cx="28" cy="42" rx="5" ry="3" fill="#f6e7c8" opacity="0.15"/>
+          </g>
+
+          <!-- 前胸背板 -->
+          <ellipse cx="42" cy="44" rx="14" ry="13" fill="url(#g-pronotum)" stroke="#0a2e20" stroke-width="1.3"/>
+          <ellipse cx="38" cy="40" rx="4" ry="2.5" fill="#3db87a" opacity="0.4"/>
+
+          <!-- 头部（朝右） -->
+          <g class="beetle-head">
+            <ellipse cx="58" cy="46" rx="12" ry="10" fill="url(#g-head-bug)" stroke="#0a2e20" stroke-width="1.2"/>
+            <!-- 复眼 -->
+            <circle cx="64" cy="43" r="4.2" fill="url(#g-eye)"/>
+            <circle cx="65.5" cy="41.5" r="1.4" fill="#fff8e0" opacity="0.85"/>
+            <!-- 大颚 -->
+            <g class="mandible-l">
+              <path d="M68,50 Q76,52 78,58" fill="none" stroke="#0a2e20" stroke-width="2.5" stroke-linecap="round"/>
+            </g>
+            <g class="mandible-r">
+              <path d="M68,54 Q74,58 74,64" fill="none" stroke="#0a2e20" stroke-width="2.2" stroke-linecap="round"/>
+            </g>
+            <!-- 触角 -->
+            <g class="antenna">
+              <path d="M62,38 Q78,22 92,18" fill="none" stroke="#0d3d2a" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="92" cy="18" r="2.5" fill="#1f6b4a"/>
+            </g>
+            <g class="antenna antenna-r">
+              <path d="M60,40 Q72,28 84,22" fill="none" stroke="#0a2e20" stroke-width="1.8" stroke-linecap="round"/>
+              <circle cx="84" cy="22" r="2" fill="#1a5538"/>
+            </g>
+          </g>
+
+          <!-- 前腿抓握操纵杆 -->
+          <g class="leg-fore">
+            <path d="M48,48 L58,44 L62,40" fill="none" stroke="#0d3d2a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="62" cy="40" r="2.2" fill="#3db87a"/>
+          </g>
+          <g class="leg-fore leg-fore-r">
+            <path d="M46,52 L56,48 L60,44" fill="none" stroke="#0a2e20" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="60" cy="44" r="2" fill="#1f6b4a"/>
+          </g>
+        </g>
+
+        <!-- 前灯 + 光锥（朝右） -->
+        <g id="headlamp">
+          <circle cx="128" cy="300" r="8" fill="#f0c75e" filter="url(#soft-glow)"/>
+          <circle cx="128" cy="300" r="4" fill="#fff8e0"/>
+          <polygon id="headlamp-cone" points="136,300 220,270 220,330" fill="#f0c75e" opacity="0.55"/>
+        </g>
+
+        <!-- 目的地牌 -->
+        <g id="sign">
+          <rect x="-40" y="368" width="100" height="18" rx="3" fill="url(#g-brass)"/>
+          <text x="10" y="381" text-anchor="middle" font-size="11" font-family="Segoe UI, sans-serif" fill="#3a1018" font-weight="700">秋谷 · 索道</text>
+        </g>
+
+        <!-- 底盘驱动滑轮 ×3（顺时针 = 向右） -->
+        <g id="drive-sheaves" transform="translate(0, 0)">
+          <g transform="translate(-50, 400)">
+            <circle class="sheave-slow" r="12" fill="#2a1838" stroke="url(#g-brass)" stroke-width="3"/>
+            <line class="sheave-slow" x1="-9" y1="0" x2="9" y2="0" stroke="#c9a227" stroke-width="2"/>
+            <line class="sheave-slow" x1="0" y1="-9" x2="0" y2="9" stroke="#c9a227" stroke-width="2"/>
+            <circle r="3" fill="#5c1c28"/>
+          </g>
+          <g transform="translate(10, 404)">
+            <circle class="sheave" r="13" fill="#2a1838" stroke="url(#g-brass)" stroke-width="3"/>
+            <line class="sheave" x1="-10" y1="0" x2="10" y2="0" stroke="#c9a227" stroke-width="2"/>
+            <line class="sheave" x1="0" y1="-10" x2="0" y2="10" stroke="#c9a227" stroke-width="2"/>
+            <circle r="3" fill="#5c1c28"/>
+          </g>
+          <g transform="translate(70, 400)">
+            <circle class="sheave-slow" r="12" fill="#2a1838" stroke="url(#g-brass)" stroke-width="3"/>
+            <line class="sheave-slow" x1="-9" y1="0" x2="9" y2="0" stroke="#c9a227" stroke-width="2"/>
+            <line class="sheave-slow" x1="0" y1="-9" x2="0" y2="9" stroke="#c9a227" stroke-width="2"/>
+            <circle r="3" fill="#5c1c28"/>
+          </g>
+        </g>
+
+        <!-- 尾旗（向左飘 = 空气阻力） -->
+        <g id="flag" transform="translate(-100, 250)">
+          <line x1="0" y1="0" x2="0" y2="-28" stroke="#8a7018" stroke-width="2"/>
+          <path d="M0,-28 Q-18,-24 -36,-30 Q-22,-18 -36,-10 Q-16,-12 0,-14 Z" fill="#e8a54b"/>
+          <circle cx="0" cy="-30" r="2.5" fill="url(#g-brass)"/>
+        </g>
+      </g>
+    </g>
+  </g>
+
+  <!-- ========== L4 近景：秋叶 + 岩石（视差 8s） ========== -->
+  <g id="layer-near">
+    <g class="scroll-near">
+      <g transform="translate(0,0)">
+        <!-- 近景岩坡 -->
+        <path d="M0,560 Q80,530 160,550 Q280,520 400,555 Q520,525 640,560 Q800,530 960,555 Q1100,525 1200,550 L1200,700 L0,700 Z" fill="url(#g-near)"/>
+        <!-- 灌木 -->
+        <ellipse cx="120" cy="555" rx="40" ry="18" fill="#5c2418"/>
+        <ellipse cx="150" cy="550" rx="28" ry="14" fill="#8b3a1f"/>
+        <ellipse cx="480" cy="548" rx="50" ry="20" fill="#4a1c18"/>
+        <ellipse cx="520" cy="542" rx="32" ry="15" fill="#c45c2a"/>
+        <ellipse cx="900" cy="552" rx="45" ry="18" fill="#5c2418"/>
+        <ellipse cx="940" cy="546" rx="30" ry="14" fill="#d4892e"/>
+        <!-- 岩石高光 -->
+        <path d="M200,560 Q230,545 260,560" fill="none" stroke="#c45c2a" stroke-width="2" opacity="0.4"/>
+        <path d="M700,555 Q740,538 780,555" fill="none" stroke="#d4892e" stroke-width="2" opacity="0.35"/>
+      </g>
+      <g transform="translate(1200,0)">
+        <path d="M0,560 Q80,530 160,550 Q280,520 400,555 Q520,525 640,560 Q800,530 960,555 Q1100,525 1200,550 L1200,700 L0,700 Z" fill="url(#g-near)"/>
+        <ellipse cx="120" cy="555" rx="40" ry="18" fill="#5c2418"/>
+        <ellipse cx="150" cy="550" rx="28" ry="14" fill="#8b3a1f"/>
+        <ellipse cx="480" cy="548" rx="50" ry="20" fill="#4a1c18"/>
+        <ellipse cx="520" cy="542" rx="32" ry="15" fill="#c45c2a"/>
+        <ellipse cx="900" cy="552" rx="45" ry="18" fill="#5c2418"/>
+        <ellipse cx="940" cy="546" rx="30" ry="14" fill="#d4892e"/>
+        <path d="M200,560 Q230,545 260,560" fill="none" stroke="#c45c2a" stroke-width="2" opacity="0.4"/>
+        <path d="M700,555 Q740,538 780,555" fill="none" stroke="#d4892e" stroke-width="2" opacity="0.35"/>
+      </g>
+    </g>
+
+    <!-- 飘落秋叶（相对风向左） -->
+    <g id="leaves">
+      <g class="leaf" transform="translate(980, 200)">
+        <path d="M0,0 Q8,-6 16,0 Q8,8 0,0 Z" fill="#c45c2a"/>
+      </g>
+      <g class="leaf" transform="translate(400, 160)">
+        <path d="M0,0 Q7,-5 14,0 Q7,7 0,0 Z" fill="#d4892e"/>
+      </g>
+      <g class="leaf" transform="translate(700, 280)">
+        <path d="M0,0 Q9,-7 18,0 Q9,9 0,0 Z" fill="#8b3a1f"/>
+      </g>
+      <g class="leaf" transform="translate(200, 240)">
+        <path d="M0,0 Q6,-5 12,0 Q6,6 0,0 Z" fill="#e8a54b"/>
+      </g>
+      <g class="leaf" transform="translate(1100, 320)">
+        <path d="M0,0 Q8,-6 15,0 Q8,7 0,0 Z" fill="#c45c2a"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- 顶部暗角 -->
+  <rect width="1200" height="80" fill="url(#g-sky)" opacity="0.25" pointer-events="none"/>
+</svg>
+</div>
+<div class="hud"><strong>SVG017</strong> · 甲虫缆车 · 暮光金秋峡谷 · 朝右</div>
+
+<script>
+(function () {
+  // 轻量增强：不依赖 JS 也能完整播放（CSS 已驱动主体）。
+  // JS 仅用于：尊重系统缩放时微调，以及暴露 debug 状态。
+  var scene = document.getElementById('scene');
+  if (!scene) return;
+
+  // 标记数据属性，便于自动化核对动画层存在
+  scene.setAttribute('data-parallax-layers', 'sky,far,mid,cable,near');
+  scene.setAttribute('data-beetle-appendages', 'leg-fore,leg-mid,leg-hind,antenna,mandible-l,mandible-r,elytra,beetle-head');
+  scene.setAttribute('data-drive-direction', 'right');
+  scene.setAttribute('data-sheave-spin', 'cw');
+
+  // 若用户开启减少动态，确保 body 上也打标
+  try {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.body.setAttribute('data-reduced-motion', '1');
+    }
+  } catch (e) { /* noop */ }
+})();
+</script>
+</body>
+</html>

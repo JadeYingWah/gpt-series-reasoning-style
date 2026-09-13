@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200" viewBox="0 0 400 200">
+  <!-- 默认态 -->
+  <rect x="20" y="30" width="120" height="44" rx="8" fill="#2563EB"/>
+  <text x="80" y="57" font-family="Arial" font-size="16" fill="#FFFFFF" text-anchor="middle">确认</text>
+
+  <!-- 悬停态 -->
+  <rect x="160" y="30" width="120" height="44" rx="8" fill="#1D4ED8"/>
+  <text x="220" y="57" font-family="Arial" font-size="16" fill="#FFFFFF" text-anchor="middle">确认</text>
+
+  <!-- 禁用态 -->
+  <rect x="20" y="100" width="120" height="44" rx="8" fill="#1E40AF" opacity="0.4"/>
+  <text x="80" y="127" font-family="Arial" font-size="16" fill="#FFFFFF" text-anchor="middle">确认</text>
+
+  <!-- 辅助按钮 -->
+  <rect x="160" y="100" width="120" height="44" rx="8" fill="#FFFFFF" stroke="#2563EB" stroke-width="2"/>
+  <text x="220" y="127" font-family="Arial" font-size="16" fill="#2563EB" text-anchor="middle">取消</text>
+
+  <!-- 标签 -->
+  <text x="80" y="20" font-family="Arial" font-size="12" fill="#6B7280" text-anchor="middle">默认</text>
+  <text x="220" y="20" font-family="Arial" font-size="12" fill="#6B7280" text-anchor="middle">悬停</text>
+  <text x="80" y="170" font-family="Arial" font-size="12" fill="#6B7280" text-anchor="middle">禁用</text>
+  <text x="220" y="170" font-family="Arial" font-size="12" fill="#6B7280" text-anchor="middle">辅助</text>
+</svg>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>库存清单（可排序）</title>
+<style>
+  :root {
+    --bg: #f6f7f9;
+    --panel: #ffffff;
+    --line: #e3e6ea;
+    --text: #1f2328;
+    --muted: #6b7280;
+    --head: #f0f2f5;
+    --accent: #2563eb;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 32px 20px;
+    background: var(--bg);
+    color: var(--text);
+    font: 14px/1.5 "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .sub { color: var(--muted); font-size: 13px; margin: 0 0 18px; }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    background: var(--head);
+    text-align: left;
+    font-weight: 600;
+    white-space: nowrap;
+    padding: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  thead th button {
+    all: unset;
+    display: block;
+    width: 100%;
+    padding: 11px 14px;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 600;
+    color: var(--text);
+  }
+  thead th button:hover { background: #e7eaee; }
+  thead th button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  th .arrow { color: var(--accent); margin-left: 6px; font-size: 12px; }
+  tbody td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: #fafbfc; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .status {
+    margin-top: 12px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>库存清单</h1>
+  <p class="sub">点击任意列标题可排序，再次点击在同一列上切换升序 / 降序。</p>
+
+  <div class="panel">
+    <table id="grid">
+      <thead><tr id="head-row"></tr></thead>
+      <tbody id="body"></tbody>
+    </table>
+  </div>
+
+  <p class="status" id="status"></p>
+</div>
+
+<script>
+/* ==== SORT_CORE:BEGIN (纯逻辑，不依赖 DOM，可被测试直接抽取) ==== */
+
+// 内嵌数据：5 条记录
+const DATA = [
+  { id: 1, name: "无线鼠标",     category: "外设",     qty: 42,  price: 89.5,   date: "2026-03-14" },
+  { id: 2, name: "机械键盘",     category: "外设",     qty: 8,   price: 499.0,  date: "2026-01-07" },
+  { id: 3, name: "27寸显示器",   category: "显示设备", qty: 15,  price: 1299.0, date: "2026-05-22" },
+  { id: 4, name: "USB-C 扩展坞", category: "配件",     qty: 120, price: 259.9,  date: "2025-11-30" },
+  { id: 5, name: "降噪耳机",     category: "音频",     qty: 3,   price: 1899.0, date: "2026-07-02" }
+];
+
+// 列定义：type 决定比较方式
+const COLUMNS = [
+  { key: "id",       label: "编号",     type: "number" },
+  { key: "name",     label: "名称",     type: "string" },
+  { key: "category", label: "类别",     type: "string" },
+  { key: "qty",      label: "数量",     type: "number" },
+  { key: "price",    label: "单价(元)", type: "number" },
+  { key: "date",     label: "入库日期", type: "date"   }
+];
+
+// 中文字符串按拼音排序，数字串按数值比较
+const collator = (typeof Intl !== "undefined" && Intl.Collator)
+  ? new Intl.Collator("zh-Hans-CN", { numeric: true, sensitivity: "base" })
+  : null;
+
+// 把单个值归一化成可比较的标量；无法比较时返回 null
+function toComparable(value, type) {
+  if (value === null || value === undefined) return null;
+  if (type === "number") {
+    const n = typeof value === "number" ? value : Number(value);
+    return Number.isNaN(n) ? null : n;
+  }
+  if (type === "date") {
+    const t = Date.parse(String(value));
+    return Number.isNaN(t) ? null : t;
+  }
+  return String(value);
+}
+
+// 两值比较：空值一律排在最后
+function compareValues(a, b, type) {
+  const x = toComparable(a, type);
+  const y = toComparable(b, type);
+  if (x === null && y === null) return 0;
+  if (x === null) return 1;
+  if (y === null) return -1;
+  if (typeof x === "number" && typeof y === "number") return x < y ? -1 : x > y ? 1 : 0;
+  if (collator) return collator.compare(String(x), String(y));
+  return String(x) < String(y) ? -1 : String(x) > String(y) ? 1 : 0;
+}
+
+// 返回排好序的新数组（不修改入参）；同值保持原有相对次序（稳定）
+function sortRows(rows, colKey, dir) {
+  const col = COLUMNS.find(function (c) { return c.key === colKey; });
+  if (!col) throw new Error("未知列: " + colKey);
+  const sign = dir === "desc" ? -1 : 1;
+  return rows
+    .map(function (row, index) { return { row: row, index: index }; })
+    .sort(function (p, q) {
+      const r = compareValues(p.row[colKey], q.row[colKey], col.type) * sign;
+      return r !== 0 ? r : p.index - q.index;
+    })
+    .map(function (p) { return p.row; });
+}
+
+/* ==== SORT_CORE:END ==== */
+
+/* ---- DOM 渲染与交互 ---- */
+
+let sortKey = "id";
+let sortDir = "asc";
+
+function formatCell(value, col) {
+  if (value === null || value === undefined) return "";
+  if (col.type === "number" && typeof value === "number" && !Number.isInteger(value)) {
+    return value.toFixed(2);
+  }
+  return String(value);
+}
+
+function renderHead() {
+  const row = document.getElementById("head-row");
+  row.textContent = "";
+  COLUMNS.forEach(function (col) {
+    const th = document.createElement("th");
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.appendChild(document.createTextNode(col.label));
+    if (col.key === sortKey) {
+      const arrow = document.createElement("span");
+      arrow.className = "arrow";
+      arrow.appendChild(document.createTextNode(sortDir === "asc" ? "▲" : "▼"));
+      btn.appendChild(arrow);
+      th.setAttribute("aria-sort", sortDir === "asc" ? "ascending" : "descending");
+    } else {
+      th.setAttribute("aria-sort", "none");
+    }
+    btn.addEventListener("click", function () { toggleSort(col.key); });
+    th.appendChild(btn);
+    row.appendChild(th);
+  });
+}
+
+function renderBody() {
+  const body = document.getElementById("body");
+  body.textContent = "";
+  sortRows(DATA, sortKey, sortDir).forEach(function (row) {
+    const tr = document.createElement("tr");
+    COLUMNS.forEach(function (col) {
+      const td = document.createElement("td");
+      if (col.type === "number" || col.type === "date") td.className = "num";
+      // 用 textContent 写入，数据不经过 HTML 解析
+      td.textContent = formatCell(row[col.key], col);
+      tr.appendChild(td);
+    });
+    body.appendChild(tr);
+  });
+
+  const col = COLUMNS.find(function (c) { return c.key === sortKey; });
+  document.getElementById("status").textContent =
+    "共 " + DATA.length + " 条 · 当前按「" + col.label + "」" +
+    (sortDir === "asc" ? "升序" : "降序") + "排列";
+}
+
+function toggleSort(key) {
+  if (key === sortKey) {
+    sortDir = sortDir === "asc" ? "desc" : "asc";
+  } else {
+    sortKey = key;
+    sortDir = "asc";
+  }
+  renderHead();
+  renderBody();
+}
+
+function init() {
+  renderHead();
+  renderBody();
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", init);
+} else {
+  init();
+}
+</script>
+</body>
+</html>

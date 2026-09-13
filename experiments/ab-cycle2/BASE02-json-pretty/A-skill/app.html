@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JSON 格式化 / 压缩工具</title>
+<style>
+  :root{
+    --bg:#0f1216; --panel:#161b22; --panel-2:#1c232c; --line:#2a323d;
+    --fg:#e6edf3; --muted:#8b98a5; --accent:#4c9aff; --accent-2:#2f7ae5;
+    --ok:#3fb950; --err:#f85149; --warn:#d29922; --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; background:var(--bg); color:var(--fg);
+    font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:20px 18px 36px}
+  header{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  h1{font-size:18px;margin:0;letter-spacing:.2px}
+  .sub{color:var(--muted);font-size:12px;margin:0}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .panel-head{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:8px 12px;background:var(--panel-2);border-bottom:1px solid var(--line);
+  }
+  .panel-head label{font-size:12px;color:var(--muted);letter-spacing:.4px;text-transform:uppercase}
+  .metric{font:12px var(--mono);color:var(--muted);white-space:nowrap}
+  textarea{
+    width:100%;height:210px;resize:vertical;border:0;outline:0;display:block;
+    background:var(--panel);color:var(--fg);padding:12px;font:13px/1.55 var(--mono);
+    tab-size:2;
+  }
+  textarea::placeholder{color:#5a6672}
+  textarea:focus{background:#141a21}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+  @media (max-width:820px){.grid{grid-template-columns:1fr}}
+  .toolbar{
+    display:flex;gap:8px;flex-wrap:wrap;align-items:center;
+    margin:14px 0 0;padding:12px;background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  }
+  button{
+    font:13px/1 inherit;padding:9px 14px;border-radius:7px;cursor:pointer;
+    border:1px solid var(--line);background:#222a34;color:var(--fg);
+    transition:background .12s,border-color .12s,transform .06s;
+  }
+  button:hover{background:#2a333f;border-color:#3b4553}
+  button:active{transform:translateY(1px)}
+  button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  button.primary{background:var(--accent-2);border-color:var(--accent-2);color:#fff;font-weight:600}
+  button.primary:hover{background:var(--accent)}
+  button.ghost{background:transparent;color:var(--muted)}
+  button[disabled]{opacity:.5;cursor:not-allowed}
+  .spacer{flex:1}
+  .feedback{
+    margin-top:14px;padding:11px 13px;border-radius:9px;font-size:13px;
+    border:1px solid var(--line);background:var(--panel);color:var(--muted);
+    display:flex;gap:9px;align-items:flex-start;min-height:42px;
+  }
+  .feedback .dot{width:8px;height:8px;border-radius:50%;background:var(--muted);margin-top:6px;flex:none}
+  .feedback.info{color:#a9b6c4}
+  .feedback.busy{border-color:#3a4a5e;color:#cbd6e2}
+  .feedback.busy .dot{background:var(--accent);animation:pulse 1s infinite}
+  .feedback.ok{border-color:#1d4527;color:#9be8a8}
+  .feedback.ok .dot{background:var(--ok)}
+  .feedback.err{border-color:#5b2422;color:#ffb3af}
+  .feedback.err .dot{background:var(--err)}
+  .feedback.warn{border-color:#54431a;color:#f0d38a}
+  .feedback.warn .dot{background:var(--warn)}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+  .error-panel{
+    margin-top:12px;border:1px solid #5b2422;border-left:4px solid var(--err);
+    background:#1d1416;border-radius:9px;padding:12px 14px;
+  }
+  .error-title{font-weight:600;color:#ffb3af;font-size:13px;margin-bottom:6px}
+  .error-msg{font:13px/1.5 var(--mono);color:#ffd7d4;word-break:break-word}
+  .error-loc{font:12px var(--mono);color:#d9a1a1;margin-top:6px}
+  pre.error-excerpt{
+    margin:9px 0 0;padding:9px 11px;background:#140f10;border:1px solid #3a1c1a;border-radius:6px;
+    font:12px/1.45 var(--mono);color:#c9d1d9;overflow:auto;white-space:pre;max-height:180px;
+  }
+  pre.error-excerpt .caret{color:var(--err);font-weight:700}
+  footer{margin-top:16px;color:#5f6b78;font-size:12px}
+  kbd{
+    font:11px var(--mono);background:#222a34;border:1px solid var(--line);
+    border-bottom-width:2px;border-radius:4px;padding:1px 5px;color:#c3ccd6;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>JSON 格式化 / 压缩工具</h1>
+    <p class="sub">单文件 · 内联 CSS/JS · 离线可用 · 无外部依赖</p>
+  </header>
+
+  <div class="grid">
+    <section class="panel">
+      <div class="panel-head">
+        <label for="input">输入 JSON</label>
+        <span class="metric" id="in-metric">0 字符</span>
+      </div>
+      <textarea id="input" spellcheck="false" autocomplete="off"
+        placeholder='在此粘贴 JSON，例如：&#10;{"name":"demo","tags":["a","b"],"ok":true}'></textarea>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <label for="output">结果（只读）</label>
+        <span class="metric" id="out-metric">0 字符</span>
+      </div>
+      <textarea id="output" readonly spellcheck="false" placeholder="格式化结果会显示在这里"></textarea>
+    </section>
+  </div>
+
+  <div class="toolbar">
+    <button id="btn-pretty" class="primary" type="button">美化（2 空格）</button>
+    <button id="btn-minify" type="button">压缩</button>
+    <button id="btn-copy" type="button">复制结果</button>
+    <button id="btn-sample" type="button">载入示例</button>
+    <span class="spacer"></span>
+    <button id="btn-clear" class="ghost" type="button">清空</button>
+  </div>
+
+  <section id="feedback" class="feedback info" role="status" aria-live="polite">
+    <span class="dot" aria-hidden="true"></span>
+    <span id="feedback-text">就绪：粘贴 JSON 后点击「美化」或「压缩」。</span>
+  </section>
+
+  <section id="error-panel" class="error-panel" hidden>
+    <div class="error-title">解析错误</div>
+    <div class="error-msg" id="error-msg"></div>
+    <div class="error-loc" id="error-loc"></div>
+    <pre class="error-excerpt" id="error-excerpt"></pre>
+  </section>
+
+  <footer>
+    快捷键：<kbd>Ctrl</kbd>+<kbd>Enter</kbd> 美化 · <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd> 压缩 ·
+    全部解析在本地完成，不发起任何网络请求。
+  </footer>
+</div>
+
+<script>
+"use strict";
+
+/* ============================================================
+ * 1) 纯逻辑层：JSON 解析 / 序列化 / 错误定位
+ *    不依赖 DOM，可在 Node 中直接测试。
+ * ============================================================ */
+var JSONTool = (function () {
+
+  var MAX_DEPTH = 1000; // 防御性上限：超深嵌套优雅报错，而不是栈溢出
+
+  function makeError(message, index) {
+    var e = new Error(message);
+    e.name = "JSONSyntaxError";
+    e.index = index;
+    return e;
+  }
+
+  /**
+   * 把字符偏移换算成 行/列（均为 1 起始）。
+   */
+  function posInfo(text, index) {
+    if (index < 0) index = 0;
+    if (index > text.length) index = text.length;
+    var line = 1, lastNL = -1;
+    for (var k = 0; k < index; k++) {
+      if (text.charCodeAt(k) === 10) { line++; lastNL = k; }
+    }
+    return { line: line, column: index - lastNL, offset: index };
+  }
+
+  /**
+   * 取错误所在行的文本片段 + 插入符位置，用于可视化定位。
+   * 返回 { lineText, caret, truncatedLeft, truncatedRight, tabsAdjusted }
+   */
+  function excerpt(text, index) {
+    var start = text.lastIndexOf("\n", index - 1) + 1;
+    var end = text.indexOf("\n", index);
+    if (end === -1) end = text.length;
+    var raw = text.slice(start, end);
+    if (raw.charCodeAt(raw.length - 1) === 13) raw = raw.slice(0, -1);
+
+    var col = index - start;
+    if (col > raw.length) col = raw.length;
+
+    var MAX = 160, s = 0, e = raw.length, truncatedLeft = false, truncatedRight = false;
+    if (raw.length > MAX) {
+      s = Math.max(0, col - 70);
+      e = Math.min(raw.length, s + MAX);
+      truncatedLeft = s > 0;
+      truncatedRight = e < raw.length;
+    }
+    var shown = raw.slice(s, e).replace(/\t/g, "    ");
+    // 制表符被展开成 4 空格后，caret 位置也要同步右移
+    var before = raw.slice(0, col);
+    var tabs = (before.match(/\t/g) || []).length;
+    var caretCol = (col - s) + tabs * 3;
+    var head = truncatedLeft ? "\u2026" : "";
+    var tail = truncatedRight ? "\u2026" : "";
+    var caretOffset = head.length + caretCol;
+
+    return {
+      lineText: head + shown + tail,
+      caret: new Array(caretOffset + 1).join(" ") + "^",
+      truncatedLeft: truncatedLeft,
+      truncatedRight: truncatedRight
+    };
+  }
+
+  function isDigit(c) { return c >= "0" && c <= "9"; }
+  var WS = { " ": 1, "\t": 1, "\n": 1, "\r": 1 };
+
+  /**
+   * 递归下降 JSON 解析器。成功返回 AST；失败抛出带 index 的 JSONSyntaxError。
+   * AST 节点：
+   *   {t:'obj', items:[[keyString, node], ...]}
+   *   {t:'arr', items:[node, ...]}
+   *   {t:'str', v:string}
+   *   {t:'num', raw:string}   // 保留原始数字字面量，避免精度/格式损失
+   *   {t:'lit', raw:'true'|'false'|'null'}
+   * 说明：对象用「键值对数组」表示，因此能保留重复键与原始书写顺序
+   * （JSON.parse 会丢重复键、并把整数样式键重排）。
+   */
+  function parse(text) {
+    if (typeof text !== "string") throw makeError("输入必须是字符串", 0);
+    var i = 0, n = text.length;
+    if (n > 0 && text.charCodeAt(0) === 0xfeff) i = 1; // 容忍 UTF-8 BOM
+
+    function fail(msg, at) { throw makeError(msg, at === undefined ? i : at); }
+
+    function skipWS() {
+      while (i < n && WS[text.charAt(i)] === 1) i++;
+    }
+
+    function parseValue(level) {
+      if (level > MAX_DEPTH) fail("嵌套层级过深（超过 " + MAX_DEPTH + " 层），已停止解析", i);
+      skipWS();
+      if (i >= n) fail("意外的输入结束：这里需要一个值");
+      var c = text.charAt(i);
+      if (c === "{") return parseObject(level);
+      if (c === "[") return parseArray(level);
+      if (c === "\"") return { t: "str", v: parseString() };
+      if (c === "-" || isDigit(c)) return parseNumber();
+      if (text.substr(i, 4) === "true") { i += 4; return { t: "lit", raw: "true" }; }
+      if (text.substr(i, 5) === "false") { i += 5; return { t: "lit", raw: "false" }; }
+      if (text.substr(i, 4) === "null") { i += 4; return { t: "lit", raw: "null" }; }
+      var got = c.charCodeAt(0) < 0x20
+        ? "控制字符 U+" + c.charCodeAt(0).toString(16).toUpperCase()
+        : "字符 " + JSON.stringify(c);
+      fail("无效的 JSON 值起始：" + got);
+    }
+
+    function parseObject(level) {
+      var start = i;
+      i++; // {
+      var items = [];
+      skipWS();
+      if (i < n && text.charAt(i) === "}") { i++; return { t: "obj", items: items }; }
+      while (true) {
+        skipWS();
+        if (i >= n) fail("对象未闭合：期待 \"}\"，但输入已结束", start);
+        if (text.charAt(i) !== "\"") {
+          if (text.charAt(i) === "}") fail("对象中出现多余的逗号（尾随逗号）", i);
+          fail("对象的键必须是双引号字符串");
+        }
+        var key = parseString();
+        skipWS();
+        if (i >= n) fail("键之后缺少 \":\"，输入已结束", i);
+        if (text.charAt(i) !== ":") fail("键之后缺少 \":\"");
+        i++; // :
+        var val = parseValue(level + 1);
+        items.push([key, val]);
+        skipWS();
+        if (i >= n) fail("对象未闭合：期待 \",\" 或 \"}\"，但输入已结束", start);
+        var d = text.charAt(i);
+        if (d === ",") {
+          i++;
+          skipWS();
+          if (i < n && text.charAt(i) === "}") fail("对象中出现多余的逗号（尾随逗号）", i);
+          continue;
+        }
+        if (d === "}") { i++; return { t: "obj", items: items }; }
+        fail("对象中期待 \",\" 或 \"}\"，实际遇到 " + JSON.stringify(d));
+      }
+    }
+
+    function parseArray(level) {
+      var start = i;
+      i++; // [
+      var items = [];
+      skipWS();
+      if (i < n && text.charAt(i) === "]") { i++; return { t: "arr", items: items }; }
+      while (true) {
+        items.push(parseValue(level + 1));
+        skipWS();
+        if (i >= n) fail("数组未闭合：期待 \",\" 或 \"]\"，但输入已结束", start);
+        var d = text.charAt(i);
+        if (d === ",") {
+          i++;
+          skipWS();
+          if (i < n && text.charAt(i) === "]") fail("数组中出现多余的逗号（尾随逗号）", i);
+          continue;
+        }
+        if (d === "]") { i++; return { t: "arr", items: items }; }
+        fail("数组中期待 \",\" 或 \"]\"，实际遇到 " + JSON.stringify(d));
+      }
+    }
+
+    function parseString() {
+      var start = i;
+      i++; // opening quote
+      var out = "";
+      while (true) {
+        if (i >= n) fail("字符串未闭合：缺少结束的 \"", start);
+        var c = text.charAt(i);
+        if (c === "\"") { i++; return out; }
+        if (c === "\\") {
+          i++;
+          if (i >= n) fail("字符串未闭合：反斜杠后缺少转义字符", start);
+          var esc = text.charAt(i);
+          switch (esc) {
+            case "\"": out += "\""; i++; break;
+            case "\\": out += "\\"; i++; break;
+            case "/": out += "/"; i++; break;
+            case "b": out += "\b"; i++; break;
+            case "f": out += "\f"; i++; break;
+            case "n": out += "\n"; i++; break;
+            case "r": out += "\r"; i++; break;
+            case "t": out += "\t"; i++; break;
+            case "u": {
+              var hex = text.substr(i + 1, 4);
+              if (!/^[0-9a-fA-F]{4}$/.test(hex)) {
+                fail("无效的 \\u 转义序列：" + JSON.stringify(text.substr(i, 5)));
+              }
+              out += String.fromCharCode(parseInt(hex, 16));
+              i += 5;
+              break;
+            }
+            default:
+              fail("无效的转义字符 \"\\" + esc + "\"");
+          }
+          continue;
+        }
+        var code = c.charCodeAt(0);
+        if (code < 0x20) {
+          fail("字符串中不能出现未转义的控制字符（U+" +
+               code.toString(16).toUpperCase().padStart(4, "0") + "）");
+        }
+        out += c;
+        i++;
+      }
+    }
+
+    function parseNumber() {
+      var start = i;
+      if (text.charAt(i) === "-") i++;
+      if (i >= n) fail("数字不完整：\"-\" 之后缺少数字", start);
+      if (text.charAt(i) === "0") {
+        i++;
+      } else if (isDigit(text.charAt(i))) {
+        while (i < n && isDigit(text.charAt(i))) i++;
+      } else {
+        fail("无效的数字字面量");
+      }
+      if (i < n && text.charAt(i) === ".") {
+        i++;
+        if (!(i < n && isDigit(text.charAt(i)))) fail("小数点后至少需要一位数字");
+        while (i < n && isDigit(text.charAt(i))) i++;
+      }
+      if (i < n && (text.charAt(i) === "e" || text.charAt(i) === "E")) {
+        i++;
+        if (i < n && (text.charAt(i) === "+" || text.charAt(i) === "-")) i++;
+        if (!(i < n && isDigit(text.charAt(i)))) fail("指数部分至少需要一位数字");
+        while (i < n && isDigit(text.charAt(i))) i++;
+      }
+      return { t: "num", raw: text.slice(start, i) };
+    }
+
+    skipWS();
+    if (i >= n) fail("输入为空：没有可解析的 JSON 内容", i);
+    var root = parseValue(0);
+    skipWS();
+    if (i < n) {
+      fail("JSON 主体结束后存在多余内容 " + JSON.stringify(text.charAt(i)));
+    }
+    return root;
+  }
+
+  /**
+   * 序列化 AST。indent 为 null/undefined 时输出压缩结果。
+   */
+  function stringify(root, indent) {
+    var pretty = (typeof indent === "number" && indent > 0);
+    var unit = pretty ? new Array(indent + 1).join(" ") : "";
+    var nl = pretty ? "\n" : "";
+    var colon = pretty ? ": " : ":";
+
+    function pad(depth) { return pretty ? new Array(depth + 1).join(unit) : ""; }
+
+    function rec(node, depth) {
+      switch (node.t) {
+        case "lit": return node.raw;
+        case "num": return node.raw;
+        case "str": return JSON.stringify(node.v);
+        case "arr": {
+          if (node.items.length === 0) return "[]";
+          var parts = [];
+          for (var a = 0; a < node.items.length; a++) {
+            parts.push(pad(depth + 1) + rec(node.items[a], depth + 1));
+          }
+          return "[" + nl + parts.join("," + nl) + nl + pad(depth) + "]";
+        }
+        case "obj": {
+          if (node.items.length === 0) return "{}";
+          var kv = [];
+          for (var b = 0; b < node.items.length; b++) {
+            var k = node.items[b][0], v = node.items[b][1];
+            kv.push(pad(depth + 1) + JSON.stringify(k) + colon + rec(v, depth + 1));
+          }
+          return "{" + nl + kv.join("," + nl) + nl + pad(depth) + "}";
+        }
+        default: throw new Error("未知的节点类型：" + node.t);
+      }
+    }
+    return rec(root, 0);
+  }
+
+  /**
+   * 一站式：格式化 / 压缩。返回统一结果对象（不抛异常）。
+   *   { ok:true, text, root, stats:{nodes,maxDepth} }
+   *   { ok:false, message, index, line, column, excerpt }
+   */
+  function run(text, mode) {
+    var indent = mode === "minify" ? null : 2;
+    try {
+      var root = parse(text);
+      var out = stringify(root, indent);
+      var s = { nodes: 0, maxDepth: 0 };
+      (function count(node, d) {
+        s.nodes++;
+        if (d > s.maxDepth) s.maxDepth = d;
+        if (node.t === "obj" || node.t === "arr") {
+          for (var q = 0; q < node.items.length; q++) {
+            count(node.t === "obj" ? node.items[q][1] : node.items[q], d + 1);
+          }
+        }
+      })(root, 1);
+      return { ok: true, text: out, root: root, stats: s };
+    } catch (e) {
+      var idx = (typeof e.index === "number") ? e.index : 0;
+      var info = posInfo(text, idx);
+      return {
+        ok: false,
+        message: e && e.message ? e.message : String(e),
+        index: idx,
+        line: info.line,
+        column: info.column,
+        excerpt: excerpt(text, idx)
+      };
+    }
+  }
+
+  return {
+    MAX_DEPTH: MAX_DEPTH,
+    parse: parse,
+    stringify: stringify,
+    posInfo: posInfo,
+    excerpt: excerpt,
+    run: run
+  };
+})();
+
+// 暴露给自动化测试（浏览器 / Node 均可）
+globalThis.JSONTool = JSONTool;
+
+/* ============================================================
+ * 2) DOM 层：UI 绑定（Node 环境下自动跳过）
+ * ============================================================ */
+if (typeof document !== "undefined" && typeof window !== "undefined") {
+  (function () {
+    var $ = function (id) { return document.getElementById(id); };
+    var input = $("input"), output = $("output");
+    var inMetric = $("in-metric"), outMetric = $("out-metric");
+    var feedback = $("feedback"), feedbackText = $("feedback-text");
+    var errorPanel = $("error-panel"), errorMsg = $("error-msg"),
+        errorLoc = $("error-loc"), errorExcerpt = $("error-excerpt");
+    var bus = {}; // UI 状态快照，便于验收时读取
+
+    var SAMPLE = [
+      '{',
+      '  "name": "\u793a\u4f8b\u6570\u636e",',
+      '  "version": 1.2,',
+      '  "offline": true,',
+      '  "tags": ["json", "\u683c\u5f0f\u5316", "offline"],',
+      '  "nested": { "active": true, "count": 3, "ratio": 0.75, "nil": null },',
+      '  "items": [ { "id": 1, "text": "\u7b2c\u4e00\u9879" }, { "id": 2, "text": "\u7b2c\u4e8c\u9879" } ],',
+      '  "escapes": "\u4e2d\u6587 \\u00e9 \\n \u6362\u884c"',
+      '}'
+    ].join("\n");
+
+    function bytesOf(str) {
+      try {
+        if (typeof TextEncoder !== "undefined") return new TextEncoder().encode(str).length;
+      } catch (e) { /* ignore */ }
+      return str.length;
+    }
+
+    function fmtChars(str) {
+      return str.length.toLocaleString("zh-CN") + " 字符";
+    }
+    function fmtMetrics(str) {
+      if (!str.length) return "0 字符";
+      return str.length.toLocaleString("zh-CN") + " 字符 · " + bytesOf(str).toLocaleString("zh-CN") + " 字节";
+    }
+
+    function setFeedback(kind, text) {
+      feedback.className = "feedback " + kind;
+      feedbackText.textContent = text;
+      bus.lastFeedback = { kind: kind, text: text, at: new Date().toISOString() };
+    }
+
+    function clearError() {
+      errorPanel.hidden = true;
+      errorMsg.textContent = "";
+      errorLoc.textContent = "";
+      errorExcerpt.textContent = "";
+      bus.lastError = null;
+    }
+
+    function showError(res, sourceText) {
+      errorPanel.hidden = false;
+      errorMsg.textContent = res.message;
+      errorLoc.textContent = "位置：第 " + res.line + " 行，第 " + res.column + " 列（字符偏移 " +
+        res.index + "，0 起始）· 输入共 " + sourceText.length + " 字符";
+      errorExcerpt.textContent = res.excerpt.lineText + "\n" + res.excerpt.caret;
+      bus.lastError = {
+        message: res.message, line: res.line, column: res.column,
+        index: res.index, excerpt: res.excerpt.lineText + "\n" + res.excerpt.caret
+      };
+      setFeedback("err", "解析失败：第 " + res.line + " 行，第 " + res.column + " 列 —— " + res.message);
+    }
+
+    function updateInputMetric() {
+      inMetric.textContent = fmtMetrics(input.value);
+    }
+    function updateOutputMetric() {
+      outMetric.textContent = fmtMetrics(output.value);
+    }
+
+    function process(mode) {
+      var raw = input.value;
+      if (raw.length === 0) {
+        clearError();
+        setFeedback("warn", "输入为空：请先粘贴 JSON 内容，或点击「载入示例」。");
+        bus.lastResult = { ok: false, reason: "empty-input" };
+        return;
+      }
+      var label = mode === "minify" ? "压缩" : "美化";
+      setFeedback("busy", "正在" + label + "…（输入 " + fmtMetrics(raw) + "）");
+      var t0 = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
+
+      // 让浏览器先把「处理中」渲染出来，再执行 CPU 工作
+      var kick = function () {
+        var res, err = null;
+        try {
+          res = JSONTool.run(raw, mode);
+        } catch (e) {
+          err = e; // 兜底：任何未预期异常都不允许逃逸出事件处理器
+        }
+        if (err) {
+          clearError();
+          setFeedback("err", "内部错误（未预期）：" + (err && err.message ? err.message : String(err)));
+          bus.lastResult = { ok: false, reason: "internal-error", message: String(err) };
+          return;
+        }
+        var dt = ((typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now()) - t0;
+        var ms = Math.round(dt * 100) / 100;
+        if (res.ok) {
+          output.value = res.text;
+          clearError();
+          updateOutputMetric();
+          var saved = raw.length - res.text.length;
+          setFeedback("ok", "已" + label + "：输出 " + fmtMetrics(res.text) +
+            "，节点 " + res.stats.nodes + " 个，最大深度 " + res.stats.maxDepth +
+            "，耗时 " + ms + " ms" +
+            (mode === "minify" && saved > 0 ? "，压缩掉 " + saved + " 字符" : ""));
+          bus.lastResult = {
+            ok: true, mode: mode, outLength: res.text.length,
+            nodes: res.stats.nodes, maxDepth: res.stats.maxDepth, ms: ms
+          };
+        } else {
+          // 解析失败时清空结果区，避免把上一次的成功结果误读成本次结果
+          output.value = "";
+          outMetric.textContent = "无结果（解析失败）";
+          showError(res, raw);
+          bus.lastResult = { ok: false, reason: "parse-error", line: res.line, column: res.column, ms: ms };
+        }
+      };
+
+      if (typeof requestAnimationFrame !== "undefined") {
+        requestAnimationFrame(function () { setTimeout(kick, 0); });
+      } else {
+        setTimeout(kick, 0);
+      }
+    }
+
+    function copyResult() {
+      var text = output.value;
+      if (!text) {
+        setFeedback("warn", "没有可复制的结果：请先完成一次美化或压缩。");
+        return;
+      }
+      var done = function (via) {
+        setFeedback("ok", "已复制 " + fmtMetrics(text) + " 到剪贴板（" + via + "）。");
+        bus.lastCopy = { ok: true, length: text.length, via: via, at: new Date().toISOString() };
+      };
+      var legacy = function () {
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "fixed";
+        ta.style.top = "-1000px";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        ta.setSelectionRange(0, text.length);
+        var ok = false;
+        try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+        document.body.removeChild(ta);
+        if (ok) { done("execCommand 回退"); }
+        else {
+          setFeedback("err", "复制失败：当前环境不允许写入剪贴板，请手动全选结果后按 Ctrl+C。");
+          bus.lastCopy = { ok: false, via: "execCommand" };
+        }
+      };
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () {
+          done("Clipboard API");
+        }).catch(function () { legacy(); });
+      } else {
+        legacy();
+      }
+    }
+
+    $("btn-pretty").addEventListener("click", function () { process("pretty"); });
+    $("btn-minify").addEventListener("click", function () { process("minify"); });
+    $("btn-copy").addEventListener("click", copyResult);
+    $("btn-sample").addEventListener("click", function () {
+      input.value = SAMPLE;
+      updateInputMetric();
+      clearError();
+      output.value = "";
+      updateOutputMetric();
+      setFeedback("info", "已载入示例 JSON（" + fmtMetrics(SAMPLE) + "）。点击「美化」或「压缩」试试。");
+    });
+    $("btn-clear").addEventListener("click", function () {
+      input.value = "";
+      output.value = "";
+      updateInputMetric();
+      updateOutputMetric();
+      clearError();
+      setFeedback("info", "已清空输入与结果。");
+      input.focus();
+    });
+
+    input.addEventListener("input", updateInputMetric);
+    document.addEventListener("keydown", function (ev) {
+      if (ev.ctrlKey && ev.key === "Enter") { ev.preventDefault(); process("pretty"); }
+      else if (ev.ctrlKey && ev.shiftKey && (ev.key === "M" || ev.key === "m")) {
+        ev.preventDefault(); process("minify");
+      }
+    });
+
+    updateInputMetric();
+    updateOutputMetric();
+    window.__JSONToolUI = {
+      state: bus,
+      process: process,
+      copy: copyResult,
+      setInput: function (t) { input.value = t; updateInputMetric(); return input.value.length; },
+      getOutput: function () { return output.value; },
+      getFeedback: function () { return { cls: feedback.className, text: feedbackText.textContent }; },
+      getError: function () {
+        return { hidden: errorPanel.hidden, msg: errorMsg.textContent, loc: errorLoc.textContent };
+      }
+    };
+  })();
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+{
+  "scenarios": [
+    {
+      "name": "initial(default=all)",
+      "ok": true,
+      "problems": []
+    },
+    {
+      "name": "click→q1",
+      "ok": true,
+      "problems": []
+    },
+    {
+      "name": "click→q2",
+      "ok": true,
+      "problems": []
+    },
+    {
+      "name": "click→q3",
+      "ok": true,
+      "problems": []
+    },
+    {
+      "name": "click→q4",
+      "ok": true,
+      "problems": []
+    },
+    {
+      "name": "click→all",
+      "ok": true,
+      "problems": []
+    },
+    {
+      "name": "urlParam(?scope=q3)",
+      "ok": true,
+      "problems": []
+    },
+    {
+      "name": "urlParam→click q1",
+      "ok": true,
+      "problems": []
+    },
+    {
+      "name": "shuffle→q4",
+      "ok": true,
+      "problems": []
+    },
+    {
+      "name": "shuffle→q2",
+      "ok": true,
+      "problems": []
+    },
+    {
+      "name": "shuffle→all",
+      "ok": true,
+      "problems": []
+    },
+    {
+      "name": "shuffle→q3",
+      "ok": true,
+      "problems": []
+    },
+    {
+      "name": "shuffle→q1",
+      "ok": true,
+      "problems": []
+    },
+    {
+      "name": "shuffle→q2",
+      "ok": true,
+      "problems": []
+    },
+    {
+      "name": "urlParam(?scope=bad)→fallback all",
+      "ok": true,
+      "problems": []
+    },
+    {
+      "name": "no URLSearchParams→fallback all",
+      "ok": true,
+      "problems": []
+    }
+  ],
+  "scriptErrors": []
+}

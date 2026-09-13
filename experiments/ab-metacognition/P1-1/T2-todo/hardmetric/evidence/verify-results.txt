@@ -1,0 +1,52 @@
+﻿验证目标：<实验根目录>\ab-metacognition\P1-1\T2-todo\hardmetric\todo.py
+解释器：<用户目录>\.workbuddy\binaries\python\versions\3.13.12\python.exe
+------------------------------------------------------------------------
+[PASS] N-01   add 单条：id 自增、默认未完成、有时间、落盘正确
+[PASS] N-02   连续 add：id 严格自增且跨进程持久化
+[PASS] N-03   done：落盘 true，默认 list 隐藏、--all 显示 [✓]
+[PASS] N-04   rm：记录从 json 与列表中消失
+[PASS] N-05   删除后 id 不复用（删 #1 再 add 得到 #3）
+[PASS] N-06   list 默认/--all 的条目集合差异正确
+[PASS] N-07   --help / -h 退出码 0 且含四个命令
+[PASS] N-08   无引号多词标题按一个标题处理
+[PASS] B-01   空标题被拒绝（退出码非 0，不产生记录）
+[PASS] B-02   纯空格标题被拒绝
+[PASS] B-03   制表/换行空白标题被拒绝
+[PASS] B-04   add 缺少参数时不崩溃
+[PASS] B-05   done 不存在的 id：退出码非 0 + 明确提示
+[PASS] B-06   rm 不存在的 id：退出码非 0 + 数据不被改动
+[PASS] B-07   id = 0 / 负数 / 超大值 均按不存在处理
+[PASS] B-08   空库 list：退出码 0 + 友好提示
+[PASS] B-09   空库 list --all：退出码 0 + 友好提示
+[PASS] B-10   全部已完成时默认 list 给出专门提示
+[PASS] B-11   重复标题允许：两条 id 不同、都在列表里
+[PASS] B-12   对已完成项再次 done：幂等、不报错
+[PASS] B-13   done/rm 缺参数或非整数 id 时不崩溃
+[PASS] B-14   未知命令 / 未知参数 / 无参数：退出码 2 且给出用法
+[PASS] E-01   todos.json 内容损坏（非法 JSON）：list 不崩溃
+[PASS] E-02   损坏后 add：成功写入，并备份原文件
+[PASS] E-03   合法 JSON 但结构异常（数组/null/数字）不崩溃
+[PASS] E-04   todos.json 为空文件：不崩溃
+[PASS] E-05   todos.json 是目录：不抛 traceback
+[PASS] E-06   todos.json 只读：写入失败也不抛 traceback
+[PASS] E-07   文件缺失时任何命令都自动创建 todos.json
+[PASS] E-08   损坏文件 + done/rm：给出警告且不抛 traceback
+[PASS] S-01   标题含双引号/单引号/反斜杠：原样保存
+[PASS] S-02   标题含换行：保存原样，显示转义不拆行
+[PASS] S-03   标题含制表符：不影响表格结构
+[PASS] S-04   emoji 标题：往返一致、不崩溃
+[PASS] S-05   500 字符超长标题：完整保存，不截断
+[PASS] S-06   5000 字符超长标题：不崩溃
+[PASS] S-07   以 - 开头的标题被当作标题而非选项
+[PASS] S-08   shell 元字符不被引擎执行，原样入库
+[PASS] S-09   格式化串 %s/{0} 原样入库（防格式化漏洞）
+[PASS] S-10   中英混排 + emoji：各行列起点显示宽度一致（含标题列→时间列）
+[PASS] S-11   表头四列齐全且各行列数一致
+[PASS] S-12   超长标题默认截断显示（带省略号），--full 显示全文，磁盘不丢数据
+[PASS] S-13   --all --full 组合与单独 --full 均可用
+[PASS] W-01   PYTHONIOENCODING=gbk 下处理 emoji 不崩溃
+[PASS] W-02   PYTHONIOENCODING=ascii 下 CJK 不崩溃
+[PASS] P-01   add×3 → done → rm 后 json 与列表状态一致
+[PASS] P-02   created_at 时间格式可读（YYYY-MM-DD HH:MM）
+------------------------------------------------------------------------
+用例总数 47，通过 47，失败 0

@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Heron × Zeppelin — SVG007</title>
+<style>
+  :root {
+    --sky-top: #0b1a33;
+    --sky-mid: #1a3a5c;
+    --sky-low: #3d6b8a;
+    --gold: #e8c56a;
+    --envelope: #c4a574;
+    --envelope-dark: #8a7348;
+    --envelope-light: #e0c99a;
+    --gondola: #4a3a28;
+    --heron-body: #9aa8b8;
+    --heron-dark: #5a6a7a;
+    --heron-white: #e8eef4;
+    --heron-beak: #e8a848;
+    --heron-leg: #d48848;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--sky-top);
+  }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+  }
+  #stage {
+    width: 100vw;
+    height: 100vh;
+    display: block;
+  }
+
+  /* ========== LAYER 0: sky gradient (static) ========== */
+  /* handled in SVG defs */
+
+  /* ========== LAYER 1: far stars + moon (slowest parallax) ========== */
+  #layer-far {
+    animation: drift-far 80s linear infinite;
+  }
+  @keyframes drift-far {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-120); }
+  }
+
+  /* ========== LAYER 2: mid clouds ========== */
+  #layer-mid {
+    animation: drift-mid 36s linear infinite;
+  }
+  @keyframes drift-mid {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-400); }
+  }
+
+  /* ========== LAYER 3: near clouds / silhouette hills ========== */
+  #layer-near {
+    animation: drift-near 18s linear infinite;
+  }
+  @keyframes drift-near {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-640); }
+  }
+
+  /* ========== ZEPPELIN GROUP ========== */
+  #zeppelin-rig {
+    /* vehicle bob: vertical float, independent of limbs */
+    animation: airship-bob 3.2s ease-in-out infinite;
+  }
+  @keyframes airship-bob {
+    0%   { transform: translateY(0px) rotate(-0.4deg); }
+    50%  { transform: translateY(-14px) rotate(0.6deg); }
+    100% { transform: translateY(0px) rotate(-0.4deg); }
+  }
+
+  /* propeller: spin around its hub (forward thrust = clockwise when facing +X) */
+  #propeller {
+    transform-box: fill-box;
+    transform-origin: 20% 50%;
+    animation: spin-prop 0.28s linear infinite;
+  }
+  @keyframes spin-prop {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  /* prop wash streaks flicker */
+  #prop-wash {
+    animation: wash-pulse 0.28s linear infinite;
+  }
+  @keyframes wash-pulse {
+    0%, 49%  { opacity: 0.55; }
+    50%, 100% { opacity: 0.15; }
+  }
+
+  /* ========== HERON LIMBS (NOT locked to vehicle) ========== */
+
+  /* neck + head: independent sway (relative to gondola) */
+  #heron-neck-head {
+    transform-box: fill-box;
+    transform-origin: 85% 90%; /* base of neck near body */
+    animation: neck-sway 2.4s ease-in-out infinite;
+  }
+  @keyframes neck-sway {
+    0%   { transform: rotate(-4deg) translateY(0px); }
+    35%  { transform: rotate(3deg)  translateY(-2px); }
+    70%  { transform: rotate(-2deg) translateY(1px); }
+    100% { transform: rotate(-4deg) translateY(0px); }
+  }
+
+  /* crest feathers flutter (secondary micro-motion) */
+  #heron-crest {
+    transform-box: fill-box;
+    transform-origin: 10% 80%;
+    animation: crest-flutter 1.1s ease-in-out infinite;
+  }
+  @keyframes crest-flutter {
+    0%, 100% { transform: rotate(0deg) skewX(0deg); }
+    50%      { transform: rotate(-8deg) skewX(6deg); }
+  }
+
+  /* near wing / primary feathers: flap (relative to body) */
+  #heron-wing {
+    transform-box: fill-box;
+    transform-origin: 15% 30%;
+    animation: wing-flap 1.6s ease-in-out infinite;
+  }
+  @keyframes wing-flap {
+    0%   { transform: rotate(0deg) scaleY(1); }
+    40%  { transform: rotate(-18deg) scaleY(0.92); }
+    70%  { transform: rotate(6deg)  scaleY(1.04); }
+    100% { transform: rotate(0deg) scaleY(1); }
+  }
+
+  /* far wing tip: phase-offset so limbs are not in lockstep */
+  #heron-wing-far {
+    transform-box: fill-box;
+    transform-origin: 20% 40%;
+    animation: wing-flap-far 1.6s ease-in-out infinite;
+    animation-delay: -0.35s;
+  }
+  @keyframes wing-flap-far {
+    0%   { transform: rotate(4deg); }
+    40%  { transform: rotate(12deg); }
+    100% { transform: rotate(4deg); }
+  }
+
+  /* trailing leg: slight kick / tuck, different period than neck */
+  #heron-leg-trail {
+    transform-box: fill-box;
+    transform-origin: 20% 10%;
+    animation: leg-trail 3.7s ease-in-out infinite;
+  }
+  @keyframes leg-trail {
+    0%   { transform: rotate(0deg); }
+    40%  { transform: rotate(-10deg); }
+    65%  { transform: rotate(4deg); }
+    100% { transform: rotate(0deg); }
+  }
+
+  /* steering foot on rudder bar — small press cycle */
+  #heron-foot-rudder {
+    transform-box: fill-box;
+    transform-origin: 50% 0%;
+    animation: rudder-press 4.5s ease-in-out infinite;
+  }
+  @keyframes rudder-press {
+    0%, 100% { transform: translateX(0) rotate(0deg); }
+    30%      { transform: translateX(3px) rotate(-3deg); }
+    70%      { transform: translateX(-2px) rotate(2deg); }
+  }
+
+  /* envelope highlight shimmer */
+  #envelope-shine {
+    animation: shine 5s ease-in-out infinite;
+  }
+  @keyframes shine {
+    0%, 100% { opacity: 0.22; }
+    50%      { opacity: 0.38; }
+  }
+
+  /* cabin window glow pulse */
+  .cabin-light {
+    animation: cabin-glow 2.8s ease-in-out infinite;
+  }
+  .cabin-light.d2 { animation-delay: -0.9s; }
+  .cabin-light.d3 { animation-delay: -1.7s; }
+  @keyframes cabin-glow {
+    0%, 100% { opacity: 0.75; }
+    50%      { opacity: 1; }
+  }
+
+  /* title card */
+  #caption {
+    position: fixed;
+    left: 28px;
+    bottom: 24px;
+    color: rgba(232, 238, 244, 0.72);
+    letter-spacing: 0.12em;
+    font-size: 13px;
+    text-transform: uppercase;
+    pointer-events: none;
+    user-select: none;
+  }
+  #caption strong {
+    display: block;
+    font-size: 18px;
+    letter-spacing: 0.2em;
+    color: rgba(232, 197, 106, 0.9);
+    font-weight: normal;
+    margin-bottom: 4px;
+  }
+</style>
+</head>
+<body>
+<svg id="stage" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#0b1a33"/>
+      <stop offset="42%"  stop-color="#1a3a5c"/>
+      <stop offset="78%"  stop-color="#3d6b8a"/>
+      <stop offset="100%" stop-color="#5a8aaa"/>
+    </linearGradient>
+
+    <radialGradient id="moonGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"  stop-color="#fff6d0" stop-opacity="0.85"/>
+      <stop offset="40%" stop-color="#e8c56a" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#e8c56a" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="envelopeGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#e0c99a"/>
+      <stop offset="35%"  stop-color="#c4a574"/>
+      <stop offset="100%" stop-color="#7a6540"/>
+    </linearGradient>
+
+    <linearGradient id="envelopeShineGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#fff8e0" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#fff8e0" stop-opacity="0"/>
+    </linearGradient>
+
+    <linearGradient id="gondolaGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#6a5438"/>
+      <stop offset="100%" stop-color="#3a2c1a"/>
+    </linearGradient>
+
+    <linearGradient id="cloudGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#c8d8e8" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#6a8aaa" stop-opacity="0.15"/>
+    </linearGradient>
+
+    <linearGradient id="hillGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#1a2a3a"/>
+      <stop offset="100%" stop-color="#0a1520"/>
+    </linearGradient>
+
+    <filter id="softBlur" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+    <filter id="farBlur" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.2"/>
+    </filter>
+  </defs>
+
+  <!-- ========== SKY (static base) ========== -->
+  <rect width="1200" height="700" fill="url(#skyGrad)"/>
+
+  <!-- ========== LAYER 1 · FAR ========== -->
+  <g id="layer-far">
+    <!-- moon -->
+    <circle cx="920" cy="120" r="90" fill="url(#moonGlow)"/>
+    <circle cx="920" cy="120" r="36" fill="#f0e6c0"/>
+    <circle cx="908" cy="112" r="6" fill="#d8c890" opacity="0.55"/>
+    <circle cx="932" cy="128" r="4" fill="#d8c890" opacity="0.4"/>
+    <circle cx="918" cy="138" r="3" fill="#d8c890" opacity="0.35"/>
+
+    <!-- stars (duplicate tile for seamless wrap feel) -->
+    <g fill="#e8eef4">
+      <circle cx="40"  cy="50"  r="1.2" opacity="0.8"/>
+      <circle cx="120" cy="90"  r="0.9" opacity="0.55"/>
+      <circle cx="200" cy="40"  r="1.4" opacity="0.9"/>
+      <circle cx="280" cy="110" r="0.8" opacity="0.5"/>
+      <circle cx="340" cy="60"  r="1.1" opacity="0.7"/>
+      <circle cx="420" cy="30"  r="1.5" opacity="0.85"/>
+      <circle cx="500" cy="95"  r="0.7" opacity="0.45"/>
+      <circle cx="560" cy="48"  r="1.2" opacity="0.75"/>
+      <circle cx="640" cy="80"  r="0.9" opacity="0.6"/>
+      <circle cx="720" cy="35"  r="1.3" opacity="0.88"/>
+      <circle cx="780" cy="100" r="0.8" opacity="0.5"/>
+      <circle cx="860" cy="55"  r="1.0" opacity="0.7"/>
+      <circle cx="1000" cy="70" r="1.2" opacity="0.8"/>
+      <circle cx="1080" cy="40" r="0.9" opacity="0.55"/>
+      <circle cx="1160" cy="90" r="1.4" opacity="0.9"/>
+      <!-- extra cluster -->
+      <circle cx="80"  cy="160" r="0.7" opacity="0.4"/>
+      <circle cx="250" cy="150" r="1.0" opacity="0.6"/>
+      <circle cx="480" cy="170" r="0.8" opacity="0.45"/>
+      <circle cx="670" cy="140" r="1.1" opacity="0.7"/>
+      <circle cx="900" cy="180" r="0.6" opacity="0.4"/>
+      <circle cx="1100" cy="160" r="0.9" opacity="0.55"/>
+    </g>
+
+    <!-- faint constellation lines -->
+    <g stroke="#e8eef4" stroke-width="0.4" opacity="0.2" fill="none">
+      <path d="M200 40 L280 110 L340 60"/>
+      <path d="M720 35 L780 100 L860 55"/>
+    </g>
+  </g>
+
+  <!-- ========== LAYER 2 · MID clouds ========== -->
+  <g id="layer-mid" filter="url(#farBlur)">
+    <g fill="url(#cloudGrad)">
+      <!-- tile A -->
+      <ellipse cx="100"  cy="220" rx="90"  ry="28"/>
+      <ellipse cx="160"  cy="210" rx="70"  ry="22"/>
+      <ellipse cx="50"   cy="225" rx="50"  ry="18"/>
+      <ellipse cx="380"  cy="260" rx="110" ry="32"/>
+      <ellipse cx="440"  cy="250" rx="80"  ry="24"/>
+      <ellipse cx="330"  cy="265" rx="60"  ry="18"/>
+      <ellipse cx="700"  cy="200" rx="100" ry="26"/>
+      <ellipse cx="760"  cy="192" rx="70"  ry="20"/>
+      <ellipse cx="980"  cy="250" rx="120" ry="34"/>
+      <ellipse cx="1050" cy="240" rx="90"  ry="26"/>
+      <ellipse cx="920"  cy="255" rx="55"  ry="18"/>
+      <!-- tile A' (for wrap) -->
+      <ellipse cx="1300" cy="220" rx="90"  ry="28"/>
+      <ellipse cx="1360" cy="210" rx="70"  ry="22"/>
+      <ellipse cx="1250" cy="225" rx="50"  ry="18"/>
+      <ellipse cx="1580" cy="260" rx="110" ry="32"/>
+      <ellipse cx="1640" cy="250" rx="80"  ry="24"/>
+      <ellipse cx="1530" cy="265" rx="60"  ry="18"/>
+      <ellipse cx="1900" cy="200" rx="100" ry="26"/>
+      <ellipse cx="1960" cy="192" rx="70"  ry="20"/>
+    </g>
+  </g>
+
+  <!-- ========== LAYER 3 · NEAR hills + low clouds ========== -->
+  <g id="layer-near">
+    <!-- distant rolling hills silhouette -->
+    <g fill="url(#hillGrad)" opacity="0.85">
+      <path d="M0 560
+               C80 540, 140 500, 220 510
+               C300 520, 340 480, 420 490
+               C500 500, 560 460, 640 475
+               C720 490, 780 450, 860 465
+               C940 480, 1000 440, 1080 455
+               C1140 465, 1180 480, 1200 490
+               L1200 700 L0 700 Z"/>
+      <!-- wrap tile -->
+      <path d="M1200 560
+               C1280 540, 1340 500, 1420 510
+               C1500 520, 1540 480, 1620 490
+               C1700 500, 1760 460, 1840 475
+               C1920 490, 1980 450, 2060 465
+               C2140 480, 2200 440, 2280 455
+               L2280 700 L1200 700 Z"/>
+    </g>
+
+    <!-- near low clouds (faster) -->
+    <g fill="#4a6a88" opacity="0.45">
+      <ellipse cx="80"   cy="400" rx="140" ry="36"/>
+      <ellipse cx="160"  cy="388" rx="100" ry="28"/>
+      <ellipse cx="20"   cy="405" rx="70"  ry="22"/>
+      <ellipse cx="420"  cy="430" rx="160" ry="40"/>
+      <ellipse cx="510"  cy="418" rx="110" ry="30"/>
+      <ellipse cx="780"  cy="390" rx="130" ry="34"/>
+      <ellipse cx="860"  cy="380" rx="90"  ry="26"/>
+      <ellipse cx="1100" cy="420" rx="150" ry="38"/>
+      <ellipse cx="1180" cy="408" rx="100" ry="28"/>
+      <!-- wrap -->
+      <ellipse cx="1280" cy="400" rx="140" ry="36"/>
+      <ellipse cx="1360" cy="388" rx="100" ry="28"/>
+      <ellipse cx="1220" cy="405" rx="70"  ry="22"/>
+      <ellipse cx="1620" cy="430" rx="160" ry="40"/>
+      <ellipse cx="1710" cy="418" rx="110" ry="30"/>
+      <ellipse cx="1980" cy="390" rx="130" ry="34"/>
+      <ellipse cx="2060" cy="380" rx="90"  ry="26"/>
+    </g>
+  </g>
+
+  <!-- ========== ZEPPELIN + HERON (subject, mid-air, facing RIGHT) ========== -->
+  <g id="zeppelin-rig" transform="translate(340, 250)">
+
+    <!-- ---- ENVELOPE (main hull) ---- -->
+    <g id="envelope">
+      <!-- shadow body -->
+      <ellipse cx="200" cy="90" rx="200" ry="62" fill="url(#envelopeGrad)"/>
+      <!-- ridge line -->
+      <path d="M40 90 Q200 40 360 90" fill="none" stroke="#f0e0b8" stroke-width="2" opacity="0.35"/>
+      <!-- longitudinal ribs -->
+      <path d="M70 70 Q200 48 330 70" fill="none" stroke="#8a7348" stroke-width="1" opacity="0.35"/>
+      <path d="M60 100 Q200 78 340 100" fill="none" stroke="#8a7348" stroke-width="1" opacity="0.3"/>
+      <path d="M75 115 Q200 100 325 115" fill="none" stroke="#8a7348" stroke-width="1" opacity="0.25"/>
+      <!-- vertical panel seams -->
+      <g stroke="#8a7348" stroke-width="0.8" opacity="0.28" fill="none">
+        <path d="M100 48 Q95 90 100 132"/>
+        <path d="M150 42 Q148 90 150 138"/>
+        <path d="M200 38 Q200 90 200 142"/>
+        <path d="M250 42 Q252 90 250 138"/>
+        <path d="M300 48 Q305 90 300 132"/>
+      </g>
+      <!-- highlight -->
+      <ellipse id="envelope-shine" cx="160" cy="62" rx="90" ry="18" fill="url(#envelopeShineGrad)"/>
+      <!-- nose cone -->
+      <ellipse cx="390" cy="90" rx="18" ry="14" fill="#a89060"/>
+      <ellipse cx="395" cy="90" rx="10" ry="8" fill="#c4a574"/>
+    </g>
+
+    <!-- ---- TAIL FINS ---- -->
+    <g id="tail-fins" fill="#8a7348">
+      <!-- vertical fin (top) -->
+      <path d="M20 90 L-10 30 L30 70 L40 90 Z" fill="#a08850"/>
+      <!-- vertical fin (bottom) -->
+      <path d="M20 90 L-5 150 L30 110 L40 90 Z" fill="#8a7348"/>
+      <!-- horizontal fin -->
+      <path d="M20 90 L-20 70 L10 85 Z" fill="#6a5838" opacity="0.9"/>
+    </g>
+
+    <!-- ---- STRUTS (envelope → gondola) ---- -->
+    <g stroke="#5a4a30" stroke-width="2.5" opacity="0.85">
+      <line x1="160" y1="140" x2="155" y2="168"/>
+      <line x1="200" y1="142" x2="200" y2="168"/>
+      <line x1="240" y1="140" x2="245" y2="168"/>
+      <line x1="180" y1="141" x2="178" y2="168"/>
+      <line x1="220" y1="141" x2="222" y2="168"/>
+    </g>
+
+    <!-- ---- GONDOLA / CABIN ---- -->
+    <g id="gondola">
+      <!-- hull -->
+      <path d="M140 168
+               L260 168
+               L255 200
+               Q250 214 230 216
+               L170 216
+               Q150 214 145 200 Z"
+            fill="url(#gondolaGrad)" stroke="#2a2010" stroke-width="1"/>
+      <!-- deck line -->
+      <line x1="145" y1="178" x2="255" y2="178" stroke="#8a7348" stroke-width="1" opacity="0.5"/>
+      <!-- cabin windows -->
+      <circle class="cabin-light"    cx="165" cy="190" r="5" fill="#e8c56a"/>
+      <circle class="cabin-light d2" cx="185" cy="190" r="5" fill="#f0d070"/>
+      <circle class="cabin-light d3" cx="205" cy="190" r="5" fill="#e8c56a"/>
+      <!-- open cockpit (front, where heron stands) -->
+      <path d="M210 168 L260 168 L255 185 L210 185 Z" fill="#2a2010"/>
+      <path d="M212 170 L258 170 L254 182 L212 182 Z" fill="#1a2530"/>
+      <!-- rudder / control bar -->
+      <line x1="230" y1="182" x2="248" y2="175" stroke="#a89060" stroke-width="2"/>
+      <circle cx="248" cy="175" r="2.5" fill="#e8c56a"/>
+    </g>
+
+    <!-- ---- PROPELLER ASSEMBLY (nose, facing +X) ---- -->
+    <g id="prop-assembly">
+      <!-- nacelle -->
+      <ellipse cx="400" cy="90" rx="12" ry="8" fill="#3a3a40"/>
+      <rect x="388" y="86" width="14" height="8" rx="2" fill="#2a2a30"/>
+      <!-- shaft -->
+      <line x1="398" y1="90" x2="408" y2="90" stroke="#666" stroke-width="2"/>
+      <!-- spinner hub -->
+      <circle cx="410" cy="90" r="4" fill="#c0c0c8"/>
+      <!-- spinning blades -->
+      <g id="propeller">
+        <ellipse cx="410" cy="70" rx="3.5" ry="22" fill="#d0d0d8" opacity="0.95"/>
+        <ellipse cx="410" cy="110" rx="3.5" ry="22" fill="#b8b8c0" opacity="0.9"/>
+        <ellipse cx="410" cy="90"  rx="3.5" ry="18" fill="#c8c8d0" opacity="0.0"/>
+      </g>
+      <!-- disc blur illusion -->
+      <circle id="prop-wash" cx="410" cy="90" r="24" fill="none" stroke="#c8d0d8" stroke-width="1.5" opacity="0.4" stroke-dasharray="6 4"/>
+      <!-- thrust streaks (point right = motion direction) -->
+      <g opacity="0.35" stroke="#a0c0d0" stroke-width="1.2" stroke-linecap="round">
+        <line x1="438" y1="82" x2="470" y2="82"/>
+        <line x1="442" y1="90" x2="478" y2="90"/>
+        <line x1="438" y1="98" x2="466" y2="98"/>
+      </g>
+    </g>
+
+    <!-- ---- HERON (pilot, standing in open cockpit, facing RIGHT) ---- -->
+    <g id="heron">
+
+      <!-- FAR WING (behind body, phase-offset flap) -->
+      <g id="heron-wing-far">
+        <path d="M200 155
+                 Q170 140 130 148
+                 Q150 155 155 162
+                 Q165 168 200 165 Z"
+              fill="#6a7a8a" opacity="0.85"/>
+      </g>
+
+      <!-- FAR LEG (trailing, relative motion) -->
+      <g id="heron-leg-trail">
+        <line x1="222" y1="188" x2="215" y2="210" stroke="#b07038" stroke-width="2.2" stroke-linecap="round"/>
+        <line x1="215" y1="210" x2="208" y2="222" stroke="#b07038" stroke-width="1.8" stroke-linecap="round"/>
+        <!-- toes -->
+        <line x1="208" y1="222" x2="202" y2="226" stroke="#a06030" stroke-width="1.2"/>
+        <line x1="208" y1="222" x2="212" y2="228" stroke="#a06030" stroke-width="1.2"/>
+      </g>
+
+      <!-- BODY -->
+      <g id="heron-body">
+        <!-- teardrop body leaning slightly forward (flight direction) -->
+        <ellipse cx="220" cy="168" rx="28" ry="18" fill="#9aa8b8"/>
+        <!-- breast -->
+        <ellipse cx="232" cy="172" rx="16" ry="12" fill="#c0ccd8"/>
+        <!-- back shading -->
+        <path d="M200 160 Q220 148 245 162" fill="none" stroke="#5a6a7a" stroke-width="3" opacity="0.4"/>
+        <!-- body feather detail -->
+        <path d="M210 175 Q220 178 230 175" fill="none" stroke="#7a8a9a" stroke-width="1" opacity="0.5"/>
+        <path d="M208 168 Q218 171 228 168" fill="none" stroke="#7a8a9a" stroke-width="1" opacity="0.4"/>
+      </g>
+
+      <!-- NEAR LEG (stepping on rudder bar — independent of body bob) -->
+      <g id="heron-foot-rudder">
+        <line x1="228" y1="186" x2="235" y2="200" stroke="#d48848" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="235" y1="200" x2="242" y2="178" stroke="#d48848" stroke-width="2" stroke-linecap="round"/>
+        <!-- foot gripping bar -->
+        <path d="M240 178 Q245 174 248 176" fill="none" stroke="#c07838" stroke-width="1.8" stroke-linecap="round"/>
+      </g>
+
+      <!-- NEAR WING (independent flap) -->
+      <g id="heron-wing">
+        <path d="M215 158
+                 Q185 145 145 155
+                 Q165 162 175 170
+                 Q190 176 218 168 Z"
+              fill="#8a9aaa"/>
+        <!-- primary feathers -->
+        <path d="M145 155 L125 152" stroke="#5a6a7a" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M148 158 L126 158" stroke="#5a6a7a" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M152 161 L130 164" stroke="#5a6a7a" stroke-width="1.5" stroke-linecap="round"/>
+        <!-- wing coverts -->
+        <path d="M190 155 Q205 152 215 158" fill="none" stroke="#6a7a8a" stroke-width="1.2" opacity="0.6"/>
+      </g>
+
+      <!-- NECK + HEAD (independent sway) -->
+      <g id="heron-neck-head">
+        <!-- S-curved long neck -->
+        <path d="M235 160
+                 Q248 140 242 120
+                 Q236 105 250 95
+                 Q262 88 270 92"
+              fill="none" stroke="#c0ccd8" stroke-width="7" stroke-linecap="round"/>
+        <path d="M235 160
+                 Q248 140 242 120
+                 Q236 105 250 95
+                 Q262 88 270 92"
+              fill="none" stroke="#e8eef4" stroke-width="4" stroke-linecap="round"/>
+
+        <!-- HEAD -->
+        <g id="heron-head">
+          <ellipse cx="272" cy="92" rx="12" ry="8" fill="#e8eef4"/>
+          <!-- cheek patch -->
+          <ellipse cx="275" cy="94" rx="5" ry="4" fill="#9aa8b8" opacity="0.5"/>
+          <!-- eye -->
+          <circle cx="276" cy="90" r="2.8" fill="#f0e060"/>
+          <circle cx="277" cy="90" r="1.4" fill="#1a1a1a"/>
+          <circle cx="277.5" cy="89.5" r="0.5" fill="#fff"/>
+
+          <!-- LONG BEAK (pointing right = flight direction) -->
+          <path d="M282 92 L312 90 L282 95 Z" fill="#e8a848"/>
+          <path d="M282 92 L312 90 L282 91.5 Z" fill="#f0c070"/>
+          <!-- beak line -->
+          <line x1="282" y1="93" x2="310" y2="91" stroke="#c07828" stroke-width="0.5" opacity="0.6"/>
+
+          <!-- CREST feathers (flutter) -->
+          <g id="heron-crest">
+            <path d="M264 88 Q255 78 250 74" fill="none" stroke="#2a3a4a" stroke-width="2" stroke-linecap="round"/>
+            <path d="M266 87 Q258 76 254 70" fill="none" stroke="#2a3a4a" stroke-width="1.6" stroke-linecap="round"/>
+            <path d="M268 88 Q262 78 260 73" fill="none" stroke="#3a4a5a" stroke-width="1.4" stroke-linecap="round"/>
+          </g>
+        </g>
+      </g>
+
+      <!-- NECKLACE / black stripe (grey heron mark) -->
+      <path d="M240 155 Q245 158 248 152" fill="none" stroke="#2a3a4a" stroke-width="1.5" stroke-linecap="round"/>
+    </g>
+
+    <!-- ---- small registration mark on envelope ---- -->
+    <text x="175" y="95" font-family="Georgia, serif" font-size="11" fill="#5a4a30" opacity="0.55" letter-spacing="2">HZ-07</text>
+  </g>
+
+  <!-- ========== foreground wisps (optional 4th touch — slight, near subject) ========== -->
+  <g opacity="0.18" fill="#e8eef4">
+    <ellipse cx="200" cy="520" rx="180" ry="20"/>
+    <ellipse cx="280" cy="515" rx="100" ry="14"/>
+    <ellipse cx="900" cy="540" rx="200" ry="18"/>
+    <ellipse cx="980" cy="535" rx="120" ry="12"/>
+  </g>
+</svg>
+
+<div id="caption">
+  <strong>Heron × Zeppelin</strong>
+  SVG007 · single-file · dusk cruise
+</div>
+
+<!--
+  ===== MOTION SELF-CONSISTENCY NOTES (also mirrored in notes.md) =====
+  Flight direction: +X (right). All "forward-facing" details (beak, nose cone,
+  propeller, thrust streaks, rudder bar) point right.
+
+  1. Propeller spins about a vertical axis at the nose; blade tips travel
+     clockwise from pilot POV so thrust pushes air aft (+X wake streaks) and
+     the craft advances right. Prop-wash dash ring flickers in phase with spin.
+
+  2. Parallax: three depth layers scroll LEFT (opposite of travel) at different
+     periods — far 80s, mid 36s, near 18s — so nearer ground/cloud appears to
+     pass faster, matching rightward advance.
+
+  3. Heron limbs NOT locked to vehicle:
+     - Neck+head sway: 2.4s period, rotate about neck base.
+     - Near wing flap: 1.6s period.
+     - Far wing: same period, phase delay -0.35s (not lockstep).
+     - Crest flutter: 1.1s period (higher frequency).
+     - Trailing leg: 3.7s period.
+     - Rudder foot: 4.5s period, presses control bar.
+     Vehicle body itself bobs on 3.2s cycle — different from every limb period,
+     so the heron is clearly articulated relative to the gondola.
+
+  4. Two-plus background layers: (1) stars+moon, (2) mid clouds,
+     (3) near hills+low clouds. Plus subject layer.
+-->
+</body>
+</html>

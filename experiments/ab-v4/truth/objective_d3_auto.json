@@ -1,0 +1,126 @@
+{
+  "D3-conservative": {
+    "exists": true,
+    "n_intervals_parsed": 5,
+    "official_points": 4,
+    "hits": 3,
+    "recall": 0.75,
+    "precision": 0.6,
+    "detail": [
+      {
+        "label": "2013-12-11 06:00",
+        "hit": false,
+        "interval_idx": null
+      },
+      {
+        "label": "2013-12-16 17:25",
+        "hit": true,
+        "interval_idx": 0
+      },
+      {
+        "label": "2014-01-28 13:55",
+        "hit": true,
+        "interval_idx": 4
+      },
+      {
+        "label": "2014-02-08 14:30",
+        "hit": true,
+        "interval_idx": 3
+      }
+    ],
+    "note": "宽松解析（含表格行/候选区间行），正式判分须人工剔除附录候选后重算"
+  },
+  "D3-noconstraint": {
+    "exists": true,
+    "n_intervals_parsed": 40,
+    "official_points": 4,
+    "hits": 3,
+    "recall": 0.75,
+    "precision": 0.075,
+    "detail": [
+      {
+        "label": "2013-12-11 06:00",
+        "hit": false,
+        "interval_idx": null
+      },
+      {
+        "label": "2013-12-16 17:25",
+        "hit": true,
+        "interval_idx": 7
+      },
+      {
+        "label": "2014-01-28 13:55",
+        "hit": true,
+        "interval_idx": 24
+      },
+      {
+        "label": "2014-02-08 14:30",
+        "hit": true,
+        "interval_idx": 35
+      }
+    ],
+    "note": "宽松解析（含表格行/候选区间行），正式判分须人工剔除附录候选后重算"
+  },
+  "D3-fullreport": {
+    "exists": true,
+    "n_intervals_parsed": 62,
+    "official_points": 4,
+    "hits": 3,
+    "recall": 0.75,
+    "precision": 0.0484,
+    "detail": [
+      {
+        "label": "2013-12-11 06:00",
+        "hit": true,
+        "interval_idx": 8
+      },
+      {
+        "label": "2013-12-16 17:25",
+        "hit": true,
+        "interval_idx": 9
+      },
+      {
+        "label": "2014-01-28 13:55",
+        "hit": false,
+        "interval_idx": null
+      },
+      {
+        "label": "2014-02-08 14:30",
+        "hit": true,
+        "interval_idx": 50
+      }
+    ],
+    "note": "宽松解析（含表格行/候选区间行），正式判分须人工剔除附录候选后重算"
+  },
+  "D3-interrupt": {
+    "exists": true,
+    "n_intervals_parsed": 51,
+    "official_points": 4,
+    "hits": 3,
+    "recall": 0.75,
+    "precision": 0.0588,
+    "detail": [
+      {
+        "label": "2013-12-11 06:00",
+        "hit": false,
+        "interval_idx": null
+      },
+      {
+        "label": "2013-12-16 17:25",
+        "hit": true,
+        "interval_idx": 6
+      },
+      {
+        "label": "2014-01-28 13:55",
+        "hit": true,
+        "interval_idx": 24
+      },
+      {
+        "label": "2014-02-08 14:30",
+        "hit": true,
+        "interval_idx": 30
+      }
+    ],
+    "note": "宽松解析（含表格行/候选区间行），正式判分须人工剔除附录候选后重算"
+  }
+}

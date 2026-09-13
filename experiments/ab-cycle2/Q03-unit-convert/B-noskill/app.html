@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>单位换算工具（长度 / 重量 / 温度）</title>
+<style>
+  :root{
+    --bg:#f5f7fa;
+    --card:#ffffff;
+    --line:#dfe4ea;
+    --text:#1f2933;
+    --muted:#6b7280;
+    --accent:#2563eb;
+    --accent-soft:#e8efff;
+    --err:#c0392b;
+    --ok:#1f7a4d;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Roboto,Helvetica,Arial,sans-serif;
+    display:flex;
+    justify-content:center;
+    padding:24px 16px 48px;
+  }
+  .card{
+    width:100%;
+    max-width:560px;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:20px 20px 24px;
+    box-shadow:0 1px 2px rgba(16,24,40,.04),0 8px 24px rgba(16,24,40,.06);
+  }
+  h1{font-size:20px;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:13px;margin:0 0 16px;}
+
+  .tabs{display:flex;gap:6px;background:#eef1f6;padding:4px;border-radius:10px;margin-bottom:16px;}
+  .tab{
+    flex:1;
+    border:0;
+    background:transparent;
+    color:var(--muted);
+    font:inherit;
+    font-size:15px;
+    padding:8px 10px;
+    border-radius:7px;
+    cursor:pointer;
+  }
+  .tab:hover{color:var(--text);}
+  .tab.on{background:#fff;color:var(--accent);font-weight:600;box-shadow:0 1px 3px rgba(16,24,40,.12);}
+  .tab:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{
+    outline:2px solid var(--accent);
+    outline-offset:2px;
+  }
+
+  .field{display:flex;flex-direction:column;gap:6px;min-width:0;}
+  label{font-size:13px;color:var(--muted);}
+  input,select{
+    font:inherit;
+    color:var(--text);
+    padding:10px 12px;
+    border:1px solid var(--line);
+    border-radius:9px;
+    background:#fff;
+    width:100%;
+    min-width:0;
+  }
+  input:focus,select:focus{border-color:var(--accent);}
+  input[aria-invalid="true"]{border-color:var(--err);background:#fff6f5;}
+
+  .row{display:flex;gap:10px;align-items:flex-end;margin-top:14px;}
+  .row .field{flex:1;}
+  .swap{
+    flex:0 0 auto;
+    width:44px;height:44px;
+    border:1px solid var(--line);
+    background:#fff;
+    border-radius:9px;
+    font-size:18px;
+    line-height:1;
+    cursor:pointer;
+    color:var(--accent);
+  }
+  .swap:hover{background:var(--accent-soft);border-color:var(--accent);}
+
+  .err{
+    min-height:20px;
+    margin:12px 0 0;
+    font-size:13.5px;
+    color:var(--err);
+  }
+  .err:empty{visibility:hidden;}
+
+  .result{
+    margin-top:4px;
+    background:var(--accent-soft);
+    border:1px solid #cddcff;
+    border-radius:10px;
+    padding:14px 14px;
+    min-height:56px;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    justify-content:center;
+  }
+  .primary{font-size:19px;font-weight:600;word-break:break-all;color:#123a86;}
+  .primary.empty{color:var(--muted);font-weight:400;font-size:15px;}
+  .note{font-size:12.5px;color:var(--err);}
+  .note:empty{display:none;}
+
+  .all{margin-top:18px;}
+  .all h2{font-size:13px;color:var(--muted);font-weight:600;margin:0 0 8px;letter-spacing:.02em;}
+  ul{list-style:none;margin:0;padding:0;border-top:1px solid var(--line);}
+  li{display:flex;justify-content:space-between;gap:12px;padding:7px 2px;border-bottom:1px solid var(--line);font-size:14.5px;}
+  li .u{color:var(--muted);}
+  li .v{font-variant-numeric:tabular-nums;word-break:break-all;text-align:right;}
+  li.dim{opacity:.45;}
+</style>
+</head>
+<body>
+<main class="card">
+  <h1>单位换算</h1>
+  <p class="sub">选择类别并输入数值，结果实时更新（无需点击“计算”）。</p>
+
+  <div class="tabs" role="tablist" aria-label="换算类别">
+    <button type="button" class="tab" role="tab" id="tab-length" data-cat="length" aria-selected="true" aria-controls="panel" tabindex="0">长度</button>
+    <button type="button" class="tab" role="tab" id="tab-weight" data-cat="weight" aria-selected="false" aria-controls="panel" tabindex="-1">重量</button>
+    <button type="button" class="tab" role="tab" id="tab-temperature" data-cat="temperature" aria-selected="false" aria-controls="panel" tabindex="-1">温度</button>
+  </div>
+
+  <div id="panel" role="tabpanel" aria-labelledby="tab-length">
+    <div class="field">
+      <label for="value">数值</label>
+      <input id="value" type="text" inputmode="decimal" autocomplete="off" spellcheck="false"
+             placeholder="例如 1、3.5、-40" aria-describedby="err">
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label for="from">从</label>
+        <select id="from"></select>
+      </div>
+      <button type="button" class="swap" id="swap" title="交换单位" aria-label="交换单位">&#8646;</button>
+      <div class="field">
+        <label for="to">到</label>
+        <select id="to"></select>
+      </div>
+    </div>
+
+    <p class="err" id="err" role="alert"></p>
+
+    <div class="result">
+      <div class="primary empty" id="primary" aria-live="polite">—</div>
+      <div class="note" id="note" role="status"></div>
+    </div>
+  </div>
+
+  <section class="all">
+    <h2>各单位的等值</h2>
+    <ul id="allList"></ul>
+  </section>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------------- 数据（全部内嵌，无网络请求） ---------------- */
+  var DATA = {
+    length: {
+      label: '长度',
+      units: [
+        { id: 'mm', name: '毫米', f: 0.001 },
+        { id: 'cm', name: '厘米', f: 0.01 },
+        { id: 'm',  name: '米',   f: 1 },
+        { id: 'km', name: '千米', f: 1000 },
+        { id: 'in', name: '英寸', f: 0.0254 },
+        { id: 'ft', name: '英尺', f: 0.3048 },
+        { id: 'yd', name: '码',   f: 0.9144 },
+        { id: 'mi', name: '英里', f: 1609.344 }
+      ],
+      def: ['m', 'ft'],
+      allowNegative: false,
+      negMsg: '长度不能为负数，请输入 0 或正数。'
+    },
+    weight: {
+      label: '重量',
+      units: [
+        { id: 'mg', name: '毫克', f: 0.000001 },
+        { id: 'g',  name: '克',   f: 0.001 },
+        { id: 'kg', name: '千克', f: 1 },
+        { id: 't',  name: '吨',   f: 1000 },
+        { id: 'oz', name: '盎司', f: 0.028349523125 },
+        { id: 'lb', name: '磅',   f: 0.45359237 }
+      ],
+      def: ['kg', 'lb'],
+      allowNegative: false,
+      negMsg: '重量不能为负数，请输入 0 或正数。'
+    },
+    temperature: {
+      label: '温度',
+      special: true,
+      units: [
+        { id: 'c', name: '摄氏度 (°C)' },
+        { id: 'f', name: '华氏度 (°F)' },
+        { id: 'k', name: '开尔文 (K)' }
+      ],
+      def: ['c', 'f'],
+      allowNegative: true
+    }
+  };
+
+  var NUM_RE = /^[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?$/;
+
+  /* ---------------- 温度换算（以摄氏度为基准） ---------------- */
+  function toCelsius(v, id) {
+    if (id === 'c') return v;
+    if (id === 'f') return (v - 32) * 5 / 9;
+    return v - 273.15;            /* 开尔文 */
+  }
+  function fromCelsius(c, id) {
+    if (id === 'c') return c;
+    if (id === 'f') return c * 9 / 5 + 32;
+    return c + 273.15;            /* 开尔文 */
+  }
+
+  function convert(cat, v, fromId, toId) {
+    var cfg = DATA[cat];
+    if (cfg.special) return fromCelsius(toCelsius(v, fromId), toId);
+    var fu = findUnit(cfg, fromId), tu = findUnit(cfg, toId);
+    return v * fu.f / tu.f;
+  }
+
+  function findUnit(cfg, id) {
+    for (var i = 0; i < cfg.units.length; i++) {
+      if (cfg.units[i].id === id) return cfg.units[i];
+    }
+    return null;
+  }
+
+  /* ---------------- 数值格式化：不产生无意义长小数 ---------------- */
+  function fmt(n) {
+    if (typeof n !== 'number' || !isFinite(n)) return '—';
+    if (n === 0) return '0';
+    var abs = Math.abs(n);
+    if (abs >= 1e15 || abs < 1e-6) {
+      var parts = n.toExponential(6).split('e');
+      var mant = parts[0].replace(/\.?0+$/, '');
+      return mant + 'e' + parts[1];
+    }
+    return Number(n.toPrecision(10)).toString();
+  }
+
+  /* ---------------- DOM ---------------- */
+  var tabs     = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+  var panel    = document.getElementById('panel');
+  var input    = document.getElementById('value');
+  var fromSel  = document.getElementById('from');
+  var toSel    = document.getElementById('to');
+  var swapBtn  = document.getElementById('swap');
+  var errEl    = document.getElementById('err');
+  var primary  = document.getElementById('primary');
+  var note     = document.getElementById('note');
+  var allList  = document.getElementById('allList');
+
+  var state = { cat: 'length' };
+
+  function setError(msg) {
+    errEl.textContent = msg || '';
+    if (msg) input.setAttribute('aria-invalid', 'true');
+    else input.removeAttribute('aria-invalid');
+  }
+
+  function unitName(id) {
+    var u = findUnit(DATA[state.cat], id);
+    return u ? u.name : id;
+  }
+
+  function fillSelects(cfg) {
+    fromSel.textContent = '';
+    toSel.textContent = '';
+    cfg.units.forEach(function (u) {
+      fromSel.appendChild(new Option(u.name, u.id));
+      toSel.appendChild(new Option(u.name, u.id));
+    });
+    fromSel.value = cfg.def[0];
+    toSel.value = cfg.def[1];
+  }
+
+  function clearOutputs() {
+    primary.textContent = '—';
+    primary.classList.add('empty');
+    note.textContent = '';
+    allList.textContent = '';
+  }
+
+  function render() {
+    var cfg = DATA[state.cat];
+    var raw = input.value.trim();
+
+    if (raw === '') {
+      setError('');
+      clearOutputs();
+      return;
+    }
+    if (!NUM_RE.test(raw)) {
+      setError('“' + clip(raw) + '” 不是有效数字，请输入如 1、3.5、-40 这样的数值。');
+      clearOutputs();
+      return;
+    }
+    var v = Number(raw);
+    if (!isFinite(v)) {
+      setError('数值超出可计算范围。');
+      clearOutputs();
+      return;
+    }
+    if (!cfg.allowNegative && v < 0) {
+      setError(cfg.negMsg);
+      clearOutputs();
+      return;
+    }
+
+    var fromId = fromSel.value;
+    var toId   = toSel.value;
+    var out    = convert(state.cat, v, fromId, toId);
+
+    if (!isFinite(out)) {
+      setError('换算结果超出可表示范围。');
+      clearOutputs();
+      return;
+    }
+
+    setError('');
+    primary.classList.remove('empty');
+    primary.textContent = fmt(v) + ' ' + unitName(fromId) + ' = ' + fmt(out) + ' ' + unitName(toId);
+
+    /* 温度：低于绝对零度只作提示，不做数学阻断 */
+    var n = '';
+    if (cfg.special) {
+      var kelvin = fromCelsius(toCelsius(v, fromId), 'k');
+      if (kelvin < -1e-9) {
+        n = '提示：该温度低于绝对零度（0 K / -273.15 °C），现实中不可达，此处仅为数学换算。';
+      }
+    }
+    note.textContent = n;
+
+    /* 全部单位等值 */
+    allList.textContent = '';
+    cfg.units.forEach(function (u) {
+      var val = convert(state.cat, v, fromId, u.id);
+      var li = document.createElement('li');
+      if (u.id === fromId) li.className = 'dim';
+      var a = document.createElement('span');
+      a.className = 'u';
+      a.textContent = u.name;
+      var b = document.createElement('span');
+      b.className = 'v';
+      b.textContent = fmt(val);
+      li.appendChild(a);
+      li.appendChild(b);
+      allList.appendChild(li);
+    });
+  }
+
+  function clip(s) {
+    return s.length > 24 ? s.slice(0, 24) + '…' : s;
+  }
+
+  function setCategory(cat) {
+    state.cat = cat;
+    tabs.forEach(function (t) {
+      var on = t.dataset.cat === cat;
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      t.classList.toggle('on', on);
+      t.tabIndex = on ? 0 : -1;
+    });
+    panel.setAttribute('aria-labelledby', 'tab-' + cat);
+    fillSelects(DATA[cat]);
+    render();
+  }
+
+  /* ---------------- 事件 ---------------- */
+  tabs.forEach(function (t) {
+    t.addEventListener('click', function () { setCategory(t.dataset.cat); });
+  });
+
+  /* 标签页方向键导航（键盘可完成全部操作） */
+  document.querySelector('.tabs').addEventListener('keydown', function (e) {
+    var i = tabs.indexOf(document.activeElement);
+    if (i < 0) return;
+    var ni = null;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') ni = (i + 1) % tabs.length;
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') ni = (i - 1 + tabs.length) % tabs.length;
+    else if (e.key === 'Home') ni = 0;
+    else if (e.key === 'End') ni = tabs.length - 1;
+    if (ni === null) return;
+    e.preventDefault();
+    tabs[ni].focus();
+    setCategory(tabs[ni].dataset.cat);
+  });
+
+  input.addEventListener('input', render);
+  input.addEventListener('change', render);
+  fromSel.addEventListener('change', render);
+  toSel.addEventListener('change', render);
+
+  swapBtn.addEventListener('click', function () {
+    var a = fromSel.value;
+    fromSel.value = toSel.value;
+    toSel.value = a;
+    render();
+  });
+
+  /* ---------------- 初始化 ---------------- */
+  setCategory('length');
+})();
+</script>
+</body>
+</html>

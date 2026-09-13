@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Crab Snowplow — Arctic Run</title>
+<!--
+  SVG003 · crab × snowplow
+  主体：赤甲蟹驾驶重型扫雪车，朝画面右侧前进。
+  几何/运动自洽说明亦见 notes.md。
+-->
+<style>
+  :root {
+    --night-deep: #071522;
+    --night-mid: #0e2a40;
+    --sky-ice: #1a4a66;
+    --aurora-teal: #2ec4a6;
+    --aurora-violet: #6b7cff;
+    --mtn-far: #1a3348;
+    --mtn-mid: #243f55;
+    --mtn-near: #2e4f66;
+    --hill: #3a6578;
+    --snow-cool: #c8dce8;
+    --snow-bright: #eef6fb;
+    --snow-shadow: #8aafc4;
+    --ice-floor: #9ec4d6;
+    --crab-shell: #e85a48;
+    --crab-deep: #b83428;
+    --crab-belly: #f2a090;
+    --crab-claw-tip: #f0c4a0;
+    --steel-dark: #1c2830;
+    --steel: #3d5160;
+    --steel-light: #5a7386;
+    --steel-hi: #8aa3b5;
+    --amber: #f5a623;
+    --amber-hot: #ffd066;
+    --hazard: #e8b923;
+    --glass: #7ec8e8;
+    --glass-deep: #2a6a8a;
+    --beam: #ffe9a8;
+    --track: #2a3540;
+    --hub: #6a8496;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--night-deep);
+  }
+
+  body {
+    display: grid;
+    place-items: center;
+    font-family: "Segoe UI", "Avenir Next", system-ui, sans-serif;
+  }
+
+  .stage {
+    position: relative;
+    width: min(100vw, 177.78vh);
+    height: min(56.25vw, 100vh);
+    max-width: 100%;
+    max-height: 100%;
+    overflow: hidden;
+    box-shadow: 0 0 80px rgba(0, 0, 0, 0.55) inset;
+  }
+
+  svg.scene {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ——— Parallax scroll shells (translateX only; GPU-safe) ——— */
+  .plx {
+    will-change: transform;
+  }
+  .plx-stars   { animation: slide-left 120s linear infinite; }
+  .plx-aurora  { animation: slide-left 90s linear infinite; }
+  .plx-mtn-far { animation: slide-left 70s linear infinite; }
+  .plx-mtn-mid { animation: slide-left 42s linear infinite; }
+  .plx-hills   { animation: slide-left 22s linear infinite; }
+  .plx-ground  { animation: slide-left 10s linear infinite; }
+
+  @keyframes slide-left {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-640px); }
+  }
+
+  /* Vehicle chassis bob — vertical only, independent of limbs */
+  .chassis {
+    animation: bob 0.55s ease-in-out infinite;
+    transform-origin: 640px 430px;
+  }
+  @keyframes bob {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50%      { transform: translateY(-3px) rotate(0.35deg); }
+  }
+
+  /* Wheels: clockwise = forward-right */
+  .wheel-spin {
+    animation: spin 0.9s linear infinite;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Track belt scroll (visual cue matching wheel direction) */
+  .belt-marks {
+    animation: belt 0.9s linear infinite;
+  }
+  @keyframes belt {
+    from { stroke-dashoffset: 0; }
+    to   { stroke-dashoffset: -28; }
+  }
+
+  /* Crab limbs — relative to chassis, different phase/amplitude */
+  .claw-l {
+    animation: claw-pulse-l 1.7s ease-in-out infinite;
+    transform-box: fill-box;
+    transform-origin: 80% 40%;
+  }
+  @keyframes claw-pulse-l {
+    0%, 100% { transform: rotate(0deg) translateY(0); }
+    40%      { transform: rotate(-7deg) translateY(1px); }
+    70%      { transform: rotate(3deg) translateY(0); }
+  }
+
+  .claw-r {
+    animation: claw-pulse-r 1.9s ease-in-out infinite;
+    transform-box: fill-box;
+    transform-origin: 20% 40%;
+  }
+  @keyframes claw-pulse-r {
+    0%, 100% { transform: rotate(0deg); }
+    35%      { transform: rotate(6deg); }
+    65%      { transform: rotate(-4deg); }
+  }
+
+  .eye-stalk-l {
+    animation: eye-bob-l 2.1s ease-in-out infinite;
+    transform-box: fill-box;
+    transform-origin: bottom center;
+  }
+  .eye-stalk-r {
+    animation: eye-bob-r 1.6s ease-in-out infinite;
+    transform-box: fill-box;
+    transform-origin: bottom center;
+  }
+  @keyframes eye-bob-l {
+    0%, 100% { transform: rotate(-4deg); }
+    50%      { transform: rotate(5deg); }
+  }
+  @keyframes eye-bob-r {
+    0%, 100% { transform: rotate(3deg); }
+    50%      { transform: rotate(-6deg); }
+  }
+
+  .pupil {
+    animation: glance 3.4s ease-in-out infinite;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  @keyframes glance {
+    0%, 40%, 100% { transform: translateX(0); }
+    55%, 75%      { transform: translateX(2.5px); }
+  }
+
+  .antenna {
+    animation: antenna-wave 1.4s ease-in-out infinite;
+    transform-box: fill-box;
+    transform-origin: bottom center;
+  }
+  .antenna-b { animation-duration: 1.75s; animation-direction: alternate-reverse; }
+  @keyframes antenna-wave {
+    0%, 100% { transform: rotate(-8deg); }
+    50%      { transform: rotate(10deg); }
+  }
+
+  /* Walking legs brace against floor — counter-phase to chassis bob */
+  .leg-walk-a { animation: leg-brace 0.55s ease-in-out infinite; transform-box: fill-box; transform-origin: top center; }
+  .leg-walk-b { animation: leg-brace 0.55s ease-in-out infinite reverse; transform-box: fill-box; transform-origin: top center; }
+  @keyframes leg-brace {
+    0%, 100% { transform: rotate(-3deg); }
+    50%      { transform: rotate(4deg); }
+  }
+
+  /* Beacon rotate + glow pulse */
+  .beacon-light {
+    animation: beacon-spin 1.2s linear infinite;
+    transform-box: fill-box;
+    transform-origin: center bottom;
+  }
+  @keyframes beacon-spin {
+    0%   { opacity: 0.35; }
+    20%  { opacity: 1; }
+    50%  { opacity: 0.45; }
+    70%  { opacity: 1; }
+    100% { opacity: 0.35; }
+  }
+  .beacon-glow {
+    animation: glow-pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes glow-pulse {
+    0%, 100% { opacity: 0.15; }
+    40%      { opacity: 0.55; }
+  }
+
+  /* Headlight beam shimmer */
+  .beam {
+    animation: beam-flicker 2.8s ease-in-out infinite;
+  }
+  @keyframes beam-flicker {
+    0%, 100% { opacity: 0.22; }
+    50%      { opacity: 0.38; }
+  }
+
+  /* Exhaust puffs */
+  .puff {
+    animation: puff-rise 2.4s ease-out infinite;
+    opacity: 0;
+  }
+  .puff-2 { animation-delay: 0.8s; }
+  .puff-3 { animation-delay: 1.6s; }
+  @keyframes puff-rise {
+    0%   { opacity: 0; transform: translate(0, 0) scale(0.4); }
+    20%  { opacity: 0.45; }
+    100% { opacity: 0; transform: translate(-40px, -55px) scale(1.6); }
+  }
+
+  /* Plow snow spray */
+  .spray-a { animation: spray 0.7s ease-out infinite; }
+  .spray-b { animation: spray 0.7s ease-out infinite 0.18s; }
+  .spray-c { animation: spray 0.7s ease-out infinite 0.36s; }
+  @keyframes spray {
+    0%   { opacity: 0.9; transform: translate(0, 0); }
+    100% { opacity: 0; transform: translate(48px, -28px); }
+  }
+
+  /* Falling snow layers */
+  .snow-far {
+    animation: snow-fall 14s linear infinite;
+  }
+  .snow-near {
+    animation: snow-fall 7s linear infinite;
+  }
+  @keyframes snow-fall {
+    from { transform: translateY(-40px); }
+    to   { transform: translateY(760px); }
+  }
+
+  /* Subtle cab window steam */
+  .steam {
+    animation: steam-drift 3.2s ease-in-out infinite;
+  }
+  @keyframes steam-drift {
+    0%, 100% { opacity: 0.12; }
+    50%      { opacity: 0.28; }
+  }
+
+  /* Vignette / grain overlay */
+  .vignette {
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .plx, .chassis, .wheel-spin, .belt-marks,
+    .claw-l, .claw-r, .eye-stalk-l, .eye-stalk-r, .pupil,
+    .antenna, .leg-walk-a, .leg-walk-b,
+    .beacon-light, .beacon-glow, .beam,
+    .puff, .spray-a, .spray-b, .spray-c,
+    .snow-far, .snow-near, .steam {
+      animation: none !important;
+    }
+  }
+
+  .caption {
+    position: absolute;
+    left: 18px;
+    bottom: 14px;
+    color: rgba(200, 220, 232, 0.55);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    pointer-events: none;
+    user-select: none;
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+  <svg class="scene" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="一只赤色螃蟹驾驶重型扫雪车在极夜雪原中向右行驶">
+    <defs>
+      <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#050e18"/>
+        <stop offset="45%" stop-color="#0e2a40"/>
+        <stop offset="100%" stop-color="#1a4a66"/>
+      </linearGradient>
+      <linearGradient id="groundGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#d4e6f0"/>
+        <stop offset="40%" stop-color="#a8c8d8"/>
+        <stop offset="100%" stop-color="#6a90a8"/>
+      </linearGradient>
+      <linearGradient id="cabGlass" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#9ad4ee" stop-opacity="0.55"/>
+        <stop offset="50%" stop-color="#3a7a9a" stop-opacity="0.35"/>
+        <stop offset="100%" stop-color="#1a4058" stop-opacity="0.5"/>
+      </linearGradient>
+      <linearGradient id="steelBody" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#5a7386"/>
+        <stop offset="40%" stop-color="#3d5160"/>
+        <stop offset="100%" stop-color="#1c2830"/>
+      </linearGradient>
+      <linearGradient id="plowBlade" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#2a3844"/>
+        <stop offset="50%" stop-color="#4a6274"/>
+        <stop offset="100%" stop-color="#2a3844"/>
+      </linearGradient>
+      <linearGradient id="crabShell" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#f07060"/>
+        <stop offset="55%" stop-color="#e85a48"/>
+        <stop offset="100%" stop-color="#b83428"/>
+      </linearGradient>
+      <radialGradient id="beaconGlow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#ffd066" stop-opacity="0.7"/>
+        <stop offset="100%" stop-color="#ffd066" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="headGlow" cx="0%" cy="50%" r="80%">
+        <stop offset="0%" stop-color="#ffe9a8" stop-opacity="0.45"/>
+        <stop offset="100%" stop-color="#ffe9a8" stop-opacity="0"/>
+      </radialGradient>
+      <linearGradient id="auroraGrad" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#2ec4a6" stop-opacity="0"/>
+        <stop offset="30%" stop-color="#2ec4a6" stop-opacity="0.35"/>
+        <stop offset="55%" stop-color="#6b7cff" stop-opacity="0.28"/>
+        <stop offset="80%" stop-color="#2ec4a6" stop-opacity="0.2"/>
+        <stop offset="100%" stop-color="#6b7cff" stop-opacity="0"/>
+      </linearGradient>
+      <pattern id="hazard" width="16" height="16" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
+        <rect width="16" height="16" fill="#1a1a1a"/>
+        <rect width="8" height="16" fill="#e8b923"/>
+      </pattern>
+      <clipPath id="cabClip">
+        <rect x="700" y="300" width="130" height="90" rx="8"/>
+      </clipPath>
+      <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur stdDeviation="3"/>
+      </filter>
+      <filter id="soft6" x="-30%" y="-30%" width="160%" height="160%">
+        <feGaussianBlur stdDeviation="6"/>
+      </filter>
+    </defs>
+
+    <!-- ========== L0 SKY ========== -->
+    <rect width="1280" height="720" fill="url(#skyGrad)"/>
+
+    <!-- Stars: far layer, slowest scroll -->
+    <g class="plx plx-stars" opacity="0.9">
+      <g fill="#e8f2ff">
+        <circle cx="40" cy="48" r="1.2" opacity="0.7"/><circle cx="120" cy="90" r="0.9" opacity="0.5"/>
+        <circle cx="200" cy="36" r="1.4" opacity="0.85"/><circle cx="280" cy="110" r="0.8" opacity="0.45"/>
+        <circle cx="360" cy="60" r="1.1" opacity="0.65"/><circle cx="440" cy="28" r="1.5" opacity="0.9"/>
+        <circle cx="520" cy="95" r="0.7" opacity="0.4"/><circle cx="600" cy="50" r="1.2" opacity="0.7"/>
+        <circle cx="680" cy="120" r="1.0" opacity="0.55"/><circle cx="760" cy="40" r="1.3" opacity="0.8"/>
+        <circle cx="840" cy="85" r="0.9" opacity="0.5"/><circle cx="920" cy="55" r="1.1" opacity="0.65"/>
+        <circle cx="1000" cy="100" r="1.4" opacity="0.85"/><circle cx="1080" cy="30" r="0.8" opacity="0.45"/>
+        <circle cx="1160" cy="70" r="1.2" opacity="0.7"/><circle cx="1240" cy="105" r="1.0" opacity="0.6"/>
+        <circle cx="80" cy="160" r="0.8" opacity="0.4"/><circle cx="300" cy="150" r="1.0" opacity="0.55"/>
+        <circle cx="500" cy="170" r="0.7" opacity="0.35"/><circle cx="700" cy="155" r="1.1" opacity="0.6"/>
+        <circle cx="900" cy="165" r="0.9" opacity="0.5"/><circle cx="1100" cy="145" r="1.2" opacity="0.65"/>
+        <!-- tile for seamless loop (offset +640) -->
+        <circle cx="680" cy="48" r="1.2" opacity="0.7"/><circle cx="760" cy="90" r="0.9" opacity="0.5"/>
+        <circle cx="840" cy="36" r="1.4" opacity="0.85"/><circle cx="920" cy="110" r="0.8" opacity="0.45"/>
+        <circle cx="1000" cy="60" r="1.1" opacity="0.65"/><circle cx="1080" cy="28" r="1.5" opacity="0.9"/>
+        <circle cx="1160" cy="95" r="0.7" opacity="0.4"/><circle cx="1240" cy="50" r="1.2" opacity="0.7"/>
+      </g>
+    </g>
+
+    <!-- Aurora band -->
+    <g class="plx plx-aurora">
+      <path d="M-40 80 C 120 20, 280 140, 440 70 S 720 30, 880 100 S 1160 40, 1320 90 L 1320 150 C 1160 100, 1000 160, 840 120 S 520 90, 360 140 S 80 90, -40 140 Z"
+            fill="url(#auroraGrad)" filter="url(#soft6)"/>
+      <path d="M-40 130 C 160 90, 320 170, 500 120 S 820 90, 1000 150 S 1240 110, 1320 140 L 1320 175 C 1200 145, 1040 190, 860 155 S 540 130, 360 175 S 80 140, -40 170 Z"
+            fill="#6b7cff" opacity="0.12" filter="url(#soft6)"/>
+    </g>
+
+    <!-- Far mountains -->
+    <g class="plx plx-mtn-far">
+      <path d="M-40 320 L 80 200 L 160 260 L 260 160 L 360 240 L 460 150 L 560 230 L 640 180
+               L 720 240 L 820 150 L 920 250 L 1020 170 L 1120 230 L 1200 155 L 1320 250 L 1320 400 L -40 400 Z"
+            fill="#1a3348"/>
+      <path d="M-40 360 L 100 250 L 200 300 L 320 210 L 440 290 L 560 200 L 680 280 L 800 220
+               L 920 300 L 1040 210 L 1160 290 L 1280 230 L 1320 280 L 1320 420 L -40 420 Z"
+            fill="#1f3a50" opacity="0.85"/>
+      <!-- snow caps -->
+      <path d="M260 160 L 280 190 L 240 190 Z M460 150 L 485 185 L 435 185 Z M820 150 L 845 190 L 795 190 Z M1020 170 L 1040 200 L 1000 200 Z"
+            fill="#8aafc4" opacity="0.55"/>
+    </g>
+
+    <!-- Mid mountains -->
+    <g class="plx plx-mtn-mid">
+      <path d="M-40 400 L 60 300 L 140 350 L 240 270 L 340 340 L 440 260 L 540 330 L 640 280
+               L 740 340 L 840 255 L 940 340 L 1040 270 L 1140 345 L 1240 280 L 1320 340 L 1320 480 L -40 480 Z"
+            fill="#243f55"/>
+      <path d="M-40 440 L 80 360 L 180 400 L 280 340 L 380 400 L 480 330 L 600 400 L 720 350
+               L 840 410 L 960 340 L 1080 400 L 1200 350 L 1320 410 L 1320 500 L -40 500 Z"
+            fill="#2e4f66" opacity="0.9"/>
+      <path d="M240 270 L 260 305 L 220 305 Z M440 260 L 465 300 L 415 300 Z M840 255 L 865 300 L 815 300 Z"
+            fill="#a8c8d8" opacity="0.4"/>
+    </g>
+
+    <!-- Rolling hills + sparse pines -->
+    <g class="plx plx-hills">
+      <path d="M-40 500 C 80 470, 160 520, 280 490 S 480 460, 600 500 S 800 470, 920 505 S 1160 465, 1320 500 L 1320 620 L -40 620 Z"
+            fill="#3a6578"/>
+      <!-- pine silhouettes -->
+      <g fill="#1e3a48">
+        <path d="M90 495 L 105 445 L 120 495 Z M100 470 L 105 430 L 110 470 Z"/>
+        <path d="M200 488 L 218 430 L 236 488 Z"/>
+        <path d="M310 492 L 322 450 L 334 492 Z"/>
+        <path d="M450 485 L 470 420 L 490 485 Z M458 460 L 470 405 L 482 460 Z"/>
+        <path d="M580 490 L 595 445 L 610 490 Z"/>
+        <path d="M730 487 L 750 425 L 770 487 Z"/>
+        <path d="M860 492 L 875 450 L 890 492 Z"/>
+        <path d="M1000 485 L 1020 420 L 1040 485 Z"/>
+        <path d="M1140 490 L 1155 445 L 1170 490 Z"/>
+        <path d="M1260 488 L 1278 430 L 1296 488 Z"/>
+        <!-- tile -->
+        <path d="M730 495 L 745 445 L 760 495 Z M740 470 L 745 430 L 750 470 Z"/>
+        <path d="M840 488 L 858 430 L 876 488 Z"/>
+        <path d="M950 492 L 962 450 L 974 492 Z"/>
+        <path d="M1090 485 L 1110 420 L 1130 485 Z"/>
+        <path d="M1220 490 L 1235 445 L 1250 490 Z"/>
+      </g>
+    </g>
+
+    <!-- Ground snow floor -->
+    <g class="plx plx-ground">
+      <rect x="-40" y="500" width="1400" height="240" fill="url(#groundGrad)"/>
+      <!-- snow texture ridges -->
+      <path d="M-40 520 Q 80 510 200 525 T 440 518 T 680 528 T 920 515 T 1160 525 T 1360 518 L 1360 560 L -40 560 Z"
+            fill="#eef6fb" opacity="0.55"/>
+      <path d="M-40 560 Q 100 548 220 562 T 480 555 T 740 568 T 1000 552 T 1280 565 L 1360 580 L -40 580 Z"
+            fill="#c8dce8" opacity="0.45"/>
+      <!-- ice patches -->
+      <ellipse cx="180" cy="600" rx="90" ry="12" fill="#b8d4e4" opacity="0.35"/>
+      <ellipse cx="520" cy="620" rx="120" ry="14" fill="#b8d4e4" opacity="0.3"/>
+      <ellipse cx="880" cy="605" rx="100" ry="11" fill="#b8d4e4" opacity="0.32"/>
+      <ellipse cx="1180" cy="630" rx="80" ry="10" fill="#b8d4e4" opacity="0.28"/>
+      <!-- tire tracks left behind (imply rightward motion) -->
+      <path d="M-40 640 Q 200 638 400 642 T 800 640 T 1280 644" stroke="#8aafc4" stroke-width="8" fill="none" opacity="0.35" stroke-linecap="round"/>
+      <path d="M-40 665 Q 200 663 400 667 T 800 665 T 1280 669" stroke="#8aafc4" stroke-width="8" fill="none" opacity="0.3" stroke-linecap="round"/>
+      <!-- dashed track marks -->
+      <path d="M0 652 L 20 652 M40 652 L 60 652 M80 652 L 100 652 M120 652 L 140 652 M160 652 L 180 652 M200 652 L 220 652 M240 652 L 260 652 M280 652 L 300 652 M320 652 L 340 652 M360 652 L 380 652 M400 652 L 420 652 M440 652 L 460 652 M480 652 L 500 652 M520 652 L 540 652 M560 652 L 580 652 M600 652 L 620 652 M640 652 L 660 652 M680 652 L 700 652 M720 652 L 740 652 M760 652 L 780 652 M800 652 L 820 652 M840 652 L 860 652 M880 652 L 900 652 M920 652 L 940 652 M960 652 L 980 652 M1000 652 L 1020 652 M1040 652 L 1060 652 M1080 652 L 1100 652 M1120 652 L 1140 652 M1160 652 L 1180 652 M1200 652 L 1220 652 M1240 652 L 1260 652 M1280 652 L 1300 652"
+            stroke="#7a9cb0" stroke-width="3" opacity="0.4" class="belt-marks"/>
+    </g>
+
+    <!-- Soft ground shadow under vehicle (static to camera) -->
+    <ellipse cx="660" cy="628" rx="210" ry="18" fill="#0a1820" opacity="0.28" filter="url(#soft)"/>
+
+    <!-- ========== VEHICLE + CRAB ========== -->
+    <g class="chassis">
+
+      <!-- Headlight beam (points right) -->
+      <path class="beam" d="M980 430 L 1280 380 L 1280 500 L 980 460 Z" fill="url(#headGlow)"/>
+
+      <!-- Exhaust puffs -->
+      <g transform="translate(560, 300)">
+        <circle class="puff" cx="0" cy="0" r="8" fill="#c8dce8" opacity="0"/>
+        <circle class="puff puff-2" cx="4" cy="-2" r="6" fill="#c8dce8" opacity="0"/>
+        <circle class="puff puff-3" cx="-2" cy="2" r="7" fill="#c8dce8" opacity="0"/>
+      </g>
+
+      <!-- === PLOW BLADE (front = right) === -->
+      <g id="plow">
+        <!-- blade face -->
+        <path d="M920 420 L 1040 400 L 1060 470 L 1040 560 L 920 545 Z" fill="url(#plowBlade)" stroke="#1a242c" stroke-width="2"/>
+        <!-- cutting edge -->
+        <path d="M1040 400 L 1060 470 L 1040 560 L 1055 560 L 1075 470 L 1055 400 Z" fill="#8aa3b5"/>
+        <!-- hazard stripe strip -->
+        <rect x="930" y="480" width="110" height="18" fill="url(#hazard)" stroke="#111" stroke-width="1"/>
+        <!-- top reinforcement -->
+        <rect x="925" y="412" width="100" height="12" rx="2" fill="#5a7386"/>
+        <!-- mount arms to chassis -->
+        <rect x="880" y="440" width="50" height="14" rx="3" fill="#2a3844"/>
+        <rect x="880" y="500" width="50" height="14" rx="3" fill="#2a3844"/>
+        <!-- snow spray from plow face -->
+        <g fill="#eef6fb">
+          <ellipse class="spray-a" cx="1060" cy="430" rx="10" ry="6" opacity="0.8"/>
+          <ellipse class="spray-b" cx="1070" cy="470" rx="12" ry="7" opacity="0.7"/>
+          <ellipse class="spray-c" cx="1055" cy="520" rx="9" ry="5" opacity="0.75"/>
+          <ellipse class="spray-a" cx="1080" cy="450" rx="7" ry="4" opacity="0.6"/>
+          <ellipse class="spray-b" cx="1090" cy="500" rx="8" ry="5" opacity="0.55"/>
+        </g>
+        <!-- piled snow on blade -->
+        <path d="M930 412 Q 970 390 1020 405 L 1030 415 Q 980 400 930 418 Z" fill="#eef6fb" opacity="0.85"/>
+      </g>
+
+      <!-- === MAIN BODY / CHASSIS === -->
+      <g id="body">
+        <!-- lower chassis -->
+        <rect x="560" y="470" width="360" height="70" rx="10" fill="url(#steelBody)" stroke="#0e1820" stroke-width="2"/>
+        <!-- side panel detail -->
+        <rect x="580" y="485" width="80" height="40" rx="4" fill="#2a3844" stroke="#1a242c" stroke-width="1"/>
+        <rect x="670" y="485" width="40" height="40" rx="4" fill="#2a3844" stroke="#1a242c" stroke-width="1"/>
+        <text x="595" y="510" font-family="Segoe UI, sans-serif" font-size="11" fill="#8aa3b5" letter-spacing="1">PLW-07</text>
+        <!-- fuel tank -->
+        <rect x="720" y="490" width="55" height="35" rx="8" fill="#3d5160" stroke="#1c2830" stroke-width="1.5"/>
+        <rect x="730" y="498" width="35" height="8" rx="2" fill="#5a7386" opacity="0.6"/>
+
+        <!-- cab structure -->
+        <path d="M680 470 L 680 320 Q 680 300 700 295 L 820 285 Q 845 283 850 305 L 860 470 Z"
+              fill="url(#steelBody)" stroke="#0e1820" stroke-width="2"/>
+        <!-- cab roof overhang -->
+        <path d="M670 310 L 860 290 L 865 305 L 675 325 Z" fill="#5a7386" stroke="#1c2830" stroke-width="1.5"/>
+        <!-- cab window -->
+        <path d="M700 330 L 820 318 L 828 400 L 705 410 Z" fill="url(#cabGlass)" stroke="#1a4058" stroke-width="2"/>
+        <!-- window reflection -->
+        <path d="M710 340 L 760 334 L 720 395 L 708 396 Z" fill="#eef6fb" opacity="0.15"/>
+        <!-- side window -->
+        <path d="M830 320 L 850 318 L 855 400 L 835 402 Z" fill="url(#cabGlass)" opacity="0.7" stroke="#1a4058" stroke-width="1.5"/>
+        <!-- door line -->
+        <line x1="825" y1="320" x2="825" y2="465" stroke="#1c2830" stroke-width="1.5" opacity="0.5"/>
+        <!-- door handle -->
+        <rect x="800" y="430" width="18" height="5" rx="2" fill="#8aa3b5"/>
+
+        <!-- steam on glass -->
+        <ellipse class="steam" cx="760" cy="360" rx="30" ry="18" fill="#eef6fb" opacity="0.15" clip-path="url(#cabClip)"/>
+
+        <!-- exhaust stack -->
+        <rect x="540" y="300" width="18" height="180" rx="3" fill="#2a3844" stroke="#1c2830" stroke-width="1.5"/>
+        <rect x="534" y="290" width="30" height="16" rx="3" fill="#3d5160"/>
+        <rect x="538" y="282" width="22" height="10" rx="2" fill="#5a7386"/>
+
+        <!-- rear engine housing -->
+        <path d="M560 400 L 680 390 L 680 470 L 560 470 Z" fill="#3d5160" stroke="#1c2830" stroke-width="2"/>
+        <rect x="575" y="415" width="40" height="30" rx="3" fill="#1c2830" opacity="0.5"/>
+        <circle cx="620" cy="430" r="6" fill="#5a7386"/>
+
+        <!-- amber beacon on roof -->
+        <rect x="740" y="278" width="22" height="12" rx="2" fill="#2a3844"/>
+        <g class="beacon-light">
+          <ellipse cx="751" cy="272" rx="10" ry="12" fill="#f5a623" opacity="0.9"/>
+          <ellipse cx="751" cy="272" rx="5" ry="6" fill="#ffd066"/>
+        </g>
+        <circle class="beacon-glow" cx="751" cy="272" r="28" fill="url(#beaconGlow)"/>
+
+        <!-- headlight housing -->
+        <rect x="900" y="430" width="28" height="28" rx="4" fill="#1c2830" stroke="#0e1820" stroke-width="1"/>
+        <circle cx="914" cy="444" r="9" fill="#ffe9a8"/>
+        <circle cx="914" cy="444" r="5" fill="#fff8e0"/>
+      </g>
+
+      <!-- === WHEELS (clockwise → rightward) === -->
+      <!-- rear wheel -->
+      <g transform="translate(620, 560)">
+        <circle r="48" fill="#1a242c" stroke="#0e1418" stroke-width="3"/>
+        <circle r="38" fill="#2a3540"/>
+        <g class="wheel-spin">
+          <circle r="22" fill="none" stroke="#6a8496" stroke-width="3"/>
+          <circle r="8" fill="#8aa3b5"/>
+          <!-- spokes: rotation direction marker -->
+          <line x1="0" y1="-22" x2="0" y2="-8" stroke="#8aa3b5" stroke-width="3"/>
+          <line x1="22" y1="0" x2="8" y2="0" stroke="#8aa3b5" stroke-width="3"/>
+          <line x1="0" y1="22" x2="0" y2="8" stroke="#8aa3b5" stroke-width="3"/>
+          <line x1="-22" y1="0" x2="-8" y2="0" stroke="#8aa3b5" stroke-width="3"/>
+          <!-- tread lug (asymmetric so spin is visible) -->
+          <circle cx="0" cy="-30" r="4" fill="#e85a48"/>
+        </g>
+        <!-- tread ring -->
+        <circle r="44" fill="none" stroke="#3d5160" stroke-width="6" stroke-dasharray="6 8" class="belt-marks"/>
+      </g>
+
+      <!-- front wheel -->
+      <g transform="translate(850, 560)">
+        <circle r="48" fill="#1a242c" stroke="#0e1418" stroke-width="3"/>
+        <circle r="38" fill="#2a3540"/>
+        <g class="wheel-spin">
+          <circle r="22" fill="none" stroke="#6a8496" stroke-width="3"/>
+          <circle r="8" fill="#8aa3b5"/>
+          <line x1="0" y1="-22" x2="0" y2="-8" stroke="#8aa3b5" stroke-width="3"/>
+          <line x1="22" y1="0" x2="8" y2="0" stroke="#8aa3b5" stroke-width="3"/>
+          <line x1="0" y1="22" x2="0" y2="8" stroke="#8aa3b5" stroke-width="3"/>
+          <line x1="-22" y1="0" x2="-8" y2="0" stroke="#8aa3b5" stroke-width="3"/>
+          <circle cx="0" cy="-30" r="4" fill="#e85a48"/>
+        </g>
+        <circle r="44" fill="none" stroke="#3d5160" stroke-width="6" stroke-dasharray="6 8" class="belt-marks"/>
+      </g>
+
+      <!-- axle hints -->
+      <rect x="600" y="545" width="40" height="10" fill="#1c2830"/>
+      <rect x="830" y="545" width="40" height="10" fill="#1c2830"/>
+
+      <!-- === CRAB DRIVER (in cab, independent limb motion) === -->
+      <g id="crab" transform="translate(0, 0)">
+        <!-- walking legs (visible through cab / floor area) — brace vs bob -->
+        <g stroke="#c44838" stroke-width="5" fill="none" stroke-linecap="round">
+          <path class="leg-walk-a" d="M720 400 L 700 430 L 690 455"/>
+          <path class="leg-walk-b" d="M735 402 L 725 432 L 720 458"/>
+          <path class="leg-walk-a" d="M750 404 L 755 434 L 760 458" style="animation-delay:0.15s"/>
+          <path class="leg-walk-b" d="M762 402 L 775 430 L 785 452" style="animation-delay:0.1s"/>
+        </g>
+        <!-- leg tips -->
+        <circle cx="690" cy="455" r="3" fill="#b83428"/>
+        <circle cx="720" cy="458" r="3" fill="#b83428"/>
+        <circle cx="760" cy="458" r="3" fill="#b83428"/>
+        <circle cx="785" cy="452" r="3" fill="#b83428"/>
+
+        <!-- body / carapace -->
+        <ellipse cx="750" cy="370" rx="48" ry="36" fill="url(#crabShell)" stroke="#9a2820" stroke-width="2"/>
+        <!-- shell texture spots -->
+        <circle cx="730" cy="360" r="4" fill="#c44838" opacity="0.5"/>
+        <circle cx="760" cy="355" r="3" fill="#c44838" opacity="0.45"/>
+        <circle cx="745" cy="380" r="5" fill="#c44838" opacity="0.4"/>
+        <circle cx="775" cy="375" r="3.5" fill="#c44838" opacity="0.4"/>
+        <!-- belly highlight -->
+        <ellipse cx="750" cy="385" rx="28" ry="12" fill="#f2a090" opacity="0.35"/>
+
+        <!-- eye stalks (independent bob) -->
+        <g class="eye-stalk-l">
+          <line x1="735" y1="340" x2="728" y2="310" stroke="#e85a48" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="727" cy="305" r="9" fill="#f2a090" stroke="#c44838" stroke-width="1.5"/>
+          <circle class="pupil" cx="729" cy="305" r="4.5" fill="#1a1a1a"/>
+          <circle cx="731" cy="303" r="1.5" fill="#fff"/>
+        </g>
+        <g class="eye-stalk-r">
+          <line x1="765" y1="338" x2="775" y2="308" stroke="#e85a48" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="777" cy="303" r="9" fill="#f2a090" stroke="#c44838" stroke-width="1.5"/>
+          <circle class="pupil" cx="779" cy="303" r="4.5" fill="#1a1a1a"/>
+          <circle cx="781" cy="301" r="1.5" fill="#fff"/>
+        </g>
+
+        <!-- antennae (independent wave) -->
+        <g class="antenna" fill="none" stroke="#f2a090" stroke-width="1.8" stroke-linecap="round">
+          <path d="M740 338 Q 720 300 710 280"/>
+          <circle cx="710" cy="280" r="2" fill="#f2a090" stroke="none"/>
+        </g>
+        <g class="antenna antenna-b" fill="none" stroke="#f2a090" stroke-width="1.8" stroke-linecap="round">
+          <path d="M758 336 Q 780 298 792 278"/>
+          <circle cx="792" cy="278" r="2" fill="#f2a090" stroke="none"/>
+        </g>
+
+        <!-- mouthparts / mandibles slight -->
+        <path d="M742 392 Q 750 398 758 392" fill="none" stroke="#9a2820" stroke-width="2" stroke-linecap="round"/>
+
+        <!-- LEFT CLAW on wheel (independent pulse) -->
+        <g class="claw-l">
+          <!-- arm -->
+          <path d="M715 375 L 680 395 L 665 420" fill="none" stroke="#e85a48" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- claw pincer gripping wheel rim -->
+          <ellipse cx="655" cy="425" rx="16" ry="12" fill="#e85a48" stroke="#b83428" stroke-width="1.5"/>
+          <path d="M645 420 L 630 412" stroke="#f0c4a0" stroke-width="7" stroke-linecap="round"/>
+          <path d="M648 432 L 632 436" stroke="#f0c4a0" stroke-width="6" stroke-linecap="round"/>
+        </g>
+
+        <!-- RIGHT CLAW on wheel (different period) -->
+        <g class="claw-r">
+          <path d="M785 375 L 810 400 L 820 425" fill="none" stroke="#e85a48" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+          <ellipse cx="825" cy="432" rx="16" ry="12" fill="#e85a48" stroke="#b83428" stroke-width="1.5"/>
+          <path d="M835 426 L 850 418" stroke="#f0c4a0" stroke-width="7" stroke-linecap="round"/>
+          <path d="M832 438 L 848 442" stroke="#f0c4a0" stroke-width="6" stroke-linecap="round"/>
+        </g>
+
+        <!-- steering wheel (crab holds this; rotates slowly) -->
+        <g transform="translate(740, 420)">
+          <circle r="28" fill="none" stroke="#2a3844" stroke-width="5"/>
+          <circle r="6" fill="#3d5160"/>
+          <g class="wheel-spin" style="animation-duration: 2.4s;">
+            <line x1="0" y1="-28" x2="0" y2="0" stroke="#2a3844" stroke-width="4"/>
+            <line x1="24" y1="14" x2="0" y2="0" stroke="#2a3844" stroke-width="4"/>
+            <line x1="-24" y1="14" x2="0" y2="0" stroke="#2a3844" stroke-width="4"/>
+          </g>
+        </g>
+
+        <!-- seat back hint -->
+        <rect x="780" y="340" width="12" height="50" rx="3" fill="#1c2830" opacity="0.6"/>
+      </g>
+    </g>
+
+    <!-- ========== FOREGROUND SNOW ========== -->
+    <!-- far snowflakes -->
+    <g class="snow-far" fill="#eef6fb" opacity="0.55">
+      <circle cx="60" cy="-20" r="2"/><circle cx="180" cy="-50" r="1.5"/>
+      <circle cx="300" cy="-10" r="2.2"/><circle cx="420" cy="-60" r="1.4"/>
+      <circle cx="540" cy="-30" r="1.8"/><circle cx="660" cy="-70" r="2"/>
+      <circle cx="780" cy="-15" r="1.6"/><circle cx="900" cy="-45" r="2.1"/>
+      <circle cx="1020" cy="-25" r="1.5"/><circle cx="1140" cy="-55" r="1.9"/>
+      <circle cx="1220" cy="-5" r="1.7"/><circle cx="100" cy="-80" r="1.3"/>
+      <circle cx="360" cy="-90" r="1.8"/><circle cx="720" cy="-95" r="1.4"/>
+      <circle cx="1080" cy="-85" r="2"/>
+    </g>
+    <!-- near snowflakes (faster, larger, more opaque) -->
+    <g class="snow-near" fill="#ffffff" opacity="0.75">
+      <circle cx="90" cy="-20" r="3.2"/><circle cx="250" cy="-60" r="2.8"/>
+      <circle cx="410" cy="-15" r="3.5"/><circle cx="570" cy="-50" r="2.6"/>
+      <circle cx="730" cy="-25" r="3.0"/><circle cx="890" cy="-70" r="3.4"/>
+      <circle cx="1050" cy="-10" r="2.9"/><circle cx="1210" cy="-40" r="3.1"/>
+      <circle cx="150" cy="-100" r="2.5"/><circle cx="480" cy="-110" r="3.0"/>
+      <circle cx="810" cy="-95" r="2.7"/><circle cx="1100" cy="-105" r="3.3"/>
+    </g>
+
+    <!-- Vignette -->
+    <rect class="vignette" width="1280" height="720" fill="url(#skyGrad)" opacity="0" pointer-events="none"/>
+    <rect width="1280" height="720" fill="none" stroke="#000" stroke-width="40" opacity="0.25" pointer-events="none"/>
+  </svg>
+  <div class="caption">Crab Snowplow · Arctic Run</div>
+</div>
+
+<script>
+(function () {
+  // Lightweight enhancement: pause CSS animations when tab hidden (perf).
+  // Geometry/motion rules are pure CSS; this only gates playback.
+  var root = document.documentElement;
+  document.addEventListener('visibilitychange', function () {
+    root.style.setProperty('--play-state', document.hidden ? 'paused' : 'running');
+    document.querySelectorAll('.plx, .chassis, .wheel-spin, .belt-marks, .claw-l, .claw-r, .eye-stalk-l, .eye-stalk-r, .pupil, .antenna, .leg-walk-a, .leg-walk-b, .beacon-light, .beacon-glow, .beam, .puff, .spray-a, .spray-b, .spray-c, .snow-far, .snow-near, .steam').forEach(function (el) {
+      el.style.animationPlayState = document.hidden ? 'paused' : 'running';
+    });
+  });
+})();
+</script>
+</body>
+</html>

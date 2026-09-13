@@ -1,0 +1,30 @@
+{
+  "P1_shutdown_1216": {
+    "min_support_all": 0,
+    "min_support_effective": 4,
+    "median_support": 4,
+    "n_perturbs_burnin_masked": 5,
+    "robust_effective": true
+  },
+  "P2_transient_1228": {
+    "min_support_all": 3,
+    "min_support_effective": 3,
+    "median_support": 3,
+    "n_perturbs_burnin_masked": 0,
+    "robust_effective": true
+  },
+  "P3_transient_0102": {
+    "min_support_all": 3,
+    "min_support_effective": 3,
+    "median_support": 3,
+    "n_perturbs_burnin_masked": 0,
+    "robust_effective": true
+  },
+  "P4_drop_0208_09": {
+    "min_support_all": 3,
+    "min_support_effective": 3,
+    "median_support": 3,
+    "n_perturbs_burnin_masked": 0,
+    "robust_effective": true
+  }
+}

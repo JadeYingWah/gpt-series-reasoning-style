@@ -1,0 +1,23 @@
+{
+  "thresholds": {
+    "A_global_madz": 5.0,
+    "B_rolling_med_resid_local_iqr_z": 4.5,
+    "C_seasonal_resid_madz": 4.5,
+    "D_diff_madz": 6.0
+  },
+  "params": {
+    "rolling_window_B": 72,
+    "seasonal_period_C": 288,
+    "merge_gap_rows": 6,
+    "report_boundary_pad_rows": 2
+  },
+  "n_flagged_per_path": {
+    "A_global_madz": 693,
+    "B_rolling_med_resid": 6,
+    "C_seasonal_resid": 1337,
+    "D_diff_madz": 14
+  },
+  "n_union_points": 1951,
+  "n_intervals_full": 55,
+  "n_intervals_highconf_ge2": 7
+}

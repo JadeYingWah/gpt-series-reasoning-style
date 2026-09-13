@@ -1,0 +1,329 @@
+{
+  "pass": 59,
+  "fail": 4,
+  "appHtmlBytes": 27116,
+  "bigInputBytes": 229563,
+  "timings": {
+    "prettyMs": 151.0735,
+    "minMs": 62.204,
+    "hugeMs": 225.7003,
+    "hugeKb": 1543
+  },
+  "records": [
+    {
+      "name": "app.html 恰好含 1 个内联 <script>（无外链）",
+      "status": "PASS",
+      "detail": "实际 1 个"
+    },
+    {
+      "name": "沙箱内成功导出 JSONTool（parse/stringify/run）",
+      "status": "PASS",
+      "detail": "MAX_DEPTH,parse,stringify,posInfo,excerpt,run"
+    },
+    {
+      "name": "格式化样例: {\"a\":1,\"b\":[1,2,{\"c\":true}],\"d\":null,\"e...",
+      "status": "PASS",
+      "detail": "美化/压缩均可被 JSON.parse 还原且值相等"
+    },
+    {
+      "name": "格式化样例: []",
+      "status": "PASS",
+      "detail": "美化/压缩均可被 JSON.parse 还原且值相等"
+    },
+    {
+      "name": "格式化样例: {}",
+      "status": "PASS",
+      "detail": "美化/压缩均可被 JSON.parse 还原且值相等"
+    },
+    {
+      "name": "格式化样例: [[]]",
+      "status": "PASS",
+      "detail": "美化/压缩均可被 JSON.parse 还原且值相等"
+    },
+    {
+      "name": "格式化样例: {\"\":\"\"}",
+      "status": "PASS",
+      "detail": "美化/压缩均可被 JSON.parse 还原且值相等"
+    },
+    {
+      "name": "格式化样例: {\"s\":\"中文 é 你好\"}",
+      "status": "PASS",
+      "detail": "美化/压缩均可被 JSON.parse 还原且值相等"
+    },
+    {
+      "name": "格式化样例: [1,-0.5,1e10,1E-3,0,12345678901234567890]",
+      "status": "PASS",
+      "detail": "美化/压缩均可被 JSON.parse 还原且值相等"
+    },
+    {
+      "name": "格式化样例: {\"n\":{\"a\":{\"b\":{\"c\":[1,2,3]}}}}",
+      "status": "PASS",
+      "detail": "美化/压缩均可被 JSON.parse 还原且值相等"
+    },
+    {
+      "name": "缩进严格等于 2 空格且换行结构正确",
+      "status": "FAIL",
+      "detail": "\"{\\n    \\\"a\\\": [\\n        1,\\n        {\\n            \\\"b\\\": 2\\n       \""
+    },
+    {
+      "name": "错误定位: 缺少值  \"{\\\"a\\\":}\"",
+      "status": "PASS",
+      "detail": "line=1 col=6 offset=5 指向 \"}\" ｜ 无效的 JSON 值起始：字符 \"}\""
+    },
+    {
+      "name": "错误定位: 尾随逗号(对象)  \"{\\\"a\\\":1,}\"",
+      "status": "PASS",
+      "detail": "line=1 col=8 offset=7 指向 \"}\" ｜ 对象中出现多余的逗号（尾随逗号）"
+    },
+    {
+      "name": "错误定位: 尾随逗号(数组)  \"[1,2,]\"",
+      "status": "PASS",
+      "detail": "line=1 col=6 offset=5 指向 \"]\" ｜ 数组中出现多余的逗号（尾随逗号）"
+    },
+    {
+      "name": "错误定位: 缺少冒号  \"{\\\"a\\\" 1}\"",
+      "status": "PASS",
+      "detail": "line=1 col=6 offset=5 指向 \"1\" ｜ 键之后缺少 \":\""
+    },
+    {
+      "name": "错误定位: 单引号键  \"{'a':1}\"",
+      "status": "PASS",
+      "detail": "line=1 col=2 offset=1 指向 \"'\" ｜ 对象的键必须是双引号字符串"
+    },
+    {
+      "name": "错误定位: 主体后多余内容  \"{\\\"a\\\":1}{\\\"b\\\":2}\"",
+      "status": "PASS",
+      "detail": "line=1 col=8 offset=7 指向 \"{\" ｜ JSON 主体结束后存在多余内容 \"{\""
+    },
+    {
+      "name": "错误定位: 前导零  \"{\\\"a\\\":01}\"",
+      "status": "PASS",
+      "detail": "line=1 col=7 offset=6 指向 \"1\" ｜ 对象中期待 \",\" 或 \"}\"，实际遇到 \"1\""
+    },
+    {
+      "name": "错误定位: 数组未闭合  \"[1,2\"",
+      "status": "PASS",
+      "detail": "line=1 col=1 offset=0 指向 \"[\" ｜ 数组未闭合：期待 \",\" 或 \"]\"，但输入已结束"
+    },
+    {
+      "name": "错误定位: 字符串未闭合  \"{\\\"a\\\":\\\"unterminated}\"",
+      "status": "PASS",
+      "detail": "line=1 col=6 offset=5 指向 \"\\\"\" ｜ 字符串未闭合：缺少结束的 \""
+    },
+    {
+      "name": "错误定位: 非法字面量  \"{\\\"a\\\":tru}\"",
+      "status": "PASS",
+      "detail": "line=1 col=6 offset=5 指向 \"t\" ｜ 无效的 JSON 值起始：字符 \"t\""
+    },
+    {
+      "name": "多行输入行号正确（第 3 行第 8 列，偏移 19，独立算法复核一致）",
+      "status": "PASS",
+      "detail": "line=3 col=8 offset=19 ｜ 无效的 JSON 值起始：字符 \",\""
+    },
+    {
+      "name": "错误摘录含插入符 ^",
+      "status": "PASS",
+      "detail": "\"  \\\"b\\\": ,\" / \"       ^\""
+    },
+    {
+      "name": "错误摘录指向出错行原文",
+      "status": "PASS",
+      "detail": "\"  \\\"b\\\": ,\""
+    },
+    {
+      "name": "合法语料：13 例，我方判定与 JSON.parse 完全一致",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "非法语料：22 例，JSON.parse 报错的样例我方均报错",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "空字符串：优雅报错且定位 1:1",
+      "status": "PASS",
+      "detail": "输入为空：没有可解析的 JSON 内容"
+    },
+    {
+      "name": "纯空白：报「输入为空」",
+      "status": "PASS",
+      "detail": "输入为空：没有可解析的 JSON 内容"
+    },
+    {
+      "name": "带 UTF-8 BOM：正常解析",
+      "status": "FAIL",
+      "detail": "\"{\\n    \\\"a\\\": 1\\n}\""
+    },
+    {
+      "name": "重复键：两个键都保留（原生 JSON.parse 会丢）",
+      "status": "PASS",
+      "detail": "\"{\\n    \\\"a\\\": 1,\\n    \\\"a\\\": 2\\n}\""
+    },
+    {
+      "name": "大整数/超大指数/-0：原样保留字面量",
+      "status": "PASS",
+      "detail": "[12345678901234567890,1e400,-0]"
+    },
+    {
+      "name": "输入用制表符：输出归一为 2 空格",
+      "status": "FAIL",
+      "detail": "\"{\\n    \\\"a\\\": 1\\n}\""
+    },
+    {
+      "name": "字符串内裸换行：报未转义控制字符",
+      "status": "PASS",
+      "detail": "字符串中不能出现未转义的控制字符（U+000A）"
+    },
+    {
+      "name": "顶层未闭合字符串：优雅报错",
+      "status": "PASS",
+      "detail": "字符串未闭合：缺少结束的 \""
+    },
+    {
+      "name": "5000 字符单行：正常处理",
+      "status": "PASS",
+      "detail": "5008 字符"
+    },
+    {
+      "name": "超长出错行：摘录被裁剪到 160 字符窗口",
+      "status": "PASS",
+      "detail": "摘录长度 73"
+    },
+    {
+      "name": "2000 层嵌套：优雅报「嵌套层级过深」而非栈溢出",
+      "status": "PASS",
+      "detail": "嵌套层级过深（超过 1000 层），已停止解析"
+    },
+    {
+      "name": "10 万层嵌套：仍优雅报错，无 RangeError",
+      "status": "PASS",
+      "detail": "嵌套层级过深（超过 1000 层），已停止解析"
+    },
+    {
+      "name": "900 层嵌套：正常往返",
+      "status": "PASS",
+      "detail": "长度 1801"
+    },
+    {
+      "name": "顶层数字：输出 123",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "顶层 true：输出 true",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "顶层字符串：输出 \"a\"",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "空对象/空数组：不展开多行",
+      "status": "FAIL",
+      "detail": "\"{\\n    \\\"a\\\": {},\\n    \\\"b\\\": []\\n}\""
+    },
+    {
+      "name": "测试输入确实 >100KB",
+      "status": "PASS",
+      "detail": "229563 字节"
+    },
+    {
+      "name": "大输入美化：成功无异常",
+      "status": "PASS",
+      "detail": "耗时 151.1 ms，输出 673581 字符"
+    },
+    {
+      "name": "大输入压缩：成功无异常",
+      "status": "PASS",
+      "detail": "耗时 62.2 ms，输出 217563 字符"
+    },
+    {
+      "name": "大输入美化结果语义等价（JSON.parse 比对）",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "大输入压缩结果语义等价（JSON.parse 比对）",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "大输入单次处理 < 3s（同步主线程预算内）",
+      "status": "PASS",
+      "detail": "pretty=151.1ms, minify=62.2ms"
+    },
+    {
+      "name": "压力输入 ~1543KB 压缩成功",
+      "status": "PASS",
+      "detail": "耗时 225.7 ms"
+    },
+    {
+      "name": "100KB+ 非法输入：快速报错不卡死",
+      "status": "PASS",
+      "detail": "耗时 9.5 ms，line=1 col=120011"
+    },
+    {
+      "name": "静态检查：无 src= 外链",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "静态检查：无 href= 外链",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "静态检查：无 http(s):// URL",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "静态检查：无 @import",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "静态检查：无 fetch()",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "静态检查：无 XMLHttpRequest",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "静态检查：无 WebSocket",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "静态检查：无 importScripts",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "静态检查：无 cdn 字样",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "内联 <script> 存在（非外链）",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "内联 <style> 存在（非外链）",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "备注：扫描基于原始文本，非 DOM 解析",
+      "status": "PASS",
+      "detail": ""
+    }
+  ]
+}

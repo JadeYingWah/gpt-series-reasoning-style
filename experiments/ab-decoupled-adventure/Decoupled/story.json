@@ -1,0 +1,77 @@
+{
+  "title": "深海遗迹",
+  "start": "submarine",
+  "nodes": {
+    "submarine": {
+      "text": "你驾驶深海潜水器，在马里亚纳海沟底部发现了一座神秘的古代遗迹。声呐显示遗迹内部有巨大的空腔。你的氧气还剩4小时。",
+      "choices": [
+        {"text": "进入遗迹探索", "next": "entrance"},
+        {"text": "先扫描外围结构", "next": "scan"},
+        {"text": "返回水面报告发现", "next": "surface_ending"}
+      ]
+    },
+    "entrance": {
+      "text": "遗迹的入口是一道巨大的石门，上面刻满了未知的符号。门半开着，里面透出微弱的蓝光。",
+      "choices": [
+        {"text": "直接进入", "next": "chamber"},
+        {"text": "先研究石门上的符号", "next": "symbols"}
+      ]
+    },
+    "scan": {
+      "text": "扫描显示遗迹由一种未知的金属合金构成，年代超过10万年。内部有三个主要空腔，其中一个有强烈的能量反应。",
+      "choices": [
+        {"text": "进入能量反应最强的区域", "next": "chamber"},
+        {"text": "进入最安全的空腔", "next": "safe_room"}
+      ]
+    },
+    "symbols": {
+      "text": "你仔细研究石门上的符号，发现它们似乎是一种警告。翻译出来的大意是：'沉睡者不可唤醒'。",
+      "choices": [
+        {"text": "无视警告，进入遗迹", "next": "chamber"},
+        {"text": "谨慎行事，只在外围探索", "next": "safe_room"}
+      ]
+    },
+    "chamber": {
+      "text": "你进入了中央大厅。大厅中央有一个巨大的水晶棺，里面躺着一个类人生物。它的胸口微微起伏——它还活着。",
+      "choices": [
+        {"text": "打开水晶棺", "next": "awaken"},
+        {"text": "拍照记录后离开", "next": "discovery_ending"},
+        {"text": "放置探测器后撤退", "next": "safe_room"}
+      ]
+    },
+    "safe_room": {
+      "text": "你进入了一个较小的空腔，里面堆满了古代的器物和文献。这里很安全，你有充足的时间进行研究。",
+      "choices": [
+        {"text": "收集文物带回水面", "next": "discovery_ending"},
+        {"text": "深入研究文献", "next": "knowledge_ending"}
+      ]
+    },
+    "awaken": {
+      "text": "你打开了水晶棺。生物缓缓睁开眼睛，它的瞳孔是深邃的紫色。它看着你，用你的语言说：'你不该来的。'",
+      "choices": [
+        {"text": "尝试沟通", "next": "knowledge_ending"},
+        {"text": "立刻逃跑", "next": "bad_ending"}
+      ]
+    },
+    "surface_ending": {
+      "text": "【谨慎结局】你返回水面，报告了遗迹的发现。科学界为之轰动，但你总在想：那道石门后面，到底藏着什么？",
+      "choices": [],
+      "ending": true
+    },
+    "discovery_ending": {
+      "text": "【发现结局】你带着珍贵的考古发现返回水面。这些文物改写了人类对历史的认知，你成为了著名的考古学家。",
+      "choices": [],
+      "ending": true
+    },
+    "knowledge_ending": {
+      "text": "【知识结局】你获得了远古文明的知识。它们的科技远超人类，但它们最终因为傲慢而毁灭。你决定保守这个秘密。",
+      "choices": [],
+      "ending": true
+    },
+    "bad_ending": {
+      "text": "【坏结局】你转身逃跑，但身后传来巨大的轰鸣声。遗迹开始坍塌。你最后看到的，是一道紫色的光芒……",
+      "choices": [],
+      "ending": true
+    }
+  }
+}

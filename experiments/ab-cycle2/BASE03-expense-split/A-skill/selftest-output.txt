@@ -1,0 +1,86 @@
+== 抽取 core 脚本：2762 字符 ==
+PASS  core 脚本在 vm 中无语法错误并成功执行
+PASS  AACore 已挂载到全局
+
+-- normalizeAmount（金额规整）--
+PASS  300 -> 30000 分
+PASS  '128.5' -> 12850 分
+PASS  '128.555' 规整 -> 12856 分
+PASS  '128.555'.rounded === true
+PASS  '128.55'.rounded === false
+PASS  '1.234' 舍 -> 123 分
+PASS  '1.235' 入 -> 124 分
+PASS  '0.005' 入 -> 1 分
+PASS  千分位 '1,000' -> 100000 分
+PASS  全角逗号 '1，000.50' -> 100050 分
+PASS  带币符 '￥128.50' -> 12850 分
+PASS  带空格 ' 88 ' -> 8800 分
+PASS  '.5' -> 50 分
+PASS  normalized 两位小数 '128.555'
+PASS  '0' -> 0 分
+PASS  空串 code=EMPTY
+PASS  纯空格 code=EMPTY
+PASS  null code=EMPTY
+PASS  'abc' code=INVALID
+PASS  '1.2.3' code=INVALID
+PASS  '.' code=INVALID
+PASS  '12.' -> 1200 分
+PASS  '-100' code=INVALID
+PASS  '1e3' code=INVALID
+PASS  超长 40 位数字 code=TOO_LARGE
+PASS  16 位整数 code=TOO_LARGE
+PASS  13 位整数可用
+
+-- normalizePeople（人数规整）--
+PASS  '8' -> 8
+PASS  ' 12 ' -> 12
+PASS  '0' code=ZERO
+PASS  '00' code=ZERO
+PASS  '-3' code=INVALID
+PASS  '3.5' code=INVALID
+PASS  'abc' code=INVALID
+PASS  '' code=EMPTY
+PASS  '1000001' code=TOO_LARGE
+PASS  '1000000' 可用
+
+-- computeSplit（余数分摊）--
+PASS  1000元/3人 base
+PASS  1000元/3人 remainder
+PASS  1000元/3人 highCount
+PASS  1000元/3人 lowCount
+PASS  1000元/3人 每人基准
+PASS  1000元/3人 多付档
+PASS  1000元/3人 合计守恒
+PASS  1000分/7人 base
+PASS  1000分/7人 remainder
+PASS  1000分/7人 每人基准
+PASS  1000分/7人 多付档
+PASS  1000分/7人 合计守恒
+PASS  300元/8人 余数
+PASS  300元/8人 每人
+PASS  300元/8人 无多付档
+PASS  0元/5人 每人
+PASS  0元/5人 守恒
+PASS  1分/3人 base=0
+PASS  1分/3人 1人付 0.01
+PASS  1分/3人 守恒
+PASS  随机 20000 组：合计恒等且档位正确（失败数）
+  随机用例数 = 20000
+PASS  1万亿元/999999人 守恒
+PASS  1万亿元/999999人 无 NaN
+
+-- app.html 静态检查 --
+PASS  无 http(s):// 外链
+PASS  无 <script src=
+PASS  无 <link href=
+PASS  无 fetch(
+PASS  无 XMLHttpRequest
+PASS  无 import(
+PASS  存在 <script id="core">
+PASS  存在 <script id="ui">
+PASS  含 window error 全局兜底
+PASS  含 try/catch 兜底
+
+================================
+通过 72 项，失败 0 项，共 72 项
+结论：全部通过

@@ -1,0 +1,179 @@
+{
+  "ok": true,
+  "failedChecks": [],
+  "launched": "chrome",
+  "url": "file:///<实验根目录>/ab-longrun-300/WG007-pomodoro-lite/A-skill/pomodoro.html",
+  "checks": {
+    "initialClock25": true,
+    "initialReady": true,
+    "startRunning": true,
+    "startLocksConfig": true,
+    "clockTickedWithin1_3s": true,
+    "pausePaused": true,
+    "pauseFreezesClock": true,
+    "resumeRunning": true,
+    "resetReady25": true,
+    "setFiveMin": true,
+    "reject0": true,
+    "reject61": true,
+    "rejectAbc": true,
+    "finishLocksDuringRun": true,
+    "finishStatusTimeUp": true,
+    "finishClockZero": true,
+    "finishPrimaryStart": true,
+    "finishUnlocksConfig": true,
+    "noHttpExternal": true,
+    "clockFastForward": true
+  },
+  "steps": [
+    {
+      "label": "initial",
+      "ui": {
+        "clock": "25:00",
+        "state": "就绪",
+        "primary": "开始",
+        "minutes": "25",
+        "minutesDisabled": false,
+        "note": "仅接受 1–60 的正整数。到时状态文案变为「时间到」，并尝试播放提示音（Web Audio，无外链）。"
+      }
+    },
+    {
+      "label": "after-start-1.3s",
+      "ui": {
+        "clock": "24:59",
+        "state": "进行中",
+        "primary": "暂停",
+        "minutes": "25",
+        "minutesDisabled": true,
+        "note": "仅接受 1–60 的正整数。到时状态文案变为「时间到」，并尝试播放提示音（Web Audio，无外链）。"
+      }
+    },
+    {
+      "label": "after-pause",
+      "ui": {
+        "clock": "24:59",
+        "state": "已暂停",
+        "primary": "继续",
+        "minutes": "25",
+        "minutesDisabled": true,
+        "note": "已暂停。剩余时间保留在内存中；刷新页面会丢失。"
+      }
+    },
+    {
+      "label": "after-resume",
+      "ui": {
+        "clock": "24:59",
+        "state": "进行中",
+        "primary": "暂停",
+        "minutes": "25",
+        "minutesDisabled": true,
+        "note": "仅接受 1–60 的正整数。到时状态文案变为「时间到」，并尝试播放提示音（Web Audio，无外链）。"
+      }
+    },
+    {
+      "label": "after-reset",
+      "ui": {
+        "clock": "25:00",
+        "state": "就绪",
+        "primary": "开始",
+        "minutes": "25",
+        "minutesDisabled": false,
+        "note": "仅接受 1–60 的正整数。到时状态文案变为「时间到」，并尝试播放提示音（Web Audio，无外链）。"
+      }
+    },
+    {
+      "label": "after-set-5min",
+      "ui": {
+        "clock": "05:00",
+        "state": "就绪",
+        "primary": "开始",
+        "minutes": "5",
+        "minutesDisabled": false,
+        "note": "已应用时长 5 分钟。"
+      }
+    },
+    {
+      "label": "after-invalid-0",
+      "ui": {
+        "clock": "05:00",
+        "state": "就绪",
+        "primary": "开始",
+        "minutes": "0",
+        "minutesDisabled": false,
+        "note": "请输入 1–60 的正整数（当前配置未改动）。"
+      }
+    },
+    {
+      "label": "after-invalid-61",
+      "ui": {
+        "clock": "05:00",
+        "state": "就绪",
+        "primary": "开始",
+        "minutes": "61",
+        "minutesDisabled": false,
+        "note": "请输入 1–60 的正整数（当前配置未改动）。"
+      }
+    },
+    {
+      "label": "after-invalid-abc",
+      "ui": {
+        "clock": "05:00",
+        "state": "就绪",
+        "primary": "开始",
+        "minutes": "",
+        "minutesDisabled": false,
+        "note": "请输入 1–60 的正整数（当前配置未改动）。"
+      }
+    },
+    {
+      "label": "before-finish-run",
+      "ui": {
+        "clock": "01:00",
+        "state": "就绪",
+        "primary": "开始",
+        "minutes": "1",
+        "minutesDisabled": false,
+        "note": "已应用时长 1 分钟。"
+      }
+    },
+    {
+      "label": "finish-run-locked",
+      "ui": {
+        "clock": "01:00",
+        "state": "进行中",
+        "primary": "暂停",
+        "minutes": "1",
+        "minutesDisabled": true,
+        "note": "仅接受 1–60 的正整数。到时状态文案变为「时间到」，并尝试播放提示音（Web Audio，无外链）。"
+      }
+    },
+    {
+      "label": "after-clock-ffinish",
+      "ui": {
+        "clock": "00:00",
+        "state": "时间到",
+        "primary": "开始",
+        "minutes": "1",
+        "minutesDisabled": false,
+        "note": "时间到。已尝试播放提示音。点「开始」可开新一轮。"
+      }
+    }
+  ],
+  "externalRequests": [
+    "file:///<实验根目录>/ab-longrun-300/WG007-pomodoro-lite/A-skill/pomodoro.html"
+  ],
+  "screenshots": [
+    "shots/01-ready.png",
+    "shots/02-running.png",
+    "shots/03-paused.png",
+    "shots/04-reset.png",
+    "shots/05-finished.png"
+  ],
+  "methods": [
+    "playwright-core headless chrome",
+    "real clicks on #btnPrimary / #btnReset",
+    "fill+Enter on #minutesInput",
+    "Date.now offset +61s to reach finish without waiting 60s wall time",
+    "screenshots captured under shots/"
+  ]
+}

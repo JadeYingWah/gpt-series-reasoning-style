@@ -1,0 +1,39 @@
+﻿=== ls -la ===
+total 389
+drwxr-xr-x 1 <用户名> 197609     0 Sep 12 14:18 .
+drwxr-xr-x 1 <用户名> 197609     0 Sep 12 13:53 ..
+-rw-r--r-- 1 <用户名> 197609   191 Sep 12 14:04 _env.txt
+drwxr-xr-x 1 <用户名> 197609     0 Sep 12 14:09 _verify
+-rw-r--r-- 1 <用户名> 197609 13097 Sep 12 14:18 app.html
+-rw-r--r-- 1 <用户名> 197609    15 Sep 12 14:19 disk-inventory.txt
+-rw-r--r-- 1 <用户名> 197609   907 Sep 12 14:00 load-proof.md
+-rw-r--r-- 1 <用户名> 197609   847 Sep 12 14:11 mutation-console.txt
+-rw-r--r-- 1 <用户名> 197609   839 Sep 12 14:11 mutation-report.md
+-rw-r--r-- 1 <用户名> 197609  4032 Sep 12 14:10 mutation-test.mjs
+-rw-r--r-- 1 <用户名> 197609 15820 Sep 12 14:17 response.md
+-rw-r--r-- 1 <用户名> 197609 75592 Sep 12 14:18 shot-finished.png
+-rw-r--r-- 1 <用户名> 197609 45156 Sep 12 14:19 shot-mobile.png
+-rw-r--r-- 1 <用户名> 197609 53650 Sep 12 14:18 shot-running.png
+-rw-r--r-- 1 <用户名> 197609 87806 Sep 12 14:19 shot-wide.png
+-rw-r--r-- 1 <用户名> 197609   744 Sep 12 13:53 task.md
+-rw-r--r-- 1 <用户名> 197609  2884 Sep 12 14:19 verify-console.txt
+-rw-r--r-- 1 <用户名> 197609  3409 Sep 12 14:10 verify-raw-M1.json
+-rw-r--r-- 1 <用户名> 197609  3383 Sep 12 14:11 verify-raw-M2.json
+-rw-r--r-- 1 <用户名> 197609  3382 Sep 12 14:11 verify-raw-M3.json
+-rw-r--r-- 1 <用户名> 197609  3422 Sep 12 14:11 verify-raw-M4.json
+-rw-r--r-- 1 <用户名> 197609  3742 Sep 12 14:19 verify-raw.json
+-rw-r--r-- 1 <用户名> 197609  2592 Sep 12 14:10 verify-report-M1.md
+-rw-r--r-- 1 <用户名> 197609  2568 Sep 12 14:11 verify-report-M2.md
+-rw-r--r-- 1 <用户名> 197609  2567 Sep 12 14:11 verify-report-M3.md
+-rw-r--r-- 1 <用户名> 197609  2607 Sep 12 14:11 verify-report-M4.md
+-rw-r--r-- 1 <用户名> 197609  2876 Sep 12 14:19 verify-report.md
+-rw-r--r-- 1 <用户名> 197609 13601 Sep 12 14:12 verify.mjs
+
+=== sha256 app.html ===
+c4bcf73c3c044e712505c05f048db35879b0f05373b6c197a217fa5ce5a8cac6 *app.html
+
+=== 行数/字节 ===
+  375 13097 app.html
+
+=== 外部依赖扫描 ===
+无匹配（无外部引用）

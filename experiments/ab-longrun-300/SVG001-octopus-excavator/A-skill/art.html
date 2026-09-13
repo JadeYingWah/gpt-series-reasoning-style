@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>OCTO-DIGGER · 章鱼挖掘机远征</title>
+<!--
+  SVG001-octopus-excavator · 自洽几何/运动说明（与 notes.md 同步）
+  1) 前进方向：画面右侧。履带齿条 translateX 负向滚动 + 驱动轮顺时针旋转（侧视右行）。
+  2) 履带：#trackBeltA/B 用 dashed stroke + stroke-dashoffset 动画，循环周期与驱动轮角速度匹配。
+  3) 章鱼附肢相对运动（≥2，非全身锁死）：
+     - #armLever：操作杆/前触手，独立 rotate 约束在座舱内
+     - #armWave：外侧触手 waving，周期与车体 bob 不同
+     - #armCurl / #armHang：吸盘触手微卷与下垂，相位错开
+     - 头部 #headBob 与眼睑眨眼，相对车架独立
+  4) 视差/景深 ≥2 层：
+     - far: #layerFar 远景海沟剪影 / 沉船 / 光柱（慢）
+     - mid: #layerMid 中景岩礁、气泡、鱼群（中速）
+     - near: #layerNear 前景海草、悬浮颗粒（快）
+  5) 无外部资源：无 CDN / 无 font link / 无 img src / 无 fetch。
+  6) prefers-reduced-motion: 降低动画。
+-->
+<style>
+  :root {
+    --abyss: #071426;
+    --deep: #0c2a44;
+    --teal: #1a6b6b;
+    --foam: #7ee0d0;
+    --coral: #ff6b5b;
+    --coral-deep: #d9483f;
+    --ink: #2b1a2e;
+    --steel: #3d4a5c;
+    --steel-lit: #6b7c90;
+    --sand: #e8c47c;
+    --warn: #f4d35e;
+    --biolume: #5bffc8;
+    --cabglass: rgba(160, 230, 255, 0.28);
+    --text: #d8f3ef;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--abyss);
+    color: var(--text);
+    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  }
+
+  .stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 420px;
+    background:
+      radial-gradient(1200px 700px at 70% 20%, rgba(91, 255, 200, 0.08), transparent 55%),
+      radial-gradient(900px 600px at 20% 80%, rgba(26, 107, 107, 0.35), transparent 60%),
+      linear-gradient(180deg, #0a2240 0%, #0c2a44 38%, #071426 100%);
+  }
+
+  .stage::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse at center, transparent 40%, rgba(4, 10, 18, 0.55) 100%);
+    z-index: 6;
+  }
+
+  svg.scene {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .hud {
+    position: absolute;
+    top: 16px;
+    left: 18px;
+    z-index: 8;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .hud .eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--biolume);
+    opacity: 0.85;
+    font-family: Consolas, "Cascadia Code", ui-monospace, monospace;
+  }
+
+  .hud h1 {
+    margin-top: 4px;
+    font-family: Georgia, "Palatino Linotype", "Times New Roman", serif;
+    font-weight: 600;
+    font-size: clamp(22px, 3.2vw, 36px);
+    letter-spacing: 0.04em;
+    color: #f2fbf8;
+    text-shadow: 0 2px 18px rgba(91, 255, 200, 0.25);
+  }
+
+  .hud .sub {
+    margin-top: 6px;
+    font-size: 12px;
+    color: rgba(216, 243, 239, 0.72);
+    max-width: 28ch;
+    line-height: 1.45;
+  }
+
+  .badge {
+    position: absolute;
+    right: 18px;
+    bottom: 16px;
+    z-index: 8;
+    font-family: Consolas, "Cascadia Code", ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(216, 243, 239, 0.55);
+    border: 1px solid rgba(126, 224, 208, 0.22);
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(7, 20, 38, 0.35);
+    pointer-events: none;
+  }
+
+  /* ---------- shared motion helpers ---------- */
+  .layer-far {
+    animation: pan-far 48s linear infinite;
+  }
+  .layer-mid {
+    animation: pan-mid 28s linear infinite;
+  }
+  .layer-near {
+    animation: pan-near 14s linear infinite;
+  }
+
+  @keyframes pan-far {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-160px); }
+  }
+  @keyframes pan-mid {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-280px); }
+  }
+  @keyframes pan-near {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-420px); }
+  }
+
+  /* vehicle bob — chassis only */
+  .chassis {
+    transform-box: fill-box;
+    transform-origin: 50% 70%;
+    animation: chassis-bob 2.4s ease-in-out infinite;
+  }
+  @keyframes chassis-bob {
+    0%, 100% { transform: translateY(0) rotate(-0.4deg); }
+    50%      { transform: translateY(5px) rotate(0.5deg); }
+  }
+
+  /* tracks: dashed belt sliding opposite to travel (rightward vehicle) */
+  .track-belt {
+    fill: none;
+    stroke: var(--steel);
+    stroke-width: 10;
+    stroke-dasharray: 10 8;
+    animation: belt-roll 0.55s linear infinite;
+  }
+  .track-belt-inner {
+    fill: none;
+    stroke: var(--steel-lit);
+    stroke-width: 3;
+    stroke-dasharray: 4 10;
+    animation: belt-roll 0.55s linear infinite;
+  }
+  @keyframes belt-roll {
+    from { stroke-dashoffset: 0; }
+    to   { stroke-dashoffset: -18; }
+  }
+
+  /* drive sprocket & idler spin clockwise for rightward motion */
+  .sprocket {
+    transform-box: fill-box;
+    transform-origin: 50% 50%;
+    animation: spin-cw 0.55s linear infinite;
+  }
+  @keyframes spin-cw {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  /* road wheels counter-visible as slight oscillation via spokes */
+  .road-wheel {
+    transform-box: fill-box;
+    transform-origin: 50% 50%;
+    animation: spin-cw 1.1s linear infinite;
+  }
+
+  /* boom micro-sway (not locked to chassis) */
+  .boom-group {
+    transform-box: fill-box;
+    transform-origin: 12% 70%;
+    animation: boom-sway 3.6s ease-in-out infinite;
+  }
+  @keyframes boom-sway {
+    0%, 100% { transform: rotate(0deg); }
+    50%      { transform: rotate(1.6deg); }
+  }
+
+  .bucket {
+    transform-box: fill-box;
+    transform-origin: 20% 20%;
+    animation: bucket-tip 3.6s ease-in-out infinite;
+  }
+  @keyframes bucket-tip {
+    0%, 100% { transform: rotate(0deg); }
+    40%      { transform: rotate(-8deg); }
+    60%      { transform: rotate(-6deg); }
+  }
+
+  /* ---------- octopus limbs: independent of vehicle ---------- */
+  .head-bob {
+    transform-box: fill-box;
+    transform-origin: 50% 80%;
+    animation: head-bob 2.1s ease-in-out infinite;
+  }
+  @keyframes head-bob {
+    0%, 100% { transform: translate(0, 0) rotate(-1deg); }
+    50%      { transform: translate(2px, -3px) rotate(1.5deg); }
+  }
+
+  .eyelid {
+    transform-box: fill-box;
+    transform-origin: 50% 0%;
+    animation: blink 4.7s step-end infinite;
+  }
+  @keyframes blink {
+    0%, 92%, 100% { transform: scaleY(0); }
+    94%, 97%      { transform: scaleY(1); }
+  }
+
+  /* limb A — joystick / lever tentacle */
+  .arm-lever {
+    transform-box: fill-box;
+    transform-origin: 90% 10%;
+    animation: arm-lever 1.4s ease-in-out infinite;
+  }
+  @keyframes arm-lever {
+    0%, 100% { transform: rotate(-6deg); }
+    50%      { transform: rotate(10deg); }
+  }
+
+  /* limb B — outer waving tentacle */
+  .arm-wave {
+    transform-box: fill-box;
+    transform-origin: 10% 15%;
+    animation: arm-wave 1.8s ease-in-out infinite;
+  }
+  @keyframes arm-wave {
+    0%, 100% { transform: rotate(-14deg) translateY(0); }
+    50%      { transform: rotate(12deg) translateY(4px); }
+  }
+
+  /* limb C — suction curl */
+  .arm-curl {
+    transform-box: fill-box;
+    transform-origin: 15% 10%;
+    animation: arm-curl 2.6s ease-in-out infinite;
+  }
+  @keyframes arm-curl {
+    0%, 100% { transform: rotate(4deg); }
+    50%      { transform: rotate(-9deg); }
+  }
+
+  /* limb D — hanging / trailing */
+  .arm-hang {
+    transform-box: fill-box;
+    transform-origin: 20% 8%;
+    animation: arm-hang 3.1s ease-in-out infinite;
+  }
+  @keyframes arm-hang {
+    0%, 100% { transform: rotate(6deg); }
+    50%      { transform: rotate(-5deg) translateY(3px); }
+  }
+
+  /* limb E — under-cab brace */
+  .arm-brace {
+    transform-box: fill-box;
+    transform-origin: 50% 0%;
+    animation: arm-brace 2.0s ease-in-out infinite;
+  }
+  @keyframes arm-brace {
+    0%, 100% { transform: rotate(-3deg); }
+    50%      { transform: rotate(5deg); }
+  }
+
+  /* bubbles from snorkel */
+  .bubble {
+    opacity: 0;
+    animation: bubble-rise 3.2s ease-in infinite;
+  }
+  .bubble:nth-child(2) { animation-delay: 0.7s; }
+  .bubble:nth-child(3) { animation-delay: 1.4s; }
+  .bubble:nth-child(4) { animation-delay: 2.1s; }
+  @keyframes bubble-rise {
+    0%   { opacity: 0; transform: translate(0, 0) scale(0.6); }
+    15%  { opacity: 0.85; }
+    100% { opacity: 0; transform: translate(28px, -110px) scale(1.15); }
+  }
+
+  /* light shaft shimmer */
+  .shaft {
+    animation: shaft-shimmer 5s ease-in-out infinite;
+  }
+  .shaft:nth-child(2) { animation-delay: 1.2s; }
+  .shaft:nth-child(3) { animation-delay: 2.5s; }
+  @keyframes shaft-shimmer {
+    0%, 100% { opacity: 0.08; }
+    50%      { opacity: 0.18; }
+  }
+
+  /* mid fish drift */
+  .fish {
+    animation: fish-drift 9s linear infinite;
+  }
+  .fish.f2 { animation-duration: 11s; animation-delay: -3s; }
+  .fish.f3 { animation-duration: 13s; animation-delay: -6s; }
+  @keyframes fish-drift {
+    from { transform: translateX(0); }
+    to   { transform: translateX(160px); }
+  }
+
+  /* near kelp sway */
+  .kelp {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+    animation: kelp-sway 3.4s ease-in-out infinite;
+  }
+  .kelp.k2 { animation-duration: 4.1s; animation-delay: -0.8s; }
+  .kelp.k3 { animation-duration: 2.9s; animation-delay: -1.5s; }
+  @keyframes kelp-sway {
+    0%, 100% { transform: rotate(-4deg); }
+    50%      { transform: rotate(5deg); }
+  }
+
+  /* cabin glass glare */
+  .glare {
+    animation: glare-slide 6s ease-in-out infinite;
+  }
+  @keyframes glare-slide {
+    0%, 100% { opacity: 0.15; transform: translateX(0); }
+    50%      { opacity: 0.4; transform: translateX(6px); }
+  }
+
+  /* exhaust puff */
+  .puff {
+    opacity: 0;
+    animation: puff-out 2.8s ease-out infinite;
+  }
+  .puff.p2 { animation-delay: 1.4s; }
+  @keyframes puff-out {
+    0%   { opacity: 0; transform: translate(0, 0) scale(0.5); }
+    20%  { opacity: 0.35; }
+    100% { opacity: 0; transform: translate(-40px, -30px) scale(1.4); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .layer-far, .layer-mid, .layer-near,
+    .chassis, .track-belt, .track-belt-inner, .sprocket, .road-wheel,
+    .boom-group, .bucket, .head-bob, .eyelid,
+    .arm-lever, .arm-wave, .arm-curl, .arm-hang, .arm-brace,
+    .bubble, .shaft, .fish, .kelp, .glare, .puff {
+      animation: none !important;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="stage" role="img" aria-label="一只章鱼驾驶履带式挖掘机，沿深海海沟向右前进，背景有视差层与气泡。">
+  <div class="hud">
+    <div class="eyebrow">EXPEDITION LOG · TRENCH-7</div>
+    <h1>OCTO-DIGGER</h1>
+    <div class="sub">深海基建局 · 章鱼驾驶员已接管操纵杆，履带向右推进</div>
+  </div>
+  <div class="badge">SVG · no CDN · parallax ×3</div>
+
+  <svg class="scene" viewBox="0 0 1280 720" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="waterGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#0d3358"/>
+        <stop offset="45%" stop-color="#0c2a44"/>
+        <stop offset="100%" stop-color="#071426"/>
+      </linearGradient>
+      <linearGradient id="shaftGrad" x1="0.5" y1="0" x2="0.5" y2="1">
+        <stop offset="0%" stop-color="#b8fff0" stop-opacity="0.55"/>
+        <stop offset="100%" stop-color="#b8fff0" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="steelGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#6b7c90"/>
+        <stop offset="55%" stop-color="#3d4a5c"/>
+        <stop offset="100%" stop-color="#2a3340"/>
+      </linearGradient>
+      <linearGradient id="coralGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#ff8a75"/>
+        <stop offset="50%" stop-color="#ff6b5b"/>
+        <stop offset="100%" stop-color="#d9483f"/>
+      </linearGradient>
+      <radialGradient id="glassGrad" cx="0.35" cy="0.3" r="0.8">
+        <stop offset="0%" stop-color="#c8f4ff" stop-opacity="0.45"/>
+        <stop offset="55%" stop-color="#5aa8c8" stop-opacity="0.22"/>
+        <stop offset="100%" stop-color="#0a2030" stop-opacity="0.35"/>
+      </radialGradient>
+      <radialGradient id="eyeGrad" cx="0.35" cy="0.35" r="0.7">
+        <stop offset="0%" stop-color="#fff8d6"/>
+        <stop offset="45%" stop-color="#f4d35e"/>
+        <stop offset="100%" stop-color="#c48a1a"/>
+      </radialGradient>
+      <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
+        <feGaussianBlur stdDeviation="4" result="b"/>
+        <feMerge>
+          <feMergeNode in="b"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+      <pattern id="hazard" width="16" height="16" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
+        <rect width="16" height="16" fill="#f4d35e"/>
+        <rect width="8" height="16" fill="#2b1a2e"/>
+      </pattern>
+    </defs>
+
+    <!-- water base -->
+    <rect width="1280" height="720" fill="url(#waterGrad)"/>
+
+    <!-- ========== FAR PARALLAX ========== -->
+    <g id="layerFar" class="layer-far">
+      <!-- distant trench wall silhouette (tiled via wide art) -->
+      <path d="M-80,520 L40,470 L120,500 L200,430 L280,480 L360,400 L440,460 L520,390 L600,450 L680,380 L760,440 L840,370 L920,430 L1000,360 L1080,420 L1160,350 L1240,410 L1400,360 L1400,720 L-80,720 Z"
+            fill="#06101c" opacity="0.85"/>
+      <path d="M-40,560 L60,520 L160,545 L260,500 L360,530 L460,490 L560,520 L660,480 L760,510 L860,470 L960,500 L1060,460 L1160,490 L1260,450 L1400,480 L1400,720 L-40,720 Z"
+            fill="#0a1a2c" opacity="0.9"/>
+      <!-- sunken wreck -->
+      <g transform="translate(240,470)" opacity="0.55">
+        <path d="M0,40 L90,10 L160,40 L140,70 L20,70 Z" fill="#0d2438"/>
+        <rect x="40" y="0" width="8" height="45" fill="#0d2438"/>
+        <path d="M48,0 L100,18 L48,30 Z" fill="#123048"/>
+      </g>
+      <g transform="translate(980,440)" opacity="0.45">
+        <rect x="0" y="30" width="120" height="18" rx="4" fill="#0d2438"/>
+        <rect x="20" y="10" width="14" height="28" fill="#0d2438"/>
+        <rect x="70" y="0" width="10" height="40" fill="#0d2438"/>
+      </g>
+      <!-- light shafts -->
+      <g>
+        <polygon class="shaft" points="180,0 260,0 340,420 220,420" fill="url(#shaftGrad)"/>
+        <polygon class="shaft" points="620,0 700,0 820,480 680,480" fill="url(#shaftGrad)"/>
+        <polygon class="shaft" points="1040,0 1120,0 1200,400 1080,400" fill="url(#shaftGrad)"/>
+      </g>
+      <!-- far biolume dots -->
+      <g fill="#5bffc8" opacity="0.35">
+        <circle cx="150" cy="300" r="1.5"/>
+        <circle cx="420" cy="220" r="1.2"/>
+        <circle cx="780" cy="340" r="1.4"/>
+        <circle cx="1100" cy="260" r="1.1"/>
+      </g>
+    </g>
+
+    <!-- ========== MID PARALLAX ========== -->
+    <g id="layerMid" class="layer-mid">
+      <!-- seabed mounds -->
+      <path d="M-40,600 C80,560 160,580 260,540 C360,500 420,560 540,530 C660,500 740,560 860,520 C980,480 1080,540 1200,510 C1280,490 1360,520 1400,510 L1400,720 L-40,720 Z"
+            fill="#0b1e32" opacity="0.95"/>
+      <ellipse cx="200" cy="575" rx="90" ry="28" fill="#123048" opacity="0.5"/>
+      <ellipse cx="900" cy="555" rx="120" ry="32" fill="#123048" opacity="0.45"/>
+      <!-- rocks -->
+      <g fill="#1a3348">
+        <path d="M320,580 L350,520 L390,575 Z"/>
+        <path d="M700,560 L740,500 L790,555 Z"/>
+        <path d="M1100,545 L1135,495 L1180,540 Z"/>
+      </g>
+      <!-- fish silhouettes (swim right = same travel direction) -->
+      <g class="fish f1" transform="translate(100,300)" fill="#1a6b6b" opacity="0.55">
+        <ellipse cx="12" cy="0" rx="14" ry="6"/>
+        <path d="M0,0 L-10,-8 L-10,8 Z"/>
+        <circle cx="18" cy="-1.5" r="1.2" fill="#5bffc8"/>
+      </g>
+      <g class="fish f2" transform="translate(40,380)" fill="#1a6b6b" opacity="0.4">
+        <ellipse cx="10" cy="0" rx="11" ry="5"/>
+        <path d="M0,0 L-8,-6 L-8,6 Z"/>
+      </g>
+      <g class="fish f3" transform="translate(200,250)" fill="#245a5a" opacity="0.45">
+        <ellipse cx="16" cy="0" rx="18" ry="7"/>
+        <path d="M0,0 L-12,-9 L-12,9 Z"/>
+        <circle cx="24" cy="-2" r="1.4" fill="#5bffc8"/>
+      </g>
+      <!-- drifting bubbles mid -->
+      <g fill="#a8f0e8" opacity="0.35">
+        <circle cx="180" cy="500" r="4"/>
+        <circle cx="190" cy="470" r="2.5"/>
+        <circle cx="640" cy="520" r="3"/>
+        <circle cx="1050" cy="480" r="3.5"/>
+        <circle cx="1062" cy="450" r="2"/>
+      </g>
+    </g>
+
+    <!-- ========== MAIN SUBJECT: OCTOPUS + EXCAVATOR ========== -->
+    <!-- vehicle parked near lower-center; motion reads as travel via track/parallax -->
+    <g id="vehicleRoot" transform="translate(380,300)">
+
+      <!-- ground contact shadow -->
+      <ellipse cx="250" cy="320" rx="220" ry="22" fill="#000" opacity="0.35"/>
+
+      <g class="chassis">
+        <!-- ===== TRACK FRAME (side view, facing right) ===== -->
+        <g id="trackAssembly" transform="translate(20,230)">
+          <!-- track shoe outline -->
+          <path d="M20,20
+                   H180
+                   A38,38 0 0 1 218,58
+                   V78
+                   A38,38 0 0 1 180,116
+                   H20
+                   A38,38 0 0 1 -18,78
+                   V58
+                   A38,38 0 0 1 20,20 Z"
+                fill="#1a2230" stroke="#2a3340" stroke-width="3"/>
+          <!-- belt path (dashed rolling) -->
+          <path class="track-belt"
+                d="M20,22 H180 A36,36 0 0 1 216,58 V78 A36,36 0 0 1 180,114 H20 A36,36 0 0 1 -16,78 V58 A36,36 0 0 1 20,22 Z"/>
+          <path class="track-belt-inner"
+                d="M28,34 H172 A26,26 0 0 1 198,60 V76 A26,26 0 0 1 172,102 H28 A26,26 0 0 1 2,76 V60 A26,26 0 0 1 28,34 Z"/>
+          <!-- drive sprocket (rear/left) -->
+          <g class="sprocket" transform="translate(20,68)">
+            <circle r="28" fill="#2f3a4a" stroke="#6b7c90" stroke-width="2"/>
+            <circle r="10" fill="#1a2230"/>
+            <rect x="-2" y="-24" width="4" height="48" rx="1" fill="#6b7c90" opacity="0.7"/>
+            <rect x="-2" y="-24" width="4" height="48" rx="1" fill="#6b7c90" opacity="0.7" transform="rotate(60)"/>
+            <rect x="-2" y="-24" width="4" height="48" rx="1" fill="#6b7c90" opacity="0.7" transform="rotate(120)"/>
+          </g>
+          <!-- idler (front/right) -->
+          <g class="sprocket" transform="translate(180,68)">
+            <circle r="24" fill="#2f3a4a" stroke="#6b7c90" stroke-width="2"/>
+            <circle r="8" fill="#1a2230"/>
+            <rect x="-1.5" y="-20" width="3" height="40" rx="1" fill="#6b7c90" opacity="0.65"/>
+            <rect x="-1.5" y="-20" width="3" height="40" rx="1" fill="#6b7c90" opacity="0.65" transform="rotate(90)"/>
+          </g>
+          <!-- road wheels -->
+          <g class="road-wheel" transform="translate(70,72)">
+            <circle r="16" fill="#2a3340" stroke="#5a6a7e" stroke-width="1.5"/>
+            <circle r="5" fill="#1a2230"/>
+            <line x1="0" y1="-14" x2="0" y2="14" stroke="#5a6a7e" stroke-width="1.5"/>
+            <line x1="-14" y1="0" x2="14" y2="0" stroke="#5a6a7e" stroke-width="1.5"/>
+          </g>
+          <g class="road-wheel" transform="translate(120,72)">
+            <circle r="16" fill="#2a3340" stroke="#5a6a7e" stroke-width="1.5"/>
+            <circle r="5" fill="#1a2230"/>
+            <line x1="0" y1="-14" x2="0" y2="14" stroke="#5a6a7e" stroke-width="1.5"/>
+            <line x1="-14" y1="0" x2="14" y2="0" stroke="#5a6a7e" stroke-width="1.5"/>
+          </g>
+          <!-- ground pads under track -->
+          <g fill="#0d1520" opacity="0.5">
+            <rect x="-10" y="110" width="28" height="6" rx="2"/>
+            <rect x="30" y="114" width="28" height="6" rx="2"/>
+            <rect x="70" y="114" width="28" height="6" rx="2"/>
+            <rect x="110" y="114" width="28" height="6" rx="2"/>
+            <rect x="150" y="110" width="28" height="6" rx="2"/>
+          </g>
+        </g>
+
+        <!-- ===== LOWER HULL / COUNTERWEIGHT ===== -->
+        <g id="hull">
+          <path d="M40,210
+                   L360,210
+                   L380,250
+                   L360,290
+                   L60,290
+                   L30,250 Z"
+                fill="url(#steelGrad)" stroke="#2a3340" stroke-width="2"/>
+          <!-- hazard stripe panel -->
+          <rect x="70" y="230" width="90" height="18" fill="url(#hazard)" opacity="0.85" rx="2"/>
+          <!-- hull rivets -->
+          <g fill="#6b7c90" opacity="0.5">
+            <circle cx="55" cy="225" r="2.5"/>
+            <circle cx="180" cy="225" r="2.5"/>
+            <circle cx="250" cy="225" r="2.5"/>
+            <circle cx="320" cy="225" r="2.5"/>
+          </g>
+          <!-- counterweight rear -->
+          <path d="M30,215 L70,215 L60,285 L25,270 Z" fill="#2a3340" stroke="#1a2230" stroke-width="2"/>
+          <rect x="38" y="230" width="8" height="40" fill="#f4d35e" opacity="0.7" rx="1"/>
+          <!-- step / tread -->
+          <rect x="200" y="288" width="50" height="8" fill="#1a2230" rx="2"/>
+        </g>
+
+        <!-- ===== CAB (octopus cabin) ===== -->
+        <g id="cab">
+          <!-- cab shell -->
+          <path d="M150,210
+                   L150,120
+                   Q150,95 175,90
+                   L290,90
+                   Q320,90 325,120
+                   L330,210 Z"
+                fill="url(#steelGrad)" stroke="#2a3340" stroke-width="2.5"/>
+          <!-- glass panel -->
+          <path d="M165,200
+                   L165,125
+                   Q165,108 185,105
+                   L285,105
+                   Q305,105 308,125
+                   L312,200 Z"
+                fill="url(#glassGrad)" stroke="#7ee0d0" stroke-width="1.5" opacity="0.95"/>
+          <!-- mullion -->
+          <line x1="240" y1="105" x2="240" y2="200" stroke="#6b7c90" stroke-width="3" opacity="0.7"/>
+          <!-- glare sweep -->
+          <path class="glare" d="M175,190 L190,115 L210,115 L195,190 Z" fill="#fff" opacity="0.25"/>
+          <!-- roof light -->
+          <rect x="200" y="78" width="40" height="12" rx="3" fill="#2a3340"/>
+          <circle cx="220" cy="78" r="6" fill="#f4d35e" filter="url(#softGlow)" opacity="0.9"/>
+          <!-- mirror / snorkel -->
+          <g id="snorkel" transform="translate(300,90)">
+            <rect x="0" y="-36" width="7" height="40" rx="2" fill="#3d4a5c"/>
+            <rect x="-4" y="-40" width="15" height="8" rx="2" fill="#6b7c90"/>
+            <!-- rising bubbles from snorkel -->
+            <g fill="#a8f0e8">
+              <circle class="bubble" cx="4" cy="-44" r="3.5"/>
+              <circle class="bubble" cx="8" cy="-44" r="2.5"/>
+              <circle class="bubble" cx="2" cy="-44" r="3"/>
+              <circle class="bubble" cx="10" cy="-44" r="2"/>
+            </g>
+          </g>
+          <!-- cab door outline -->
+          <path d="M150,210 L150,120" stroke="#6b7c90" stroke-width="2" fill="none"/>
+          <!-- handrail -->
+          <path d="M140,150 L140,200 M140,150 L155,150" stroke="#f4d35e" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        </g>
+
+        <!-- ===== OCTOPUS DRIVER ===== -->
+        <g id="octopus" transform="translate(175,95)">
+          <!-- mantle / head -->
+          <g class="head-bob">
+            <ellipse cx="55" cy="40" rx="38" ry="42" fill="url(#coralGrad)"/>
+            <!-- head highlight -->
+            <ellipse cx="42" cy="28" rx="14" ry="10" fill="#ffb09a" opacity="0.45"/>
+            <!-- eye whites -->
+            <ellipse cx="40" cy="38" rx="11" ry="13" fill="#f7f3e8"/>
+            <ellipse cx="68" cy="38" rx="11" ry="13" fill="#f7f3e8"/>
+            <!-- pupils looking right (direction of travel) -->
+            <circle cx="44" cy="39" r="5.5" fill="#2b1a2e"/>
+            <circle cx="72" cy="39" r="5.5" fill="#2b1a2e"/>
+            <circle cx="45.5" cy="37" r="1.8" fill="#fff"/>
+            <circle cx="73.5" cy="37" r="1.8" fill="#fff"/>
+            <!-- eyelids -->
+            <ellipse class="eyelid" cx="40" cy="28" rx="11" ry="8" fill="#d9483f"/>
+            <ellipse class="eyelid" cx="68" cy="28" rx="11" ry="8" fill="#d9483f"/>
+            <!-- brow ridges -->
+            <path d="M28,24 Q40,18 50,24" fill="none" stroke="#c43c35" stroke-width="2" stroke-linecap="round"/>
+            <path d="M58,24 Q68,18 80,24" fill="none" stroke="#c43c35" stroke-width="2" stroke-linecap="round"/>
+            <!-- smile -->
+            <path d="M42,58 Q55,66 70,56" fill="none" stroke="#8b2a24" stroke-width="2" stroke-linecap="round"/>
+            <!-- freckles / texture -->
+            <g fill="#c43c35" opacity="0.35">
+              <circle cx="30" cy="50" r="2"/>
+              <circle cx="80" cy="48" r="2.2"/>
+              <circle cx="55" cy="22" r="1.6"/>
+            </g>
+          </g>
+
+          <!-- hard hat (operator PPE) -->
+          <g transform="translate(20,0)">
+            <ellipse cx="48" cy="8" rx="42" ry="12" fill="#f4d35e"/>
+            <path d="M14,8 Q20,-18 48,-20 Q76,-18 82,8" fill="#f4d35e" stroke="#d4b03a" stroke-width="1.5"/>
+            <rect x="10" y="4" width="76" height="6" rx="2" fill="#e0b83a"/>
+            <rect x="40" y="-18" width="10" height="10" rx="2" fill="#ff6b5b"/>
+          </g>
+
+          <!-- ===== TENTACLES (independent limbs) ===== -->
+
+          <!-- A: lever arm — grips joystick -->
+          <g class="arm-lever" transform="translate(100,55)">
+            <path d="M0,0 C30,8 55,25 70,48 C78,60 72,72 58,70 C44,68 40,55 48,45 C56,35 48,22 30,18 C18,15 8,18 0,22 Z"
+                  fill="url(#coralGrad)"/>
+            <!-- suction cups -->
+            <g fill="#ffc4b8" stroke="#d9483f" stroke-width="0.8">
+              <circle cx="28" cy="20" r="3.5"/>
+              <circle cx="42" cy="28" r="3.5"/>
+              <circle cx="54" cy="40" r="3.2"/>
+              <circle cx="62" cy="54" r="3"/>
+              <circle cx="58" cy="64" r="2.6"/>
+            </g>
+            <!-- joystick grip visual link -->
+            <g transform="translate(68,62)">
+              <rect x="-3" y="-28" width="5" height="28" rx="2" fill="#6b7c90"/>
+              <circle cx="0" cy="-30" r="6" fill="#2b1a2e"/>
+            </g>
+          </g>
+
+          <!-- B: outer wave tentacle — hangs out of cab, waves -->
+          <g class="arm-wave" transform="translate(20,70)">
+            <path d="M0,0 C-30,20 -55,50 -48,90 C-44,115 -20,120 -12,105 C-4,90 -18,80 -28,88 C-40,98 -28,110 -8,100 C20,86 18,40 8,18 Z"
+                  fill="url(#coralGrad)"/>
+            <g fill="#ffc4b8" stroke="#d9483f" stroke-width="0.8">
+              <circle cx="-28" cy="30" r="3.2"/>
+              <circle cx="-40" cy="48" r="3.2"/>
+              <circle cx="-46" cy="68" r="3"/>
+              <circle cx="-44" cy="88" r="2.8"/>
+              <circle cx="-34" cy="100" r="2.5"/>
+            </g>
+          </g>
+
+          <!-- C: curl tentacle — suction-cupped to window -->
+          <g class="arm-curl" transform="translate(85,40)">
+            <path d="M0,0 C25,-10 55,-5 70,18 C82,36 75,55 58,52 C45,50 48,38 58,38 C68,38 70,48 60,50 C48,52 40,40 48,28 C56,14 40,4 22,8 Z"
+                  fill="url(#coralGrad)"/>
+            <g fill="#ffc4b8" stroke="#d9483f" stroke-width="0.8">
+              <circle cx="25" cy="4" r="3"/>
+              <circle cx="45" cy="8" r="3"/>
+              <circle cx="60" cy="20" r="3"/>
+              <circle cx="68" cy="36" r="2.8"/>
+              <circle cx="62" cy="48" r="2.5"/>
+            </g>
+          </g>
+
+          <!-- D: hanging tentacle over hull edge -->
+          <g class="arm-hang" transform="translate(30,85)">
+            <path d="M0,0 C8,30 4,60 -18,85 C-30,100 -48,95 -44,80 C-40,66 -28,72 -28,84 C-28,94 -14,92 -6,78 C6,56 8,28 2,6 Z"
+                  fill="#e85a4c"/>
+            <g fill="#ffc4b8" stroke="#d9483f" stroke-width="0.8">
+              <circle cx="-2" cy="20" r="3"/>
+              <circle cx="-6" cy="40" r="3"/>
+              <circle cx="-14" cy="58" r="2.8"/>
+              <circle cx="-28" cy="76" r="2.6"/>
+            </g>
+          </g>
+
+          <!-- E: brace tentacle on dash -->
+          <g class="arm-brace" transform="translate(70,90)">
+            <path d="M0,0 C18,10 38,28 42,50 C44,62 32,68 26,58 C20,48 28,40 34,46 C40,52 32,58 24,52 C12,42 4,22 0,10 Z"
+                  fill="#ff7a66"/>
+            <g fill="#ffc4b8" stroke="#d9483f" stroke-width="0.8">
+              <circle cx="16" cy="12" r="2.8"/>
+              <circle cx="28" cy="26" r="2.8"/>
+              <circle cx="36" cy="42" r="2.6"/>
+            </g>
+          </g>
+        </g>
+
+        <!-- ===== BOOM + ARM + BUCKET (facing right, dig-ready) ===== -->
+        <g class="boom-group" id="boomAssembly" transform="translate(300,200)">
+          <!-- boom -->
+          <path d="M0,0
+                   L10,-12
+                   L120,-90
+                   L145,-80
+                   L25,20
+                   Z"
+                fill="url(#steelGrad)" stroke="#2a3340" stroke-width="2"/>
+          <!-- boom hydraulic cylinder -->
+          <g transform="translate(20,5) rotate(-28)">
+            <rect x="0" y="-6" width="70" height="12" rx="4" fill="#6b7c90"/>
+            <rect x="55" y="-3" width="50" height="6" rx="2" fill="#c5d0dc"/>
+          </g>
+          <!-- stick -->
+          <g class="bucket" transform="translate(130,-85)">
+            <path d="M0,0 L18,-8 L90,50 L72,62 Z" fill="url(#steelGrad)" stroke="#2a3340" stroke-width="2"/>
+            <!-- stick cylinder -->
+            <g transform="translate(10,4) rotate(50)">
+              <rect x="0" y="-5" width="40" height="10" rx="3" fill="#6b7c90"/>
+              <rect x="32" y="-2.5" width="28" height="5" rx="2" fill="#c5d0dc"/>
+            </g>
+            <!-- bucket -->
+            <g transform="translate(78,55) rotate(15)">
+              <path d="M0,0
+                       C20,-5 50,0 60,25
+                       C65,40 50,55 30,50
+                       C10,45 0,30 0,15 Z"
+                    fill="#3d4a5c" stroke="#2a3340" stroke-width="2"/>
+              <!-- teeth -->
+              <g fill="#6b7c90">
+                <path d="M48,48 L58,62 L50,52 Z"/>
+                <path d="M38,52 L44,68 L38,56 Z"/>
+                <path d="M28,52 L28,68 L26,54 Z"/>
+                <path d="M18,48 L10,62 L16,50 Z"/>
+              </g>
+              <!-- grit / sediment -->
+              <circle cx="35" cy="30" r="4" fill="#e8c47c" opacity="0.55"/>
+              <circle cx="45" cy="36" r="2.5" fill="#e8c47c" opacity="0.4"/>
+            </g>
+            <!-- pivot pin -->
+            <circle cx="0" cy="0" r="5" fill="#1a2230" stroke="#6b7c90" stroke-width="1.5"/>
+          </g>
+          <!-- boom base pin -->
+          <circle cx="0" cy="0" r="7" fill="#1a2230" stroke="#6b7c90" stroke-width="2"/>
+        </g>
+
+        <!-- exhaust puffs behind counterweight -->
+        <g transform="translate(20,200)" fill="#7ee0d0">
+          <circle class="puff" cx="0" cy="0" r="8"/>
+          <circle class="puff p2" cx="0" cy="0" r="6"/>
+        </g>
+
+        <!-- company decal -->
+        <g transform="translate(250,235)">
+          <text x="0" y="0"
+                font-family="Consolas, monospace"
+                font-size="11"
+                fill="#7ee0d0"
+                letter-spacing="1">TRENCH-7</text>
+        </g>
+      </g><!-- /chassis -->
+    </g><!-- /vehicleRoot -->
+
+    <!-- ========== NEAR PARALLAX (foreground) ========== -->
+    <g id="layerNear" class="layer-near">
+      <!-- seabed foreground -->
+      <path d="M-40,660 C100,630 200,670 340,640 C480,610 560,660 720,630 C880,600 980,650 1120,620 C1220,600 1320,640 1400,620 L1400,720 L-40,720 Z"
+            fill="#050e18"/>
+      <!-- kelp clusters -->
+      <g class="kelp k1" transform="translate(80,720)">
+        <path d="M0,0 C-15,-60 15,-100 -5,-160 C-20,-200 10,-230 -10,-280"
+              fill="none" stroke="#1a6b6b" stroke-width="14" stroke-linecap="round"/>
+        <path d="M20,0 C5,-50 35,-90 15,-150"
+              fill="none" stroke="#245a5a" stroke-width="10" stroke-linecap="round"/>
+      </g>
+      <g class="kelp k2" transform="translate(1180,720)">
+        <path d="M0,0 C20,-70 -10,-120 15,-180 C30,-220 0,-250 20,-300"
+              fill="none" stroke="#1a6b6b" stroke-width="16" stroke-linecap="round"/>
+        <path d="M-25,0 C-40,-55 -15,-100 -35,-150"
+              fill="none" stroke="#245a5a" stroke-width="11" stroke-linecap="round"/>
+      </g>
+      <g class="kelp k3" transform="translate(640,720)">
+        <path d="M0,0 C-10,-50 12,-90 -4,-140"
+              fill="none" stroke="#0f4a4a" stroke-width="12" stroke-linecap="round"/>
+      </g>
+      <!-- floating sediment particles (near, large) -->
+      <g fill="#a8f0e8" opacity="0.25">
+        <circle cx="200" cy="500" r="2.5"/>
+        <circle cx="400" cy="350" r="2"/>
+        <circle cx="750" cy="280" r="2.8"/>
+        <circle cx="950" cy="420" r="2.2"/>
+        <circle cx="1100" cy="300" r="1.8"/>
+      </g>
+      <!-- a few close bubbles -->
+      <g fill="#d0fff5" opacity="0.4">
+        <circle cx="300" cy="600" r="6"/>
+        <circle cx="312" cy="570" r="3.5"/>
+        <circle cx="900" cy="580" r="5"/>
+        <circle cx="910" cy="550" r="3"/>
+      </g>
+    </g>
+
+    <!-- vignette frame accent lines -->
+    <g fill="none" stroke="#5bffc8" stroke-opacity="0.12" stroke-width="1">
+      <rect x="12" y="12" width="1256" height="696" rx="4"/>
+    </g>
+  </svg>
+</div>
+</body>
+</html>

@@ -1,0 +1,9 @@
+v22.22.2
+---npm---
+10.9.7
+---py---
+Python 3.13.14
+---chrome---
+/c/Program Files/Google/Chrome/Application/chrome.exe
+---edge---
+/c/Program Files (x86)/Microsoft/Edge/Application/msedge.exe

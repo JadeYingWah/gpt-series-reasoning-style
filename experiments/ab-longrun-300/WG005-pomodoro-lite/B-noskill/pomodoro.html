@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>极简番茄钟</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --card: #1a2332;
+    --text: #e7ecf3;
+    --muted: #8b9bb4;
+    --accent: #3d8bfd;
+    --ok: #3dd68c;
+    --warn: #f5a524;
+    --danger: #f07178;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    background: radial-gradient(1200px 600px at 50% -10%, #1b2a44 0%, var(--bg) 55%);
+    color: var(--text);
+  }
+  .app {
+    width: min(420px, calc(100vw - 32px));
+    background: var(--card);
+    border: 1px solid #2a364a;
+    border-radius: calc(var(--radius) + 4px);
+    padding: 28px 24px 24px;
+    box-shadow: 0 20px 50px rgba(0,0,0,.35);
+  }
+  h1 {
+    margin: 0 0 6px;
+    font-size: 1.15rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    color: var(--text);
+  }
+  .sub {
+    margin: 0 0 22px;
+    font-size: .85rem;
+    color: var(--muted);
+  }
+  .timer {
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    font-size: clamp(3.2rem, 12vw, 4.4rem);
+    font-weight: 650;
+    letter-spacing: .04em;
+    line-height: 1;
+    margin: 8px 0 10px;
+    color: var(--text);
+  }
+  .timer.finished { color: var(--warn); }
+  .timer.running { color: var(--ok); }
+  .status {
+    text-align: center;
+    min-height: 1.4em;
+    font-size: .95rem;
+    color: var(--muted);
+    margin-bottom: 22px;
+  }
+  .status.done { color: var(--warn); font-weight: 600; }
+  .status.active { color: var(--ok); }
+  .controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  button {
+    flex: 1;
+    border: 0;
+    border-radius: 10px;
+    padding: 12px 10px;
+    font-size: .95rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: #0b1220;
+    background: var(--accent);
+    transition: filter .15s ease, transform .05s ease;
+  }
+  button:hover { filter: brightness(1.08); }
+  button:active { transform: translateY(1px); }
+  button:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+    filter: none;
+  }
+  button.secondary {
+    background: #2a364a;
+    color: var(--text);
+  }
+  .config {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-top: 16px;
+    border-top: 1px solid #2a364a;
+  }
+  .config label {
+    flex: 1;
+    font-size: .9rem;
+    color: var(--muted);
+  }
+  .config input {
+    width: 72px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid #3a4a63;
+    background: #121a26;
+    color: var(--text);
+    font-size: 1rem;
+    text-align: center;
+  }
+  .config input:invalid { border-color: var(--danger); }
+  .config button {
+    flex: 0 0 auto;
+    padding: 8px 14px;
+    font-size: .85rem;
+  }
+  .hint {
+    margin: 12px 0 0;
+    font-size: .78rem;
+    color: var(--muted);
+    line-height: 1.45;
+  }
+  .hint code {
+    font-family: ui-monospace, Consolas, monospace;
+    color: #b7c7de;
+  }
+</style>
+</head>
+<body>
+<main class="app" id="app">
+  <h1>极简番茄钟</h1>
+  <p class="sub">单文件 · 无外链 · 可配置时长</p>
+
+  <div class="timer" id="display" aria-live="polite">25:00</div>
+  <div class="status" id="status">就绪</div>
+
+  <div class="controls">
+    <button type="button" id="btnStart" aria-label="开始">开始</button>
+    <button type="button" id="btnPause" class="secondary" disabled aria-label="暂停">暂停</button>
+    <button type="button" id="btnReset" class="secondary" aria-label="重置">重置</button>
+  </div>
+
+  <div class="config">
+    <label for="minutes">时长（分钟，1–60）</label>
+    <input id="minutes" type="number" min="1" max="60" step="1" value="25" inputmode="numeric">
+    <button type="button" id="btnApply" class="secondary">应用</button>
+  </div>
+  <p class="hint">结束时状态文案变为「时间到」，并尝试播放提示音（Web Audio API）。若浏览器策略阻止音频，文案仍会更新。核心逻辑见页内 <code>PomodoroCore</code>。</p>
+</main>
+
+<script>
+/**
+ * Pure core — no DOM. Verifiable by Node extraction or source review.
+ * Exported for test harness via globalThis when not in browser test mode.
+ */
+const PomodoroCore = (() => {
+  const DEFAULT_MINUTES = 25;
+  const MIN_MINUTES = 1;
+  const MAX_MINUTES = 60;
+
+  function clampMinutes(n) {
+    const v = Math.floor(Number(n));
+    if (!Number.isFinite(v)) return null;
+    if (v < MIN_MINUTES || v > MAX_MINUTES) return null;
+    return v;
+  }
+
+  function totalSeconds(minutes) {
+    return minutes * 60;
+  }
+
+  function formatTime(totalSec) {
+    const s = Math.max(0, Math.floor(totalSec));
+    const m = Math.floor(s / 60);
+    const r = s % 60;
+    return String(m).padStart(2, "0") + ":" + String(r).padStart(2, "0");
+  }
+
+  /**
+   * Deterministic tick model.
+   * state: { remaining, running, finished }
+   * returns new state after one second elapses (if running).
+   */
+  function tick(state) {
+    if (!state.running || state.finished) return { ...state };
+    const remaining = state.remaining - 1;
+    if (remaining <= 0) {
+      return { remaining: 0, running: false, finished: true };
+    }
+    return { remaining, running: true, finished: false };
+  }
+
+  function start(state) {
+    if (state.finished || state.running) return { ...state };
+    return { remaining: state.remaining, running: true, finished: false };
+  }
+
+  function pause(state) {
+    if (!state.running) return { ...state };
+    return { remaining: state.remaining, running: false, finished: false };
+  }
+
+  function reset(minutes) {
+    const m = clampMinutes(minutes) ?? DEFAULT_MINUTES;
+    return { remaining: totalSeconds(m), running: false, finished: false };
+  }
+
+  return {
+    DEFAULT_MINUTES,
+    MIN_MINUTES,
+    MAX_MINUTES,
+    clampMinutes,
+    totalSeconds,
+    formatTime,
+    tick,
+    start,
+    pause,
+    reset
+  };
+})();
+
+// Expose for Node / source-level verification (e.g. `require` not needed; VM can read this).
+if (typeof globalThis !== "undefined") {
+  globalThis.PomodoroCore = PomodoroCore;
+}
+
+/* ---------- UI wiring ---------- */
+(function bootstrap() {
+  const display = document.getElementById("display");
+  const statusEl = document.getElementById("status");
+  const btnStart = document.getElementById("btnStart");
+  const btnPause = document.getElementById("btnPause");
+  const btnReset = document.getElementById("btnReset");
+  const minutesInput = document.getElementById("minutes");
+  const btnApply = document.getElementById("btnApply");
+
+  let state = PomodoroCore.reset(PomodoroCore.DEFAULT_MINUTES);
+  let timerId = null;
+  let audioCtx = null;
+
+  function render() {
+    display.textContent = PomodoroCore.formatTime(state.remaining);
+    display.classList.toggle("running", state.running);
+    display.classList.toggle("finished", state.finished);
+
+    statusEl.classList.toggle("done", state.finished);
+    statusEl.classList.toggle("active", state.running && !state.finished);
+
+    if (state.finished) {
+      statusEl.textContent = "时间到";
+    } else if (state.running) {
+      statusEl.textContent = "专注中…";
+    } else if (state.remaining === PomodoroCore.totalSeconds(currentMinutes())) {
+      statusEl.textContent = "就绪";
+    } else {
+      statusEl.textContent = "已暂停";
+    }
+
+    btnStart.disabled = state.running || state.finished;
+    btnPause.disabled = !state.running;
+  }
+
+  function currentMinutes() {
+    const parsed = PomodoroCore.clampMinutes(minutesInput.value);
+    return parsed ?? PomodoroCore.DEFAULT_MINUTES;
+  }
+
+  function stopLoop() {
+    if (timerId !== null) {
+      clearInterval(timerId);
+      timerId = null;
+    }
+  }
+
+  function startLoop() {
+    stopLoop();
+    timerId = setInterval(() => {
+      state = PomodoroCore.tick(state);
+      if (state.finished) {
+        stopLoop();
+        beep();
+      }
+      render();
+    }, 1000);
+  }
+
+  function beep() {
+    // Optional short beep. May be blocked until user gesture — status still shows 时间到.
+    try {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      if (!audioCtx) audioCtx = new Ctx();
+      if (audioCtx.state === "suspended") {
+        audioCtx.resume().catch(() => {});
+      }
+      const t0 = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(880, t0);
+      osc.frequency.setValueAtTime(660, t0 + 0.15);
+      gain.gain.setValueAtTime(0.0001, t0);
+      gain.gain.exponentialRampToValueAtTime(0.2, t0 + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.45);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(t0);
+      osc.stop(t0 + 0.5);
+    } catch (_) {
+      /* audio optional */
+    }
+  }
+
+  function applyDuration() {
+    const m = PomodoroCore.clampMinutes(minutesInput.value);
+    if (m === null) {
+      minutesInput.setCustomValidity("请输入 1–60 的正整数");
+      minutesInput.reportValidity();
+      return false;
+    }
+    minutesInput.setCustomValidity("");
+    minutesInput.value = String(m);
+    stopLoop();
+    state = PomodoroCore.reset(m);
+    render();
+    return true;
+  }
+
+  btnStart.addEventListener("click", () => {
+    // Unlock audio on user gesture so end beep is more likely to play.
+    try {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (Ctx && !audioCtx) audioCtx = new Ctx();
+      if (audioCtx && audioCtx.state === "suspended") audioCtx.resume().catch(() => {});
+    } catch (_) {}
+    state = PomodoroCore.start(state);
+    if (state.running) startLoop();
+    render();
+  });
+
+  btnPause.addEventListener("click", () => {
+    state = PomodoroCore.pause(state);
+    stopLoop();
+    render();
+  });
+
+  btnReset.addEventListener("click", () => {
+    stopLoop();
+    state = PomodoroCore.reset(currentMinutes());
+    render();
+  });
+
+  btnApply.addEventListener("click", applyDuration);
+
+  minutesInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") applyDuration();
+  });
+
+  minutesInput.addEventListener("input", () => {
+    minutesInput.setCustomValidity("");
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

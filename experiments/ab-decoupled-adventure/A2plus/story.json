@@ -1,0 +1,71 @@
+{
+  "title": "星际救援",
+  "start": "bridge",
+  "nodes": {
+    "bridge": {
+      "text": "你站在飞船的舰桥上，警报声刺耳地响着。主控台显示：生命维持系统故障，氧气正在快速流失。你必须做出选择。",
+      "choices": [
+        {"text": "前往工程舱修复系统", "next": "engineering"},
+        {"text": "启动紧急救生舱", "next": "escape_pod"},
+        {"text": "检查船员状态", "next": "crew_quarters"}
+      ]
+    },
+    "engineering": {
+      "text": "工程舱里一片狼藉。主管道破裂，蒸汽四处喷射。你看到两个可能的修复方案。",
+      "choices": [
+        {"text": "用备用零件临时修补", "next": "temp_fix"},
+        {"text": "关闭主管道，启用备用系统", "next": "backup_system"}
+      ]
+    },
+    "temp_fix": {
+      "text": "你用备用零件修补了管道。氧气流失减缓了，但系统仍然不稳定。你需要决定下一步。",
+      "choices": [
+        {"text": "继续加固修补", "next": "good_ending"},
+        {"text": "返回舰桥评估情况", "next": "bridge"}
+      ]
+    },
+    "backup_system": {
+      "text": "你成功切换到备用系统。氧气供应恢复正常，但主系统已经彻底损坏。飞船只能依靠备用系统维持。",
+      "choices": [
+        {"text": "发送求救信号等待救援", "next": "rescue_ending"},
+        {"text": "尝试手动导航到最近的空间站", "next": "navigation"}
+      ]
+    },
+    "navigation": {
+      "text": "你手动操纵飞船，利用备用系统的有限动力，缓慢地向最近的空间站移动。经过漫长的航行，你终于看到了空间站的灯光。但备用系统的动力正在耗尽。",
+      "choices": [
+        {"text": "全速前进，争取在动力耗尽前对接", "next": "good_ending"},
+        {"text": "节省动力，发送求救信号等待拖船", "next": "rescue_ending"}
+      ]
+    },
+    "escape_pod": {
+      "text": "你冲进救生舱，按下了发射按钮。救生舱脱离了飞船，你看着飞船在远处逐渐变暗。",
+      "choices": [
+        {"text": "启动求救信标", "next": "rescue_ending"},
+        {"text": "尝试返回飞船", "next": "bad_ending"}
+      ]
+    },
+    "crew_quarters": {
+      "text": "船员宿舍里，三名船员已经昏迷。氧气浓度正在下降，你必须快速行动。",
+      "choices": [
+        {"text": "把船员转移到救生舱", "next": "escape_pod"},
+        {"text": "就地给船员戴上氧气面罩", "next": "engineering"}
+      ]
+    },
+    "good_ending": {
+      "text": "【好结局】你成功拯救了飞船和所有船员。救援队到达时，一切都在掌控之中。你被授予星际救援勋章。",
+      "choices": [],
+      "ending": true
+    },
+    "rescue_ending": {
+      "text": "【中立结局】你发出了求救信号，救援队在24小时后到达。你和船员都安全了，但飞船已经无法修复。",
+      "choices": [],
+      "ending": true
+    },
+    "bad_ending": {
+      "text": "【坏结局】你试图返回飞船，但救生舱的燃料不足以完成往返。你在太空中漂流，氧气逐渐耗尽……",
+      "choices": [],
+      "ending": true
+    }
+  }
+}

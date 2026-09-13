@@ -1,0 +1,183 @@
+{
+  "static": {
+    "bytes": 23057,
+    "keyframes_defs": [
+      "@keyframes twinkleA{",
+      "@keyframes twinkleB{",
+      "@keyframes twinkleC{",
+      "@keyframes cloudShimmer{",
+      "@keyframes wingGlow{",
+      "@keyframes vortexGlow{",
+      "@keyframes birdDrift{"
+    ],
+    "keyframes_count": 7,
+    "animateTransform_count": 6,
+    "animate_count": 2,
+    "parallax_layer_ids": [
+      "id=\"lyr-far\"",
+      "id=\"lyr-mid\"",
+      "id=\"lyr-near\"",
+      "id=\"lyr-fore\""
+    ],
+    "layer_bases": [
+      {
+        "id": "lyr-far",
+        "dur_s": 30,
+        "base_px_s": 40
+      },
+      {
+        "id": "lyr-mid",
+        "dur_s": 12,
+        "base_px_s": 100
+      },
+      {
+        "id": "lyr-near",
+        "dur_s": 5,
+        "base_px_s": 240
+      },
+      {
+        "id": "lyr-fore",
+        "dur_s": 3,
+        "base_px_s": 400
+      }
+    ],
+    "external_refs": [],
+    "grades": {
+      "gte_8KB": true,
+      "no_external": true
+    }
+  },
+  "runtime": {
+    "svg_ok": "svg",
+    "glide_exposed": "object",
+    "console_errors_seen_so_far": 0,
+    "verify_t3": {
+      "t": 3,
+      "closed": [
+        93.26196956056158,
+        233.15492390140395,
+        559.5718173633695,
+        932.6196956056158
+      ],
+      "numeric": [
+        93.2626483031611,
+        233.15662075790283,
+        559.5758898189665,
+        932.6264830316113
+      ],
+      "absErr": [
+        0.0006787425995185004,
+        0.001696856498881516,
+        0.004072455596997315,
+        0.006787425995526064
+      ],
+      "maxErr": 0.006787425995526064
+    },
+    "verify_t20": {
+      "t": 20,
+      "closed": [
+        779.9464771704213,
+        1949.8661929260531,
+        4679.678863022527,
+        7799.464771704213
+      ],
+      "numeric": [
+        780.0480225244794,
+        1950.1200563111936,
+        4680.288135146878,
+        7800.480225244774
+      ],
+      "absErr": [
+        0.10154535405808929,
+        0.25386338514044837,
+        0.6092721243503547,
+        1.0154535405617935
+      ],
+      "maxErr": 1.0154535405617935
+    },
+    "state_t_1_5": {
+      "alt": 26,
+      "pitch": 3.6739403974420594e-16,
+      "vfac": 0.65,
+      "layers": [
+        {
+          "id": "lyr-far",
+          "dur": 30,
+          "speed": 26,
+          "dx": -46.631
+        },
+        {
+          "id": "lyr-mid",
+          "dur": 12,
+          "speed": 65,
+          "dx": -116.577
+        },
+        {
+          "id": "lyr-near",
+          "dur": 5,
+          "speed": 156,
+          "dx": -279.786
+        },
+        {
+          "id": "lyr-fore",
+          "dur": 3,
+          "speed": 260,
+          "dx": -466.31
+        }
+      ]
+    },
+    "speeds_distinct": {
+      "speeds": [
+        27.8756,
+        69.6891,
+        167.2539,
+        278.7564
+      ],
+      "distinct": 4
+    },
+    "appendage_vs_vehicle": {
+      "vehicle_T": 6,
+      "leg_ratio": 5,
+      "vehicle_period_differs_from_leg": true
+    },
+    "screenshots": [
+      "shot-t0_0.png",
+      "shot-t1_5.png",
+      "shot-t3_0.png",
+      "shot-t4_5.png"
+    ]
+  },
+  "replay": {
+    "frame_2_4_run1": {
+      "g": "translate(600,249.7176) rotate(4.8541)",
+      "L": [
+        "translate(-71.815,0)",
+        "translate(-179.538,0)",
+        "translate(-430.891,0)",
+        "translate(-718.152,0)"
+      ]
+    },
+    "frame_2_4_run2": {
+      "g": "translate(600,249.7176) rotate(4.8541)",
+      "L": [
+        "translate(-71.815,0)",
+        "translate(-179.538,0)",
+        "translate(-430.891,0)",
+        "translate(-718.152,0)"
+      ]
+    },
+    "frame_4_9": {
+      "g": "translate(600,288.7522) rotate(-2.4404)",
+      "L": [
+        "translate(-188.069,0)",
+        "translate(-470.172,0)",
+        "translate(-1128.412,0)",
+        "translate(-680.687,0)"
+      ]
+    },
+    "reproducible": true,
+    "frame_differs": true
+  },
+  "console": [],
+  "console_final": []
+}

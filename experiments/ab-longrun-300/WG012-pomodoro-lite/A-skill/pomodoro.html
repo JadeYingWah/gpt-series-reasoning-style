@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>番茄钟 · Lite</title>
+<style>
+  :root {
+    --bg: #1a1b26;
+    --panel: #24283b;
+    --text: #c0caf5;
+    --muted: #565f89;
+    --accent: #bb9af7;
+    --ok: #9ece6a;
+    --warn: #e0af68;
+    --bad: #f7768e;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    color: var(--text);
+    font-family: ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+  }
+  .card {
+    width: min(420px, 92vw);
+    background: var(--panel);
+    border-radius: 16px;
+    padding: 32px 28px;
+    box-shadow: 0 12px 40px rgba(0,0,0,.35);
+  }
+  h1 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 18px;
+  }
+  #display {
+    font-variant-numeric: tabular-nums;
+    font-size: clamp(3.2rem, 12vw, 4.5rem);
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: .04em;
+    line-height: 1;
+    margin-bottom: 10px;
+  }
+  #status {
+    text-align: center;
+    font-size: .95rem;
+    color: var(--muted);
+    min-height: 1.4em;
+    margin-bottom: 24px;
+  }
+  #status.running { color: var(--ok); }
+  #status.paused  { color: var(--warn); }
+  #status.done    { color: var(--bad); }
+  .row {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+  button {
+    appearance: none;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-size: .95rem;
+    font-weight: 600;
+    cursor: pointer;
+    background: #414868;
+    color: var(--text);
+    transition: background .15s, opacity .15s;
+  }
+  button:hover:not(:disabled) { background: #565f89; }
+  button:disabled { opacity: .4; cursor: not-allowed; }
+  button.primary { background: var(--accent); color: #1a1b26; }
+  button.primary:hover:not(:disabled) { background: #c0a0ff; }
+  .config {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: .9rem;
+    color: var(--muted);
+  }
+  .config input {
+    width: 64px;
+    padding: 6px 8px;
+    border: 1px solid #414868;
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    text-align: center;
+    font-size: 1rem;
+  }
+  .config input:disabled { opacity: .5; }
+  .hint {
+    margin-top: 16px;
+    text-align: center;
+    font-size: .75rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+<main class="card">
+  <h1>POMODORO LITE</h1>
+  <div id="display" aria-live="polite">25:00</div>
+  <div id="status" class="">就绪</div>
+  <div class="row">
+    <button id="btnStart" class="primary" type="button">开始</button>
+    <button id="btnPause" type="button" disabled>暂停</button>
+    <button id="btnReset" type="button">重置</button>
+  </div>
+  <div class="config">
+    <label for="minutes">时长（分钟）</label>
+    <input id="minutes" type="number" min="1" max="60" step="1" value="25">
+  </div>
+  <p class="hint">支持 1–60 正整数。到时播放提示音（Web Audio，无外部资源）。</p>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- pure helpers (Node-verifiable) ---------- */
+  function clampMinutes(n) {
+    if (!isFinite(n) || isNaN(n)) return 25;
+    n = Math.floor(n);
+    if (n < 1) return 1;
+    if (n > 60) return 60;
+    return n;
+  }
+
+  function formatTime(totalSeconds) {
+    var s = Math.max(0, totalSeconds | 0);
+    var m = Math.floor(s / 60);
+    var r = s % 60;
+    return (m < 10 ? "0" : "") + m + ":" + (r < 10 ? "0" : "") + r;
+  }
+
+  /* ---------- state ---------- */
+  // state: idle | running | paused | done
+  var state = "idle";
+  var remaining = 25 * 60;
+  var timerId = null;
+
+  var elDisplay = document.getElementById("display");
+  var elStatus  = document.getElementById("status");
+  var elStart   = document.getElementById("btnStart");
+  var elPause   = document.getElementById("btnPause");
+  var elReset   = document.getElementById("btnReset");
+  var elMinutes = document.getElementById("minutes");
+
+  var STATUS_TEXT = {
+    idle:    "就绪",
+    running: "进行中",
+    paused:  "已暂停",
+    done:    "时间到"
+  };
+
+  function render() {
+    elDisplay.textContent = formatTime(remaining);
+    elStatus.textContent = STATUS_TEXT[state];
+    elStatus.className = state;
+    elStart.disabled = (state === "running");
+    elPause.disabled = (state !== "running");
+    elMinutes.disabled = (state === "running" || state === "paused");
+  }
+
+  function clearTimer() {
+    if (timerId !== null) {
+      clearInterval(timerId);
+      timerId = null;
+    }
+  }
+
+  function beep() {
+    try {
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      var ctx = new Ctx();
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = 880;
+      gain.gain.value = 0.08;
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.35);
+      osc.onended = function () { ctx.close(); };
+    } catch (e) { /* audio optional */ }
+  }
+
+  function tick() {
+    remaining -= 1;
+    if (remaining <= 0) {
+      remaining = 0;
+      clearTimer();
+      state = "done";
+      beep();
+    }
+    render();
+  }
+
+  function start() {
+    if (state === "running") return;
+    if (state === "done") {
+      remaining = clampMinutes(parseInt(elMinutes.value, 10)) * 60;
+    } else if (state === "idle") {
+      remaining = clampMinutes(parseInt(elMinutes.value, 10)) * 60;
+    }
+    // paused: resume from remaining
+    state = "running";
+    clearTimer();
+    timerId = setInterval(tick, 1000);
+    render();
+  }
+
+  function pause() {
+    if (state !== "running") return;
+    clearTimer();
+    state = "paused";
+    render();
+  }
+
+  function reset() {
+    clearTimer();
+    remaining = clampMinutes(parseInt(elMinutes.value, 10)) * 60;
+    state = "idle";
+    render();
+  }
+
+  elStart.addEventListener("click", start);
+  elPause.addEventListener("click", pause);
+  elReset.addEventListener("click", reset);
+
+  elMinutes.addEventListener("change", function () {
+    var v = clampMinutes(parseInt(elMinutes.value, 10));
+    elMinutes.value = String(v);
+    if (state === "idle" || state === "done") {
+      remaining = v * 60;
+      if (state === "done") state = "idle";
+      render();
+    }
+  });
+
+  /* expose for console / Node harness */
+  window.__pomodoroLite = {
+    clampMinutes: clampMinutes,
+    formatTime: formatTime,
+    getState: function () {
+      return { state: state, remaining: remaining, display: formatTime(remaining), status: STATUS_TEXT[state] };
+    },
+    start: start,
+    pause: pause,
+    reset: reset
+  };
+
+  render();
+})();
+</script>
+</body>
+</html>

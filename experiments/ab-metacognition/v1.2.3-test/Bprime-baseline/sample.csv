@@ -1,0 +1,5 @@
+name,note,qty
+"a,b","he said ""hi""",3
+"multi
+line",,4
+last,no-newline,5

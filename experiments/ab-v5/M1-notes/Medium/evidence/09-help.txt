@@ -1,0 +1,12 @@
+usage: add.py [-h] [-t 标签] title content
+
+新增一条笔记（自动记录时间戳、自增 id），可选打标签。
+
+positional arguments:
+  title         笔记标题（不能为空）
+  content       笔记内容（可为空字符串）
+
+options:
+  -h, --help    show this help message and exit
+  -t, --tag 标签  为笔记打标签，可重复使用（如 --tag 工作 --tag 计划）
+exit=0

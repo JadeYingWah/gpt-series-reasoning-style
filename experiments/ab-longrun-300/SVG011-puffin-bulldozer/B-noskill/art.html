@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Puffin Bulldozer · SVG011</title>
+<style>
+  :root {
+    --sky-top: #0b1d3a;
+    --sky-mid: #1e4d7b;
+    --sky-low: #f4a261;
+    --ice: #c8e7f5;
+    --ice-shadow: #7eb6d4;
+    --sea: #1a6b8a;
+    --foam: #e8f6fc;
+    --sand: #c4a574;
+    --sand-dark: #8a7350;
+    --dozer-body: #f0b429;
+    --dozer-dark: #c4880f;
+    --dozer-deep: #8a5a08;
+    --track: #2a2a2e;
+    --track-tread: #4a4a52;
+    --puffin-black: #1a1a1e;
+    --puffin-white: #f5f0e8;
+    --beak-orange: #f4783c;
+    --beak-red: #d94530;
+    --beak-yellow: #f5c542;
+    --blade: #8a9aaa;
+    --blade-edge: #c5d0d8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #06101f;
+    font-family: "Segoe UI", system-ui, sans-serif;
+  }
+
+  #stage {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    min-height: 420px;
+  }
+
+  svg#scene {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ===== Background parallax layers ===== */
+  .layer-sky { animation: none; }
+  .cloud-far {
+    animation: drift-far 48s linear infinite;
+  }
+  .cloud-mid {
+    animation: drift-mid 28s linear infinite;
+  }
+  .berg-far {
+    animation: scroll-far 60s linear infinite;
+  }
+  .berg-mid {
+    animation: scroll-mid 36s linear infinite;
+  }
+  .sea-band {
+    animation: sea-shimmer 6s ease-in-out infinite;
+  }
+  .ground-scroll {
+    animation: scroll-near 8s linear infinite;
+  }
+  .ground-detail {
+    animation: scroll-near 8s linear infinite;
+  }
+  .road-stripes {
+    animation: scroll-near 8s linear infinite;
+  }
+
+  @keyframes drift-far {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-320px); }
+  }
+  @keyframes drift-mid {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-480px); }
+  }
+  @keyframes scroll-far {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-900px); }
+  }
+  @keyframes scroll-mid {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-720px); }
+  }
+  @keyframes scroll-near {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-240px); }
+  }
+  @keyframes sea-shimmer {
+    0%, 100% { opacity: 0.85; }
+    50%      { opacity: 1; }
+  }
+
+  /* ===== Bulldozer group: vehicle body bounce (engine) ===== */
+  #vehicle {
+    transform-origin: 400px 390px;
+    animation: engine-bounce 0.28s ease-in-out infinite;
+  }
+  @keyframes engine-bounce {
+    0%   { transform: translateY(0px); }
+    25%  { transform: translateY(-1.2px); }
+    50%  { transform: translateY(0.4px); }
+    75%  { transform: translateY(-0.8px); }
+    100% { transform: translateY(0px); }
+  }
+
+  /* Track treads: moving LEFT relative to vehicle = vehicle going RIGHT */
+  .tread-belt {
+    animation: tread-scroll 0.55s linear infinite;
+  }
+  @keyframes tread-scroll {
+    from { stroke-dashoffset: 0; }
+    to   { stroke-dashoffset: -40; }
+  }
+
+  /* Wheels rotate clockwise when vehicle advances right */
+  .wheel-spin {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: spin-cw 0.55s linear infinite;
+  }
+  @keyframes spin-cw {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  /* Exhaust puffs rise and drift left (vehicle moves right) */
+  .puff {
+    animation: puff-rise 1.4s ease-out infinite;
+    opacity: 0;
+  }
+  .puff:nth-child(1) { animation-delay: 0s; }
+  .puff:nth-child(2) { animation-delay: 0.45s; }
+  .puff:nth-child(3) { animation-delay: 0.9s; }
+  @keyframes puff-rise {
+    0%   { opacity: 0.7; transform: translate(0,0) scale(0.6); }
+    50%  { opacity: 0.45; transform: translate(-18px,-28px) scale(1.05); }
+    100% { opacity: 0; transform: translate(-36px,-56px) scale(1.4); }
+  }
+
+  /* ===== Puffin: independent limb / body motion (NOT locked to chassis) ===== */
+
+  /* 1. Head look / bob — independent of vehicle */
+  #puffin-head {
+    transform-origin: 478px 268px;
+    animation: head-bob 2.1s ease-in-out infinite;
+  }
+  @keyframes head-bob {
+    0%   { transform: rotate(0deg) translate(0,0); }
+    20%  { transform: rotate(-4deg) translate(1px,-2px); }
+    45%  { transform: rotate(3deg) translate(-1px,1px); }
+    70%  { transform: rotate(-2deg) translate(0.5px,-1px); }
+    100% { transform: rotate(0deg) translate(0,0); }
+  }
+
+  /* 2. Left wing (far side) pushes joystick — independent */
+  #wing-left {
+    transform-origin: 445px 295px;
+    animation: wing-left-act 1.1s ease-in-out infinite;
+  }
+  @keyframes wing-left-act {
+    0%   { transform: rotate(0deg); }
+    30%  { transform: rotate(-18deg); }
+    55%  { transform: rotate(8deg); }
+    100% { transform: rotate(0deg); }
+  }
+
+  /* 3. Right wing (near side) works lever — different phase */
+  #wing-right {
+    transform-origin: 455px 300px;
+    animation: wing-right-act 1.35s ease-in-out infinite;
+  }
+  @keyframes wing-right-act {
+    0%   { transform: rotate(0deg); }
+    25%  { transform: rotate(14deg); }
+    60%  { transform: rotate(-10deg); }
+    100% { transform: rotate(0deg); }
+  }
+
+  /* 4. Feet on pedals — cycle with machine rhythm, independent of chassis */
+  #foot-left {
+    transform-origin: 470px 340px;
+    animation: pedal-left 0.7s ease-in-out infinite;
+  }
+  @keyframes pedal-left {
+    0%, 100% { transform: rotate(0deg) translateY(0); }
+    50%      { transform: rotate(-8deg) translateY(2px); }
+  }
+  #foot-right {
+    transform-origin: 490px 342px;
+    animation: pedal-right 0.7s ease-in-out infinite;
+    animation-delay: 0.35s;
+  }
+  @keyframes pedal-right {
+    0%, 100% { transform: rotate(0deg) translateY(0); }
+    50%      { transform: rotate(6deg) translateY(2px); }
+  }
+
+  /* 5. Tail wobble — independent */
+  #puffin-tail {
+    transform-origin: 430px 310px;
+    animation: tail-wag 1.6s ease-in-out infinite;
+  }
+  @keyframes tail-wag {
+    0%, 100% { transform: rotate(0deg); }
+    40%      { transform: rotate(-7deg); }
+    70%      { transform: rotate(5deg); }
+  }
+
+  /* Blade slight scrape bob */
+  #blade {
+    transform-origin: 250px 380px;
+    animation: blade-scrape 1.8s ease-in-out infinite;
+  }
+  @keyframes blade-scrape {
+    0%, 100% { transform: rotate(0deg) translateY(0); }
+    50%      { transform: rotate(1.2deg) translateY(2px); }
+  }
+
+  /* Sun / moon glow pulse */
+  .sun-core {
+    animation: sun-pulse 5s ease-in-out infinite;
+  }
+  @keyframes sun-pulse {
+    0%, 100% { opacity: 0.95; r: 38; }
+    50%      { opacity: 1; r: 42; }
+  }
+
+  /* HUD caption */
+  #caption {
+    position: absolute;
+    left: 50%;
+    bottom: 18px;
+    transform: translateX(-50%);
+    color: rgba(232, 246, 252, 0.72);
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    pointer-events: none;
+    user-select: none;
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+<svg id="scene" viewBox="0 0 900 560" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A puffin driving a yellow bulldozer toward the right across an arctic coastal landscape">
+
+  <defs>
+    <!-- Sky gradient -->
+    <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#0b1d3a"/>
+      <stop offset="45%" stop-color="#1e4d7b"/>
+      <stop offset="78%" stop-color="#c45c26"/>
+      <stop offset="100%" stop-color="#f4a261"/>
+    </linearGradient>
+
+    <!-- Sea gradient -->
+    <linearGradient id="seaGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#1a6b8a"/>
+      <stop offset="100%" stop-color="#0d3d55"/>
+    </linearGradient>
+
+    <!-- Ground / gravel -->
+    <linearGradient id="groundGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#a89068"/>
+      <stop offset="40%" stop-color="#8a7350"/>
+      <stop offset="100%" stop-color="#5c4a32"/>
+    </linearGradient>
+
+    <!-- Dozer body face -->
+    <linearGradient id="dozerFace" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#ffd060"/>
+      <stop offset="55%" stop-color="#f0b429"/>
+      <stop offset="100%" stop-color="#c4880f"/>
+    </linearGradient>
+
+    <!-- Blade metal -->
+    <linearGradient id="bladeMetal" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"  stop-color="#5a6a78"/>
+      <stop offset="40%" stop-color="#8a9aaa"/>
+      <stop offset="100%" stop-color="#c5d0d8"/>
+    </linearGradient>
+
+    <!-- Beak gradient -->
+    <linearGradient id="beakGrad" x1="0" y1="0" x2="1" y2="0.3">
+      <stop offset="0%"  stop-color="#d94530"/>
+      <stop offset="35%" stop-color="#f4783c"/>
+      <stop offset="75%" stop-color="#f5c542"/>
+      <stop offset="100%" stop-color="#e8a830"/>
+    </linearGradient>
+
+    <!-- Soft shadow -->
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+
+    <filter id="glowSoft" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Track tread pattern (repeating dashes along path) -->
+    <pattern id="treadPat" width="20" height="12" patternUnits="userSpaceOnUse">
+      <rect x="0" y="0" width="20" height="12" fill="#2a2a2e"/>
+      <rect x="2" y="1" width="10" height="10" rx="1.5" fill="#4a4a52"/>
+      <rect x="14" y="1" width="4" height="10" rx="1" fill="#3a3a42"/>
+    </pattern>
+  </defs>
+
+  <!-- ========== LAYER 0: SKY ========== -->
+  <rect class="layer-sky" x="0" y="0" width="900" height="360" fill="url(#skyGrad)"/>
+
+  <!-- Stars (far) -->
+  <g opacity="0.55">
+    <circle cx="80"  cy="40" r="1.2" fill="#fff"/>
+    <circle cx="160" cy="70" r="0.9" fill="#fff"/>
+    <circle cx="300" cy="30" r="1.1" fill="#fff"/>
+    <circle cx="420" cy="55" r="0.8" fill="#fff"/>
+    <circle cx="560" cy="25" r="1.3" fill="#fff"/>
+    <circle cx="700" cy="48" r="0.9" fill="#fff"/>
+    <circle cx="820" cy="35" r="1.0" fill="#fff"/>
+    <circle cx="250" cy="90" r="0.7" fill="#fff"/>
+    <circle cx="640" cy="80" r="0.8" fill="#fff"/>
+  </g>
+
+  <!-- Sun -->
+  <g class="sun-core" filter="url(#glowSoft)">
+    <circle cx="720" cy="280" r="38" fill="#ffb347" opacity="0.9"/>
+    <circle cx="720" cy="280" r="22" fill="#ffe08a"/>
+  </g>
+
+  <!-- ========== LAYER 1: FAR CLOUDS ========== -->
+  <g class="cloud-far" opacity="0.35">
+    <ellipse cx="100" cy="90" rx="55" ry="16" fill="#6a8aaa"/>
+    <ellipse cx="140" cy="85" rx="40" ry="14" fill="#6a8aaa"/>
+    <ellipse cx="420" cy="110" rx="70" ry="18" fill="#5a7a9a"/>
+    <ellipse cx="470" cy="104" rx="45" ry="14" fill="#5a7a9a"/>
+    <ellipse cx="780" cy="70" rx="50" ry="12" fill="#6a8aaa"/>
+    <!-- wrap copies for seamless loop -->
+    <ellipse cx="100+320" cy="90" rx="55" ry="16" fill="#6a8aaa" transform="translate(320,0)"/>
+    <ellipse cx="140+320" cy="85" rx="40" ry="14" fill="#6a8aaa" transform="translate(320,0)"/>
+    <ellipse cx="420+320" cy="110" rx="70" ry="18" fill="#5a7a9a" transform="translate(320,0)"/>
+    <ellipse cx="470+320" cy="104" rx="45" ry="14" fill="#5a7a9a" transform="translate(320,0)"/>
+    <ellipse cx="780+320" cy="70" rx="50" ry="12" fill="#6a8aaa" transform="translate(320,0)"/>
+  </g>
+
+  <!-- ========== LAYER 2: FAR ICEBERGS / MOUNTAINS ========== -->
+  <g class="berg-far" opacity="0.55">
+    <polygon points="40,320 90,200 140,320" fill="#7eb6d4"/>
+    <polygon points="90,200 120,240 140,320 100,320" fill="#5a9ab8"/>
+    <polygon points="200,320 260,170 330,320" fill="#8ec8e0"/>
+    <polygon points="260,170 300,230 330,320 270,320" fill="#6aacc8"/>
+    <polygon points="400,320 470,185 540,320" fill="#7eb6d4"/>
+    <polygon points="470,185 510,245 540,320 480,320" fill="#5a9ab8"/>
+    <polygon points="600,320 660,195 720,320" fill="#8ec8e0"/>
+    <polygon points="660,195 695,250 720,320 670,320" fill="#6aacc8"/>
+    <polygon points="760,320 820,210 880,320" fill="#7eb6d4"/>
+    <!-- wrap -->
+    <polygon points="40+900,320 90+900,200 140+900,320" fill="#7eb6d4" transform="translate(-900,0)" opacity="0"/>
+    <g transform="translate(900,0)">
+      <polygon points="40,320 90,200 140,320" fill="#7eb6d4"/>
+      <polygon points="200,320 260,170 330,320" fill="#8ec8e0"/>
+      <polygon points="400,320 470,185 540,320" fill="#7eb6d4"/>
+      <polygon points="600,320 660,195 720,320" fill="#8ec8e0"/>
+      <polygon points="760,320 820,210 880,320" fill="#7eb6d4"/>
+    </g>
+  </g>
+
+  <!-- ========== LAYER 3: SEA ========== -->
+  <g class="sea-band">
+    <rect x="0" y="310" width="900" height="50" fill="url(#seaGrad)"/>
+    <!-- wave crests -->
+    <path d="M0,325 Q30,318 60,325 T120,325 T180,325 T240,325 T300,325 T360,325 T420,325 T480,325 T540,325 T600,325 T660,325 T720,325 T780,325 T840,325 T900,325"
+          fill="none" stroke="#e8f6fc" stroke-width="1.5" opacity="0.5"/>
+    <path d="M0,340 Q40,332 80,340 T160,340 T240,340 T320,340 T400,340 T480,340 T560,340 T640,340 T720,340 T800,340 T880,340"
+          fill="none" stroke="#e8f6fc" stroke-width="1" opacity="0.3"/>
+  </g>
+
+  <!-- ========== LAYER 4: MID ICE / ROCKS ========== -->
+  <g class="berg-mid">
+    <ellipse cx="80" cy="350" rx="50" ry="18" fill="#c8e7f5" opacity="0.85"/>
+    <ellipse cx="100" cy="345" rx="30" ry="12" fill="#e8f6fc"/>
+    <ellipse cx="300" cy="355" rx="40" ry="14" fill="#a8d0e8"/>
+    <ellipse cx="520" cy="348" rx="55" ry="16" fill="#c8e7f5" opacity="0.75"/>
+    <ellipse cx="540" cy="344" rx="28" ry="10" fill="#e8f6fc"/>
+    <ellipse cx="780" cy="352" rx="45" ry="15" fill="#a8d0e8"/>
+    <g transform="translate(720,0)">
+      <ellipse cx="80" cy="350" rx="50" ry="18" fill="#c8e7f5" opacity="0.85"/>
+      <ellipse cx="300" cy="355" rx="40" ry="14" fill="#a8d0e8"/>
+      <ellipse cx="520" cy="348" rx="55" ry="16" fill="#c8e7f5" opacity="0.75"/>
+      <ellipse cx="780" cy="352" rx="45" ry="15" fill="#a8d0e8"/>
+    </g>
+    <!-- tiny distant birds -->
+    <g stroke="#1a1a1e" stroke-width="1.2" fill="none" opacity="0.4">
+      <path d="M150,160 q6,-8 12,0"/>
+      <path d="M162,160 q6,-8 12,0"/>
+      <path d="M200,145 q5,-7 10,0"/>
+      <path d="M210,145 q5,-7 10,0"/>
+    </g>
+  </g>
+
+  <!-- ========== LAYER 5: NEAR GROUND (gravel road) ========== -->
+  <!-- Ground base — wide so strip pattern tiles -->
+  <rect x="0" y="355" width="900" height="205" fill="url(#groundGrad)"/>
+
+  <!-- Scrolling ground texture / gravel -->
+  <g class="ground-scroll" opacity="0.55">
+    <g fill="#5c4a32">
+      <ellipse cx="20" cy="380" rx="4" ry="2"/>
+      <ellipse cx="70" cy="400" rx="5" ry="2.5"/>
+      <ellipse cx="130" cy="370" rx="3" ry="1.5"/>
+      <ellipse cx="180" cy="410" rx="6" ry="2"/>
+      <ellipse cx="240" cy="385" rx="4" ry="2"/>
+      <ellipse cx="300" cy="405" rx="5" ry="2.5"/>
+      <ellipse cx="360" cy="375" rx="3" ry="1.5"/>
+      <ellipse cx="420" cy="415" rx="5" ry="2"/>
+      <ellipse cx="480" cy="390" rx="4" ry="2"/>
+      <ellipse cx="540" cy="400" rx="6" ry="2.5"/>
+      <ellipse cx="600" cy="370" rx="3" ry="1.5"/>
+      <ellipse cx="660" cy="410" rx="5" ry="2"/>
+      <ellipse cx="720" cy="385" rx="4" ry="2"/>
+      <ellipse cx="780" cy="405" rx="5" ry="2.5"/>
+      <ellipse cx="840" cy="375" rx="3" ry="1.5"/>
+      <ellipse cx="890" cy="415" rx="4" ry="2"/>
+    </g>
+    <!-- wrap set -->
+    <g fill="#5c4a32" transform="translate(240,0)">
+      <ellipse cx="20" cy="380" rx="4" ry="2"/>
+      <ellipse cx="70" cy="400" rx="5" ry="2.5"/>
+      <ellipse cx="130" cy="370" rx="3" ry="1.5"/>
+      <ellipse cx="180" cy="410" rx="6" ry="2"/>
+      <ellipse cx="240" cy="385" rx="4" ry="2"/>
+      <ellipse cx="300" cy="405" rx="5" ry="2.5"/>
+      <ellipse cx="360" cy="375" rx="3" ry="1.5"/>
+      <ellipse cx="420" cy="415" rx="5" ry="2"/>
+      <ellipse cx="480" cy="390" rx="4" ry="2"/>
+      <ellipse cx="540" cy="400" rx="6" ry="2.5"/>
+      <ellipse cx="600" cy="370" rx="3" ry="1.5"/>
+      <ellipse cx="660" cy="410" rx="5" ry="2"/>
+      <ellipse cx="720" cy="385" rx="4" ry="2"/>
+      <ellipse cx="780" cy="405" rx="5" ry="2.5"/>
+      <ellipse cx="840" cy="375" rx="3" ry="1.5"/>
+    </g>
+  </g>
+
+  <!-- Road stripes (near layer, faster visual) -->
+  <g class="road-stripes" opacity="0.35">
+    <rect x="0"   y="430" width="40" height="3" rx="1" fill="#c4b090"/>
+    <rect x="70"  y="430" width="40" height="3" rx="1" fill="#c4b090"/>
+    <rect x="140" y="430" width="40" height="3" rx="1" fill="#c4b090"/>
+    <rect x="210" y="430" width="40" height="3" rx="1" fill="#c4b090"/>
+    <rect x="280" y="430" width="40" height="3" rx="1" fill="#c4b090"/>
+    <rect x="350" y="430" width="40" height="3" rx="1" fill="#c4b090"/>
+    <rect x="420" y="430" width="40" height="3" rx="1" fill="#c4b090"/>
+    <rect x="490" y="430" width="40" height="3" rx="1" fill="#c4b090"/>
+    <rect x="560" y="430" width="40" height="3" rx="1" fill="#c4b090"/>
+    <rect x="630" y="430" width="40" height="3" rx="1" fill="#c4b090"/>
+    <rect x="700" y="430" width="40" height="3" rx="1" fill="#c4b090"/>
+    <rect x="770" y="430" width="40" height="3" rx="1" fill="#c4b090"/>
+    <rect x="840" y="430" width="40" height="3" rx="1" fill="#c4b090"/>
+  </g>
+
+  <!-- Foreground tufts / ice chips (fastest scroll) -->
+  <g class="ground-detail">
+    <g fill="#3d3222" opacity="0.7">
+      <path d="M30,470 l4,-18 2,18z"/>
+      <path d="M36,470 l6,-14 1,14z"/>
+      <path d="M200,500 l5,-20 2,20z"/>
+      <path d="M208,500 l7,-16 1,16z"/>
+      <path d="M400,480 l4,-16 2,16z"/>
+      <path d="M620,510 l5,-18 2,18z"/>
+      <path d="M628,510 l6,-14 1,14z"/>
+      <path d="M800,490 l4,-16 2,16z"/>
+    </g>
+    <g fill="#a8d0e8" opacity="0.5">
+      <ellipse cx="120" cy="490" rx="8" ry="4"/>
+      <ellipse cx="350" cy="520" rx="10" ry="5"/>
+      <ellipse cx="550" cy="500" rx="7" ry="3.5"/>
+      <ellipse cx="750" cy="530" rx="9" ry="4"/>
+    </g>
+  </g>
+
+  <!-- ========== BULLDOZER + PUFFIN ========== -->
+  <!--
+    MOTION CONSISTENCY NOTES (also in notes.md):
+    - Vehicle faces RIGHT (blade on the right, cab/body left of blade).
+    - Track treads animate with stroke-dashoffset going negative → pattern
+      appears to move LEFT along the belt → matches RIGHTWARD vehicle motion.
+    - Road stripes / gravel / bergs scroll LEFT (translateX negative) →
+      consistent with vehicle advancing RIGHT at fixed screen position.
+    - Puffin limbs (head, wings, feet, tail) have SEPARATE animations with
+      different periods/phases from the chassis bounce — not locked translation.
+  -->
+  <g id="vehicle" filter="url(#softShadow)">
+
+    <!-- Ground contact shadow under tracks -->
+    <ellipse cx="400" cy="458" rx="130" ry="12" fill="#000" opacity="0.35"/>
+
+    <!-- ---- TRACK ASSEMBLY (rear / main) ---- -->
+    <g id="track-assembly">
+      <!-- Track frame outline -->
+      <rect x="300" y="390" width="180" height="58" rx="22" fill="#1a1a1e" stroke="#111" stroke-width="2"/>
+      <!-- Inner track path (tread belt) -->
+      <rect x="308" y="398" width="164" height="42" rx="16"
+            fill="none" stroke="#4a4a52" stroke-width="14"/>
+      <!-- Animated tread dashes: dash pattern 8 gap 12, offset animates left -->
+      <rect class="tread-belt"
+            x="308" y="398" width="164" height="42" rx="16"
+            fill="none" stroke="#5a5a64" stroke-width="10"
+            stroke-dasharray="8 12"
+            stroke-dashoffset="0"/>
+      <!-- Second thinner tread line for density -->
+      <rect class="tread-belt"
+            x="308" y="398" width="164" height="42" rx="16"
+            fill="none" stroke="#3a3a42" stroke-width="4"
+            stroke-dasharray="4 16"
+            stroke-dashoffset="0"/>
+
+      <!-- Sprocket wheels inside track (rotate CW for rightward motion) -->
+      <g class="wheel-spin">
+        <circle cx="328" cy="419" r="16" fill="#2a2a2e" stroke="#5a5a64" stroke-width="2"/>
+        <line x1="328" y1="405" x2="328" y2="433" stroke="#8a8a96" stroke-width="2"/>
+        <line x1="314" y1="419" x2="342" y2="419" stroke="#8a8a96" stroke-width="2"/>
+        <circle cx="328" cy="419" r="4" fill="#8a8a96"/>
+      </g>
+      <g class="wheel-spin">
+        <circle cx="462" cy="419" r="16" fill="#2a2a2e" stroke="#5a5a64" stroke-width="2"/>
+        <line x1="462" y1="405" x2="462" y2="433" stroke="#8a8a96" stroke-width="2"/>
+        <line x1="448" y1="419" x2="476" y2="419" stroke="#8a8a96" stroke-width="2"/>
+        <circle cx="462" cy="419" r="4" fill="#8a8a96"/>
+      </g>
+      <!-- Road wheels -->
+      <g class="wheel-spin">
+        <circle cx="360" cy="419" r="11" fill="#333338" stroke="#6a6a74" stroke-width="1.5"/>
+        <line x1="360" y1="410" x2="360" y2="428" stroke="#8a8a96" stroke-width="1.5"/>
+      </g>
+      <g class="wheel-spin">
+        <circle cx="400" cy="419" r="11" fill="#333338" stroke="#6a6a74" stroke-width="1.5"/>
+        <line x1="400" y1="410" x2="400" y2="428" stroke="#8a8a96" stroke-width="1.5"/>
+      </g>
+      <g class="wheel-spin">
+        <circle cx="430" cy="419" r="11" fill="#333338" stroke="#6a6a74" stroke-width="1.5"/>
+        <line x1="430" y1="410" x2="430" y2="428" stroke="#8a8a96" stroke-width="1.5"/>
+      </g>
+    </g>
+
+    <!-- ---- CHASSIS / BODY ---- -->
+    <!-- Main body block -->
+    <path d="M310,300
+             L310,385
+             Q310,392 318,392
+             L475,392
+             Q485,392 485,382
+             L485,300
+             Z"
+          fill="url(#dozerFace)" stroke="#8a5a08" stroke-width="2"/>
+    <!-- Side panel detail -->
+    <rect x="320" y="320" width="70" height="40" rx="4" fill="#c4880f" stroke="#8a5a08" stroke-width="1.5"/>
+    <text x="330" y="345" font-family="Georgia, serif" font-size="11" fill="#5c3a08" font-weight="bold">PUFF-01</text>
+    <!-- Rivets -->
+    <circle cx="325" cy="310" r="2.5" fill="#8a5a08"/>
+    <circle cx="325" cy="380" r="2.5" fill="#8a5a08"/>
+    <circle cx="475" cy="310" r="2.5" fill="#8a5a08"/>
+    <circle cx="475" cy="380" r="2.5" fill="#8a5a08"/>
+    <circle cx="400" cy="310" r="2.5" fill="#8a5a08"/>
+    <circle cx="400" cy="380" r="2.5" fill="#8a5a08"/>
+
+    <!-- Engine hood (front-right of body, toward blade) -->
+    <path d="M485,340 L540,340 L555,355 L555,385 L485,385 Z"
+          fill="#e0a020" stroke="#8a5a08" stroke-width="2"/>
+    <!-- Hood vents -->
+    <line x1="500" y1="350" x2="500" y2="375" stroke="#8a5a08" stroke-width="1.5"/>
+    <line x1="512" y1="350" x2="512" y2="375" stroke="#8a5a08" stroke-width="1.5"/>
+    <line x1="524" y1="352" x2="524" y2="375" stroke="#8a5a08" stroke-width="1.5"/>
+
+    <!-- Exhaust stack -->
+    <rect x="500" y="290" width="10" height="55" rx="2" fill="#3a3a42" stroke="#222" stroke-width="1.5"/>
+    <rect x="496" y="285" width="18" height="10" rx="2" fill="#4a4a52" stroke="#222" stroke-width="1.5"/>
+    <!-- Exhaust puffs -->
+    <g transform="translate(505,282)">
+      <circle class="puff" cx="0" cy="0" r="8"  fill="#8a8a96" opacity="0.6"/>
+      <circle class="puff" cx="0" cy="0" r="6"  fill="#a0a0ac" opacity="0.5"/>
+      <circle class="puff" cx="0" cy="0" r="10" fill="#6a6a74" opacity="0.4"/>
+    </g>
+
+    <!-- Cab (open canopy frame where puffin sits) -->
+    <!-- Cab floor / seat base -->
+    <rect x="360" y="300" width="90" height="12" rx="2" fill="#c4880f" stroke="#8a5a08" stroke-width="1.5"/>
+    <!-- Canopy posts -->
+    <rect x="365" y="230" width="6" height="72" fill="#3a3a42" stroke="#222" stroke-width="1"/>
+    <rect x="440" y="230" width="6" height="72" fill="#3a3a42" stroke="#222" stroke-width="1"/>
+    <!-- Canopy roof -->
+    <path d="M355,228 L455,228 L462,218 L348,218 Z"
+          fill="#f0b429" stroke="#8a5a08" stroke-width="2"/>
+    <!-- Roof highlight -->
+    <rect x="360" y="220" width="90" height="4" rx="1" fill="#ffd060"/>
+
+    <!-- Seat back -->
+    <path d="M370,270 Q368,250 375,248 L420,248 Q425,250 425,270 L425,300 L370,300 Z"
+          fill="#2a2a2e" stroke="#111" stroke-width="1.5"/>
+    <ellipse cx="397" cy="275" rx="20" ry="12" fill="#3a3a42"/>
+
+    <!-- Control levers -->
+    <line x1="430" y1="310" x2="445" y2="275" stroke="#5a5a64" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="445" cy="273" r="5" fill="#d94530" stroke="#8a2010" stroke-width="1"/>
+    <line x1="420" y1="312" x2="430" y2="285" stroke="#5a5a64" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="430" cy="283" r="4" fill="#1a6b8a" stroke="#0d3d55" stroke-width="1"/>
+
+    <!-- Blade arms connecting body to blade -->
+    <line x1="550" y1="360" x2="620" y2="370" stroke="#5a6a78" stroke-width="6" stroke-linecap="round"/>
+    <line x1="550" y1="375" x2="620" y2="382" stroke="#5a6a78" stroke-width="6" stroke-linecap="round"/>
+    <!-- Hydraulic cylinder -->
+    <line x1="540" y1="350" x2="600" y2="365" stroke="#8a9aaa" stroke-width="4" stroke-linecap="round"/>
+    <line x1="595" y1="363" x2="620" y2="370" stroke="#c5d0d8" stroke-width="3" stroke-linecap="round"/>
+
+    <!-- ---- FRONT BLADE (right side = direction of travel) ---- -->
+    <g id="blade">
+      <!-- Blade face -->
+      <path d="M620,340
+               L640,340
+               Q655,340 655,355
+               L655,420
+               Q655,435 640,435
+               L620,435
+               Z"
+            fill="url(#bladeMetal)" stroke="#3a4a58" stroke-width="2"/>
+      <!-- Blade cutting edge -->
+      <rect x="648" y="345" width="8" height="85" rx="2" fill="#e8eef2" stroke="#8a9aaa" stroke-width="1"/>
+      <!-- Wear marks -->
+      <line x1="628" y1="360" x2="645" y2="360" stroke="#5a6a78" stroke-width="1" opacity="0.5"/>
+      <line x1="628" y1="380" x2="645" y2="380" stroke="#5a6a78" stroke-width="1" opacity="0.5"/>
+      <line x1="628" y1="400" x2="645" y2="400" stroke="#5a6a78" stroke-width="1" opacity="0.5"/>
+      <line x1="628" y1="420" x2="645" y2="420" stroke="#5a6a78" stroke-width="1" opacity="0.5"/>
+      <!-- Dirt on blade edge -->
+      <path d="M648,400 Q660,395 665,410 Q655,415 648,412 Z" fill="#5c4a32" opacity="0.6"/>
+      <path d="M648,370 Q658,368 660,378 Q652,380 648,376 Z" fill="#8a7350" opacity="0.5"/>
+    </g>
+
+    <!-- ---- PUFFIN DRIVER ---- -->
+    <!-- Body (black back / white belly typical Atlantic puffin) -->
+    <g id="puffin-body">
+      <!-- Tail (independent animation) -->
+      <g id="puffin-tail">
+        <path d="M428,300 L400,315 L420,320 L430,308 Z"
+              fill="#1a1a1e" stroke="#111" stroke-width="1"/>
+        <path d="M428,302 L408,314 L422,316 L429,306 Z" fill="#2a2a32"/>
+      </g>
+
+      <!-- Torso -->
+      <ellipse cx="455" cy="295" rx="28" ry="38" fill="#1a1a1e"/>
+      <!-- White belly -->
+      <ellipse cx="462" cy="305" rx="18" ry="26" fill="#f5f0e8"/>
+      <!-- Chest sheen -->
+      <ellipse cx="468" cy="298" rx="8" ry="14" fill="#fff" opacity="0.35"/>
+
+      <!-- Feet on pedals (independent) -->
+      <g id="foot-left">
+        <ellipse cx="468" cy="338" rx="10" ry="5" fill="#f4783c" stroke="#d94530" stroke-width="1"/>
+        <line x1="460" y1="336" x2="460" y2="338" stroke="#d94530" stroke-width="1.5"/>
+        <line x1="468" y1="336" x2="468" y2="338" stroke="#d94530" stroke-width="1.5"/>
+        <line x1="476" y1="336" x2="476" y2="338" stroke="#d94530" stroke-width="1.5"/>
+      </g>
+      <g id="foot-right">
+        <ellipse cx="488" cy="340" rx="10" ry="5" fill="#f4783c" stroke="#d94530" stroke-width="1"/>
+        <line x1="480" y1="338" x2="480" y2="340" stroke="#d94530" stroke-width="1.5"/>
+        <line x1="488" y1="338" x2="488" y2="340" stroke="#d94530" stroke-width="1.5"/>
+        <line x1="496" y1="338" x2="496" y2="340" stroke="#d94530" stroke-width="1.5"/>
+      </g>
+
+      <!-- Left wing (far side) — works blue lever -->
+      <g id="wing-left">
+        <path d="M440,285
+                 Q425,290 422,305
+                 Q425,318 440,315
+                 Q448,300 440,285 Z"
+              fill="#1a1a1e" stroke="#111" stroke-width="1"/>
+        <!-- wing tip reaching lever -->
+        <ellipse cx="432" cy="300" rx="6" ry="10" fill="#2a2a32"/>
+      </g>
+
+      <!-- Right wing (near side) — works red joystick -->
+      <g id="wing-right">
+        <path d="M468,288
+                 Q490,292 500,278
+                 Q505,270 498,268
+                 Q485,272 470,282 Z"
+              fill="#1a1a1e" stroke="#111" stroke-width="1"/>
+        <!-- wingtip on joystick -->
+        <ellipse cx="498" cy="272" rx="7" ry="5" fill="#2a2a32"/>
+      </g>
+
+      <!-- Head group (independent bob) -->
+      <g id="puffin-head">
+        <!-- Neck / head black cap -->
+        <ellipse cx="478" cy="258" rx="22" ry="24" fill="#1a1a1e"/>
+        <!-- White cheek patch -->
+        <ellipse cx="482" cy="262" rx="14" ry="16" fill="#f5f0e8"/>
+        <!-- Eye ring (puffin's distinctive pale eye patch) -->
+        <ellipse cx="486" cy="254" rx="7" ry="8" fill="#e8e0d0"/>
+        <!-- Eye -->
+        <circle cx="488" cy="254" r="4" fill="#1a1a1e"/>
+        <circle cx="489.5" cy="252.5" r="1.4" fill="#fff"/>
+        <!-- Second eye hint (far side, slight) -->
+        <circle cx="472" cy="256" r="2.5" fill="#1a1a1e" opacity="0.6"/>
+
+        <!-- Iconic large colorful beak (pointing right = travel direction) -->
+        <path d="M496,258
+                 L545,262
+                 Q552,263 552,268
+                 Q552,274 544,275
+                 L496,272
+                 Q492,265 496,258 Z"
+              fill="url(#beakGrad)" stroke="#b83820" stroke-width="1.5"/>
+        <!-- Beak plate lines -->
+        <path d="M520,260 L520,273" stroke="#b83820" stroke-width="1" opacity="0.6"/>
+        <path d="M535,261 L535,274" stroke="#b83820" stroke-width="1" opacity="0.6"/>
+        <!-- Beak tip sheen -->
+        <ellipse cx="545" cy="266" rx="5" ry="3" fill="#ffe08a" opacity="0.4"/>
+
+        <!-- Hard hat (safety!) -->
+        <path d="M460,242
+                 Q460,228 478,226
+                 Q496,228 496,242
+                 L500,244
+                 L456,244 Z"
+              fill="#f0b429" stroke="#8a5a08" stroke-width="1.5"/>
+        <ellipse cx="478" cy="244" rx="22" ry="4" fill="#e0a020" stroke="#8a5a08" stroke-width="1"/>
+        <!-- Hat brim front -->
+        <path d="M496,242 L512,246 L512,249 L496,246 Z" fill="#c4880f"/>
+        <!-- Hard hat lamp -->
+        <circle cx="478" cy="232" r="4" fill="#ffe08a" stroke="#8a5a08" stroke-width="1"/>
+        <line x1="478" y1="236" x2="478" y2="242" stroke="#8a5a08" stroke-width="1.5"/>
+      </g>
+    </g>
+
+    <!-- Soft inner shadow on body for depth -->
+    <path d="M310,360 Q400,370 485,360 L485,392 L318,392 Q310,392 310,385 Z"
+          fill="#000" opacity="0.12"/>
+
+  </g>
+
+  <!-- Foreground dust kicked up by tracks (in front of vehicle slightly) -->
+  <g class="ground-detail" opacity="0.45">
+    <circle cx="280" cy="440" r="6" fill="#c4b090"/>
+    <circle cx="260" cy="448" r="4" fill="#a89068"/>
+    <circle cx="240" cy="445" r="5" fill="#c4b090"/>
+    <circle cx="220" cy="450" r="3" fill="#a89068"/>
+    <circle cx="200" cy="442" r="4" fill="#c4b090"/>
+  </g>
+
+</svg>
+<div id="caption">Puffin × Bulldozer · SVG011</div>
+</div>
+
+<script>
+/* Lightweight runtime polish — no network, no external deps.
+   Ensures SVG scales cleanly and adds a tiny FPS-independent
+   vehicle idle sway layered on top of CSS animations. */
+(function () {
+  var vehicle = document.getElementById('vehicle');
+  if (!vehicle) return;
+
+  var t0 = performance.now();
+  function frame(now) {
+    var t = (now - t0) / 1000;
+    // gentle lateral idle sway, amplitude < 1px, period ~3.2s
+    var sway = Math.sin(t * 1.96) * 0.7;
+    // tiny roll around track contact point
+    var roll = Math.sin(t * 1.96 + 0.4) * 0.15;
+    vehicle.style.transform =
+      'translate(' + sway.toFixed(3) + 'px, 0) rotate(' + roll.toFixed(3) + 'deg)';
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  /* Pause CSS animations when tab hidden (saves battery, keeps geo consistent) */
+  document.addEventListener('visibilitychange', function () {
+    var svg = document.getElementById('scene');
+    if (!svg) return;
+    svg.style.animationPlayState = document.hidden ? 'paused' : 'running';
+    var all = svg.querySelectorAll('*');
+    for (var i = 0; i < all.length; i++) {
+      all[i].style.animationPlayState = document.hidden ? 'paused' : 'running';
+    }
+  });
+})();
+</script>
+</body>
+</html>

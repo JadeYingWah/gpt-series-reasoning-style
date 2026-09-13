@@ -1,0 +1,31 @@
+﻿交叉验证（Node.js vv22.22.2 / V8 独立运行时独立实现，含校验逻辑动态执行）
+目标文件: <实验根目录>\ab-v5\M3-refactor\A2plus\index.html
+检查项: 27 | PASS: 27 | FAIL: 0
+PASS | 单文件存在且可按 UTF-8 严格解码 | 9871 bytes, BOM=无
+PASS | 头像占位存在（.avatar + 内联 SVG）
+PASS | 技能区块存在（分组≥1 且 标签≥5，结构保留） | 分组 3，标签 13
+PASS | 项目卡片恰好 3 张（结构保留） | 实际 3 张
+PASS | 联系表单存在（#contact-form + novalidate）
+PASS | 三字段齐备且 required（name/email/message + label[for]，属性顺序无关） | 姓名/邮箱/留言均通过
+PASS | 成功提示存在且初始 hidden
+PASS | 外部依赖 0 命中（属性白名单 + 关键词扫描） | 扫描干净（href/src 共 6 处，均白名单内）
+PASS | 表单校验逻辑动态执行（V8 实跑，输入域分段） | 12 个分段用例全部符合期望
+PASS | 提交接线（submit 监听 + preventDefault + 成功/失败分支）
+PASS | 错误提示元素齐备（err-name/err-email/err-message）
+PASS | 对比度 正文 on 页面背景 = 13.68:1（要求 ≥4.5） | fg=#1f2937 bg=#f5f7fa
+PASS | 对比度 卡片正文 on surface = 14.68:1（要求 ≥4.5） | fg=#1f2937 bg=#ffffff
+PASS | 对比度 标签文字 on elevated = 12.96:1（要求 ≥4.5） | fg=#1f2937 bg=#eef1f5
+PASS | 对比度 副标题/表单标签/页脚链接 on 背景 = 7.04:1（要求 ≥4.5） | fg=#4b5563 bg=#f5f7fa
+PASS | 对比度 项目描述 on surface = 7.56:1（要求 ≥4.5） | fg=#4b5563 bg=#ffffff
+PASS | 对比度 状态/页脚弱化文字 on 背景 = 5.03:1（要求 ≥4.5） | fg=#626b78 bg=#f5f7fa
+PASS | 对比度 链接 on 背景 = 6.24:1（要求 ≥4.5） | fg=#1d4ed8 bg=#f5f7fa
+PASS | 对比度 卡片内链接 on surface = 6.70:1（要求 ≥4.5） | fg=#1d4ed8 bg=#ffffff
+PASS | 对比度 技术标签 on 混合底色(rgba 8%) = 5.93:1（要求 ≥4.5） | fg=#1d4ed8 bg=#edf1fc
+PASS | 对比度 头像文字 on 渐变暗端 = 4.85:1（要求 ≥3） | fg=#0f172a bg=#3b82f6
+PASS | 对比度 头像文字 on 渐变亮端 = 9.90:1（要求 ≥3） | fg=#0f172a bg=#93c5fd
+PASS | 对比度 表单错误提示 on 背景 = 6.13:1（要求 ≥4.5） | fg=#b42318 bg=#f5f7fa
+PASS | 对比度 成功提示 on 浅绿底(rgba 8%) = 5.89:1（要求 ≥4.5） | fg=#166534 bg=#e3ebea
+PASS | 对比度 按钮文字 on 按钮底 = 6.70:1（要求 ≥4.5） | fg=#ffffff bg=#1d4ed8
+PASS | 页面背景足够浅（>0.85） | L=0.9284 (#f5f7fa)
+PASS | color-scheme: light 声明
+RESULT: ALL GREEN

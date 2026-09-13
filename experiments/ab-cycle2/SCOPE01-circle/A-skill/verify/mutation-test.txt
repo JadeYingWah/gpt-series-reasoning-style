@@ -1,0 +1,7 @@
+﻿[safe-delete][SAFE_DELETE_BULK_CONFIRM_REQUIRED] {"count":50,"threshold":50,"scope":"turn","targets":["<实验根目录>\\ab-cycle2\\SCOPE01-circle\\A-skill\\verify\\_mutated-response.md"],"targetCount":1}
+=== 基线（未篡改）===
+exit=0  末行=CLAIM CHECK: PASS
+① 把 art.html 的大小 520 改成 999 -> RED 被杀死  ['- 大小不符: art.html 声明=999 实际=520']
+② 把自述用例数 4/4 改成 3/3 -> RED 被杀死  ['- 用例覆盖数不符: 自述 3 实际 PASS 4', '- 自述分母 3 与实测 4 不符']
+③ 删掉 prove_clamp.py 的声明行 -> RED 被杀死  ['- 磁盘存在未声明的产物: verify/prove_clamp.py']
+④ 声明一个磁盘上不存在的文件 -> RED 被杀死  ['- 声明的文件不存在: verify/ghost.py', '- 磁盘存在未声明的产物: verify/verify_pixels.py']

@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>销售看板 · 2026 H1</title>
+<style>
+  :root{
+    --bg:#f4f6fb;
+    --panel:#ffffff;
+    --ink:#111827;
+    --ink-2:#4b5563;
+    --ink-3:#9ca3af;
+    --line:#e5e7eb;
+    --brand:#3b5bdb;
+    --brand-soft:#e8edff;
+    --accent:#12b886;
+    --warn:#b45309;
+    --radius:14px;
+    --shadow:0 1px 2px rgba(16,24,40,.04), 0 8px 24px rgba(16,24,40,.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB","Segoe UI",system-ui,-apple-system,sans-serif;
+    font-size:14px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1040px;margin:0 auto;padding:28px 20px 56px}
+
+  /* ---------- 页头 ---------- */
+  header.page{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between;margin-bottom:20px}
+  header.page h1{margin:0;font-size:22px;font-weight:700;letter-spacing:.2px}
+  header.page .sub{margin:4px 0 0;color:var(--ink-2);font-size:13px}
+  .dataset-tag{
+    font-size:12px;color:var(--brand);background:var(--brand-soft);
+    border:1px solid #cdd8ff;border-radius:999px;padding:4px 10px;white-space:nowrap;
+  }
+
+  /* ---------- 分区标题 ---------- */
+  .sec-title{
+    display:flex;align-items:baseline;gap:10px;
+    margin:0 0 10px;font-size:13px;font-weight:700;color:var(--ink-2);
+    letter-spacing:.08em;
+  }
+  .sec-title::after{content:"";flex:1;height:1px;background:var(--line)}
+  section{margin-bottom:22px}
+
+  /* ---------- 筛选条 ---------- */
+  .filterbar{
+    display:flex;flex-wrap:wrap;gap:12px;align-items:center;
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:14px 16px;box-shadow:var(--shadow);margin-bottom:18px;
+  }
+  .filterbar label{font-size:13px;color:var(--ink-2);font-weight:600}
+  select#region{
+    min-width:220px;max-width:100%;
+    padding:8px 12px;font-size:14px;font-family:inherit;color:var(--ink);
+    background:#fff;border:1px solid #d1d5db;border-radius:9px;cursor:pointer;
+  }
+  select#region:focus{outline:2px solid var(--brand);outline-offset:1px;border-color:var(--brand)}
+  .badge{
+    display:inline-flex;align-items:center;gap:6px;
+    max-width:340px;padding:5px 12px;border-radius:999px;
+    background:var(--brand-soft);color:#2b3fa8;border:1px solid #ccd7ff;
+    font-size:12.5px;font-weight:600;
+  }
+  .badge .dot{width:7px;height:7px;border-radius:50%;background:var(--brand);flex:none}
+  .badge .txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .badge.is-idle{background:#f3f4f6;border-color:#e5e7eb;color:var(--ink-2)}
+  .badge.is-idle .dot{background:var(--ink-3)}
+  .badge.is-invalid{background:#fff7ed;border-color:#fed7aa;color:var(--warn)}
+  .badge.is-invalid .dot{background:var(--warn)}
+
+  /* ---------- KPI 卡 ---------- */
+  .kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+  .card{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:16px 18px;box-shadow:var(--shadow);
+  }
+  .kpi .k-label{font-size:12.5px;color:var(--ink-2);font-weight:600;letter-spacing:.02em}
+  .kpi .k-value{
+    margin-top:8px;font-size:28px;font-weight:700;letter-spacing:-.5px;
+    font-variant-numeric:tabular-nums;overflow-wrap:anywhere;
+  }
+  .kpi .k-value .unit{font-size:15px;font-weight:600;color:var(--ink-2);margin-right:3px}
+  .kpi .k-foot{margin-top:6px;font-size:12px;color:var(--ink-3);min-height:18px}
+  .kpi.is-zero .k-value{color:var(--ink-3)}
+
+  /* ---------- 图表卡 ---------- */
+  .chartcard{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px;box-shadow:var(--shadow)}
+  .chart-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:6px}
+  .chart-head h3{margin:0;font-size:15px;font-weight:700}
+  .chart-head .hint{font-size:12px;color:var(--ink-3)}
+  .chart-box{position:relative}
+  svg#chart{display:block;width:100%;height:auto;overflow:visible}
+  .gridline{stroke:#eef1f5;stroke-width:1}
+  .axis-text{fill:#9ca3af;font-size:10.5px;font-variant-numeric:tabular-nums}
+  .axis-base{stroke:#e5e7eb;stroke-width:1}
+  .bar{fill:var(--brand);transition:y .32s cubic-bezier(.4,0,.2,1), height .32s cubic-bezier(.4,0,.2,1), fill .18s}
+  .bar:hover{fill:#2f49b3}
+  .bar.is-empty{fill:#e9ecf3}
+  .bar-label{fill:#374151;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums}
+  .x-label{fill:#6b7280;font-size:11.5px}
+  .x-label.is-current{fill:var(--brand);font-weight:700}
+
+  /* ---------- 空态 ---------- */
+  .empty{
+    display:none;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+    min-height:240px;text-align:center;padding:24px;
+    border:1px dashed #d8dde7;border-radius:12px;background:#fafbfe;
+  }
+  .empty.show{display:flex}
+  .empty .e-icon{width:38px;height:38px;border-radius:50%;background:#eef1f7;display:flex;align-items:center;justify-content:center;color:#9aa4b8;font-size:19px;font-weight:700}
+  .empty .e-title{font-size:14.5px;font-weight:700;color:#374151}
+  .empty .e-desc{font-size:12.5px;color:var(--ink-2);max-width:420px;overflow-wrap:anywhere}
+  .empty .e-meta{font-size:12px;color:var(--ink-3)}
+
+  /* ---------- 页脚 ---------- */
+  footer.foot{margin-top:26px;color:var(--ink-3);font-size:12px;text-align:center}
+  @media (max-width:680px){
+    .kpis{grid-template-columns:1fr}
+    .kpi .k-value{font-size:24px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page">
+    <div>
+      <h1>销售看板</h1>
+      <p class="sub">2026 上半年 · 内嵌样本数据（离线可用，无网络请求）</p>
+    </div>
+    <span class="dataset-tag" data-testid="dataset-tag">样本数据 · 加载中…</span>
+  </header>
+
+  <div class="filterbar">
+    <label for="region">地区筛选</label>
+    <select id="region" data-testid="filter" aria-label="按地区筛选"></select>
+    <span class="badge is-idle" data-testid="filter-badge">
+      <span class="dot"></span><span class="txt" data-testid="filter-badge-text">全部地区</span>
+    </span>
+  </div>
+
+  <section aria-labelledby="sec-kpi">
+    <h2 class="sec-title" id="sec-kpi">总览</h2>
+    <div class="kpis">
+      <div class="card kpi" data-testid="kpi-total-card">
+        <div class="k-label">总销售额</div>
+        <div class="k-value" data-testid="kpi-total"><span class="unit">¥</span><span class="num">0.00</span></div>
+        <div class="k-foot" data-testid="kpi-total-foot"></div>
+      </div>
+      <div class="card kpi" data-testid="kpi-orders-card">
+        <div class="k-label">订单数</div>
+        <div class="k-value" data-testid="kpi-orders"><span class="num">0</span></div>
+        <div class="k-foot" data-testid="kpi-orders-foot"></div>
+      </div>
+      <div class="card kpi" data-testid="kpi-avg-card">
+        <div class="k-label">客单价</div>
+        <div class="k-value" data-testid="kpi-avg"><span class="unit">¥</span><span class="num">0.00</span></div>
+        <div class="k-foot" data-testid="kpi-avg-foot"></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="sec-chart">
+    <h2 class="sec-title" id="sec-chart">月度趋势</h2>
+    <div class="chartcard">
+      <div class="chart-head">
+        <h3>各月销售额</h3>
+        <span class="hint" data-testid="chart-hint">按当前筛选统计 · 单位：元</span>
+      </div>
+      <div class="chart-box">
+        <svg id="chart" data-testid="chart" viewBox="0 0 660 270" role="img" aria-label="按月销售额柱状图"></svg>
+        <div class="empty" data-testid="empty-state" role="status" aria-live="polite">
+          <div class="e-icon">!</div>
+          <div class="e-title" data-testid="empty-title">暂无可展示的数据</div>
+          <div class="e-desc" data-testid="empty-desc">当前筛选条件下没有任何订单记录。</div>
+          <div class="e-meta" data-testid="empty-meta"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot">单文件离线看板 · 数据内嵌于本文件 · 无外部依赖</footer>
+</div>
+
+<script>
+/* ===================== DATA:BEGIN ===================== */
+/* 一行 = 一笔订单；JSON 兼容字面量，便于外部独立复算 */
+const DATA = [
+  {"id":"SO-0001","month":"2026-01","region":"华东","amount":12800},
+  {"id":"SO-0002","month":"2026-01","region":"华北","amount":9600},
+  {"id":"SO-0003","month":"2026-01","region":"华南","amount":15400},
+  {"id":"SO-0004","month":"2026-01","region":"西南","amount":7300},
+  {"id":"SO-0005","month":"2026-02","region":"华东","amount":14200},
+  {"id":"SO-0006","month":"2026-02","region":"华东","amount":8100},
+  {"id":"SO-0007","month":"2026-02","region":"华南","amount":11900},
+  {"id":"SO-0008","month":"2026-02","region":"西南","amount":6400},
+  {"id":"SO-0009","month":"2026-02","region":"华北","amount":5900},
+  {"id":"SO-0010","month":"2026-03","region":"华东","amount":17300},
+  {"id":"SO-0011","month":"2026-03","region":"华北","amount":12400},
+  {"id":"SO-0012","month":"2026-03","region":"华南","amount":9800},
+  {"id":"SO-0013","month":"2026-03","region":"西南","amount":10200},
+  {"id":"SO-0014","month":"2026-03","region":"华南·粤港澳大湾区跨境业务区","amount":21600},
+  {"id":"SO-0015","month":"2026-04","region":"华东","amount":15900},
+  {"id":"SO-0016","month":"2026-04","region":"华北","amount":8800},
+  {"id":"SO-0017","month":"2026-04","region":"华南","amount":13400},
+  {"id":"SO-0018","month":"2026-04","region":"西南","amount":7600},
+  {"id":"SO-0019","month":"2026-05","region":"华东","amount":18400},
+  {"id":"SO-0020","month":"2026-05","region":"华东","amount":9200},
+  {"id":"SO-0021","month":"2026-05","region":"华北","amount":11100},
+  {"id":"SO-0022","month":"2026-05","region":"华南","amount":14700},
+  {"id":"SO-0023","month":"2026-05","region":"西南","amount":8300},
+  {"id":"SO-0024","month":"2026-05","region":"华南·粤港澳大湾区跨境业务区","amount":25900},
+  {"id":"SO-0025","month":"2026-06","region":"华东","amount":13500},
+  {"id":"SO-0026","month":"2026-06","region":"华北","amount":10600},
+  {"id":"SO-0027","month":"2026-06","region":"华南","amount":16800},
+  {"id":"SO-0028","month":"2026-06","region":"西南","amount":9100},
+  {"id":"SO-0029","month":"2026-06","region":"华南·粤港澳大湾区跨境业务区","amount":19200},
+  {"id":"SO-0030","month":"2026-06","region":"华北","amount":4700}
+];
+/* ===================== DATA:END ===================== */
+
+/* ---------- 错误收集器（供外部核验「无未捕获异常」） ---------- */
+window.__uncaught = [];
+window.addEventListener('error', function (e) {
+  try { window.__uncaught.push(String((e && (e.message || e.error)) || 'error')); } catch (_) {}
+});
+window.addEventListener('unhandledrejection', function (e) {
+  try { window.__uncaught.push('unhandledrejection: ' + String(e && e.reason)); } catch (_) {}
+});
+
+/* ---------- 常量 ---------- */
+var ALL = 'ALL';
+var INVALID = '__invalid__';
+var PAD = { l: 54, r: 14, t: 22, b: 36 };
+var VIEW_W = 660, VIEW_H = 270;
+var MONTH_NAMES = { '01':'1月','02':'2月','03':'3月','04':'4月','05':'5月','06':'6月','07':'7月','08':'8月','09':'9月','10':'10月','11':'11月','12':'12月' };
+
+/* ---------- 纯函数：统计 ---------- */
+function computeStats(rows) {
+  var out = { total: 0, orders: 0, avg: 0, skipped: 0 };
+  if (!Array.isArray(rows)) { out.invalidRows = true; return out; }
+  for (var i = 0; i < rows.length; i++) {
+    var r = rows[i];
+    if (!r || typeof r !== 'object') { out.skipped++; continue; }
+    var amt = Number(r.amount);
+    if (!isFinite(amt)) { out.skipped++; continue; }
+    out.total += amt;
+    out.orders += 1;
+  }
+  out.avg = out.orders > 0 ? out.total / out.orders : 0;
+  return out;
+}
+
+/* ---------- 纯函数：按月聚合（月份轴固定为全量数据并集） ---------- */
+function monthAxis(rows) {
+  var seen = {};
+  var list = [];
+  if (!Array.isArray(rows)) return list;
+  for (var i = 0; i < rows.length; i++) {
+    var m = rows[i] && rows[i].month;
+    if (typeof m === 'string' && m && !seen[m]) { seen[m] = 1; list.push(m); }
+  }
+  list.sort();
+  return list;
+}
+function groupByMonth(rows, axis) {
+  var map = {};
+  var keys = axis || monthAxis(rows);
+  for (var k = 0; k < keys.length; k++) map[keys[k]] = 0;
+  if (Array.isArray(rows)) {
+    for (var i = 0; i < rows.length; i++) {
+      var r = rows[i];
+      if (!r || typeof r !== 'object') continue;
+      var amt = Number(r.amount);
+      if (!isFinite(amt)) continue;
+      if (typeof r.month === 'string' && Object.prototype.hasOwnProperty.call(map, r.month)) map[r.month] += amt;
+    }
+  }
+  return keys.map(function (m) { return { month: m, value: map[m] }; });
+}
+
+/* ---------- 纯函数：确定性格式化（避免 toLocaleString 跨环境差异） ---------- */
+function fmt2(n) {
+  var v = Number(n);
+  if (!isFinite(v)) return '0.00';
+  var neg = v < 0; v = Math.abs(v);
+  var s = v.toFixed(2);
+  var parts = s.split('.');
+  var int = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return (neg ? '-' : '') + int + '.' + parts[1];
+}
+function fmtInt(n) {
+  var v = Number(n);
+  if (!isFinite(v)) return '0';
+  return String(Math.round(v)).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+function monthText(m) {
+  if (typeof m !== 'string') return '—';
+  var seg = m.split('-');
+  if (seg.length < 2) return m;
+  return (MONTH_NAMES[seg[1]] || seg[1] + '月');
+}
+function svgEl(tag, attrs) {
+  var el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  if (attrs) for (var k in attrs) if (Object.prototype.hasOwnProperty.call(attrs, k)) el.setAttribute(k, attrs[k]);
+  return el;
+}
+
+/* ---------- 状态 ---------- */
+var state = { filter: ALL, invalidValue: null, rows: DATA, axis: monthAxis(DATA) };
+
+function knownRegions(rows) {
+  var seen = {}; var list = [];
+  if (!Array.isArray(rows)) return list;
+  for (var i = 0; i < rows.length; i++) {
+    var g = rows[i] && rows[i].region;
+    if (typeof g === 'string' && g && !seen[g]) { seen[g] = 1; list.push(g); }
+  }
+  list.sort(function (a, b) { return a.localeCompare(b, 'zh-Hans-CN'); });
+  return list;
+}
+function matchFilter(rows) {
+  if (!Array.isArray(rows)) return [];
+  if (state.filter === ALL) return rows.slice();
+  if (state.filter === INVALID) return [];
+  return rows.filter(function (r) { return r && r.region === state.filter; });
+}
+
+/* ---------- 渲染：图表 ---------- */
+function drawChart(series, active) {
+  var svg = document.getElementById('chart');
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+  var plotW = VIEW_W - PAD.l - PAD.r;
+  var plotH = VIEW_H - PAD.t - PAD.b;
+  var baseY = PAD.t + plotH;
+
+  var maxV = 0;
+  for (var i = 0; i < series.length; i++) if (series[i].value > maxV) maxV = series[i].value;
+  var top = niceCeil(maxV);
+  var scale = top > 0 ? plotH / top : 0;
+
+  // 网格线 + Y 轴刻度
+  var STEPS = 4;
+  for (var s = 0; s <= STEPS; s++) {
+    var y = PAD.t + plotH - (plotH * s / STEPS);
+    svg.appendChild(svgEl('line', { 'class': 'gridline', x1: PAD.l, y1: y, x2: VIEW_W - PAD.r, y2: y }));
+    var val = top * s / STEPS;
+    var t = svgEl('text', { 'class': 'axis-text', x: PAD.l - 8, y: y + 3.5, 'text-anchor': 'end' });
+    t.textContent = shortNum(val);
+    svg.appendChild(t);
+  }
+  svg.appendChild(svgEl('line', { 'class': 'axis-base', x1: PAD.l, y1: baseY, x2: VIEW_W - PAD.r, y2: baseY }));
+
+  if (!series.length) return;
+
+  var slot = plotW / series.length;
+  var barW = Math.max(10, Math.min(46, slot * 0.48));
+
+  for (var j = 0; j < series.length; j++) {
+    var it = series[j];
+    var h = it.value > 0 ? Math.max(1.5, it.value * scale) : 0;
+    var x = PAD.l + slot * j + (slot - barW) / 2;
+    var y = baseY - h;
+
+    var g = svgEl('g', { 'data-testid': 'bar-group', 'data-month': it.month, 'data-value': String(it.value) });
+
+    if (it.value > 0) {
+      var r = svgEl('rect', {
+        'class': 'bar', 'data-testid': 'bar', 'data-month': it.month, 'data-value': String(it.value),
+        x: x, y: y, width: barW, height: h, rx: 3
+      });
+      r.style.y = y + 'px';
+      r.style.height = h + 'px';
+      var tip = svgEl('title');
+      tip.textContent = it.month + '：¥' + fmt2(it.value) + '（' + fmtInt(countOf(it.month)) + ' 笔）';
+      r.appendChild(tip);
+      g.appendChild(r);
+
+      var lab = svgEl('text', {
+        'class': 'bar-label', 'data-testid': 'bar-label', 'data-month': it.month,
+        x: x + barW / 2, y: Math.max(PAD.t + 9, y - 5), 'text-anchor': 'middle'
+      });
+      lab.textContent = shortNum(it.value);
+      g.appendChild(lab);
+    } else {
+      g.appendChild(svgEl('rect', {
+        'class': 'bar is-empty', 'data-testid': 'bar-zero', 'data-month': it.month, 'data-value': '0',
+        x: x, y: baseY - 1.5, width: barW, height: 1.5, rx: 1
+      }));
+    }
+
+    var xl = svgEl('text', {
+      'class': 'x-label' + (it.month === active ? ' is-current' : ''),
+      x: x + barW / 2, y: baseY + 17, 'text-anchor': 'middle', 'data-testid': 'x-label', 'data-month': it.month
+    });
+    xl.textContent = monthText(it.month);
+    g.appendChild(xl);
+
+    svg.appendChild(g);
+  }
+}
+function niceCeil(v) {
+  if (!isFinite(v) || v <= 0) return 0;
+  var exp = Math.floor(Math.log10(v));
+  var base = Math.pow(10, exp);
+  var f = v / base;
+  var nice = f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10;
+  return nice * base;
+}
+function shortNum(v) {
+  var n = Number(v);
+  if (!isFinite(n)) return '0';
+  if (n >= 10000) return (n / 10000).toFixed(n % 10000 === 0 ? 0 : 1) + '万';
+  return fmtInt(n);
+}
+function countOf(month) {
+  var arr = matchFilter(state.rows);
+  var c = 0;
+  for (var i = 0; i < arr.length; i++) if (arr[i] && arr[i].month === month) c++;
+  return c;
+}
+
+/* ---------- 渲染：KPI + 空态 + 徽标 ---------- */
+function setNum(el, text) {
+  var n = el.querySelector('.num');
+  if (n) n.textContent = text; else el.textContent = text;
+}
+function render() {
+  try {
+    var rows = matchFilter(state.rows);
+    var st = computeStats(rows);
+    var axis = state.axis;
+    var series = groupByMonth(rows, axis);
+
+    // 数字卡
+    var cardT = document.querySelector('[data-testid="kpi-total-card"]');
+    var cardO = document.querySelector('[data-testid="kpi-orders-card"]');
+    var cardA = document.querySelector('[data-testid="kpi-avg-card"]');
+    setNum(document.querySelector('[data-testid="kpi-total"]'), fmt2(st.total));
+    setNum(document.querySelector('[data-testid="kpi-orders"]'), fmtInt(st.orders));
+    setNum(document.querySelector('[data-testid="kpi-avg"]'), fmt2(st.total));
+    cardT.classList.toggle('is-zero', st.orders === 0);
+    cardO.classList.toggle('is-zero', st.orders === 0);
+    cardA.classList.toggle('is-zero', st.orders === 0);
+    document.querySelector('[data-testid="kpi-total-foot"]').textContent =
+      st.orders > 0 ? '覆盖 ' + axis.length + ' 个月 · ' + fmtInt(st.orders) + ' 笔订单' : '无有效订单';
+    document.querySelector('[data-testid="kpi-orders-foot"]').textContent =
+      st.orders > 0 ? '已过滤 ' + fmtInt(state.rows.length) + ' 条原始记录' : '筛选结果为空';
+    document.querySelector('[data-testid="kpi-avg-foot"]').textContent =
+      st.orders > 0 ? '总销售额 ÷ 订单数' : '订单数为 0，客单价不可计算';
+
+    // 图例 / 徽标
+    var badge = document.querySelector('[data-testid="filter-badge"]');
+    var badgeTxt = document.querySelector('[data-testid="filter-badge-text"]');
+    badge.classList.remove('is-idle', 'is-invalid');
+    if (state.filter === INVALID) {
+      badge.classList.add('is-invalid');
+      badgeTxt.textContent = '筛选值无效：' + shortText(state.invalidValue);
+    } else if (state.filter === ALL) {
+      badge.classList.add('is-idle');
+      badgeTxt.textContent = '全部地区';
+    } else {
+      badgeTxt.textContent = state.filter + '（' + fmtInt(rows.length) + ' 笔）';
+    }
+
+    // 图表 / 空态 互斥
+    var empty = document.querySelector('[data-testid="empty-state"]');
+    var svg = document.getElementById('chart');
+    if (rows.length === 0) {
+      empty.classList.add('show');
+      svg.style.display = 'none';
+      document.querySelector('[data-testid="empty-title"]').textContent =
+        state.filter === INVALID ? '筛选条件无效' : '暂无可展示的数据';
+      document.querySelector('[data-testid="empty-desc"]').textContent =
+        state.filter === INVALID
+          ? '收到的筛选值「' + shortText(state.invalidValue) + '」不在已知地区列表中，已按空结果处理。请从上方下拉框重新选择。'
+          : (state.filter === ALL
+            ? '当前数据集为空，没有任何订单记录可统计。'
+            : '「' + shortText(state.filter) + '」在当前数据集里没有订单记录，换个地区看看。');
+      document.querySelector('[data-testid="empty-meta"]').textContent =
+        '原始记录 ' + fmtInt(Array.isArray(state.rows) ? state.rows.length : 0) + ' 条 · 命中 0 条';
+      document.querySelector('[data-testid="chart-hint"]').textContent = '无数据 · 单位：元';
+      window.__lastRender = { total: 0, orders: 0, avg: 0, rows: 0, series: [] };
+    } else {
+      empty.classList.remove('show');
+      svg.style.display = '';
+      document.querySelector('[data-testid="chart-hint"]').textContent = '按当前筛选统计 · 单位：元';
+      var last = axis.length ? axis[axis.length - 1] : '';
+      drawChart(series, last);
+      window.__lastRender = {
+        total: st.total, orders: st.orders, avg: st.avg, rows: rows.length,
+        series: series.map(function (x) { return { month: x.month, value: x.value }; })
+      };
+    }
+
+    document.querySelector('[data-testid="dataset-tag"]').textContent =
+      '样本数据 · ' + fmtInt(Array.isArray(state.rows) ? state.rows.length : 0) + ' 条记录';
+    window.__renderError = null;
+  } catch (err) {
+    window.__renderError = String((err && err.message) || err);
+  }
+}
+function shortText(v) {
+  var s;
+  try { s = (v === null || v === undefined) ? '—' : String(v); } catch (_) { s = '[unstringifiable]'; }
+  return s.length > 40 ? s.slice(0, 40) + '…' : s;
+}
+
+/* ---------- 控件 ---------- */
+function buildSelect() {
+  var sel = document.getElementById('region');
+  var regions = knownRegions(state.rows);
+  // 数据变化后仍保留用户当前选择（即使该地区已无数据）——宁可显示空态，也不静默改回「全部」
+  if (state.filter !== ALL && state.filter !== INVALID && regions.indexOf(state.filter) === -1) {
+    regions = regions.concat([state.filter]).sort(function (a, b) { return a.localeCompare(b, 'zh-Hans-CN'); });
+  }
+  while (sel.firstChild) sel.removeChild(sel.firstChild);
+  var o0 = document.createElement('option');
+  o0.value = ALL; o0.textContent = '全部地区';
+  sel.appendChild(o0);
+  for (var i = 0; i < regions.length; i++) {
+    var o = document.createElement('option');
+    o.value = regions[i];
+    o.textContent = regions[i];
+    sel.appendChild(o);
+  }
+  sel.value = state.filter === INVALID ? ALL : state.filter;
+}
+
+/* ---------- 对外测试钩子 ---------- */
+window.__app = {
+  ALL: ALL,
+  getData: function () { return DATA; },
+  setFilter: function (v) {
+    var regions = knownRegions(state.rows);
+    var ok = (v === ALL) || (typeof v === 'string' && regions.indexOf(v) !== -1);
+    if (ok) { state.filter = v; state.invalidValue = null; }
+    else { state.filter = INVALID; state.invalidValue = v; }
+    var sel = document.getElementById('region');
+    if (sel) sel.value = state.filter === INVALID ? ALL : state.filter;
+    render();
+    return state.filter;
+  },
+  setData: function (rows) {
+    state.rows = Array.isArray(rows) ? rows : [];
+    state.axis = monthAxis(state.rows);
+    buildSelect();
+    render();
+    return state.rows.length;
+  },
+  reset: function () { state.rows = DATA; state.axis = monthAxis(DATA); state.filter = ALL; state.invalidValue = null; buildSelect(); render(); },
+  state: function () { return { filter: state.filter, invalidValue: state.invalidValue, rows: state.rows.length, axis: state.axis.slice() }; },
+  render: render
+};
+
+/* ---------- 启动 ---------- */
+buildSelect();
+render();
+document.getElementById('region').addEventListener('change', function (e) {
+  window.__app.setFilter(e && e.target ? e.target.value : ALL);
+});
+</script>
+</body>
+</html>

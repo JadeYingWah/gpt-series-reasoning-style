@@ -1,0 +1,61 @@
+{
+  "pairs": [
+    {
+      "pair": "ink/card(正文+KPI数字)",
+      "fg": "#111827",
+      "bg": "#ffffff",
+      "ratio": 17.74,
+      "pass": true
+    },
+    {
+      "pair": "muted/card(标签/单位)",
+      "fg": "#4b5563",
+      "bg": "#ffffff",
+      "ratio": 7.56,
+      "pass": true
+    },
+    {
+      "pair": "white/activeBtn(选中筛选钮)",
+      "fg": "#ffffff",
+      "bg": "#1e40af",
+      "ratio": 8.72,
+      "pass": true
+    },
+    {
+      "pair": "tick/card(Y轴刻度)",
+      "fg": "#6b7280",
+      "bg": "#ffffff",
+      "ratio": 4.83,
+      "pass": true
+    },
+    {
+      "pair": "mlabel/card(月份标签)",
+      "fg": "#374151",
+      "bg": "#ffffff",
+      "ratio": 10.31,
+      "pass": true
+    },
+    {
+      "pair": "val/card(柱顶数值)",
+      "fg": "#111827",
+      "bg": "#ffffff",
+      "ratio": 17.74,
+      "pass": true
+    },
+    {
+      "pair": "ink/body(标题)",
+      "fg": "#111827",
+      "bg": "#f5f7fb",
+      "ratio": 16.54,
+      "pass": true
+    },
+    {
+      "pair": "muted/body(副标题/页脚)",
+      "fg": "#4b5563",
+      "bg": "#f5f7fb",
+      "ratio": 7.05,
+      "pass": true
+    }
+  ],
+  "all_pass": true
+}

@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Octopus Excavator · SVG001</title>
+<!--
+  SVG001-octopus-excavator — self-contained scene notes
+  Forward direction: +X (画面右侧)
+  Track/crawler animation: dashoffset decreasing → belt surface moves rightward relative to chassis, consistent with vehicle advancing right.
+  Drive sprocket / idler wheels: CSS rotate + (clockwise) when moving right.
+  Octopus relative motion (not locked to chassis):
+    (1) arm-ctrl-L / arm-ctrl-R — tentacles gripping joysticks, independent lag/phase
+    (2) arm-hang / arm-wave — free tentacles outside cab, different period & amplitude
+    (3) head bob + eye blink — micro motion vs vehicle bob
+    (4) boom/bucket dig cycle — machine limb separate from body
+  Parallax layers (far → near):
+    L0 sky gradient + stars, L1 far hills, L2 mid industrial skyline, L3 ground + tracks contact
+  No external resources. All CSS/JS/SVG inline.
+-->
+<style>
+  :root {
+    --sky-top: #0b1d36;
+    --sky-mid: #163a5f;
+    --sky-bot: #1f5f7a;
+    --hill-far: #0e2a45;
+    --hill-mid: #143d5c;
+    --city: #0a2238;
+    --ground: #1a1410;
+    --ground-line: #3d2e22;
+    --hazard: #ffc857;
+    --body-orange: #e87a2a;
+    --body-dark: #b85518;
+    --body-light: #f4a54a;
+    --cabin-glass: #7ec8e8;
+    --octo-skin: #d94d7a;
+    --octo-dark: #a32d55;
+    --octo-light: #f07a9a;
+    --accent-cyan: #3de0ff;
+    --accent-amber: #ffc857;
+    --dust: #c4a574;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #050b14;
+    font-family: "Segoe UI", system-ui, sans-serif;
+  }
+
+  #stage {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  svg#scene {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ---------- TRACK / CRAWLER ---------- */
+  .track-belt {
+    fill: none;
+    stroke: #2a2a2a;
+    stroke-width: 14;
+    stroke-linecap: butt;
+  }
+  .track-tread {
+    fill: none;
+    stroke: #4a4a4a;
+    stroke-width: 10;
+    stroke-dasharray: 8 6;
+    animation: tread-scroll 0.55s linear infinite;
+  }
+  @keyframes tread-scroll {
+    to { stroke-dashoffset: -14; }
+  }
+  .track-tread-inner {
+    fill: none;
+    stroke: #1a1a1a;
+    stroke-width: 4;
+    stroke-dasharray: 3 5;
+    animation: tread-scroll-slow 0.55s linear infinite;
+  }
+  @keyframes tread-scroll-slow {
+    to { stroke-dashoffset: -8; }
+  }
+
+  /* wheels rotate clockwise for rightward motion */
+  .wheel-spin {
+    animation: wheel-cw 1.1s linear infinite;
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+  @keyframes wheel-cw {
+    to { transform: rotate(360deg); }
+  }
+
+  /* ---------- VEHICLE BOB ---------- */
+  .vehicle-bob {
+    animation: bob 2.4s ease-in-out infinite;
+  }
+  @keyframes bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+  }
+
+  /* ---------- BOOM / BUCKET DIG CYCLE ---------- */
+  .boom-group {
+    animation: boom-dig 3.6s ease-in-out infinite;
+    transform-origin: 520px 310px;
+    transform-box: view-box;
+  }
+  @keyframes boom-dig {
+    0%   { transform: rotate(0deg); }
+    25%  { transform: rotate(-18deg); }
+    50%  { transform: rotate(8deg); }
+    75%  { transform: rotate(-6deg); }
+    100% { transform: rotate(0deg); }
+  }
+  .stick-group {
+    animation: stick-curl 3.6s ease-in-out infinite;
+    transform-origin: 700px 200px;
+    transform-box: view-box;
+  }
+  @keyframes stick-curl {
+    0%   { transform: rotate(0deg); }
+    30%  { transform: rotate(25deg); }
+    55%  { transform: rotate(-10deg); }
+    100% { transform: rotate(0deg); }
+  }
+  .bucket-group {
+    animation: bucket-curl 3.6s ease-in-out infinite;
+    transform-origin: 820px 280px;
+    transform-box: view-box;
+  }
+  @keyframes bucket-curl {
+    0%   { transform: rotate(0deg); }
+    35%  { transform: rotate(40deg); }
+    60%  { transform: rotate(-15deg); }
+    100% { transform: rotate(0deg); }
+  }
+
+  /* ---------- OCTOPUS LIMBS (independent of chassis) ---------- */
+  .arm-ctrl-L {
+    animation: arm-ctrl-l 1.3s ease-in-out infinite;
+    transform-origin: 430px 250px;
+    transform-box: view-box;
+  }
+  @keyframes arm-ctrl-l {
+    0%, 100% { transform: rotate(0deg) translateY(0); }
+    40% { transform: rotate(-8deg) translateY(2px); }
+    70% { transform: rotate(4deg) translateY(-1px); }
+  }
+  .arm-ctrl-R {
+    animation: arm-ctrl-r 1.55s ease-in-out infinite;
+    transform-origin: 470px 250px;
+    transform-box: view-box;
+  }
+  @keyframes arm-ctrl-r {
+    0%, 100% { transform: rotate(0deg); }
+    35% { transform: rotate(10deg); }
+    65% { transform: rotate(-5deg); }
+  }
+  .arm-hang {
+    animation: arm-hang 2.1s ease-in-out infinite;
+    transform-origin: 410px 270px;
+    transform-box: view-box;
+  }
+  @keyframes arm-hang {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(14deg); }
+  }
+  .arm-wave {
+    animation: arm-wave 1.7s ease-in-out infinite;
+    transform-origin: 490px 265px;
+    transform-box: view-box;
+  }
+  @keyframes arm-wave {
+    0%, 100% { transform: rotate(0deg) scaleY(1); }
+    30% { transform: rotate(-18deg) scaleY(1.05); }
+    60% { transform: rotate(8deg) scaleY(0.97); }
+  }
+  .arm-tuck {
+    animation: arm-tuck 2.8s ease-in-out infinite;
+    transform-origin: 445px 280px;
+    transform-box: view-box;
+  }
+  @keyframes arm-tuck {
+    0%, 100% { transform: rotate(0deg); }
+    45% { transform: rotate(-6deg); }
+  }
+
+  .octo-head {
+    animation: head-bob 1.8s ease-in-out infinite;
+    transform-origin: 450px 230px;
+    transform-box: view-box;
+  }
+  @keyframes head-bob {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(1px, -3px); }
+  }
+
+  .eye-lid {
+    animation: blink 4.2s ease-in-out infinite;
+  }
+  .eye-lid-b {
+    animation: blink 4.2s ease-in-out infinite;
+    animation-delay: 0.08s;
+  }
+  @keyframes blink {
+    0%, 92%, 100% { transform: scaleY(0); }
+    95%, 97% { transform: scaleY(1); }
+  }
+
+  /* ---------- PARALLAX DRIFT (CSS + JS hybrid) ---------- */
+  .layer-far  { animation: drift-far 80s linear infinite; }
+  .layer-mid  { animation: drift-mid 40s linear infinite; }
+  .layer-near { animation: drift-near 18s linear infinite; }
+  @keyframes drift-far  { from { transform: translateX(0); } to { transform: translateX(-200px); } }
+  @keyframes drift-mid  { from { transform: translateX(0); } to { transform: translateX(-200px); } }
+  @keyframes drift-near { from { transform: translateX(0); } to { transform: translateX(-200px); } }
+
+  /* dust puffs */
+  .dust {
+    animation: dust-rise 2.2s ease-out infinite;
+    opacity: 0;
+  }
+  .dust:nth-child(1) { animation-delay: 0s; }
+  .dust:nth-child(2) { animation-delay: 0.4s; }
+  .dust:nth-child(3) { animation-delay: 0.8s; }
+  .dust:nth-child(4) { animation-delay: 1.2s; }
+  .dust:nth-child(5) { animation-delay: 1.6s; }
+  @keyframes dust-rise {
+    0%   { opacity: 0.55; transform: translate(0,0) scale(0.6); }
+    100% { opacity: 0;    transform: translate(-40px,-28px) scale(1.6); }
+  }
+
+  /* exhaust / bubbles */
+  .bubble {
+    animation: bubble-up 3s ease-in infinite;
+    opacity: 0;
+  }
+  @keyframes bubble-up {
+    0%   { opacity: 0.7; transform: translate(0,0) scale(0.5); }
+    100% { opacity: 0;   transform: translate(10px,-50px) scale(1.3); }
+  }
+
+  /* warning light */
+  .warn-lamp {
+    animation: lamp-flash 0.9s steps(1) infinite;
+  }
+  @keyframes lamp-flash {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0.15; }
+  }
+
+  /* ground scroll to reinforce forward motion */
+  .ground-marks {
+    animation: ground-scroll 1.1s linear infinite;
+  }
+  @keyframes ground-scroll {
+    to { transform: translateX(-60px); }
+  }
+
+  .hud {
+    position: absolute;
+    left: 16px;
+    top: 14px;
+    color: #9fd7ef;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.75;
+    pointer-events: none;
+    text-shadow: 0 0 8px rgba(61, 224, 255, 0.4);
+  }
+  .hud strong { color: var(--accent-cyan); font-weight: 600; }
+
+  .title-chip {
+    position: absolute;
+    right: 18px;
+    bottom: 16px;
+    color: #ffc857;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    opacity: 0.7;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="hud"><strong>SVG001</strong> · OCTOPUS EXCAVATOR · FORWARD +X</div>
+  <div class="title-chip">OCTOPUS × EXCAVATOR</div>
+
+<svg id="scene" viewBox="0 0 1200 640" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="An octopus driving an excavator toward the right with parallax background">
+  <defs>
+    <!-- sky -->
+    <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#071426"/>
+      <stop offset="45%" stop-color="#123a5c"/>
+      <stop offset="100%" stop-color="#1d6b7a"/>
+    </linearGradient>
+    <!-- sun/moon glow -->
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffe6a8" stop-opacity="0.95"/>
+      <stop offset="40%" stop-color="#ffb347" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#ffb347" stop-opacity="0"/>
+    </radialGradient>
+    <!-- ground -->
+    <linearGradient id="groundGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2c2118"/>
+      <stop offset="100%" stop-color="#120e0a"/>
+    </linearGradient>
+    <!-- excavator body -->
+    <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f4a54a"/>
+      <stop offset="45%" stop-color="#e87a2a"/>
+      <stop offset="100%" stop-color="#a84a14"/>
+    </linearGradient>
+    <linearGradient id="bodyDark" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c45f1c"/>
+      <stop offset="100%" stop-color="#7a340e"/>
+    </linearGradient>
+    <!-- cabin glass -->
+    <linearGradient id="glassGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#b8e8ff"/>
+      <stop offset="40%" stop-color="#5eb0d8"/>
+      <stop offset="100%" stop-color="#2a6a90"/>
+    </linearGradient>
+    <!-- octopus skin -->
+    <radialGradient id="octoHead" cx="40%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#f07a9a"/>
+      <stop offset="55%" stop-color="#d94d7a"/>
+      <stop offset="100%" stop-color="#9c2a4e"/>
+    </radialGradient>
+    <linearGradient id="armGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#e06085"/>
+      <stop offset="100%" stop-color="#b03060"/>
+    </linearGradient>
+    <!-- metal -->
+    <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6a7380"/>
+      <stop offset="50%" stop-color="#3d4550"/>
+      <stop offset="100%" stop-color="#2a3038"/>
+    </linearGradient>
+    <linearGradient id="hazard" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ffc857"/>
+      <stop offset="50%" stop-color="#1a1a1a"/>
+      <stop offset="100%" stop-color="#ffc857"/>
+    </linearGradient>
+    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="softBlur">
+      <feGaussianBlur stdDeviation="1.2"/>
+    </filter>
+  </defs>
+
+  <!-- ========== LAYER 0: SKY ========== -->
+  <rect width="1200" height="640" fill="url(#skyGrad)"/>
+  <circle cx="980" cy="90" r="70" fill="url(#glow)"/>
+  <circle cx="980" cy="90" r="22" fill="#ffe9b8" opacity="0.9"/>
+
+  <!-- stars -->
+  <g class="layer-far" fill="#cfe8ff">
+    <circle cx="80" cy="40" r="1.2" opacity="0.7"/>
+    <circle cx="160" cy="90" r="0.9" opacity="0.5"/>
+    <circle cx="240" cy="30" r="1.4" opacity="0.8"/>
+    <circle cx="340" cy="70" r="0.8" opacity="0.45"/>
+    <circle cx="420" cy="25" r="1.1" opacity="0.65"/>
+    <circle cx="520" cy="55" r="0.7" opacity="0.4"/>
+    <circle cx="640" cy="35" r="1.3" opacity="0.75"/>
+    <circle cx="760" cy="80" r="0.9" opacity="0.5"/>
+    <circle cx="860" cy="28" r="1.0" opacity="0.6"/>
+    <circle cx="1100" cy="50" r="1.2" opacity="0.7"/>
+    <circle cx="60" cy="120" r="0.6" opacity="0.35"/>
+    <circle cx="300" cy="110" r="0.8" opacity="0.4"/>
+  </g>
+
+  <!-- ========== LAYER 1: FAR HILLS ========== -->
+  <g class="layer-far">
+    <path d="M-200 420
+             Q -80 300, 60 340
+             T 220 320
+             T 380 350
+             T 540 300
+             T 700 340
+             T 860 290
+             T 1020 330
+             T 1200 310
+             L 1400 420 L 1400 500 L -200 500 Z"
+          fill="#0e2a45" opacity="0.95"/>
+    <path d="M-200 440
+             Q 0 360, 180 390
+             T 400 370
+             T 620 400
+             T 840 360
+             T 1100 390
+             L 1400 420 L 1400 500 L -200 500 Z"
+          fill="#123550" opacity="0.85"/>
+  </g>
+
+  <!-- ========== LAYER 2: MID INDUSTRIAL SKYLINE ========== -->
+  <g class="layer-mid">
+    <!-- distant cranes / towers silhouettes -->
+    <g fill="#0a2238" opacity="0.9">
+      <rect x="80" y="280" width="18" height="160"/>
+      <rect x="60" y="270" width="58" height="12"/>
+      <rect x="95" y="200" width="8" height="80"/>
+      <line x1="99" y1="200" x2="160" y2="230" stroke="#0a2238" stroke-width="4"/>
+
+      <rect x="220" y="300" width="28" height="140"/>
+      <rect x="210" y="290" width="48" height="14"/>
+      <circle cx="234" cy="280" r="10"/>
+
+      <rect x="400" y="260" width="14" height="180"/>
+      <rect x="380" y="250" width="54" height="12"/>
+      <line x1="407" y1="250" x2="470" y2="280" stroke="#0a2238" stroke-width="3"/>
+      <rect x="455" y="278" width="10" height="16"/>
+
+      <rect x="600" y="310" width="40" height="130"/>
+      <rect x="590" y="300" width="60" height="14"/>
+      <rect x="610" y="270" width="20" height="30"/>
+
+      <rect x="780" y="290" width="16" height="150"/>
+      <rect x="760" y="280" width="56" height="12"/>
+      <line x1="788" y1="280" x2="860" y2="310" stroke="#0a2238" stroke-width="4"/>
+
+      <rect x="980" y="320" width="50" height="120"/>
+      <rect x="970" y="308" width="70" height="16"/>
+      <rect x="1000" y="280" width="16" height="28"/>
+      <rect x="1020" y="288" width="10" height="20"/>
+
+      <rect x="1120" y="300" width="20" height="140"/>
+      <rect x="1100" y="290" width="60" height="12"/>
+    </g>
+    <!-- window lights -->
+    <g fill="#3de0ff" opacity="0.55">
+      <rect x="86" y="300" width="4" height="4"/>
+      <rect x="86" y="320" width="4" height="4"/>
+      <rect x="226" y="320" width="5" height="5"/>
+      <rect x="238" y="340" width="5" height="5"/>
+      <rect x="608" y="330" width="6" height="6"/>
+      <rect x="622" y="350" width="6" height="6"/>
+      <rect x="990" y="340" width="6" height="6"/>
+      <rect x="1008" y="360" width="6" height="6"/>
+      <rect x="1128" y="330" width="5" height="5"/>
+    </g>
+  </g>
+
+  <!-- ========== LAYER 3: GROUND ========== -->
+  <rect x="0" y="460" width="1200" height="180" fill="url(#groundGrad)"/>
+  <!-- scrolling ground marks reinforce +X motion -->
+  <g class="ground-marks" stroke="#3d2e22" stroke-width="2" opacity="0.7">
+    <line x1="-40" y1="500" x2="20" y2="500"/>
+    <line x1="60" y1="520" x2="130" y2="520"/>
+    <line x1="180" y1="490" x2="250" y2="490"/>
+    <line x1="300" y1="530" x2="380" y2="530"/>
+    <line x1="420" y1="505" x2="490" y2="505"/>
+    <line x1="540" y1="525" x2="620" y2="525"/>
+    <line x1="660" y1="495" x2="740" y2="495"/>
+    <line x1="780" y1="535" x2="860" y2="535"/>
+    <line x1="900" y1="510" x2="980" y2="510"/>
+    <line x1="1020" y1="528" x2="1100" y2="528"/>
+    <line x1="1140" y1="498" x2="1220" y2="498"/>
+    <line x1="1260" y1="518" x2="1340" y2="518"/>
+  </g>
+  <!-- rocks / debris near ground -->
+  <g fill="#3a2c20">
+    <ellipse cx="100" cy="560" rx="18" ry="8"/>
+    <ellipse cx="350" cy="580" rx="22" ry="9"/>
+    <ellipse cx="720" cy="555" rx="14" ry="7"/>
+    <ellipse cx="1050" cy="575" rx="20" ry="8"/>
+  </g>
+
+  <!-- dust puffs behind tracks -->
+  <g class="dust" fill="#c4a574">
+    <ellipse cx="300" cy="540" rx="16" ry="10"/>
+  </g>
+  <g class="dust" fill="#b8956a">
+    <ellipse cx="280" cy="545" rx="14" ry="9"/>
+  </g>
+  <g class="dust" fill="#c4a574">
+    <ellipse cx="310" cy="538" rx="18" ry="11"/>
+  </g>
+  <g class="dust" fill="#a88860">
+    <ellipse cx="270" cy="548" rx="12" ry="8"/>
+  </g>
+  <g class="dust" fill="#c4a574">
+    <ellipse cx="295" cy="542" rx="15" ry="9"/>
+  </g>
+
+  <!-- ===================== VEHICLE ===================== -->
+  <g class="vehicle-bob" id="excavator">
+
+    <!-- ---- TRACK ASSEMBLY ---- -->
+    <g id="tracks">
+      <!-- track frame shadow -->
+      <ellipse cx="400" cy="545" rx="130" ry="12" fill="#000" opacity="0.35"/>
+
+      <!-- left track (far, slightly higher/smaller for depth) -->
+      <g transform="translate(0, -8) scale(0.92)" transform-origin="340 520">
+        <ellipse class="track-belt" cx="340" cy="520" rx="110" ry="28"/>
+        <ellipse class="track-tread" cx="340" cy="520" rx="110" ry="28"/>
+        <ellipse class="track-tread-inner" cx="340" cy="520" rx="100" ry="22"/>
+        <!-- road wheels -->
+        <circle cx="270" cy="520" r="16" fill="#2a3038" stroke="#555" stroke-width="2"/>
+        <g class="wheel-spin">
+          <rect x="268" y="506" width="4" height="12" fill="#777"/>
+          <rect x="268" y="522" width="4" height="12" fill="#777"/>
+          <rect x="256" y="518" width="12" height="4" fill="#777"/>
+          <rect x="272" y="518" width="12" height="4" fill="#777"/>
+        </g>
+        <circle cx="340" cy="520" r="16" fill="#2a3038" stroke="#555" stroke-width="2"/>
+        <g class="wheel-spin">
+          <rect x="338" y="506" width="4" height="12" fill="#777"/>
+          <rect x="338" y="522" width="4" height="12" fill="#777"/>
+          <rect x="326" y="518" width="12" height="4" fill="#777"/>
+          <rect x="342" y="518" width="12" height="4" fill="#777"/>
+        </g>
+        <circle cx="410" cy="520" r="16" fill="#2a3038" stroke="#555" stroke-width="2"/>
+        <g class="wheel-spin">
+          <rect x="408" y="506" width="4" height="12" fill="#777"/>
+          <rect x="408" y="522" width="4" height="12" fill="#777"/>
+          <rect x="396" y="518" width="12" height="4" fill="#777"/>
+          <rect x="412" y="518" width="12" height="4" fill="#777"/>
+        </g>
+        <!-- sprocket front -->
+        <circle cx="448" cy="520" r="20" fill="#1e242c" stroke="#666" stroke-width="2"/>
+        <g class="wheel-spin">
+          <circle cx="448" cy="520" r="8" fill="none" stroke="#888" stroke-width="2"/>
+          <line x1="448" y1="500" x2="448" y2="540" stroke="#888" stroke-width="2"/>
+          <line x1="428" y1="520" x2="468" y2="520" stroke="#888" stroke-width="2"/>
+        </g>
+        <!-- idler rear -->
+        <circle cx="232" cy="520" r="18" fill="#1e242c" stroke="#666" stroke-width="2"/>
+        <g class="wheel-spin">
+          <circle cx="232" cy="520" r="7" fill="none" stroke="#888" stroke-width="2"/>
+          <line x1="232" y1="502" x2="232" y2="538" stroke="#888" stroke-width="2"/>
+          <line x1="214" y1="520" x2="250" y2="520" stroke="#888" stroke-width="2"/>
+        </g>
+      </g>
+
+      <!-- right track (near) -->
+      <g transform="translate(10, 0)">
+        <ellipse class="track-belt" cx="360" cy="530" rx="120" ry="32"/>
+        <ellipse class="track-tread" cx="360" cy="530" rx="120" ry="32"/>
+        <ellipse class="track-tread-inner" cx="360" cy="530" rx="110" ry="26"/>
+        <!-- road wheels -->
+        <circle cx="285" cy="530" r="18" fill="#2a3038" stroke="#6a7380" stroke-width="2"/>
+        <g class="wheel-spin">
+          <rect x="283" y="514" width="4" height="14" fill="#9aa"/>
+          <rect x="283" y="532" width="4" height="14" fill="#9aa"/>
+          <rect x="269" y="528" width="14" height="4" fill="#9aa"/>
+          <rect x="287" y="528" width="14" height="4" fill="#9aa"/>
+          <circle cx="285" cy="530" r="5" fill="#445"/>
+        </g>
+        <circle cx="360" cy="530" r="18" fill="#2a3038" stroke="#6a7380" stroke-width="2"/>
+        <g class="wheel-spin">
+          <rect x="358" y="514" width="4" height="14" fill="#9aa"/>
+          <rect x="358" y="532" width="4" height="14" fill="#9aa"/>
+          <rect x="344" y="528" width="14" height="4" fill="#9aa"/>
+          <rect x="362" y="528" width="14" height="4" fill="#9aa"/>
+          <circle cx="360" cy="530" r="5" fill="#445"/>
+        </g>
+        <circle cx="435" cy="530" r="18" fill="#2a3038" stroke="#6a7380" stroke-width="2"/>
+        <g class="wheel-spin">
+          <rect x="433" y="514" width="4" height="14" fill="#9aa"/>
+          <rect x="433" y="532" width="4" height="14" fill="#9aa"/>
+          <rect x="419" y="528" width="14" height="4" fill="#9aa"/>
+          <rect x="437" y="528" width="14" height="4" fill="#9aa"/>
+          <circle cx="435" cy="530" r="5" fill="#445"/>
+        </g>
+        <!-- drive sprocket front-right -->
+        <circle cx="475" cy="530" r="24" fill="#1e242c" stroke="#8a93a0" stroke-width="2.5"/>
+        <g class="wheel-spin">
+          <circle cx="475" cy="530" r="10" fill="none" stroke="#aab" stroke-width="2"/>
+          <line x1="475" y1="506" x2="475" y2="554" stroke="#aab" stroke-width="2.5"/>
+          <line x1="451" y1="530" x2="499" y2="530" stroke="#aab" stroke-width="2.5"/>
+          <line x1="458" y1="513" x2="492" y2="547" stroke="#aab" stroke-width="2"/>
+          <line x1="492" y1="513" x2="458" y2="547" stroke="#aab" stroke-width="2"/>
+          <!-- sprocket teeth hint -->
+          <circle cx="475" cy="508" r="3" fill="#889"/>
+          <circle cx="475" cy="552" r="3" fill="#889"/>
+          <circle cx="497" cy="530" r="3" fill="#889"/>
+          <circle cx="453" cy="530" r="3" fill="#889"/>
+        </g>
+        <!-- idler rear-left -->
+        <circle cx="245" cy="530" r="20" fill="#1e242c" stroke="#8a93a0" stroke-width="2.5"/>
+        <g class="wheel-spin">
+          <circle cx="245" cy="530" r="8" fill="none" stroke="#aab" stroke-width="2"/>
+          <line x1="245" y1="510" x2="245" y2="550" stroke="#aab" stroke-width="2"/>
+          <line x1="225" y1="530" x2="265" y2="530" stroke="#aab" stroke-width="2"/>
+        </g>
+        <!-- track frame plate -->
+        <path d="M250 512 L470 512 L470 522 L250 522 Z" fill="url(#metal)" opacity="0.85"/>
+      </g>
+    </g>
+
+    <!-- ---- UNDERCARRIAGE / SWING PLATFORM ---- -->
+    <g id="undercarriage">
+      <path d="M260 490 L480 490 L490 505 L250 505 Z" fill="url(#bodyDark)"/>
+      <rect x="270" y="478" width="200" height="16" rx="3" fill="url(#bodyGrad)"/>
+      <!-- hazard stripe on platform -->
+      <rect x="280" y="482" width="80" height="6" fill="url(#hazard)" opacity="0.85"/>
+      <!-- swing bearing -->
+      <ellipse cx="380" cy="475" rx="50" ry="10" fill="#3a4048"/>
+      <ellipse cx="380" cy="472" rx="42" ry="8" fill="#4a5560"/>
+    </g>
+
+    <!-- ---- HOUSE / BODY ---- -->
+    <g id="house">
+      <!-- main body mass -->
+      <path d="M300 360
+               L500 355
+               L520 370
+               L530 470
+               L290 470
+               L280 400 Z"
+            fill="url(#bodyGrad)"/>
+      <!-- body side panel -->
+      <path d="M300 360 L500 355 L510 390 L300 395 Z" fill="url(#bodyLight)" opacity="0.35"/>
+      <!-- engine deck -->
+      <rect x="310" y="340" width="140" height="28" rx="4" fill="url(#bodyDark)"/>
+      <!-- engine vents -->
+      <g stroke="#5a280c" stroke-width="2">
+        <line x1="325" y1="348" x2="435" y2="348"/>
+        <line x1="325" y1="355" x2="435" y2="355"/>
+        <line x1="325" y1="362" x2="435" y2="362"/>
+      </g>
+      <!-- counterweight rear -->
+      <path d="M280 390 L300 360 L300 470 L275 450 Z" fill="#8a3c12"/>
+      <rect x="278" y="420" width="22" height="30" rx="3" fill="#6a2e0c"/>
+      <!-- brand stripe -->
+      <rect x="320" y="410" width="160" height="10" rx="2" fill="#1a1a1a" opacity="0.5"/>
+      <rect x="320" y="410" width="40" height="10" fill="#ffc857" opacity="0.9"/>
+      <!-- exhaust stack -->
+      <rect x="455" y="300" width="14" height="60" rx="3" fill="#2a3038"/>
+      <rect x="452" y="296" width="20" height="10" rx="2" fill="#3d4550"/>
+      <!-- bubbles from exhaust (octopus theme) -->
+      <circle class="bubble" cx="462" cy="290" r="5" fill="#7ec8e8" opacity="0"/>
+      <circle class="bubble" cx="468" cy="295" r="3.5" fill="#a0d8ef" opacity="0" style="animation-delay:1s"/>
+      <circle class="bubble" cx="456" cy="292" r="4" fill="#7ec8e8" opacity="0" style="animation-delay:1.8s"/>
+
+      <!-- warning lamp -->
+      <rect x="400" y="328" width="16" height="12" rx="2" fill="#333"/>
+      <circle class="warn-lamp" cx="408" cy="324" r="6" fill="#ff6b35" filter="url(#softGlow)"/>
+    </g>
+
+    <!-- ---- CABIN ---- -->
+    <g id="cabin">
+      <!-- cabin frame -->
+      <path d="M390 300
+               L500 295
+               L510 310
+               L510 390
+               L390 395 Z"
+            fill="#2a3540"/>
+      <!-- glass panels -->
+      <path d="M398 308 L492 304 L498 318 L498 385 L398 388 Z" fill="url(#glassGrad)" opacity="0.85"/>
+      <!-- glass reflection -->
+      <path d="M410 315 L450 312 L430 380 L410 382 Z" fill="#fff" opacity="0.15"/>
+      <path d="M460 312 L480 310 L470 380 L455 381 Z" fill="#fff" opacity="0.08"/>
+      <!-- cabin pillars -->
+      <rect x="392" y="300" width="10" height="95" fill="#1a242e"/>
+      <rect x="498" y="298" width="10" height="95" fill="#1a242e"/>
+      <rect x="392" y="298" width="116" height="10" fill="#1a242e"/>
+      <!-- door handle -->
+      <rect x="502" y="350" width="4" height="14" rx="1" fill="#8a93a0"/>
+      <!-- cabin roof -->
+      <path d="M385 288 L515 282 L518 300 L382 305 Z" fill="url(#bodyGrad)"/>
+      <rect x="420" y="275" width="50" height="12" rx="2" fill="#3d4550"/>
+      <!-- antenna -->
+      <line x1="480" y1="275" x2="485" y2="240" stroke="#555" stroke-width="2"/>
+      <circle cx="485" cy="238" r="3" fill="#3de0ff" filter="url(#softGlow)"/>
+
+      <!-- interior seat (visible through glass) -->
+      <rect x="430" y="350" width="40" height="30" rx="3" fill="#1a3040" opacity="0.5"/>
+      <!-- joysticks -->
+      <rect x="415" y="340" width="6" height="28" fill="#333"/>
+      <circle cx="418" cy="338" r="5" fill="#444"/>
+      <rect x="475" y="338" width="6" height="28" fill="#333"/>
+      <circle cx="478" cy="336" r="5" fill="#444"/>
+      <!-- control panel glow -->
+      <rect x="445" y="365" width="30" height="12" rx="2" fill="#0a3040"/>
+      <rect x="448" y="368" width="8" height="4" fill="#3de0ff" opacity="0.8"/>
+      <rect x="460" y="368" width="8" height="4" fill="#ffc857" opacity="0.8"/>
+    </g>
+
+    <!-- ---- OCTOPUS PILOT ---- -->
+    <g id="octopus">
+      <!-- body / head mantle -->
+      <g class="octo-head">
+        <!-- mantle -->
+        <ellipse cx="450" cy="250" rx="42" ry="48" fill="url(#octoHead)"/>
+        <!-- mantle highlight -->
+        <ellipse cx="438" cy="235" rx="18" ry="22" fill="#f07a9a" opacity="0.45"/>
+        <!-- spots -->
+        <circle cx="465" cy="235" r="4" fill="#9c2a4e" opacity="0.5"/>
+        <circle cx="430" cy="255" r="3" fill="#9c2a4e" opacity="0.45"/>
+        <circle cx="455" cy="265" r="3.5" fill="#9c2a4e" opacity="0.4"/>
+
+        <!-- eyes -->
+        <ellipse cx="432" cy="242" rx="12" ry="14" fill="#fff8f0"/>
+        <ellipse cx="468" cy="242" rx="12" ry="14" fill="#fff8f0"/>
+        <ellipse cx="435" cy="244" rx="6" ry="8" fill="#1a1020"/>
+        <ellipse cx="471" cy="244" rx="6" ry="8" fill="#1a1020"/>
+        <circle cx="437" cy="241" r="2" fill="#fff"/>
+        <circle cx="473" cy="241" r="2" fill="#fff"/>
+        <!-- eyelids for blink -->
+        <ellipse class="eye-lid" cx="432" cy="242" rx="12" ry="14" fill="#d94d7a" style="transform-origin:432px 242px"/>
+        <ellipse class="eye-lid-b" cx="468" cy="242" rx="12" ry="14" fill="#d94d7a" style="transform-origin:468px 242px"/>
+
+        <!-- siphon / funnel -->
+        <ellipse cx="450" cy="275" rx="8" ry="12" fill="#b03060" opacity="0.7"/>
+      </g>
+
+      <!-- ARM 1: left control arm on joystick (independent) -->
+      <g class="arm-ctrl-L">
+        <path d="M430 280
+                 Q 415 300, 412 320
+                 Q 410 335, 418 345"
+              fill="none" stroke="url(#armGrad)" stroke-width="11" stroke-linecap="round"/>
+        <!-- suckers -->
+        <circle cx="416" cy="310" r="2.5" fill="#f0a0b8"/>
+        <circle cx="412" cy="325" r="2.2" fill="#f0a0b8"/>
+        <circle cx="417" cy="338" r="2" fill="#f0a0b8"/>
+        <!-- tip gripping joystick -->
+        <ellipse cx="418" cy="345" rx="5" ry="4" fill="#c04070"/>
+      </g>
+
+      <!-- ARM 2: right control arm (independent phase) -->
+      <g class="arm-ctrl-R">
+        <path d="M470 278
+                 Q 485 298, 478 320
+                 Q 472 335, 478 342"
+              fill="none" stroke="url(#armGrad)" stroke-width="11" stroke-linecap="round"/>
+        <circle cx="480" cy="305" r="2.5" fill="#f0a0b8"/>
+        <circle cx="476" cy="320" r="2.2" fill="#f0a0b8"/>
+        <circle cx="477" cy="332" r="2" fill="#f0a0b8"/>
+        <ellipse cx="478" cy="342" rx="5" ry="4" fill="#c04070"/>
+      </g>
+
+      <!-- ARM 3: hanging out left of cab (free) -->
+      <g class="arm-hang">
+        <path d="M412 270
+                 Q 380 290, 360 330
+                 Q 350 360, 355 390
+                 Q 360 410, 375 420"
+              fill="none" stroke="url(#armGrad)" stroke-width="12" stroke-linecap="round"/>
+        <circle cx="375" cy="310" r="3" fill="#f0a0b8"/>
+        <circle cx="360" cy="340" r="2.8" fill="#f0a0b8"/>
+        <circle cx="352" cy="370" r="2.5" fill="#f0a0b8"/>
+        <circle cx="358" cy="400" r="2.5" fill="#f0a0b8"/>
+        <!-- curled tip -->
+        <path d="M375 420 Q 390 425, 388 410" fill="none" stroke="#b03060" stroke-width="6" stroke-linecap="round"/>
+      </g>
+
+      <!-- ARM 4: waving out right (free, different period) -->
+      <g class="arm-wave">
+        <path d="M488 265
+                 Q 520 275, 545 300
+                 Q 565 325, 560 355
+                 Q 555 375, 540 380"
+              fill="none" stroke="url(#armGrad)" stroke-width="11" stroke-linecap="round"/>
+        <circle cx="515" cy="285" r="2.8" fill="#f0a0b8"/>
+        <circle cx="540" cy="310" r="2.5" fill="#f0a0b8"/>
+        <circle cx="558" cy="340" r="2.5" fill="#f0a0b8"/>
+        <circle cx="552" cy="365" r="2.2" fill="#f0a0b8"/>
+        <!-- tip flick -->
+        <path d="M540 380 Q 525 388, 528 372" fill="none" stroke="#b03060" stroke-width="5" stroke-linecap="round"/>
+      </g>
+
+      <!-- ARM 5: tucked / gripping dash (subtle) -->
+      <g class="arm-tuck">
+        <path d="M440 285
+                 Q 445 310, 448 340
+                 Q 450 355, 455 365"
+              fill="none" stroke="url(#armGrad)" stroke-width="9" stroke-linecap="round"/>
+        <circle cx="445" cy="315" r="2" fill="#f0a0b8"/>
+        <circle cx="449" cy="340" r="2" fill="#f0a0b8"/>
+      </g>
+
+      <!-- ARM 6: short tuck rear -->
+      <g class="arm-hang" style="animation-delay:-0.7s">
+        <path d="M420 275
+                 Q 400 295, 395 320
+                 Q 393 340, 400 355"
+              fill="none" stroke="url(#armGrad)" stroke-width="9" stroke-linecap="round"/>
+        <circle cx="400" cy="305" r="2.2" fill="#f0a0b8"/>
+        <circle cx="395" cy="330" r="2" fill="#f0a0b8"/>
+      </g>
+    </g>
+
+    <!-- ---- BOOM ---- -->
+    <g class="boom-group" id="boom">
+      <!-- boom main -->
+      <path d="M520 320
+               L560 300
+               L720 180
+               L740 200
+               L560 330 Z"
+            fill="url(#bodyGrad)"/>
+      <!-- boom dark side -->
+      <path d="M520 320 L560 330 L740 200 L730 190 Z" fill="url(#bodyDark)" opacity="0.6"/>
+      <!-- boom pins / joints -->
+      <circle cx="530" cy="320" r="10" fill="#3d4550" stroke="#8a93a0" stroke-width="2"/>
+      <circle cx="530" cy="320" r="4" fill="#1a1a1a"/>
+      <!-- hydraulic cylinder on boom -->
+      <path d="M545 310 L650 220" stroke="#5a6570" stroke-width="8" stroke-linecap="round"/>
+      <path d="M545 310 L590 272" stroke="#8a93a0" stroke-width="5" stroke-linecap="round"/>
+
+      <!-- STICK -->
+      <g class="stick-group" id="stick">
+        <path d="M720 180
+                 L750 170
+                 L830 260
+                 L800 275 Z"
+              fill="url(#bodyGrad)"/>
+        <path d="M720 180 L750 170 L830 260 L810 255 Z" fill="url(#bodyDark)" opacity="0.5"/>
+        <!-- stick joint -->
+        <circle cx="730" cy="185" r="9" fill="#3d4550" stroke="#8a93a0" stroke-width="2"/>
+        <!-- hydraulic on stick -->
+        <path d="M740 195 L800 245" stroke="#5a6570" stroke-width="6" stroke-linecap="round"/>
+
+        <!-- BUCKET -->
+        <g class="bucket-group" id="bucket">
+          <!-- bucket link -->
+          <circle cx="815" cy="265" r="7" fill="#3d4550" stroke="#8a93a0" stroke-width="2"/>
+          <!-- bucket body -->
+          <path d="M810 255
+                   Q 860 250, 880 290
+                   Q 890 330, 850 345
+                   Q 810 350, 800 320
+                   Q 795 285, 810 255 Z"
+                fill="url(#metal)"/>
+          <!-- bucket teeth -->
+          <path d="M845 345 L850 365 L860 348 Z" fill="#555"/>
+          <path d="M860 340 L870 358 L875 338 Z" fill="#555"/>
+          <path d="M875 325 L890 338 L888 318 Z" fill="#555"/>
+          <!-- dirt in bucket -->
+          <ellipse cx="850" cy="300" rx="22" ry="12" fill="#5a4030" opacity="0.8"/>
+          <!-- hydraulic ram to bucket -->
+          <path d="M780 230 L820 270" stroke="#5a6570" stroke-width="5" stroke-linecap="round"/>
+        </g>
+      </g>
+    </g>
+
+    <!-- ---- COUNTERWEIGHT detail / rear lights ---- -->
+    <circle cx="285" cy="440" r="5" fill="#ff4444" opacity="0.8"/>
+    <circle cx="285" cy="455" r="4" fill="#ff8800" opacity="0.6"/>
+
+    <!-- headlight -->
+    <ellipse cx="520" cy="400" rx="8" ry="5" fill="#ffe9a0"/>
+    <path d="M528 400 L580 385 L580 415 Z" fill="#ffe9a0" opacity="0.12"/>
+
+  </g><!-- end excavator -->
+
+  <!-- foreground grass / weeds (near layer, fastest parallax) -->
+  <g class="layer-near" fill="#2a4030" opacity="0.85">
+    <path d="M40 640 Q 45 580, 30 560 Q 50 590, 48 640 Z"/>
+    <path d="M55 640 Q 65 570, 80 550 Q 70 590, 68 640 Z"/>
+    <path d="M200 640 Q 210 590, 200 570 Q 220 600, 215 640 Z"/>
+    <path d="M900 640 Q 910 575, 925 555 Q 915 600, 912 640 Z"/>
+    <path d="M920 640 Q 935 585, 950 565 Q 940 605, 938 640 Z"/>
+    <path d="M1100 640 Q 1108 580, 1100 560 Q 1118 595, 1115 640 Z"/>
+  </g>
+
+  <!-- subtle vignette -->
+  <rect width="1200" height="640" fill="url(#glow)" opacity="0.05" pointer-events="none"/>
+</svg>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // Optional: slight JS-enhanced parallax on pointer for depth feel.
+  // Pure enhancement; scene already animates via CSS alone.
+  var svg = document.getElementById("scene");
+  if (!svg) return;
+
+  var far = svg.querySelectorAll(".layer-far");
+  var mid = svg.querySelectorAll(".layer-mid");
+  var near = svg.querySelectorAll(".layer-near");
+
+  var mx = 0, my = 0, tx = 0, ty = 0;
+
+  function onMove(e) {
+    var r = svg.getBoundingClientRect();
+    mx = ((e.clientX - r.left) / r.width - 0.5) * 2;
+    my = ((e.clientY - r.top) / r.height - 0.5) * 2;
+  }
+
+  window.addEventListener("mousemove", onMove, { passive: true });
+  window.addEventListener("touchmove", function (e) {
+    if (e.touches && e.touches[0]) onMove(e.touches[0]);
+  }, { passive: true });
+
+  function tick() {
+    tx += (mx - tx) * 0.06;
+    ty += (my - ty) * 0.06;
+
+    // Offset multipliers: farther layers move less
+    var fX = tx * -6, fY = ty * -3;
+    var mX = tx * -14, mY = ty * -6;
+    var nX = tx * -28, nY = ty * -10;
+
+    far.forEach(function (el) { el.style.translate = fX + "px " + fY + "px"; });
+    mid.forEach(function (el) { el.style.translate = mX + "px " + mY + "px"; });
+    near.forEach(function (el) { el.style.translate = nX + "px " + nY + "px"; });
+
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  // Self-check in console (for response.md evidence)
+  var checks = {
+    svg: !!document.getElementById("scene"),
+    octopus: !!document.getElementById("octopus"),
+    excavator: !!document.getElementById("excavator"),
+    tracks: !!document.getElementById("tracks"),
+    boom: !!document.getElementById("boom"),
+    animatedArms: document.querySelectorAll(".arm-ctrl-L,.arm-ctrl-R,.arm-hang,.arm-wave,.arm-tuck").length,
+    parallaxLayers: document.querySelectorAll(".layer-far,.layer-mid,.layer-near").length,
+    externalScripts: document.querySelectorAll("script[src]").length,
+    externalLinks: document.querySelectorAll("link[href]").length,
+    externalImages: document.querySelectorAll("image[href],img[src]").length
+  };
+  console.info("[SVG001 self-check]", checks);
+  window.__SVG001_CHECKS__ = checks;
+})();
+</script>
+</body>
+</html>

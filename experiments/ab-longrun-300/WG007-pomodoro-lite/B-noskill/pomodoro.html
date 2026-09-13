@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>极简番茄钟</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --panel: #1a2332;
+      --text: #e7ecf3;
+      --muted: #8b9bb4;
+      --accent: #e85d4c;
+      --accent-dim: #a63d32;
+      --ok: #3dba7a;
+      --border: #2a3548;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: radial-gradient(ellipse at center, #1a2332 0%, var(--bg) 70%);
+      color: var(--text);
+      padding: 24px;
+    }
+    .card {
+      width: 100%;
+      max-width: 360px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px 28px 28px;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35);
+    }
+    h1 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-align: center;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+    .display {
+      font-variant-numeric: tabular-nums;
+      font-size: 3.6rem;
+      font-weight: 300;
+      text-align: center;
+      letter-spacing: 0.04em;
+      line-height: 1.1;
+      margin-bottom: 8px;
+      color: var(--text);
+      transition: color 0.2s;
+    }
+    .display.finished {
+      color: var(--accent);
+    }
+    .status {
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--muted);
+      min-height: 1.4em;
+      margin-bottom: 24px;
+    }
+    .status.finished {
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    button {
+      flex: 1;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      font-family: inherit;
+    }
+    button:active { transform: scale(0.97); }
+    button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:hover:not(:disabled) { background: #f06a5a; }
+    .btn-secondary {
+      background: #2a3548;
+      color: var(--text);
+    }
+    .btn-secondary:hover:not(:disabled) { background: #354258; }
+    .config {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .config label {
+      font-size: 0.85rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .config input {
+      flex: 1;
+      background: #121a26;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 8px 12px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      text-align: center;
+    }
+    .config input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .hint {
+      margin-top: 10px;
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-align: center;
+      min-height: 1.2em;
+    }
+    .hint.error { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <main class="card" id="app">
+    <h1>POMODORO</h1>
+    <div class="display" id="display" aria-live="polite">25:00</div>
+    <div class="status" id="status">就绪</div>
+    <div class="controls">
+      <button type="button" class="btn-primary" id="btnToggle">开始</button>
+      <button type="button" class="btn-secondary" id="btnReset">重置</button>
+    </div>
+    <div class="config">
+      <label for="minutes">时长（分钟）</label>
+      <input
+        type="number"
+        id="minutes"
+        min="1"
+        max="60"
+        step="1"
+        value="25"
+        inputmode="numeric"
+      />
+    </div>
+    <p class="hint" id="hint">1–60 正整数；结束时有提示音（浏览器 AudioContext）</p>
+  </main>
+
+  <script>
+    "use strict";
+
+    // ---- state ----
+    var DEFAULT_MINUTES = 25;
+    var MIN_MINUTES = 1;
+    var MAX_MINUTES = 60;
+    var TICK_MS = 250; // interval; remaining is computed from wall clock
+
+    var configuredMinutes = DEFAULT_MINUTES;
+    var remainingMs = configuredMinutes * 60 * 1000;
+    var running = false;
+    var finished = false;
+    var endTime = 0; // absolute ms when timer hits 0
+    var intervalId = null;
+
+    // ---- dom ----
+    var elDisplay = document.getElementById("display");
+    var elStatus = document.getElementById("status");
+    var elToggle = document.getElementById("btnToggle");
+    var elReset = document.getElementById("btnReset");
+    var elMinutes = document.getElementById("minutes");
+    var elHint = document.getElementById("hint");
+
+    // ---- helpers ----
+    function clampInt(n) {
+      if (typeof n !== "number" || !isFinite(n)) return null;
+      var i = Math.floor(n);
+      if (i < MIN_MINUTES || i > MAX_MINUTES) return null;
+      // reject non-integers (e.g. 25.5)
+      if (n !== i) return null;
+      return i;
+    }
+
+    function parseMinutes(raw) {
+      var s = String(raw).trim();
+      if (!/^\d+$/.test(s)) return null;
+      return clampInt(parseInt(s, 10));
+    }
+
+    function formatMs(ms) {
+      if (ms < 0) ms = 0;
+      var totalSec = Math.ceil(ms / 1000);
+      var m = Math.floor(totalSec / 60);
+      var s = totalSec % 60;
+      return (
+        (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s
+      );
+    }
+
+    function setStatus(text, isFinished) {
+      elStatus.textContent = text;
+      if (isFinished) {
+        elStatus.classList.add("finished");
+        elDisplay.classList.add("finished");
+      } else {
+        elStatus.classList.remove("finished");
+        elDisplay.classList.remove("finished");
+      }
+    }
+
+    function render() {
+      elDisplay.textContent = formatMs(remainingMs);
+    }
+
+    // Optional beep via Web Audio API (no external file).
+    // Fails silently if AudioContext is unavailable or blocked.
+    function playBeep() {
+      try {
+        var Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return;
+        var ctx = new Ctx();
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.value = 880;
+        gain.gain.value = 0.0001;
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        var now = ctx.currentTime;
+        gain.gain.exponentialRampToValueAtTime(0.15, now + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.45);
+        osc.start(now);
+        osc.stop(now + 0.5);
+        osc.onended = function () {
+          try { ctx.close(); } catch (e) { /* ignore */ }
+        };
+      } catch (e) {
+        // no audio available — status text still shows 时间到
+      }
+    }
+
+    function stopTick() {
+      if (intervalId !== null) {
+        clearInterval(intervalId);
+        intervalId = null;
+      }
+    }
+
+    function startTick() {
+      stopTick();
+      intervalId = setInterval(function () {
+        remainingMs = endTime - Date.now();
+        if (remainingMs <= 0) {
+          remainingMs = 0;
+          finish();
+          return;
+        }
+        render();
+      }, TICK_MS);
+    }
+
+    function finish() {
+      stopTick();
+      running = false;
+      finished = true;
+      remainingMs = 0;
+      render();
+      setStatus("时间到", true);
+      elToggle.textContent = "开始";
+      elMinutes.disabled = false;
+      playBeep();
+    }
+
+    function start() {
+      if (finished) {
+        // start a fresh cycle with current config
+        resetTimer(false);
+      }
+      if (remainingMs <= 0) return;
+      running = true;
+      finished = false;
+      endTime = Date.now() + remainingMs;
+      setStatus("进行中", false);
+      elToggle.textContent = "暂停";
+      elMinutes.disabled = true;
+      startTick();
+    }
+
+    function pause() {
+      if (!running) return;
+      stopTick();
+      running = false;
+      remainingMs = endTime - Date.now();
+      if (remainingMs < 0) remainingMs = 0;
+      render();
+      setStatus("已暂停", false);
+      elToggle.textContent = "继续";
+      elMinutes.disabled = true;
+    }
+
+    function resetTimer(keepMinutesInput) {
+      stopTick();
+      running = false;
+      finished = false;
+      remainingMs = configuredMinutes * 60 * 1000;
+      render();
+      setStatus("就绪", false);
+      elToggle.textContent = "开始";
+      elMinutes.disabled = false;
+      if (!keepMinutesInput) {
+        elMinutes.value = String(configuredMinutes);
+      }
+    }
+
+    function applyMinutesFromInput(showFeedback) {
+      var parsed = parseMinutes(elMinutes.value);
+      if (parsed === null) {
+        if (showFeedback) {
+          elHint.textContent = "请输入 1–60 的正整数";
+          elHint.classList.add("error");
+        }
+        return false;
+      }
+      configuredMinutes = parsed;
+      elHint.textContent = "1–60 正整数；结束时有提示音（浏览器 AudioContext）";
+      elHint.classList.remove("error");
+      // Only reset remaining if not running/finished mid-cycle
+      if (!running) {
+        remainingMs = configuredMinutes * 60 * 1000;
+        finished = false;
+        render();
+        setStatus("就绪", false);
+        elToggle.textContent = "开始";
+      }
+      return true;
+    }
+
+    // ---- events ----
+    elToggle.addEventListener("click", function () {
+      if (running) {
+        pause();
+      } else {
+        start();
+      }
+    });
+
+    elReset.addEventListener("click", function () {
+      applyMinutesFromInput(false);
+      resetTimer(false);
+    });
+
+    elMinutes.addEventListener("change", function () {
+      if (running) return;
+      applyMinutesFromInput(true);
+    });
+
+    elMinutes.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        if (running) return;
+        applyMinutesFromInput(true);
+      }
+    });
+
+    // initial paint
+    render();
+  </script>
+</body>
+</html>

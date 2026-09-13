@@ -1,0 +1,15 @@
+import fs from 'node:fs';
+const p = '<实验根目录>/ab-cycle2/Q03-unit-convert/A-skill/app.html';
+const buf = fs.readFileSync(p);
+console.log('bytes:', buf.length);
+console.log('BOM  :', buf.slice(0, 4).toString('hex'));
+const s = fs.readFileSync(p, 'utf8');
+const i = s.indexOf('CORE-LOGIC-START');
+console.log('indexOf START:', i);
+console.log('context:', JSON.stringify(s.slice(i - 12, i + 140)));
+const j = s.indexOf('CORE-LOGIC-END');
+console.log('indexOf END:', j);
+console.log('context END:', JSON.stringify(s.slice(j - 12, j + 60)));
+console.log('crlf count:', (s.match(/\r\n/g) || []).length);
+console.log('count START marker:', s.split('CORE-LOGIC-START').length - 1);
+console.log('count END marker:', s.split('CORE-LOGIC-END').length - 1);

@@ -1,0 +1,60 @@
+# Field Tests / 实测报告
+
+> This directory is the skill holding itself to its own standard: every rule in this repo must survive contact with real multi-AI operations, and defects found in the field are published here together with the fixes they produced.
+>
+> 本目录是这个 skill 用自己的标准要求自己的证据：本仓库的每条规则都必须在真实多 AI 协作中经受检验，实测中发现的缺陷连同修复一起在这里公开。
+
+## Why publish field tests / 为什么公开实测
+
+Most skills are designed and shipped. This one is designed, shipped, **attacked, and re-shipped**: an adversarial probe methodology re-runs controlled prompts against successive rule states, and every round's finding is fed back into the rules, lessons, and self-tests in the same version discipline. The reports below are the evidence — including the rounds where the defect was in the skill's own rules, not in the tested AI.
+
+大多数 skill 设计完就发布。这一个设计、发布之后还要**被攻击、再发布**：对抗探针方法学用固定提示词连续攻击不同规则状态，每轮发现都按同一版本纪律回灌进规则、教训与自测。下面的报告就是证据——包括缺陷出在 skill 自己规则上、而非被测 AI 的那几轮。
+
+## The two instruments / 两件测试仪器
+
+1. **End-to-end field test / 端到端实测** — a real multi-stage build executed under the full commander protocol: a commander AI (skill loaded) plans and dispatches, an executor AI (fresh window, skill installed) executes, and a human relays between the two windows. All three sides keep complete records. Scored against a published 16-point scorecard: 9 core checks (C1–C9), 3 planted traps, 4 negative checks (N1–N4). **Untriggered traps are recorded as *untested*, never *passed*.**
+2. **Probe series / 探针系列** — one minimal, controlled prompt re-run across successive rule states to attack one suspected rule weakness per round. Each round: observed behavior → root cause → rule fix → re-probe. This is the regression instrument for the skill's own rules. **Scripted**: the probe prompt + per-round attack targets / pass conditions / fail patterns / fixes live in [`probes/probe-scenarios.json`](../../probes/probe-scenarios.json); `python probes/probe-runner.py list|archive|report` records each round's verdict append-only (a human reads the host output and decides; the runner never auto-passes).
+
+端到端实测：一次真实的多阶段构建走完整指挥官协议——指挥官 AI（已加载 skill）规划派发，执行者 AI（全新窗口、已装 skill）执行，人类在两窗之间转交；三方各自留档；按公开的 16 分制判分（9 项核心检查 C1–C9、3 个预埋陷阱、4 项阴性检查 N1–N4），未触发的陷阱一律记「未测出」，不计「通过」。探针系列：一个最小受控提示词跨规则状态复测，每轮只攻击一个疑似弱点，观察 → 定根因 → 修规则 → 下一轮复测，是 skill 自身规则的回归测试仪。
+
+## Results / 结果
+
+| # | Instrument 仪器 | Form under test 受测形态 | Skill state* | Outcome 结果 | Defect found in the skill 发现的规则缺陷 | Fix 修复 |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | End-to-end 端到端 | Commander 指挥官（2 AI + 人类转交） | 3.0.0 | 16/16 — all triggered items passed / 触发项全过（2 陷阱未触发不计分） | —（指挥官抓到执行者未发现的 P0，见报告一） | Lesson codified: DOM state change ≠ render evidence 入册 |
+| 2 | Probe R1 探针一轮 | Subagent self-selection 子 Agent 自选 | 3.1.1 | Form never declared 未声明形态 | Rule–template desync 规则-模板脱节 | Form-selection field added to gate template & field list 形态字段补入模板与清单 |
+| 3 | Probe R2 探针二轮 | Same probe 同一探针 | 3.1.2 | Light-channel bypass 轻通道旁路 | Light clause had no exclusions 轻通道无排除项 | 3 explicit exclusions added 三条显式排除项 |
+| 4 | Probe R3 探针三轮 | Same probe 同一探针 | 3.2.0 | Conservative choice, text cited verbatim 保守选择、逐字引原文自辩 | The rules contradicted themselves in 3 places 规则三处自相矛盾 | Contradictions removed 消除矛盾、收敛自选意图 |
+| 5 | Blind test 2 盲测二 · A/B（3 任务 × 双臂） | Minimal-discipline summary 速查卡摘要 | Public 1.1.0 | Process axes 0/3→3/3 (clarify/compare/gate); defects 0 vs 0 (ceiling) 流程轴 0/3→3/3，缺陷 0 vs 0（天花板） | None in skill rules; summary omission of light-task waiver priced it 规则无缺陷；摘要省略轻任务免流程付出代价 | Pending adjudication 待与缺陷提案一并裁决 |
+
+\* Pre-release internal versions, all consolidated into public **1.1.0** — see [INTERNAL-HISTORY](../../INTERNAL-HISTORY.md). / 均为发布前内部版本，已全部合并入公开版 **1.1.0**，见 INTERNAL-HISTORY。
+
+Earlier handover field tests (versions also consolidated into 1.1.0) validated the answer-handling protocol in real cross-window relays and exposed governance-file placement defects, fixed under the same version discipline. / 更早的转交实测（版本同样并入 1.1.0）在真实跨窗转交中验证了回答接手协议，并暴露治理文件落位缺陷，按同一版本纪律修复。
+
+## Reports / 报告
+
+- [Field Test 1 · Commander form, end-to-end / 实测一 · 指挥官形态端到端](field-test-1-commander-end-to-end.md)
+- [Field Test 2 · Three-round probe series / 实测二 · 三轮对抗探针系列](field-test-2-probe-series.md)
+- [Field Test 3 · Third-party blind test（method; first run 2026-09-08）/ 实测三 · 第三方盲测（方法；2026-09-08 已首测）](third-party-blind-test.md)
+- [Blind-test first run · 2026-09-08 / 盲测首次执行 · 2026-09-08](blind-test/2026-09-08/report.md)
+- [Blind-test second run · A/B summary test · 2026-09-09 / 盲测二 · A/B 摘要实测 · 2026-09-09](blind-test/2026-09-09/report.md)
+
+## Honesty & hygiene rules for these reports / 本目录的报告纪律
+
+- Untriggered traps are **untested**, not passed. / 未触发的陷阱记「未测出」，不记「通过」。
+- A defect in the tested AI's *behavior* and a defect in the skill's *rules* are reported separately; when the rules were at fault, the report says so. / 被测 AI 的行为缺陷与 skill 的规则缺陷分开归因；规则有错时如实写明。
+- All parties are anonymized to window/role; scenarios are generic; no private project material appears here. / 所有参与方匿名到「窗口/角色」粒度；场景为通用场景；不含任何私有项目材料。
+- Index is bilingual; report bodies are in Chinese — the language the tests actually ran in — each with an English abstract. / 索引双语；报告正文用实测实际发生时的语言（中文），每篇附英文摘要。
+
+## A/B 验收指南 / How to verify it yourself
+
+别只信介绍，自己测：同一批任务，宿主分别用「未装 skill」和「已装 skill」各跑一遍，**只比较两个数**——
+
+1. 最终交付物的**缺陷数**（越少越好）；
+2. **token 消耗**（风格变没变一眼能看出）。
+
+**判定一句**：缺陷数下降、且 token 增幅在你可接受的范围内，才值得留；只降缺陷但 token 成倍增长要先权衡；缺陷没降则直接不留。
+
+**天花板效应警告（2026-09-09 二次盲测实证）**：当任务小而自明、正确性可机械核验且两臂都做对时，缺陷数会出现 0 vs 0——这**不代表纪律无效**，只是这批任务没有区分空间。要测出缺陷差，任务必须含真实误解陷阱（模糊需求、多交付物高压、中途改需求）；否则 0:0 只能当「流程轴无信息」，不能当「纪律无效」的证据。
+
+只想吃最小收益时，用 `docs/minimal-discipline.md` 的三条常驻规则即可，不必装完整 skill。

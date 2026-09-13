@@ -1,0 +1,205 @@
+#!/usr/bin/env python3
+"""Drive & archive the 77 behavioural self-tests (references/self-test.md).
+
+The 77 self-tests are prompt->expected pairs that only genuinely pass when a
+host model chooses to follow the rules; no tool can prove them. This runner
+makes them operable and archivable WITHOUT faking a verdict:
+
+  list    - print every case (num / title / prompt / expectations) so you can
+            drive host AIs one by one.
+  schema  - generate a judgement sheet (markdown) under docs/selftest-run/:
+            one row per case with a PASS/PARTIAL/FAIL/? slot for a human to
+            fill. Does not populate the verdict.
+  archive - given a filled sheet, compute pass/total stats and a content
+            fingerprint and emit a dated, reproducible report. The verdict
+            column is decided by a human; this tool only tallies + fingerprints.
+
+Honesty: the verdict is human judgement. This tool never marks a case as
+passed on its own; it only structures, fingerprints, and archives.
+
+Usage:
+  python scripts/selftest-runner.py list
+  python scripts/selftest-runner.py schema [--out docs/selftest-run/judgement-<date>.md]
+  python scripts/selftest-runner.py archive <sheet.md> [--commit <sha>]
+"""
+
+from __future__ import annotations
+
+import argparse
+import datetime
+import hashlib
+import pathlib
+import re
+import sys
+
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+SELF = ROOT / "references" / "self-test.md"
+SHEETS_DIR = ROOT / "docs" / "selftest-run"
+
+ALLOWED = {"PASS", "PARTIAL", "FAIL", "?"}
+
+
+def parse() -> list:
+    text = SELF.read_text(encoding="utf-8")
+    out = []
+    for block in re.split(r"^## Test ", text, flags=re.M)[1:]:
+        head = block.splitlines()[0].strip()
+        m = re.match(r"(\d+):\s*(.+)", head)
+        if not m:
+            continue
+        num, title = int(m.group(1)), m.group(2)
+        pblocks = re.findall(r"```(?:text)?\n(.*?)```", block, flags=re.S)
+        prompt = "\n---\n".join(b.strip() for b in pblocks) if pblocks else ""
+        tail = block.split("Expected")[-1] if "Expected" in block else block
+        exp = [x.strip() for x in re.findall(r"^-\s+(.+)$", tail, flags=re.M)]
+        fm = re.search(r"^Fixture:\s*(.+)$", block, flags=re.M)
+        fixture = fm.group(1).strip() if fm else ""
+        out.append({"num": num, "title": title, "prompt": prompt, "expect": exp, "fixture": fixture})
+    out.sort(key=lambda d: d["num"])
+    return out
+
+
+def cmd_list() -> int:
+    cases = parse()
+    if not cases:
+        print("ERROR: could not parse any cases from " + str(SELF))
+        return 2
+    for c in cases:
+        print("=" * 70)
+        print("Test {}: {}".format(c["num"], c["title"]))
+        print("PROMPT >>>")
+        print(c["prompt"] or "(no prompt captured)")
+        if c.get("fixture"):
+            print("FIXTURE (pre-supplied truth) >>>")
+            print("  - " + c["fixture"])
+        print("EXPECT ({} items) >>>".format(len(c["expect"])))
+        for e in c["expect"]:
+            print("  - " + e)
+    print("=" * 70)
+    print("TOTAL CASES:", len(cases))
+    return 0
+
+
+def cmd_schema(out: str) -> int:
+    cases = parse()
+    now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    lines = [
+        "# Self-Test Judgement Sheet / 自测判定表",
+        "",
+        "- Generated (UTC): `{}`".format(now),
+        "- Source: `references/self-test.md`",
+        "- Fill the **判定** column yourself (PASS / PARTIAL / FAIL / ?). The tool",
+        "  does not decide behaviour; it only archives what you record.",
+        "- To drive a case, run `python scripts/selftest-runner.py list` and copy the",
+        "  prompt of the matching Test N into the host AI.",
+        "",
+        "| # | Title / 标题 | Fixture 预置真相 | Status | 判定 verdict | Evidence / 证据句 |",
+        "| --- | --- | --- | --- | --- |",
+    ]
+    for c in cases:
+        lines.append("| {} | {} | {} | ? |  |  |".format(c["num"], c["title"], c.get("fixture") or ""))
+    lines += [
+        "",
+        "Fill legend (verdict): PASS = host behaved as expected and a human confirmed; PARTIAL =",
+        "covered partially / needed a nudge; FAIL = did not; ? = not tested yet (ranked as",
+        "NOT RUN, never as passed).",
+        "",
+        "Status legend (orthogonal to verdict): RULE-ONLY = a pure rule statement, not a scripted",
+        "scenario; EXAMPLE = an illustrative case; FIELD-TESTED = actually executed with recorded",
+        "evidence; ?/blank = not yet classified. Defaults to ?. Never mark FIELD-TESTED without a",
+        "recorded run.",
+        "",
+        "Fixture 预置真相：注明该测试需要的预置工作准备（如预置项目 / 预置 git 状态 / 已知通过数），不同宿主上结果才可比；空则为无需预置。",
+    ]
+    dest = pathlib.Path(out if out else SHEETS_DIR / ("judgement-" + now[:10] + ".md"))
+    if not dest.is_absolute():
+        dest = ROOT / dest
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_text("\n".join(lines), encoding="utf-8")
+    print("judgement sheet written:", dest)
+    return 0
+
+
+def cmd_archive(sheet: str, commit: str) -> int:
+    p = pathlib.Path(sheet)
+    if not p.is_absolute():
+        p = ROOT / p
+    text = p.read_text(encoding="utf-8")
+    rows = []
+    for line in text.splitlines():
+        if not line.startswith("|"):
+            continue
+        cols = [x.strip() for x in line.strip("|").split("|")]
+        if len(cols) < 3:
+            continue
+        try:
+            num = int(cols[0])
+        except ValueError:
+            continue
+        rows.append({"num": num, "title": cols[1], "verdict": cols[2]})
+    if not rows:
+        print("ERROR: no data rows found in " + str(p))
+        return 2
+    seen = {}
+    for r in rows:
+        seen[r["verdict"]] = seen.get(r["verdict"], 0) + 1
+    human = [r["verdict"] for r in rows]
+    decided = sum(1 for v in human if v in {"PASS", "PARTIAL", "FAIL"})
+    pass_n = sum(1 for v in human if v == "PASS")
+    partial_n = sum(1 for v in human if v == "PARTIAL")
+    fail_n = sum(1 for v in human if v == "FAIL")
+    open_n = sum(1 for v in human if v == "?" or v == "")
+    # column must be one of allowed; anything else is a parse warning
+    unknown = {v for v in human if v and v not in ALLOWED}
+    fingerprint = hashlib.sha1(text.encode("utf-8")).hexdigest()[:12]
+    now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    rate = (pass_n + partial_n) / decided if decided else 0.0
+    report = [
+        "# Self-Test Run Report / 自测运行报表",
+        "",
+        "- Source sheet: `{}`".format(str(p)),
+        "- Commit / label: `{}`".format(commit or "local"),
+        "- Time (UTC): `{}`".format(now),
+        "- Cases tallied: {}".format(len(rows)),
+        "- PASS: {} · PARTIAL: {} · FAIL: {} · open(/?): {}".format(
+            pass_n, partial_n, fail_n, open_n),
+        "- Decided (human): {} / {}".format(decided, len(rows)),
+        "- Effective pass rate (PASS+PARTIAL)/decided: {:.0%}".format(rate),
+        "- Fingerprint: `{}`".format(fingerprint),
+        "",
+        "> Verdicts come from a human-filled sheet. '?' / blank = NOT RUN, and is",
+        "> NEVER counted as passed. The fingerprint above lets you reproduce this",
+        "> exact report from the archived sheet.",
+    ]
+    if unknown:
+        report.append("WARNING unknown verdict tokens: " + ", ".join(sorted(unknown)))
+    out = p.with_name(p.stem + "-report.md")
+    out.write_text("\n".join(report), encoding="utf-8")
+    print("\n".join(report))
+    print("report written:", out)
+    return 0
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description="Drive/archive the 77 behavioural self-tests")
+    sub = ap.add_subparsers(dest="cmd")
+    sub.add_parser("list")
+    sp = sub.add_parser("schema")
+    sp.add_argument("--out")
+    ar = sub.add_parser("archive")
+    ar.add_argument("sheet")
+    ar.add_argument("--commit", default="")
+    args = ap.parse_args()
+
+    if args.cmd == "list":
+        return cmd_list()
+    if args.cmd == "schema":
+        return cmd_schema(args.out)
+    if args.cmd == "archive":
+        return cmd_archive(args.sheet, args.commit)
+    ap.print_help()
+    return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main())

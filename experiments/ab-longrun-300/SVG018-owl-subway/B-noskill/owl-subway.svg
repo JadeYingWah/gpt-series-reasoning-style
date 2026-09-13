@@ -1,0 +1,373 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-labelledby="title desc">
+  <title id="title">Owl Driving a Subway</title>
+  <desc id="desc">A stylized barn owl drives a modern metro train toward the right through a twilight tunnel.</desc>
+
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0b1026"/>
+      <stop offset="45%" stop-color="#1a2744"/>
+      <stop offset="100%" stop-color="#2a3555"/>
+    </linearGradient>
+    <linearGradient id="tunnelGlow" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1a2744" stop-opacity="0"/>
+      <stop offset="70%" stop-color="#f4a261" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#ffd166" stop-opacity="0.28"/>
+    </linearGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f7f3ea"/>
+      <stop offset="55%" stop-color="#e8dcc8"/>
+      <stop offset="100%" stop-color="#cbb89a"/>
+    </linearGradient>
+    <linearGradient id="faceDisc" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fff8ee"/>
+      <stop offset="100%" stop-color="#f0e0c4"/>
+    </linearGradient>
+    <linearGradient id="trainShell" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f2f5f8"/>
+      <stop offset="40%" stop-color="#d9e2ec"/>
+      <stop offset="100%" stop-color="#9fb3c8"/>
+    </linearGradient>
+    <linearGradient id="trainNose" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#c5d4e4"/>
+      <stop offset="100%" stop-color="#7f9bb8"/>
+    </linearGradient>
+    <linearGradient id="windowGlass" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#b8e0ff" stop-opacity="0.9"/>
+      <stop offset="45%" stop-color="#7ec8e3" stop-opacity="0.75"/>
+      <stop offset="100%" stop-color="#4a90a4" stop-opacity="0.85"/>
+    </linearGradient>
+    <linearGradient id="cabinGlass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#d4f1ff" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#6eb0c9" stop-opacity="0.8"/>
+    </linearGradient>
+    <linearGradient id="headlight" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#fff7c2" stop-opacity="0.95"/>
+      <stop offset="40%" stop-color="#ffd166" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#ffd166" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="railMetal" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#d8dee9"/>
+      <stop offset="50%" stop-color="#8b95a5"/>
+      <stop offset="100%" stop-color="#4a5361"/>
+    </linearGradient>
+    <radialGradient id="eyeGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffe066"/>
+      <stop offset="55%" stop-color="#f4a261"/>
+      <stop offset="100%" stop-color="#e76f51"/>
+    </radialGradient>
+    <radialGradient id="beam" cx="0%" cy="50%" r="100%">
+      <stop offset="0%" stop-color="#fff3b0" stop-opacity="0.55"/>
+      <stop offset="60%" stop-color="#ffd166" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#ffd166" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="softBlur" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6"/>
+    </filter>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <clipPath id="cabClip">
+      <path d="M760 268 C820 258, 880 262, 930 278 L930 392 L760 392 Z"/>
+    </clipPath>
+    <clipPath id="sideWin1">
+      <rect x="520" y="292" width="78" height="58" rx="10"/>
+    </clipPath>
+    <clipPath id="sideWin2">
+      <rect x="418" y="292" width="78" height="58" rx="10"/>
+    </clipPath>
+    <clipPath id="sideWin3">
+      <rect x="316" y="292" width="78" height="58" rx="10"/>
+    </clipPath>
+    <style>
+      .line { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+      .label { font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="675" fill="url(#sky)"/>
+  <ellipse cx="980" cy="180" rx="340" ry="220" fill="#3d4f7c" opacity="0.35" filter="url(#softBlur)"/>
+
+  <!-- Tunnel arch suggestion -->
+  <path d="M40 430 Q600 40 1160 430" class="line" stroke="#3a4a6d" stroke-width="18" opacity="0.55"/>
+  <path d="M70 430 Q600 80 1130 430" class="line" stroke="#2c3a58" stroke-width="8" opacity="0.7"/>
+
+  <!-- Distant city silhouette through tunnel mouth -->
+  <g opacity="0.55">
+    <rect x="980" y="210" width="28" height="140" fill="#1e2a44"/>
+    <rect x="1015" y="180" width="36" height="170" fill="#243352"/>
+    <rect x="1058" y="230" width="22" height="120" fill="#1e2a44"/>
+    <rect x="1088" y="195" width="40" height="155" fill="#2a3a5c"/>
+    <rect x="1135" y="240" width="24" height="110" fill="#1e2a44"/>
+    <g fill="#ffd166" opacity="0.7">
+      <rect x="1022" y="192" width="6" height="6"/>
+      <rect x="1034" y="210" width="6" height="6"/>
+      <rect x="1096" y="208" width="6" height="6"/>
+      <rect x="1110" y="230" width="6" height="6"/>
+      <rect x="1110" y="250" width="6" height="6"/>
+    </g>
+  </g>
+
+  <!-- Ground / track bed -->
+  <rect x="0" y="470" width="1200" height="205" fill="#1a2035"/>
+  <rect x="0" y="470" width="1200" height="18" fill="#2a334d"/>
+
+  <!-- Sleepers -->
+  <g fill="#3a4258">
+    <rect x="30" y="520" width="28" height="14" rx="2"/>
+    <rect x="110" y="520" width="28" height="14" rx="2"/>
+    <rect x="190" y="520" width="28" height="14" rx="2"/>
+    <rect x="270" y="520" width="28" height="14" rx="2"/>
+    <rect x="350" y="520" width="28" height="14" rx="2"/>
+    <rect x="430" y="520" width="28" height="14" rx="2"/>
+    <rect x="510" y="520" width="28" height="14" rx="2"/>
+    <rect x="590" y="520" width="28" height="14" rx="2"/>
+    <rect x="670" y="520" width="28" height="14" rx="2"/>
+    <rect x="750" y="520" width="28" height="14" rx="2"/>
+    <rect x="830" y="520" width="28" height="14" rx="2"/>
+    <rect x="910" y="520" width="28" height="14" rx="2"/>
+    <rect x="990" y="520" width="28" height="14" rx="2"/>
+    <rect x="1070" y="520" width="28" height="14" rx="2"/>
+    <rect x="1150" y="520" width="28" height="14" rx="2"/>
+  </g>
+
+  <!-- Rails -->
+  <rect x="0" y="500" width="1200" height="7" fill="url(#railMetal)"/>
+  <rect x="0" y="534" width="1200" height="7" fill="url(#railMetal)"/>
+  <rect x="0" y="500" width="1200" height="2" fill="#e8eef5" opacity="0.5"/>
+
+  <!-- Motion speed lines (behind train) -->
+  <g stroke="#9bb7ff" stroke-linecap="round" opacity="0.45">
+    <line x1="40" y1="300" x2="170" y2="300" stroke-width="3"/>
+    <line x1="20" y1="340" x2="150" y2="340" stroke-width="2"/>
+    <line x1="55" y1="380" x2="190" y2="380" stroke-width="4"/>
+    <line x1="90" y1="420" x2="200" y2="420" stroke-width="2"/>
+    <line x1="30" y1="260" x2="130" y2="260" stroke-width="2"/>
+  </g>
+  <g stroke="#ffd166" stroke-linecap="round" opacity="0.25">
+    <line x1="100" y1="310" x2="210" y2="310" stroke-width="2"/>
+    <line x1="70" y1="360" x2="180" y2="360" stroke-width="2"/>
+  </g>
+
+  <!-- ===== SUBWAY TRAIN (facing RIGHT) ===== -->
+  <g id="train">
+    <!-- Rear car body (left) -->
+    <path d="M180 300
+             L180 470
+             L760 470
+             L760 300
+             Q180 285 180 300 Z"
+          fill="url(#trainShell)"/>
+
+    <!-- Side stripe -->
+    <rect x="180" y="368" width="580" height="18" fill="#1b6ca8"/>
+    <rect x="180" y="368" width="580" height="5" fill="#3aa0e0"/>
+
+    <!-- Side windows -->
+    <g>
+      <rect x="520" y="292" width="78" height="58" rx="10" fill="url(#windowGlass)" stroke="#5a7a96" stroke-width="3"/>
+      <rect x="418" y="292" width="78" height="58" rx="10" fill="url(#windowGlass)" stroke="#5a7a96" stroke-width="3"/>
+      <rect x="316" y="292" width="78" height="58" rx="10" fill="url(#windowGlass)" stroke="#5a7a96" stroke-width="3"/>
+      <!-- window glints -->
+      <path d="M530 300 L550 298 L535 340 L515 342 Z" fill="#ffffff" opacity="0.18"/>
+      <path d="M428 300 L448 298 L433 340 L413 342 Z" fill="#ffffff" opacity="0.18"/>
+      <path d="M326 300 L346 298 L331 340 L311 342 Z" fill="#ffffff" opacity="0.18"/>
+    </g>
+
+    <!-- Passenger silhouettes -->
+    <g clip-path="url(#sideWin1)" opacity="0.55" fill="#1a3048">
+      <circle cx="545" cy="325" r="9"/>
+      <path d="M532 350 Q545 336 558 350 Z"/>
+      <circle cx="575" cy="328" r="7"/>
+      <path d="M565 350 Q575 340 585 350 Z"/>
+    </g>
+    <g clip-path="url(#sideWin2)" opacity="0.45" fill="#1a3048">
+      <circle cx="450" cy="328" r="8"/>
+      <path d="M438 350 Q450 338 462 350 Z"/>
+    </g>
+    <g clip-path="url(#sideWin3)" opacity="0.4" fill="#1a3048">
+      <circle cx="360" cy="326" r="9"/>
+      <path d="M348 350 Q360 336 372 350 Z"/>
+    </g>
+
+    <!-- Door seams -->
+    <g stroke="#7a8fa6" stroke-width="2" opacity="0.8">
+      <line x1="498" y1="300" x2="498" y2="455"/>
+      <line x1="396" y1="300" x2="396" y2="455"/>
+      <line x1="294" y1="300" x2="294" y2="455"/>
+    </g>
+
+    <!-- Lower skirt / undercarriage -->
+    <path d="M180 470 L760 470 L750 500 L190 500 Z" fill="#3d4a5c"/>
+    <rect x="210" y="478" width="90" height="14" rx="3" fill="#2a3344"/>
+    <rect x="330" y="478" width="90" height="14" rx="3" fill="#2a3344"/>
+    <rect x="450" y="478" width="90" height="14" rx="3" fill="#2a3344"/>
+    <rect x="570" y="478" width="90" height="14" rx="3" fill="#2a3344"/>
+
+    <!-- Bogies / wheels -->
+    <g fill="#1c2433">
+      <circle cx="250" cy="505" r="28"/>
+      <circle cx="310" cy="505" r="28"/>
+      <circle cx="620" cy="505" r="28"/>
+      <circle cx="680" cy="505" r="28"/>
+    </g>
+    <g fill="#5a6a80">
+      <circle cx="250" cy="505" r="12"/>
+      <circle cx="310" cy="505" r="12"/>
+      <circle cx="620" cy="505" r="12"/>
+      <circle cx="680" cy="505" r="12"/>
+    </g>
+    <g fill="#9aabbf">
+      <circle cx="250" cy="505" r="5"/>
+      <circle cx="310" cy="505" r="5"/>
+      <circle cx="620" cy="505" r="5"/>
+      <circle cx="680" cy="505" r="5"/>
+    </g>
+
+    <!-- Front cab (RIGHT side of train) -->
+    <path d="M760 255
+             L930 255
+             Q990 255 1010 300
+             Q1035 360 1020 420
+             Q1010 465 960 470
+             L760 470
+             Z"
+          fill="url(#trainNose)" stroke="#6a829c" stroke-width="2"/>
+
+    <!-- Nose accent -->
+    <path d="M960 270 Q1015 300 1025 370 Q1030 430 990 460 L960 460 Q1000 400 995 340 Q990 300 960 270 Z"
+          fill="#5a7a9a" opacity="0.35"/>
+
+    <!-- Destination LED sign -->
+    <rect x="780" y="268" width="150" height="28" rx="4" fill="#1a2030"/>
+    <text x="855" y="288" text-anchor="middle" class="label" font-size="14" fill="#ff8c42" font-weight="700" letter-spacing="1">NIGHT OWL · LINE 7</text>
+
+    <!-- Cab windshield -->
+    <path d="M760 305 L900 305 Q940 310 950 340 L950 385 L760 385 Z"
+          fill="url(#cabinGlass)" stroke="#4a6a85" stroke-width="3"/>
+
+    <!-- Headlight beams -->
+    <ellipse cx="1040" cy="400" rx="70" ry="28" fill="url(#beam)"/>
+    <ellipse cx="1035" cy="430" rx="50" ry="16" fill="url(#beam)" opacity="0.7"/>
+
+    <!-- Headlights -->
+    <g filter="url(#glow)">
+      <ellipse cx="1005" cy="395" rx="14" ry="12" fill="#fff5c0"/>
+      <ellipse cx="995" cy="435" rx="10" ry="8" fill="#ffe08a"/>
+    </g>
+
+    <!-- Cab side light stripe -->
+    <path d="M760 392 L960 392 L970 410 L760 410 Z" fill="#e85d04" opacity="0.85"/>
+    <path d="M760 392 L960 392 L962 398 L760 398 Z" fill="#ffb703"/>
+
+    <!-- Coupler front -->
+    <rect x="1010" y="448" width="22" height="16" rx="3" fill="#2c3545"/>
+  </g>
+
+  <!-- ===== OWL DRIVER (in cab, looking RIGHT) ===== -->
+  <g id="owl" transform="translate(820, 318) scale(0.92)">
+    <!-- Body -->
+    <ellipse cx="0" cy="48" rx="38" ry="44" fill="url(#body)"/>
+    <!-- Belly speckles -->
+    <g fill="#c4a574" opacity="0.55">
+      <circle cx="-12" cy="50" r="2.2"/>
+      <circle cx="0" cy="58" r="2.2"/>
+      <circle cx="12" cy="48" r="2.2"/>
+      <circle cx="-6" cy="68" r="2"/>
+      <circle cx="8" cy="66" r="2"/>
+      <circle cx="-18" cy="62" r="1.8"/>
+      <circle cx="18" cy="60" r="1.8"/>
+    </g>
+
+    <!-- Wing (tucked, holding controller) -->
+    <path d="M-28 40 Q-48 55 -40 78 Q-28 85 -18 70 Q-22 50 -28 40 Z"
+          fill="#d9c7a3" stroke="#b89f78" stroke-width="1.5"/>
+    <path d="M-36 55 Q-32 65 -28 72" class="line" stroke="#b89f78" stroke-width="1.2" opacity="0.7"/>
+
+    <!-- Head / facial disc -->
+    <ellipse cx="0" cy="8" rx="40" ry="36" fill="url(#faceDisc)"/>
+    <path d="M-38 0 Q0 -28 38 0 Q20 -8 0 -8 Q-20 -8 -38 0 Z" fill="#f5e6c8" opacity="0.5"/>
+
+    <!-- Ear tufts (small, barn-owl-ish soft edges) -->
+    <path d="M-34 -8 Q-42 -28 -28 -22 Q-30 -10 -34 -8 Z" fill="#d4c09a"/>
+    <path d="M34 -8 Q42 -28 28 -22 Q30 -10 34 -8 Z" fill="#d4c09a"/>
+
+    <!-- Eyes — looking RIGHT -->
+    <g>
+      <ellipse cx="-10" cy="6" rx="11" ry="12" fill="#2b2118"/>
+      <ellipse cx="14" cy="6" rx="11" ry="12" fill="#2b2118"/>
+      <circle cx="-8" cy="6" r="6.5" fill="url(#eyeGlow)"/>
+      <circle cx="16" cy="6" r="6.5" fill="url(#eyeGlow)"/>
+      <!-- pupils shifted right for "facing right" -->
+      <circle cx="-5.5" cy="6" r="3.2" fill="#1a120b"/>
+      <circle cx="18.5" cy="6" r="3.2" fill="#1a120b"/>
+      <circle cx="-4.2" cy="4.5" r="1.2" fill="#fff" opacity="0.9"/>
+      <circle cx="19.8" cy="4.5" r="1.2" fill="#fff" opacity="0.9"/>
+    </g>
+
+    <!-- Beak -->
+    <path d="M2 18 L10 30 L-2 28 Z" fill="#e09f3e" stroke="#c47f17" stroke-width="1"/>
+
+    <!-- Tiny conductor cap -->
+    <g transform="translate(0, -22)">
+      <ellipse cx="0" cy="4" rx="22" ry="6" fill="#1b3a5f"/>
+      <rect x="-16" y="-8" width="32" height="12" rx="3" fill="#1b3a5f"/>
+      <rect x="-16" y="-2" width="32" height="4" fill="#f4a261"/>
+      <circle cx="0" cy="-10" r="3" fill="#ffd166"/>
+    </g>
+
+    <!-- Feet on control panel -->
+    <g fill="#e09f3e">
+      <path d="M-16 88 L-22 98 L-10 98 Z"/>
+      <path d="M-8 90 L-12 100 L-2 100 Z"/>
+      <path d="M8 88 L4 98 L14 98 Z"/>
+      <path d="M16 90 L12 100 L20 100 Z"/>
+    </g>
+
+    <!-- Control lever (wing tip) -->
+    <g transform="translate(28, 42)">
+      <line x1="0" y1="0" x2="18" y2="-16" stroke="#5a6a80" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="20" cy="-18" r="6" fill="#e85d04" stroke="#9a3a00" stroke-width="1.5"/>
+    </g>
+  </g>
+
+  <!-- Cab dashboard hint -->
+  <rect x="880" y="378" width="55" height="10" rx="2" fill="#2a3a50" opacity="0.8"/>
+  <rect x="888" y="372" width="6" height="6" fill="#4ade80"/>
+  <rect x="900" y="372" width="6" height="6" fill="#facc15"/>
+  <rect x="912" y="372" width="6" height="6" fill="#f87171"/>
+
+  <!-- Tunnel light streaks in foreground (speed) -->
+  <g opacity="0.2" stroke="#e0f2fe" stroke-linecap="round">
+    <line x1="1080" y1="200" x2="1200" y2="200" stroke-width="2"/>
+    <line x1="1100" y1="240" x2="1200" y2="240" stroke-width="1.5"/>
+    <line x1="1060" y1="560" x2="1200" y2="560" stroke-width="2"/>
+    <line x1="1090" y1="600" x2="1200" y2="600" stroke-width="1.5"/>
+  </g>
+
+  <!-- Floating dust / tunnel particles -->
+  <g fill="#ffd166" opacity="0.35">
+    <circle cx="250" cy="200" r="2"/>
+    <circle cx="400" cy="160" r="1.5"/>
+    <circle cx="600" cy="140" r="2"/>
+    <circle cx="900" cy="120" r="1.5"/>
+    <circle cx="150" cy="250" r="1.5"/>
+    <circle cx="720" cy="180" r="1.8"/>
+  </g>
+
+  <!-- Title plaque -->
+  <g transform="translate(60, 560)">
+    <rect x="0" y="0" width="280" height="72" rx="10" fill="#0f1528" opacity="0.75" stroke="#3aa0e0" stroke-width="2"/>
+    <text x="20" y="32" class="label" font-size="22" fill="#f4f7fb" font-weight="700">Midnight Express</text>
+    <text x="20" y="56" class="label" font-size="13" fill="#8eb8e0" letter-spacing="2">CAPTAIN: BARN OWL · DEPOT 3</text>
+  </g>
+
+  <!-- Directional arrow (right) -->
+  <g transform="translate(1080, 560)" opacity="0.7">
+    <path d="M0 20 L40 20 M28 8 L40 20 L28 32" class="line" stroke="#ffd166" stroke-width="4"/>
+  </g>
+</svg>
