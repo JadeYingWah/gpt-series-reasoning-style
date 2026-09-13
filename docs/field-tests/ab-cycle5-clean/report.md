@@ -1,4 +1,4 @@
-# A/B cycle5-clean · 干净对照实验报告（T1+T2 合并轮）
+﻿# A/B cycle5-clean · 干净对照实验报告（T1+T2 合并轮）
 
 - **日期**：2026-09-12
 - **模型**：Hy3（六格同模型，任务原文双臂逐字同文）
@@ -31,7 +31,7 @@ A 臂额外治理产物：`docs/agents/host-alignment.md` ×2、`.workbuddy/memo
 
 ## 四、床1（F6）：双臂皆 T3，但 B1 不裸——W12 判污染格
 
-- **B1 在 FC#2 调用了 `Skill: verification-sensitivity-audit`**。该 skill 住 `C:\Users\<用户名>\.workbuddy\skills\`（宿主用户级 skill 路径），**不在本次隔离范围**（只搬了 `~/.agents/skills`）。佐证：B1 面板 Skills≈5.6K vs B3/B4 3.6K。
+- **B1 在 FC#2 调用了 `Skill: verification-sensitivity-audit`**。该 skill 住 `<用户目录>\.workbuddy\skills\`（宿主用户级 skill 路径），**不在本次隔离范围**（只搬了 `~/.agents/skills`）。佐证：B1 面板 Skills≈5.6K vs B3/B4 3.6K。
 - 因此「干净环境 B 臂还能否 T3」**本轮不可测**，床1 裸差悬置。cycle4 的结论（B 臂有 audit skill 助阵仍输在声称-产物对等）保持不变。
 - A1 全程 T3：独立重算（462 vs 435）→ 变异杀伤（金额类 0%）→ 真渲染抓自检装置自身 11/12 → 修复 → 复跑杀伤 100% → **标注 UNVERIFIED 残留**（跨源账单核对、打印实测）。质量与 B1 相当，方法归属明确。
 
