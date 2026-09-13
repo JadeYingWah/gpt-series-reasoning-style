@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 Cross-Validation Method 3 — Spot Check + Formula Derivation
 

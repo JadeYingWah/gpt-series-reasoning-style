@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 Cross-Validation Comparison — Compare Method 1 (primary/conservative),
 Method 2 (full repair), Method 3 (formula derivation) on core metrics.

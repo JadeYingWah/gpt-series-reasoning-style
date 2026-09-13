@@ -1,4 +1,4 @@
-"""生成可靠的能量核心OBJ文件（细分八面体）"""
+﻿"""生成可靠的能量核心OBJ文件（细分八面体）"""
 import math
 
 def normalize(v):

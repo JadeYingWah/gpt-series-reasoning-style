@@ -1,4 +1,4 @@
-"""视觉类验证 - 解耦版"""
+﻿"""视觉类验证 - 解耦版"""
 import re, xml.etree.ElementTree as ET
 
 def hex_to_rgb(h):

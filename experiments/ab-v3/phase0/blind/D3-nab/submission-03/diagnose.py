@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """诊断：打印关键时段的检出点明细（时间/值/槽位中位/z）"""
 import csv, statistics
 from datetime import datetime

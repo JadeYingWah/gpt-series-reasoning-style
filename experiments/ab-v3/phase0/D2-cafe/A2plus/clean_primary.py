@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 D2 Cafe Sales Data Cleaning — Primary (Conservative) Method
 A2+ configuration: conservative repair, multi-path cross-validation ready.

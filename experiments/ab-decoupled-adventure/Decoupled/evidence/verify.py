@@ -1,4 +1,4 @@
-"""Adventure verification - Decoupled"""
+﻿"""Adventure verification - Decoupled"""
 import json
 from collections import deque
 

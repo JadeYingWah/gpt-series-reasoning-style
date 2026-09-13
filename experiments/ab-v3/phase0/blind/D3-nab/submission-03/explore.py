@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """探索脚本：日内周期形态 + 关键时段原始值（仅打印，不写文件）"""
 import csv, statistics
 from datetime import datetime, timedelta

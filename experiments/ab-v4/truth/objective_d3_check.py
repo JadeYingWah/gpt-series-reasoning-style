@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """ab-v4 D3 客观检查：报告区间 vs NAB 官方标注（±60min 容差，与 Phase 0 预注册口径一致）"""
 import json, re, csv, sys
 from pathlib import Path

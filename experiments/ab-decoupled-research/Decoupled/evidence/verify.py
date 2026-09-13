@@ -1,4 +1,4 @@
-"""Research verification - Decoupled"""
+﻿"""Research verification - Decoupled"""
 import re
 
 with open(r"<实验根目录>\ab-decoupled-research\Decoupled\report.md", encoding="utf-8") as f:

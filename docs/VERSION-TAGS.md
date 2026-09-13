@@ -1,4 +1,4 @@
-# 版本Tag说明 / Version Tags Documentation
+﻿# 版本Tag说明 / Version Tags Documentation
 
 > 本文档说明 v1.0.0 / v1.1.0 / v1.2.0 三个版本tag的状态、脱敏情况和历史背景。
 
@@ -15,7 +15,7 @@
 三个版本的代码均已完成脱敏，不含以下私有信息：
 - 私有项目名称 / Private project names
 - 个人真实姓名 / Real personal names
-- 本地路径（如 `<实验根目录>`、`C:\Users\<用户名>`）/ Local paths
+- 本地路径（如 `<实验根目录>`、`<用户目录>`）/ Local paths
 - 内部案例编号 / Internal case numbers
 - 可定位的代码文件名 / Locatable code filenames
 

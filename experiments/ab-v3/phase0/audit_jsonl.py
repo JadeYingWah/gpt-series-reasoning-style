@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """audit_jsonl.py — Phase 0 执行真实性审计：jsonl 工具痕迹 → 边界合规
 检查每个臂实际读取/写入/命令引用的路径 vs 任务书白名单。
 重点：D3-A2 是否读过 nab_combined_labels.json（其报告声明未读）。

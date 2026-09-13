@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 Cross-Validation Method 2 — Full Repair + Independent Reimplementation
 

@@ -1,17 +1,17 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
-D2 咖啡馆销售数据清�? + 分析
+D2 咖啡馆销售数据清洗 + 分析
 预注册规则：
-  R1 字段�? strip 后为 ERROR / UNKNOWN / 空字符串 -> 视为缺失
-  R2 Total Spent 缺失�? Quantity �? Price Per Unit 均有�? -> Total Spent = Quantity * Price Per Unit
-  R3 金额分析只用 R2 �? Total Spent 有效的行
-  R4 �? Item 的分析只�? Item 有效的行
-本脚本含两套独立实现（纯Python csv / sqlite3 SQL），输出双结果与交叉比对�?
+  R1 字段值 strip 后为 ERROR / UNKNOWN / 空字符串 -> 视为缺失
+  R2 Total Spent 缺失但 Quantity 与 Price Per Unit 均有效 -> Total Spent = Quantity * Price Per Unit
+  R3 金额分析只用 R2 后 Total Spent 有效的行
+  R4 按 Item 的分析只用 Item 有效的行
+本脚本含两套独立实现（纯Python csv / sqlite3 SQL），输出双结果与交叉比对。
 """
 import csv
 import sys
 
-DATA = r"<ʵ���Ŀ¼>\ab-v3\datasets\cafe_sales_dirty.csv"
+DATA = r"<实验根目录>\ab-v3\datasets\cafe_sales_dirty.csv"
 MISSING_TOKENS = {"error", "unknown", ""}
 
 
@@ -20,7 +20,7 @@ def is_missing(raw):
 
 
 def parse_num(raw):
-    """有效数�?�返�? float，否�? None�?"""
+    """有效数值返回 float，否则 None。"""
     if is_missing(raw):
         return None
     try:
@@ -45,7 +45,7 @@ def run_pure_python(path):
     def col(r, name):
         return r[idx[name]]
 
-    # Q4: 修复前缺失统�?
+    # Q4: 修复前缺失统计
     miss_ts = sum(1 for r in rows if is_missing(col(r, "Total Spent")))
     miss_qty = sum(1 for r in rows if is_missing(col(r, "Quantity")))
     miss_item = sum(1 for r in rows if is_missing(col(r, "Item")))
@@ -62,18 +62,18 @@ def run_pure_python(path):
             repaired += 1
         if ts is not None:
             ts_valid_after += 1
-            r[idx["Total Spent"]] = repr(ts)  # 写回修复值，供后续统�?
+            r[idx["Total Spent"]] = repr(ts)  # 写回修复值，供后续统计
 
-    # Q2: 总收入（R3�?
+    # Q2: 总收入（R3）
     total_revenue = sum(
         parse_num(col(r, "Total Spent"))
         for r in rows
         if parse_num(col(r, "Total Spent")) is not None
     )
 
-    # Q3: �? Item（R4 + R3 口径：Item 有效�? Total Spent 有效�?
+    # Q3: 按 Item（R4 + R3 口径：Item 有效且 Total Spent 有效）
     agg = {}
-    agg_all = {}  # 参�?�口径：�? Item 有效即计�?
+    agg_all = {}  # 参考口径：仅 Item 有效即计数
     for r in rows:
         item_raw = col(r, "Item").strip()
         if is_missing(item_raw):
@@ -87,7 +87,7 @@ def run_pure_python(path):
             agg[item][0] += 1
             agg[item][1] += ts
 
-    # Q5: TS �? Q*P 均有效但不一致（�?>0.005），按原始数�?
+    # Q5: TS 与 Q*P 均有效但不一致（差>0.005），按原始数据
     inconsistent = 0
     with open(path, newline="", encoding="utf-8") as f:
         reader = csv.reader(f)
@@ -113,7 +113,7 @@ def run_pure_python(path):
     }
 
 
-# ---------------- 实现 A：sqlite3（独�? SQL 计算引擎�? ----------------
+# ---------------- 实现 A：sqlite3（独立 SQL 计算引擎） ----------------
 def run_sqlite(path):
     import sqlite3
 
@@ -214,17 +214,17 @@ def main():
 
     diffs = cmp(res_pure, res_sql)
     print("=== 交叉验证 ===")
-    print("两套独立实现差异:", diffs if diffs else "无（全部�?致）")
+    print("两套独立实现差异:", diffs if diffs else "无（全部一致）")
 
-    print("\n=== 结果（sqlite 实现�? ===")
+    print("\n=== 结果（sqlite 实现） ===")
     for k, v in res_sql.items():
         print(f"{k}: {v}")
 
-    print("\n=== Q3 收入降序表（有效交易�?, 收入�? ===")
+    print("\n=== Q3 收入降序表（有效交易数, 收入） ===")
     for item, (cnt, rev) in res_sql["q3_item"].items():
         print(f"{item}\t{cnt}\t{rev:.2f}")
 
-    # �?出码：不�?致则�? 0，供验证流程捕获
+    # 退出码：不一致则非 0，供验证流程捕获
     sys.exit(1 if diffs else 0)
 
 

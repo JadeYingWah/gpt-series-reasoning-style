@@ -1,4 +1,4 @@
-# ab-cycle2 最终报告 · 12 对 24 臂可信 A/B 回测（2026-09-13 定稿）
+﻿# ab-cycle2 最终报告 · 12 对 24 臂可信 A/B 回测（2026-09-13 定稿）
 
 > 被测对象：gpt-series-reasoning-style skill（冻结快照 `skill-snapshot/` 1.2.0，MANIFEST.sha256 在盘）
 > 协议：`_judge/PROTOCOL-v2.md`（唯一协议）｜ 进度真源：`_judge/progress.json`

@@ -1,4 +1,4 @@
-"""冒险类验证脚本 - A2+配置"""
+﻿"""冒险类验证脚本 - A2+配置"""
 import json
 from collections import deque
 

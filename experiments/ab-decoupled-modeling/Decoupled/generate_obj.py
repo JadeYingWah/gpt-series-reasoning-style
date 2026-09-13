@@ -1,4 +1,4 @@
-"""Generate energy core OBJ (subdivided octahedron)"""
+﻿"""Generate energy core OBJ (subdivided octahedron)"""
 import math
 
 def normalize(v):

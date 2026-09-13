@@ -1,4 +1,4 @@
-"""研究类验证脚本 - A2+配置"""
+﻿"""研究类验证脚本 - A2+配置"""
 import re
 
 REPORT = r"<实验根目录>\ab-decoupled-research\A2plus\report.md"

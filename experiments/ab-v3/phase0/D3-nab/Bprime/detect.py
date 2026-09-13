@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 r"""D3 时序异常检测：NAB machine temperature（<实验根目录>\ab-v3\datasets\nab_machine_temp.csv）
 方法：Hampel 滤波器（居中滑动窗口的稳健 z-score）
   - 滑动中位数 m_t、滑动 MAD_t（乘 1.4826 近似标准差）

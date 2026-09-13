@@ -1,4 +1,4 @@
-"""变异测试 - 解耦版"""
+﻿"""变异测试 - 解耦版"""
 import os, shutil, subprocess, sys
 
 SRC = r"<实验根目录>\ab-decoupled-code\Decoupled\rename.py"

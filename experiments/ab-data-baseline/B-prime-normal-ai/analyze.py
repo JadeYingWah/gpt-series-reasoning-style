@@ -1,4 +1,4 @@
-import csv
+﻿import csv
 from collections import defaultdict
 
 data = []

@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """Generate judgeable A/B task beds for gpt-series-reasoning-style long-run eval."""
 from __future__ import annotations
 

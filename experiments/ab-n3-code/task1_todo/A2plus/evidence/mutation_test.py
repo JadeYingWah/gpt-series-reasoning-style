@@ -1,4 +1,4 @@
-"""变异测试 - 待办CLI"""
+﻿"""变异测试 - 待办CLI"""
 import os, shutil, subprocess, sys, json
 
 SRC = r"<实验根目录>\ab-n3-code\task1_todo\A2plus\todo.py"

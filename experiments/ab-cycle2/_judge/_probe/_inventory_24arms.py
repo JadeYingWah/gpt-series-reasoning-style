@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """ab-cycle2 24 臂产物盘点：输出每臂文件数/总字节/顶层文件清单。
 Chrome profile 等临时目录单独聚合计数，不逐个展开。"""
 import os, sys, io, json

@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 r"""ab-cycle2 床位生成器（lead 编写）。
 生成 12 对高鉴别力床位：每床 A-skill / B-noskill 同任务书，另附双臂派发提示词。
-不删除任何既有文件；仅创建 <?????>\ab-cycle2 下的新内容。
+不删除任何既有文件；仅创建 <实验根目录>\ab-cycle2 下的新内容。
 """
 import hashlib
 import os
@@ -9,9 +9,9 @@ import shutil
 import json
 from pathlib import Path
 
-ROOT = Path(r"<?????>\ab-cycle2")
-REPO = Path(r"E:\Skill管理\自制skill\gpt-series-reasoning-style")
-OLDCOPY = Path(r"C:\Users\<???>\.agents\skills\gpt-series-reasoning-style")
+ROOT = Path(r"<实验根目录>\ab-cycle2")
+REPO = Path(r"<skill安装目录>")
+OLDCOPY = Path(r"<用户目录>\.agents\skills\gpt-series-reasoning-style")
 SNAP = ROOT / "skill-snapshot"
 
 # ---------------------------------------------------------------- 快照
@@ -291,7 +291,7 @@ SPAWN_B = """你是执行者（子智能体）。
 3. 写 `response.md`：你做了什么、怎么验证的、还有什么不确定
 
 ## 硬性禁止
-- **不得读取任何 skill 目录或 skill 文件**（包括 `E:\\Skill管理\\...`、`~/.agents\\skills`、`.claude/skills` 等一切路径）
+- **不得读取任何 skill 目录或 skill 文件**（包括 `<skill安装目录> 等一切路径）
 - 不得读同床 A-skill 目录
 - 不得虚报：任何声称必须能在磁盘上指出对应文件/行
 

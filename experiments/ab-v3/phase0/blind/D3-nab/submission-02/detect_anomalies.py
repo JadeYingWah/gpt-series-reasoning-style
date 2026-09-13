@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 D3 时序异常检测：NAB machine_temperature_system_failure
 =====================================================
-输入：E:\\Harness\\ab-v3\\datasets\\nab_machine_temp.csv（22695 行，5min 采样）
+输入：<实验根目录>\\ab-v3\\datasets\\nab_machine_temp.csv（22695 行，5min 采样）
 输出：anomaly_intervals.json + anomaly_overview.svg + 控制台报告
 
 方法（三流，仅低位侧做 regime 检测，理由见 report.md）：

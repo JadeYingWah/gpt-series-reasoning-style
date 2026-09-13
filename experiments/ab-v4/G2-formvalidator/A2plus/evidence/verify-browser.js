@@ -1,4 +1,4 @@
-'use strict';
+﻿'use strict';
 /*
  * G2/A2+ 路径1：浏览器实操验证（自包含 CDP 驱动，headless Chromium）
  * 以真实输入事件（Input.insertText / 鼠标按下-抬起点击）驱动交付页 index.html，

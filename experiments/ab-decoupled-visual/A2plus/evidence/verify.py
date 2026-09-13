@@ -1,4 +1,4 @@
-"""视觉类验证脚本 - A2+配置"""
+﻿"""视觉类验证脚本 - A2+配置"""
 import re
 import xml.etree.ElementTree as ET
 

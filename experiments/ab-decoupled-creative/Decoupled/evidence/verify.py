@@ -1,4 +1,4 @@
-"""创意文案验证 - 解耦版"""
+﻿"""创意文案验证 - 解耦版"""
 import re, sys
 sys.path.insert(0, r"<实验根目录>\ab-decoupled-creative\A2plus\evidence")
 from verify import check_completeness, check_word_count, check_three_ads, check_slogan_length, check_pain_points, load

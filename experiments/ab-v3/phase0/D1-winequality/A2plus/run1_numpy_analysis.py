@@ -1,4 +1,4 @@
-"""
+﻿"""
 Run 1 — 主实现（numpy 路径）
 方法：numpy.genfromtxt 读入 → numpy.corrcoef 计算 Pearson → numpy 统计分组均值
 输出：evidence/run1_results.json + 控制台摘要

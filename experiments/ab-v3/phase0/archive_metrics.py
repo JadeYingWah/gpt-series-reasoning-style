@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """archive_metrics.py — Phase 0 后处理第 1-2 步：jsonl 归档哈希 + token 实测
 可重复运行（idempotent）：产物未完成的臂跳过归档，标 pending。
 输出：<实验根目录>/ab-v3/phase0/archive/*.jsonl + metrics.json + 控制台表

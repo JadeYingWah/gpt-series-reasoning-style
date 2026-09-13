@@ -1,6 +1,6 @@
-import json, pathlib, io, sys
+﻿import json, pathlib, io, sys
 
-BASE = pathlib.Path(r"C:\Users\<用户名>\.workbuddy\projects")
+BASE = pathlib.Path(r"<用户目录>\.workbuddy\projects")
 OUT = pathlib.Path(r"<实验根目录>\ab-cycle3-suppression\transcripts")
 OUT.mkdir(parents=True, exist_ok=True)
 

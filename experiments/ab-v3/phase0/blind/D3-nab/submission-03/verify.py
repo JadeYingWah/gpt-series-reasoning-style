@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 独立复算验证（不复用 detect_anomalies.py 的任何函数）：
   V1 区间极值核验：直接重读 CSV，核对报告中每段的峰值/谷值与值域

@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """A2+ 轻量+ 双路径交叉验证 · 方法A（数据类：Python 独立计算）
 渠道 CTR 分析：完整性检查 + CTR + Wilson 95% 下界（保守口径）+ 排序。
 运行: python channel_analysis.py

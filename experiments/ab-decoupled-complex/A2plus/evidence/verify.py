@@ -1,4 +1,4 @@
-"""复合类验证脚本 - A2+配置"""
+﻿"""复合类验证脚本 - A2+配置"""
 import re
 
 HTML = r"<实验根目录>\ab-decoupled-complex\A2plus\index.html"

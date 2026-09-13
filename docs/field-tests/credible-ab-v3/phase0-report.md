@@ -1,4 +1,4 @@
-# Phase 0 可信 A/B 实验报告（gpt-series-reasoning-style v1.2.1）
+﻿# Phase 0 可信 A/B 实验报告（gpt-series-reasoning-style v1.2.1）
 
 - 日期：2026-09-13 · 执行/核验/汇总：team lead（总指挥终审）
 - 协议：`docs/proposals/2026-09-13-credible-ab-v3-protocol.md`（batch 93/94 预注册）
@@ -90,7 +90,7 @@
 ## 六、执行真实性审计（两层，全部通过）
 
 1. **层 1（工具调用路径）**：零违规。A 臂全部读取 skill 快照（合规）；B′ 臂全部未读（符合定义）。
-2. **层 2（jsonl 全文敏感词 + 脚本内容 + 跨任务数据引用 + 写入白名单）**：无任何臂接触 truth/frozen、PROMPTS 目录、E:\Skill管理、D3 官方标注；跨任务数据零引用；写入全部在各自交付目录。
+2. **层 2（jsonl 全文敏感词 + 脚本内容 + 跨任务数据引用 + 写入白名单）**：无任何臂接触 truth/frozen、PROMPTS 目录、<skill安装目录> 官方标注；跨任务数据零引用；写入全部在各自交付目录。
 3. **D3-A2 "未读官方标注"声明核实为真**（28 条 Bash、全部脚本内容、2 次 WebSearch 只查方法）。其 0.75/1.00 为干净成绩。
 4. 虚惊存档：D1-A2 jsonl 命中 "truth/frozen" 字样 = 任务书禁止条款文本 + reasoning 复述边界规则，非读取行为。
 5. D2-A2 主动披露变异测试临时文件短暂写入 datasets：三个数据集 SHA256 复核全部未变，无污染；主动披露为诚实性正向证据。

@@ -1,4 +1,4 @@
-import csv
+﻿import csv
 from collections import defaultdict
 
 with open(r'<实验根目录>\ab-data\sales_data.csv', encoding='utf-8') as f:

@@ -1,4 +1,4 @@
-"""Modeling verification - Decoupled"""
+﻿"""Modeling verification - Decoupled"""
 import re, math
 
 OBJ = r"<实验根目录>\ab-decoupled-modeling\Decoupled\energy_core.obj"

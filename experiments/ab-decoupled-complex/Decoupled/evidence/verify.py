@@ -1,4 +1,4 @@
-"""Complex verification - Decoupled"""
+﻿"""Complex verification - Decoupled"""
 import re
 
 with open(r"<实验根目录>\ab-decoupled-complex\Decoupled\index.html", encoding="utf-8") as f:

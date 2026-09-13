@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """D2 咖啡馆销售数据清洗（预注册规则 R1-R4），纯标准库实现"""
 import csv
 from collections import defaultdict

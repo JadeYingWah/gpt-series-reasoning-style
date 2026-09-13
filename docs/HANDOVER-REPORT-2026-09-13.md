@@ -1,9 +1,9 @@
-# gpt-series-reasoning-style 项目交接报告
+﻿# gpt-series-reasoning-style 项目交接报告
 
 > 交接时间：2026-09-13
 > 当前版本：1.2.1（batch 92）
 > 仓库：https://github.com/JadeYingWah/gpt-series-reasoning-style
-> 本地路径：E:\Skill管理\自制skill\gpt-series-reasoning-style
+> 本地路径：<skill安装目录>
 
 ---
 
@@ -245,7 +245,7 @@
 | docs/field-tests/four-baseline-complete-analysis/report.md | 四基线完整分析 |
 | docs/field-tests/judging-rubric.md | 判分细则 |
 
-### 9.3 实验产物（<?????>\）
+### 9.3 实验产物（<实验根目录>\）
 | 目录 | 说明 |
 |---|---|
 | ab-modular-selection/ | 代码类实验产物 |
