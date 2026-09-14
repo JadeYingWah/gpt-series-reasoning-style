@@ -440,7 +440,21 @@ flowchart TD
 
 ## Install / 安装
 
-本 skill 是普通 Agent Skills 包（顶层布局）。**保持文件夹名 `gpt-series-reasoning-style`**，整包复制或软链到宿主的 skill 目录即可。
+### 最简单的方式（推荐 AI 帮装时用）
+
+**把整个仓库文件夹复制到宿主的 skill 目录，保持文件夹名 `gpt-series-reasoning-style` 不变。** 不需要运行脚本，不需要 clone。
+
+| 你用什么 | 复制到哪里 |
+|---|---|
+| **豆包（Doubao）** | `~/.agents/skills/gpt-series-reasoning-style/`（即 `C:\\Users\\<用户名>\\.agents\\skills\\`） |
+| Claude Code | `~/.claude/skills/gpt-series-reasoning-style/` |
+| Codex CLI | `~/.codex/skills/gpt-series-reasoning-style/` |
+| Cursor / Windsurf / Trae / Roo | 项目目录下的 `.cursor/rules/` / `.windsurf/rules/` / `.trae/rules/` / `.roo/rules/` |
+| 其他 Agent Skills 宿主 | `~/.agents/skills/gpt-series-reasoning-style/` |
+
+复制后删除目标文件夹里的 `.git/`、`.github/`、`site/`（仓库专属面，非 skill 运行时需要）。
+
+### 用安装脚本（可选）
 
 ```bash
 # macOS / Linux
@@ -448,56 +462,58 @@ chmod +x scripts/install.sh
 ./scripts/install.sh agents          # 平台参数见下表；FORCE=1 覆盖安装
 
 # Windows (PowerShell)
-powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Platform agents
+powershell -ExecutionPolicy Bypass -File .\\scripts\\install.ps1 -Platform agents
 ```
 
-安装器会剥离仓库专属面（`.git*`、`.github/`、`site/`、`__pycache__/`），装出的副本只含宿主需要的文件。
+安装器自动剥离仓库专属面（`.git*`、`.github/`、`site/`、`__pycache__/`）。
 
-**Claude Code 插件市场（可选，免 clone）**：本仓库同时是一个单体插件 marketplace（清单在 `.claude-plugin/`，根目录 `SKILL.md` 直接作为单 skill 加载）：
+| 平台 | 脚本参数 | 目标目录 |
+| --- | --- | --- |
+| **豆包 / 通用 Agent Skills** | `agents`（默认） | `~/.agents/skills/` |
+| Codex CLI / Codex desktop | `codex` | `~/.codex/skills/` |
+| Claude Code | `claude` | `~/.claude/skills/` |
+| Cursor | `cursor` | `.cursor/rules/` |
+| Windsurf | `windsurf` | `.windsurf/rules/` |
+| Cline | `cline` | `.clinerules/` |
+| Gemini CLI | `gemini` | `~/.gemini/skills/` |
+| Kiro | `kiro` | `~/.kiro/skills/` |
+| Trae | `trae` | `.trae/rules/` |
+| Goose | `goose` | `~/.config/goose/skills/` |
+| OpenCode | `opencode` | `~/.config/opencode/skills/` |
+| Roo Code | `roo` | `.roo/rules/` |
+| Antigravity | `antigravity` | `~/.agents/skills/`（同 agents） |
+
+### Claude Code 插件市场（免 clone，可选）
+
+本仓库同时是单体插件 marketplace（清单在 `.claude-plugin/`）：
 
 ```text
 /plugin marketplace add JadeYingWah/gpt-series-reasoning-style
 /plugin install gpt-series-reasoning-style@gpt-series-reasoning-style
 ```
 
-钉大版本：`/plugin marketplace add JadeYingWah/gpt-series-reasoning-style@v1.2.0`（发布态快照，仅供复现历史版本参考；**日常使用建议 clone 仓库 main**，含全部 *Unreleased* 批次）。提交到官方/社区目录前，可用 `claude plugin validate` 本地校验清单。
+### 验证安装
 
-| 平台 | Skill 目录 | 脚本参数 |
-| --- | --- | --- |
-| Codex CLI / Codex desktop | `~/.codex/skills/` | `codex` |
-| Claude Code | `~/.claude/skills/` | `claude` |
-| VS Code Copilot | `~/.claude/skills/` 或 `.github/skills/` | （手动复制） |
-| Cursor | `.cursor/rules/` | `cursor` |
-| Windsurf | `.windsurf/rules/` | `windsurf` |
-| Cline | `.clinerules/` | `cline` |
-| Gemini CLI | `~/.gemini/skills/` | `gemini` |
-| Kiro | `~/.kiro/skills/` | `kiro` |
-| Trae | `.trae/rules/` | `trae` |
-| Goose | `~/.config/goose/skills/` | `goose` |
-| OpenCode | `~/.config/opencode/skills/` | `opencode` |
-| Roo Code | `.roo/rules/` | `roo` |
-| Antigravity | `~/.agents/skills/` | `antigravity`（与 `agents` 同路径别名） |
-| 通用 Agent Skills | `~/.agents/skills/` | `agents`（默认） |
-
-> 徽章口径：脚本接受 **13 个平台参数**（`antigravity` 与 `agents` 同指 `~/.agents/skills/`）；安装表含手动路径共 14 行。
->
-> **只要核心收益？/ Lite install**：可以不装整包——把 [Minimal Usage](#minimal-usage--最小用法) 的三条写进宿主配置即可（三条本体实测 **147 tokens** / o200k_base；完整治理随时整包叠加，三条中的「全新产物默认中档」边界不要省）。
-
-**验证安装**——按名调用：
+按名调用，skill 应加载 `SKILL.md`：
 
 ```text
 使用 $gpt-series-reasoning-style 按本推理风格执行本次任务。
 ```
 
-skill 应加载 `SKILL.md`；references 仅在当前阶段需要时按需读取。
+references 仅在当前阶段需要时按需读取。
 
-**平台附加件（可选）：**
+### Lite install（只要核心收益）
 
-- `agents/openai.yaml` —— OpenAI/Codex 兼容 skill 面的 UI 元数据。其 `default_prompt` 是执行层的一部分（把门禁与澄清模式选择带进首次调用）；使用 `default_prompt` 的平台**不要**把它换成泛泛的"use the skill"。
-- `AGENTS.md` —— Codex / Gemini CLI / Copilot CLI 等识别 `AGENTS.md` 的运行时的入口别名：读 `SKILL.md` + `VERSION` → 按规则执行 → 被要求证明加载时输出版本号、硬规则第一条原文、协作架构与已读文件。冲突时以 `SKILL.md` 与 `references/` 为权威。
-- `hooks/session-reminder.sh`（**opt-in，默认不装**）—— Claude Code `SessionStart` hook，会话开始注入恰好一行提醒，对冲"模型想不起调用"。matcher 建议 `startup|clear|compact`（compact 后重注入）。不装不影响任何功能。
+不装整包——把 [Minimal Usage](#minimal-usage--最小用法) 的三条写进宿主配置即可（三条本体实测 **147 tokens** / o200k_base）。完整治理随时整包叠加。
+
+### 平台附加件（可选）
+
+- `agents/openai.yaml` —— OpenAI/Codex 兼容 skill 面的 UI 元数据。其 `default_prompt` 是执行层的一部分；使用 `default_prompt` 的平台**不要**把它换成泛泛的"use the skill"。
+- `AGENTS.md` —— Codex / Gemini CLI / Copilot CLI 等识别 `AGENTS.md` 的运行时的入口别名。冲突时以 `SKILL.md` 与 `references/` 为权威。
+- `hooks/session-reminder.sh`（**opt-in，默认不装**）—— Claude Code `SessionStart` hook，会话开始注入一行提醒，对冲"模型想不起调用"。不装不影响任何功能。
 
 ---
+
 
 ## Minimal Usage / 最小用法
 
