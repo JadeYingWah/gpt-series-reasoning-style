@@ -58,7 +58,7 @@ Copy-Item -Path (Join-Path $source '*') -Destination $dest -Recurse -Force
 # Keep the install identical to the bash path: with -Force the '*' glob DOES
 # include hidden items, so .git history / CI config would otherwise be shipped;
 # site/ is the static docs page, not part of the runtime skill.
-foreach ($dot in @('.git', '.github', '.gitignore', '.gitattributes', 'site')) {
+foreach ($dot in @('.git', '.github', '.gitignore', '.gitattributes', 'site', 'experiments')) {
   $dotPath = Join-Path $dest $dot
   if (Test-Path -LiteralPath $dotPath) {
     Remove-Item -LiteralPath $dotPath -Recurse -Force

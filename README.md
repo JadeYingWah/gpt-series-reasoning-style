@@ -518,6 +518,12 @@ powershell -ExecutionPolicy Bypass -File .\\scripts\\install.ps1 -Platform agent
 
 references 仅在当前阶段需要时按需读取。
 
+### 安装后注意事项
+
+- **装出的副本很小**：安装器自动排除 `experiments/`（60MB 实验归档，非运行时需要）、`.git*`、`.github/`、`site/`、`__pycache__/`，装出的副本通常只有几 MB。
+- **"装好了"≠"生效了"**：部分宿主不热扫描新装目录，`load_skill` 可能加载失败。此时需重启会话，或手动把 `SKILL.md` 读进上下文遵循。文件夹名必须保持 `gpt-series-reasoning-style`，别名会失效。
+- **装完跑一次自检**：`python scripts/selfcheck.py` 确认无文件缺失（预期 23/23 通过）。
+
 ### Lite install（只要核心收益）
 
 不装整包——把 [Minimal Usage](#minimal-usage--最小用法) 的三条写进宿主配置即可（三条本体实测 **147 tokens** / o200k_base）。完整治理随时整包叠加。

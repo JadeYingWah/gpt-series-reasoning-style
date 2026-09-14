@@ -46,6 +46,6 @@ cp -R "$SOURCE" "$DEST"
 # Keep the install identical to the PowerShell path (its '*' glob skips
 # dotfiles): the host needs the skill, not git history, CI config, the
 # static site, or repo-level line-ending config.
-rm -rf "$DEST/.git" "$DEST/.github" "$DEST/.gitignore" "$DEST/.gitattributes" "$DEST/site"
+rm -rf "$DEST/.git" "$DEST/.github" "$DEST/.gitignore" "$DEST/.gitattributes" "$DEST/site" "$DEST/experiments"
 find "$DEST" -depth -type d -name "__pycache__" -exec rm -rf {} +
 echo "Installed $SKILL_NAME to $DEST"
