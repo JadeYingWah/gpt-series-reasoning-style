@@ -114,6 +114,22 @@ AI  ：做完了，测试都过了。        AI  ：完成。附磁盘自检清�
 - **`reasoning-style` 指"推理的流程纪律风格"，不是推理能力上限**：它约束 AI 怎么干活（先理解、先盘点、先门禁、给证据），不会让模型变得更聪明。
 - **曾用名 / Formerly**：`gpt-5-6-sol-multi-agent-style`（"GPT-5.6 Sol"，内部期），旧检索别名 `gpt-5-6-sol-reasoning-style`——供搜索引擎与联网 AI 把旧名归并到本仓库。
 
+### 关键数字速览 / Key Numbers at a Glance
+
+> 以下为当前版本（v1.2.5）的权威数字，所有跨文件一致性由 `scripts/selfcheck.py`（SB1–SB23）自动校验。
+
+| 维度 | 数字 | 说明 |
+|---|---|---|
+| 当前版本 | **v1.2.5** | `VERSION` 文件唯一权威 |
+| SKILL.md | **178 行 / 约 9.8k tokens** | 常驻面，o200k_base 分词器实测 |
+| References | **15 份** | 按需取节加载，非整读 |
+| 内置角色身份 | **21 个** | `identities/` 目录（另含 README + _template，共 23 个 .md 文件） |
+| 行为自测 | **77 条** | `references/self-test.md`，v1.1.0 扩容后冻结 |
+| 静态自检 | **23 项** | SB1–SB23，CI 每次 push 自动跑 |
+| 实现前门禁 | **14 字段** | v1.2.2 A2+ 第五增强点升级（旧版 10 字段已淘汰） |
+| 指挥官任务包 | **23 字段** | 跨模型协作协议 |
+| CI 流水线 | **14 步** | Python 3.9，严格退出码 |
+
 ### 核心机制 / Core Mechanisms
 
 | # | 机制 | 一句话 |
