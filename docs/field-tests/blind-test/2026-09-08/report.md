@@ -1,5 +1,7 @@
 # Blind Test · 2026-09-08 / 第三方盲测 · 2026-09-08
 
+> **历史文档 / Historical**：撰写于 v1.0.x 时期，当时 self-test 为 67 条（当前已扩容至 77 条并冻结）。文中数字反映撰写时状态，不代表当前版本。
+
 方法依据：`docs/field-tests/third-party-blind-test.md`（第三方盲测方法）。
 
 ## 被测方与局限
