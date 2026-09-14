@@ -20,7 +20,22 @@
 - **全项目版本号对齐**：VERSION、SKILL.md（frontmatter + 底部 Version 节）、README（徽章/安装钉版/目录树/收敛原则/Versioning 节）、references/self-test.md（5 处加载证明示例）、site/index.html（徽章）全部从 1.2.1 同步至 1.2.2。
 - **验证**：selfcheck 22/22 通过（指纹 `fe05327219dd`）。
 
-## Unreleased / 未发布增量（对外仍为 1.2.2）
+## 1.2.4 / 2026-09-14
+
+**发布版本：探索层增强（R0-R4 条款化）——同执行者重跑决定性正向 +20.5**
+
+- **R0 方案探索**：实现前列出至少 2 个本质不同的实现路径，分析各路径最可能出 bug 的位置后选定。
+- **R1 反例方法菜单**：按「有否参考实现」选择——有参考→差分+变异；无参考→蜕变测试(MT)+属性测试(PBT)；输出有结构约束→不变量检查；通用叠加对抗输入。依据：静默数据改写 4 例中 3 例自测全绿，只有差分/fuzz 能抓。
+- **R2 自由探索配额**：最低要求完成后以约 10-15% 验证预算自选计划外方法（随机 fuzz、差分、异常序列攻击等），无发现也须说明探索了什么。
+- **R3 I/O 强制防御**：输入保真度/往返一致性断言（防恒真）+ CLI 编码干净环境实测（剥离 PYTHONUTF8）。
+- **R4 反例过程留痕**：变异体设计→首轮结果（含存活项）→存活项处置（补用例/修实现/判定已声明）全过程记录。
+- **实验依据**：T3 md2html 同执行者三臂重跑 **60.0 > 39.5 > 35.5**（+20.5 决定性正向），v1.2.4 臂 0 真实 bug、五种反例方法全落地；T1 CSV 扩样 60.0 全系列最高分；原则引导反例执行率随机（首轮 100%/重跑 0%）实锤，条款驱动确定为 100%。
+- **全项目版本号对齐**：VERSION、SKILL.md、README、self-test、site 全部从 1.2.2 同步至 1.2.4。
+- **验证**：selfcheck 23/23 通过。
+
+## Unreleased / 未发布增量（对外为 1.2.5）
+
+- **v1.2.5 小修 · R3 消费端契约强化 + 断言反向自查 + HTML 转义必测（2026-09-14 第九十四批）**：①**R3 升级为三条强制防御**——原「CLI 编码实测」升级为「干净环境实测 + 消费端 UTF-8 契约断言 + 字节级 hexdump 证据」，仅"不崩溃"不构成通过（依据：T2 v1.2.4 垫底 56.0，stdout mojibake 被"不崩+存储往返"恰好绕过）；新增**断言有效性反向自查**——验证脚本写完后必须注入至少一个已知错误确认断言会变红，注入后不变红按恒真断言处理（依据：豆包 C 13 缺陷中"断言空洞率最高"，方法清单华丽但断言对两种行为都为真）。②**HTML/XML 生成类任务转义边界必测**——必须测 `<script>`/事件处理器注入、`&`/`<`/`>` 实体转义、属性值内引号注入三类边界，未测按 UNVERIFIED 处理（依据：豆包 C 产物有 HTML 注入，自测全绿未发现）。③SKILL.md 176→178 行，全项目版本号对齐 1.2.5。验证：selfcheck **23/23**（指纹 `5d705df866ad`）。
 
 - **A/B 验证实验归档 · 作品集网站双臂对照（2026-09-13 第七十八批）**：完成 batch 77 改进后的首次 A/B 双臂验证实验，任务为创建个人作品集网站（4页面，HTML/CSS/JS）。结果：A臂（用skill）加权总分 **8.59/10**，B臂（不用skill）**3.59/10**，提升幅度 **139%**。分维度：产物质量 8.75 vs 6.5、流程合规性 8.5 vs 0.8、用户思维 8.25 vs 3.5、边界覆盖 8.33 vs 2.0、诚实标记 9.0 vs 0。成本：A臂约90K tokens/25min，B臂约33K tokens/6min，token倍率2.7x。关键发现：skill核心价值在流程约束减少遗漏（无障碍/SEO/性能/错误处理/诚实标记），每提升1分多耗约22K tokens，交付类任务划算、原型类不划算。报告归档至 [docs/field-tests/ab-batch77-portfolio/report.md](docs/field-tests/ab-batch77-portfolio/report.md)。局限性：n=1、同AI评估有偏见、浏览器实操测试UNVERIFIED。验证：selfcheck **22/22**。
 - A/B validation experiment archived — portfolio website dual-arm comparison (batch 78): first A/B dual-arm validation after batch 77 improvements. A-arm (with skill) weighted score **8.59/10**, B-arm (without skill) **3.59/10**, improvement **139%**. Cost ratio 2.7x tokens. Report at [docs/field-tests/ab-batch77-portfolio/report.md](docs/field-tests/ab-batch77-portfolio/report.md). Verification: selfcheck **22/22**.
