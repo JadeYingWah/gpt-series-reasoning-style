@@ -106,8 +106,8 @@ AI  ：做完了，测试都过了。        AI  ：完成。附磁盘自检清�
 
 ### 定位与名称 / Positioning & Name
 
-这是一层可以装进任何 Agent 宿主的行为纪律。它是一个普通 Agent Skills 包：常驻面只有 `SKILL.md` + `VERSION`（实测约 9.8k tokens，o200k_base），
-15 份 references 按需取节加载，`AGENTS.md` 为 Codex / Gemini CLI / Copilot CLI 等运行时提供跨运行时入口别名。
+这是一层可以装进任何 Agent 宿主的行为纪律。它是一个普通 Agent Skills 包：常驻面只有 `SKILL.md` + `VERSION`（实测约 8.4k tokens，o200k_base），
+16 份 references 按需取节加载，`AGENTS.md` 为 Codex / Gemini CLI / Copilot CLI 等运行时提供跨运行时入口别名。
 
 - **名字记录来源，不划能力边界**：规则纪律从一系列 GPT 系列大模型的真实对话记录中打磨提炼，公开发布线为 1.0.0 → 1.1.0 → **1.2.2**（更早的内部迭代已归档于 [`INTERNAL-HISTORY.md`](INTERNAL-HISTORY.md)）。
 - **不依赖、也不限于 GPT 系列**：任何宿主模型（Claude / Gemini / DeepSeek / Qwen / GLM …）均可加载使用。
@@ -122,7 +122,7 @@ AI  ：做完了，测试都过了。        AI  ：完成。附磁盘自检清�
 |---|---|---|
 | 当前版本 | **v1.2.5** | `VERSION` 文件唯一权威 |
 | SKILL.md | **178 行 / 约 9.8k tokens** | 常驻面，o200k_base 分词器实测 |
-| References | **15 份** | 按需取节加载，非整读 |
+| References | **16 份** | 按需取节加载，非整读 |
 | 内置角色身份 | **21 个** | `identities/` 目录（另含 README + _template，共 23 个 .md 文件） |
 | 行为自测 | **77 条** | `references/self-test.md`，v1.1.0 扩容后冻结 |
 | 静态自检 | **23 项** | SB1–SB23，CI 每次 push 自动跑 |
@@ -409,7 +409,7 @@ flowchart TD
 
 | 项 | Tokens（o200k） | 何时发生 |
 | --- | --- | --- |
-| 常驻面：`SKILL.md` + `VERSION` | **9,833**（SKILL.md 9,828 + VERSION 5；2026-09-14 重测） | 装上后的每次会话 |
+| 常驻面：`SKILL.md` + `VERSION` | **8,420**（SKILL.md 8,415 + VERSION 5；2026-09-15 去重简化后重测） | 装上后的每次会话 |
 | 按需 references | 单份 280–17,987；workflow 按 Section Map **取节加载、勿整读**；一个中等任务全周期常驻 + 按需通常累计约 1 万–4 万 tokens（**摊在整个任务，不是每条消息**，取决于实际加载面） | 对应阶段首次需要时 |
 | Lite 档（不装整包） | 三条本体 147（整卡 518） | 常驻 |
 
@@ -420,7 +420,7 @@ flowchart TD
 
 | 参照物 | 量级 | 性质 |
 | --- | --- | --- |
-| 常驻面 9,833 tok | **128k 上下文窗口的约 7.7%**（200k 约 4.9%）；SKILL.md 含约 9,000 汉字 / 15.6k 字符 ≈ 10 页 A4 中文 | 精确算术 |
+| 常驻面 8,420 tok | **128k 上下文窗口的约 6.4%**（200k 约 4.2%）；SKILL.md 含约 8,000 汉字 / 13.4k 字符 ≈ 8.5 页 A4 中文 | 精确算术 |
 | 20 轮的任务 | 摊销 ≈ **492 tok/轮** | 精确算术 |
 | 全周期（常驻 + 按需）约 1 万–4 万 tok | 上限仍落在 **一次返工来回的常见量级**（澄清 + 重读上下文 + 重做，常见 2 万–10 万 tok）之内 | 区间为实测组合推算，非单任务实测 |
 
@@ -562,7 +562,7 @@ gpt-series-reasoning-style/
 │   └── openai.yaml          # OpenAI/Codex 兼容面的可选 UI 元数据（display_name / default_prompt）
 ├── identities/              # 21 个内置角色身份（双语）+ _template.md
 ├── custom-identities/       # 用户自定义身份（中文名：其他身份）
-├── references/              # 15 份按需规则文档
+├── references/              # 16 份按需规则文档
 │   ├── master-process-reference.md       # 主过程参照系（设计原点，315 行，所有修改应对照此文件）
 │   ├── series-reasoning-workflow.md      # 完整流程与审计模板（中文权威版，873 行，Section Map 分节）
 │   ├── series-reasoning-workflow-en.md   # 上者的英文镜像（795 行，中文宿主勿读）
