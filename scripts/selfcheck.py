@@ -267,6 +267,7 @@ def run_checks() -> list:
     c = new(9, "gate-field 14-field surface sync")
     oai = read_text(REPO_ROOT / "agents" / "openai.yaml")
     wf_cn = read_text(REPO_ROOT / "references" / "series-reasoning-workflow.md")
+    preflight = read_text(REPO_ROOT / "checklists" / "pre-flight.md")
     # Authoritative 14 gate fields (mirrors artifact-check.py GATE_FIELDS)
     gate_fields_cn = [
         "我理解的目标", "任务类型", "风险分档", "形态选择", "已盘点可用资源",
@@ -276,8 +277,8 @@ def run_checks() -> list:
     missing_tokens = []
     # Check all 14 CN fields exist in SKILL.md, CN workflow, README
     for tk in gate_fields_cn:
-        if tk not in skill_text:
-            missing_tokens.append("SKILL.md:" + tk)
+        if tk not in preflight:
+            missing_tokens.append("pre-flight:" + tk)
         if tk not in wf_cn:
             missing_tokens.append("workflow-cn:" + tk)
         if tk not in readme:
@@ -289,7 +290,7 @@ def run_checks() -> list:
     if missing_tokens:
         c.fail("missing gate field(s) across surfaces: " + ", ".join(missing_tokens))
     else:
-        c.pass_("14 gate fields synced across SKILL.md / CN workflow / openai.yaml / README")
+        c.pass_("14 gate fields synced across pre-flight / CN workflow / openai.yaml / README")
 
     # SB10 install platform parameter set
     c = new(10, "install platform parameter set")
