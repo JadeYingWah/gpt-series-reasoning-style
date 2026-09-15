@@ -219,8 +219,8 @@ Output:
 
 ```text
 【角色身份确认】
-- 内置身份及职责：先读取 identities/README.md，给每个候选身份附 1 行职责说明，再让用户选择
-- 可选内置身份：先读取 identities/README.md（权威角色目录），逐条呈现全部内置身份并各附一行职责，再让用户选择或确认——不要在此硬编码身份清单（当前 21 个，硬编码必然漂移）。
+- 候选身份及职责：给每个候选身份附 1 行职责说明（角色=一行 职责+交付物，无内置目录），再让用户选择
+- 角色以一行职责说明呈现，不硬编码角色清单；用户提供的自定义角色描述优先。
 - 用户指定身份：...
 - 其他身份文件路径：...
 - 是否已读取身份文件：是 / 否
@@ -233,25 +233,25 @@ The template above is a field checklist, not literal formatting. Render the requ
 
 Rules:
 
-- Built-in identities are in `identities/`.
-- Custom identities are in `custom-identities/` (Chinese: 其他身份).
+- Roles are plain one-line labels (responsibility + deliverable); there is no built-in catalog.
+- A user-provided role definition always wins over an invented one.
 - If the user has no preference, default to `commander`.
 - Do not claim a role without reading the identity file.
 - Output role identity confirmation and stop. Wait for explicit user confirmation of the identity, even when the default is `commander`; do not proceed to the next gate by yourself.
-- Do not present role names only. Read `identities/README.md` or `references/commander-roles.md` and show a one-line responsibility for each candidate before asking the user.
-- Read `references/identity-library.md` for the universal role contract, trust tiers, and confidence protocol.
-- If no built-in identity matches, check `custom-identities/`; if still absent, state the gap honestly and ask for a custom identity or permission to use the closest generic role with a caveat.
+- Do not present role names only. Show a one-line responsibility for each candidate before asking the user.
+- The role contract and trust tiers (T1/T2/T3) are defined in `references/multi-agent-closure-rules.md`.
+- If no role matches, state the gap honestly and ask for a custom role definition or permission to use the closest generic role with a caveat.
 
 规则：
 
-- 内置身份位于 `identities/`。
-- 自定义身份位于 `custom-identities/`（中文名：其他身份）。
+- 角色是纯一行标签（职责+交付物），无内置目录。
+- 用户提供的角色定义优先于自行发明。
 - 用户没有指定时，默认采用 `commander`。
 - 未读取身份文件前，不能声称已经采用该角色。
 - 输出角色身份确认后必须停止，等待用户明确确认身份；即使默认是 `commander`，也不能自行进入下一步。
-- 不能只列角色名。先读取 `identities/README.md` 或 `references/commander-roles.md`，给每个候选身份附一行职责说明，再询问用户。
-- 身份库契约、信任层级和置信度协议见 `references/identity-library.md`。
-- 没有匹配的内置身份时，先检查 `custom-identities/`；仍不存在时诚实说明缺口，询问用户提供自定义身份，或获准后用最接近的通用角色并标记近似。
+- 不能只列角色名。给每个候选身份附一行职责说明，再询问用户。
+- 角色契约、信任层级（T1/T2/T3）和置信度协议见 `references/multi-agent-closure-rules.md`。
+- 没有匹配的角色时，诚实说明缺口，询问用户提供自定义角色定义，或获准后用最接近的通用角色并标记近似。
 
 ### Mandatory Coordination Channel Confirmation / 强制协调通道确认
 
@@ -348,9 +348,9 @@ Field sample (T-SEC-01, 0815 session): the recipient reported "20 passed, 1 pend
 - Re-evaluate the whole plan when the user changes any part of it.
 - Own final acceptance with the user.
 
-When dispatching multiple independent agents, select roles from `references/commander-roles.md` and use `references/identity-library.md` as the role contract. Choose the smallest role set with clear deliverables; every role must have a DRI and required evidence.
+When dispatching multiple independent agents, define each role as a one-line responsibility + deliverable and treat that as the role contract. Choose the smallest role set with clear deliverables; every role must have a DRI and required evidence.
 
-派发多个独立 Agent 时，从 `references/commander-roles.md` 选择角色，并以 `references/identity-library.md` 作为角色契约。选择有明确交付物的最小角色集；每个角色必须有 DRI 和必需证据。
+派发多个独立 Agent 时，把每个角色定义为一行 职责+交付物，并以此作为角色契约。选择有明确交付物的最小角色集；每个角色必须有 DRI 和必需证据。
 
 Read `references/multi-agent-closure-rules.md` before dispatch. It defines identity declarations, DRI closure, return handling, file ownership, the pre-dispatch conflict ledger, consolidation (fan-in), the fix-loop cap, authorization separation, and context discipline.
 
@@ -396,7 +396,7 @@ The canonical field list is a content checklist, not literal formatting. Render 
 - The commander cannot accept another agent's summary as verified evidence.
 - If an agent returns only claims, mark the result `UNVERIFIED`.
 - Recipients should return `CONFIDENCE: High / Medium / Low` with a one-line reason, or `BLOCKED: reason, what would unblock`.
-- Dispatch tasks with a trust tier; T1/T2/T3 are defined in `references/identity-library.md`.
+- Dispatch tasks with a trust tier; T1/T2/T3 are defined in `references/multi-agent-closure-rules.md`.
 - Every task package must name the recipient identity (role + platform/window) and the reason that recipient was selected. Decoupling does not mean anonymity: the identity declaration drops model/session, and the task package/ledger keep the recipient role+platform as routing metadata; the underlying model is optional reference metadata that must never block dispatch or invalidate a ledger row. 解耦不等于匿名：声明里去掉模型/会话，任务包与台账保留"角色+平台/窗口"作为路由元数据；底层大模型是可选参考，永不阻塞、永不使台账失效。
 - Every task package must state the declaration cadence: recipients declare identity at the declaration moments (first entry, role change, handoff, possible confusion); per-response repetition is not required once the role is established. If the host already injects identity automatically, the duplicate declaration may be omitted — but only when the injected value is role + task ID.
 - If the user changes the plan, the commander stops dispatch, re-evaluates the whole plan, and only then sends the next round.
@@ -432,7 +432,7 @@ Multi-agent dispatch state must not live only in the conversation. Maintain a le
 - 指挥官不能把其他 Agent 的总结当作已验证证据。
 - 如果其他 Agent 只返回声明，将结果标记为 `UNVERIFIED`。
 - 接收方应返回 `CONFIDENCE: High / Medium / Low` 及一行理由；无法继续时返回 `BLOCKED: 原因, 解除条件`。
-- 派发任务时必须声明信任层级；T1/T2/T3 定义见 `references/identity-library.md`。
+- 派发任务时必须声明信任层级；T1/T2/T3 定义见 `references/multi-agent-closure-rules.md`。
 - 每个任务包必须写明接收方身份（角色 + 平台/窗口）以及选择该接收方的理由；底层大模型为可选参考元数据。
 - 每个任务包必须写明声明节奏：接收方在声明时点（首次进入、角色变化、交接、可能混淆）声明身份，角色已确立且无歧义后不必每条回复重复；宿主已自动注入身份时可省略重复声明，但仅当注入的是「角色 + 任务 ID」（只注入模型名/会话名不构成豁免，见 `multi-agent-closure-rules.md`）。
 - 用户改变计划时，指挥官停止派发、整体再规划，然后才发送下一轮。
@@ -452,7 +452,7 @@ Multi-agent dispatch state must not live only in the conversation. Maintain a le
 - The commander must not treat another agent's summary as verified evidence.
 - If another agent returns only claims, mark the result `UNVERIFIED`.
 - Recipients should return `CONFIDENCE: High / Medium / Low` with a one-line reason; when they cannot continue, they return `BLOCKED: reason, unblock condition`.
-- Dispatching a task must declare the trust tier; T1/T2/T3 are defined in `references/identity-library.md`.
+- Dispatching a task must declare the trust tier; T1/T2/T3 are defined in `references/multi-agent-closure-rules.md`.
 - Every task package must state the recipient identity (role + platform/window) and the reason for choosing that recipient; the underlying model is optional reference metadata.
 - Every task package must state the declaration cadence: the recipient declares identity at declaration points (first entry, role change, handover, possible confusion); per-response repetition is not required once the role is established. If the host already injects identity automatically, the duplicate declaration may be omitted — but only when the injected value is role + task ID.
 - When the user changes the plan, the commander stops dispatching, re-plans from the whole, and only then sends the next round.

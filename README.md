@@ -106,8 +106,8 @@ AI  ：做完了，测试都过了。        AI  ：完成。附磁盘自检清�
 
 ### 定位与名称 / Positioning & Name
 
-这是一层可以装进任何 Agent 宿主的行为纪律。它是一个普通 Agent Skills 包：常驻面只有 `SKILL.md` + `VERSION`（实测约 8.4k tokens，o200k_base），
-16 份 references 按需取节加载，`AGENTS.md` 为 Codex / Gemini CLI / Copilot CLI 等运行时提供跨运行时入口别名。
+这是一层可以装进任何 Agent 宿主的行为纪律。它是一个普通 Agent Skills 包：常驻面只有 `SKILL.md` + `VERSION`（实测约 7.9k tokens，o200k_base），
+11 份 references 按需取节加载，`AGENTS.md` 为 Codex / Gemini CLI / Copilot CLI 等运行时提供跨运行时入口别名。
 
 - **名字记录来源，不划能力边界**：规则纪律从一系列 GPT 系列大模型的真实对话记录中打磨提炼，公开发布线为 1.0.0 → 1.1.0 → **1.2.2**（更早的内部迭代已归档于 [`INTERNAL-HISTORY.md`](INTERNAL-HISTORY.md)）。
 - **不依赖、也不限于 GPT 系列**：任何宿主模型（Claude / Gemini / DeepSeek / Qwen / GLM …）均可加载使用。
@@ -123,7 +123,7 @@ AI  ：做完了，测试都过了。        AI  ：完成。附磁盘自检清�
 | 当前版本 | **v1.2.5** | `VERSION` 文件唯一权威 |
 | SKILL.md | **178 行 / 约 9.8k tokens** | 常驻面，o200k_base 分词器实测 |
 | References | **16 份** | 按需取节加载，非整读 |
-| 内置角色身份 | **21 个** | `identities/` 目录（另含 README + _template，共 23 个 .md 文件） |
+| 内置角色身份 | 无（已删） | 角色 = 一行「职责 + 交付物」标签；信任层级 T1/T2/T3 见 multi-agent-closure-rules |
 | 行为自测 | **77 条** | `references/self-test.md`，v1.1.0 扩容后冻结 |
 | 静态自检 | **23 项** | SB1–SB23，CI 每次 push 自动跑 |
 | 实现前门禁 | **14 字段** | v1.2.2 A2+ 第五增强点升级（旧版 10 字段已淘汰） |
@@ -170,7 +170,7 @@ AI  ：做完了，测试都过了。        AI  ：完成。附磁盘自检清�
 
 ## How It Works / 工作原理
 
-> 完整 870+ 行流程（含授权矩阵、发散-收敛协议、审计模板）见 [`references/series-reasoning-workflow.md`](references/series-reasoning-workflow.md)（中文权威版，头部有 Section Map，按节取用，**勿整读**）；英文镜像为 [`-en.md`](references/series-reasoning-workflow-en.md)（中文宿主勿读）。流程图对照 [`master-process-reference.md`](references/master-process-reference.md)（主过程参照系，设计原点）绘制。
+> 完整 870+ 行流程（含授权矩阵、发散-收敛协议、审计模板）见 [`references/series-reasoning-workflow.md`](references/series-reasoning-workflow.md)（中文权威版，头部有 Section Map，按节取用，**勿整读**）。
 
 ```mermaid
 flowchart TD
@@ -308,13 +308,13 @@ flowchart TD
 
 ### 指挥官模式（模式三）要点
 
-启用前须完成两道确认（平台工具可用 ≠ 用户确认）：①**【角色身份确认】**——AI 出示候选身份（读 `identities/README.md`）供用户指定；②**【指挥官协调通道确认】**——逐接收方判定协调通道（直接工具/子 Agent/MCP/API/用户转交），用户选择用户转交后不得擅自改用直接工具。
+启用前须完成两道确认（平台工具可用 ≠ 用户确认）：①**【角色身份确认】**——AI 逐个候选给出 1 行职责说明供用户指定；②**【指挥官协调通道确认】**——逐接收方判定协调通道（直接工具/子 Agent/MCP/API/用户转交），用户选择用户转交后不得擅自改用直接工具。
 
 核心规则：接收方按"角色 + 平台/窗口"命名（笼统的"另一个 AI"不够），底层大模型从不主动询问；角色与承载模型解耦，身份互斥不得越权；23 字段完整任务包推荐落盘为简报文件 `<项目根>/docs/plans/<task-id>-brief.md`，接收方一次 Read 读全包；治理产物以项目根为锚（身份登记 `docs/agents/`、计划 `docs/plans/`、派发台账与发现账本）；坚持最小角色集，审查类角色默认只读，验收审计员必须在真实目标环境验证真实用户路径；声明能力缺口启用扩展时必须附两条证据，无证据标 `UNVERIFIED` 回退主干。权威规则见 [`multi-agent-closure-rules.md`](references/multi-agent-closure-rules.md)（337 行，身份声明硬规则、接手协议、任务包、账本）与 [`agent-modes.md`](references/agent-modes.md)（503 行，形态判定与模板）。
 
 ### 内置身份 / Built-in Identities
 
-21 个内置角色身份（`identities/`，双语，每个角色一个文件）+ `_template.md` 自定义模板。权威目录是 [`identities/README.md`](identities/README.md)；用户自定义身份放 `custom-identities/`，采用前必须先读取。
+角色 = 一行「职责 + 交付物」标签（无内置目录，2026-09-15 起角色库已删除）；信任层级 T1/T2/T3 定义见 [`references/multi-agent-closure-rules.md`](references/multi-agent-closure-rules.md)；用户提供的角色定义优先。
 
 | 分组 | 身份 |
 | --- | --- |
@@ -409,7 +409,7 @@ flowchart TD
 
 | 项 | Tokens（o200k） | 何时发生 |
 | --- | --- | --- |
-| 常驻面：`SKILL.md` + `VERSION` | **8,420**（SKILL.md 8,415 + VERSION 5；2026-09-15 去重简化后重测） | 装上后的每次会话 |
+| 常驻面：`SKILL.md` + `VERSION` | **7,944**（SKILL.md 7,939 + VERSION 5；2026-09-15 极简版重测） | 装上后的每次会话 |
 | 按需 references | 单份 280–17,987；workflow 按 Section Map **取节加载、勿整读**；一个中等任务全周期常驻 + 按需通常累计约 1 万–4 万 tokens（**摊在整个任务，不是每条消息**，取决于实际加载面） | 对应阶段首次需要时 |
 | Lite 档（不装整包） | 三条本体 147（整卡 518） | 常驻 |
 
@@ -420,7 +420,7 @@ flowchart TD
 
 | 参照物 | 量级 | 性质 |
 | --- | --- | --- |
-| 常驻面 8,420 tok | **128k 上下文窗口的约 6.4%**（200k 约 4.2%）；SKILL.md 含约 8,000 汉字 / 13.4k 字符 ≈ 8.5 页 A4 中文 | 精确算术 |
+| 常驻面 7,944 tok | **128k 上下文窗口的约 6.1%**（200k 约 4.0%）；SKILL.md 含约 12.6k 字符 ≈ 8 页 A4 中文 | 精确算术 |
 | 20 轮的任务 | 摊销 ≈ **492 tok/轮** | 精确算术 |
 | 全周期（常驻 + 按需）约 1 万–4 万 tok | 上限仍落在 **一次返工来回的常见量级**（澄清 + 重读上下文 + 重做，常见 2 万–10 万 tok）之内 | 区间为实测组合推算，非单任务实测 |
 
@@ -554,28 +554,21 @@ references 仅在当前阶段需要时按需读取。
 
 ```text
 gpt-series-reasoning-style/
-├── SKILL.md                 # 入口：加载证明、协作架构、门禁、模块化矩阵、工作流、References 索引（≈178 行 / ≈9.8k tok）
+├── SKILL.md                 # 入口：加载证明、协作架构、门禁、模块化矩阵、工作流、References 索引（≈168 行 / ≈7.9k tok）
 ├── VERSION                  # 1.2.5 —— 加载证明只需要 SKILL.md + VERSION
 ├── AGENTS.md                # 跨运行时入口别名（Codex / Gemini CLI / Copilot）——只指路，权威仍在 SKILL.md
 ├── README.md / LICENSE / CHANGELOG.md / INTERNAL-HISTORY.md / SECURITY.md
 ├── agents/
 │   └── openai.yaml          # OpenAI/Codex 兼容面的可选 UI 元数据（display_name / default_prompt）
-├── identities/              # 21 个内置角色身份（双语）+ _template.md
-├── custom-identities/       # 用户自定义身份（中文名：其他身份）
-├── references/              # 16 份按需规则文档
-│   ├── master-process-reference.md       # 主过程参照系（设计原点，315 行，所有修改应对照此文件）
+├── references/              # 11 份按需规则文档
 │   ├── series-reasoning-workflow.md      # 完整流程与审计模板（中文权威版，873 行，Section Map 分节）
-│   ├── series-reasoning-workflow-en.md   # 上者的英文镜像（795 行，中文宿主勿读）
 │   ├── agent-modes.md                    # 协作架构、形态自选、确认模板、任务包（503 行）
 │   ├── multi-agent-closure-rules.md      # 指挥官闭环：身份、23 字段任务包、账本、信任层级（337 行）
-│   ├── identity-library.md               # 身份库契约（P0/P1/P2 判据权威表）
-│   ├── commander-roles.md                # 角色库与最小角色集
 │   ├── project-artifacts.md              # 门禁单/台账落盘约定
 │   ├── project-policy-template.md        # 项目政策模板（复制到项目内替换占位使用）
 │   ├── common-failures.md                # 高频造假对照表 + 自留失败档案 F1–F6
 │   ├── verification-reproducibility-patterns.md  # 验证可复现性模式与反例方法目录
 │   ├── series-reasoning-lessons.md       # 反模式与教训
-│   ├── series-reasoning-examples.md      # 行为示例
 │   ├── self-test.md                      # 77 条行为自测（冻结；非宿主任务路径）
 │   └── platform-installation.md          # 安装方式与平台路径
 ├── docs/
@@ -633,10 +626,10 @@ gpt-series-reasoning-style/
 | `README.md` / `AGENTS.md` / `site/` | 双语 |
 | `series-reasoning-workflow.md`（权威版） | 中文（双语 Section Map）；`-en.md` 为英文镜像，冲突以中文为准 |
 | `agent-modes.md` / `multi-agent-closure-rules.md`（规则层） | 双语严查（tier-A） |
-| `identity-library.md` / `commander-roles.md` / `platform-installation.md` / `project-policy-template.md` / `series-reasoning-lessons.md` | 英文为主 |
+| `platform-installation.md` / `project-policy-template.md` / `series-reasoning-lessons.md` | 英文为主 |
 | `common-failures.md` / `project-artifacts.md` | 中文为主 |
-| `series-reasoning-examples.md` / `docs/` | 中文 |
-| `identities/*.md` / `self-test.md` | 双语 |
+| `docs/` | 中文 |
+| `self-test.md` | 双语 |
 
 **英文签名术语恒不翻译**：`UNVERIFIED`、`P0/P1/P2`、light channel、pre-implementation gate、load proof——跨语言轮次保持字节级保真（Test 1 自测项）。
 
@@ -646,7 +639,7 @@ gpt-series-reasoning-style/
 
 为防"规则越写越多、检查越加越重"的失控，本仓库给自己立了预算：
 
-- **`SKILL.md` ≤ 250 行**（当前约 178 行 / 实测约 9.8k tokens 常驻，o200k_base）——入口只保留决策点，细节下沉到按需的 references；
+- **`SKILL.md` ≤ 250 行**（当前约 168 行 / 实测约 7.9k tokens 常驻，o200k_base）——入口只保留决策点，细节下沉到按需的 references；
 - **静态检查上限 23 项（SB1–SB23）**：新增第 24 项必须先证明它抓到过**真实缺陷**（可指认提交哈希）——SB18/19/20/21/22/23 均按此准入立项（SB23 守常驻面 token 声明的数量级，证据 `812c44f..f7dcf37`：Cost 表声明 3,843 而实测 9,833 的 2.5 倍漂移，SB21 只守行数未抓到）；
 - **77 条行为自测冻结**：只做"旧测失去鉴别力 → 替换"，不再扩容；
 - **收敛优先于加码**：版本对外固定 `1.2.5` 基线，post-1.2.5 增量以 CHANGELOG 的 Unreleased 批次计价，引用时注明批次。
@@ -671,8 +664,7 @@ gpt-series-reasoning-style/
 改**门禁字段、硬规则或模板**时必须同步的重述面（selfcheck 的 SB 多表面检查会抓漂移）：
 
 - **权威面**：`SKILL.md`（入口）· `references/series-reasoning-workflow.md`（流程权威）· `references/agent-modes.md` / `multi-agent-closure-rules.md`（规则层）
-- **镜像**：`references/series-reasoning-workflow-en.md`（同版本内同步；冲突以中文权威为准）
-- **重述面**：`agents/openai.yaml`（default_prompt）· `README.md` · `docs/minimal-discipline.md` · `references/series-reasoning-examples.md` · `references/series-reasoning-lessons.md` · `references/self-test.md` · `site/index.html`
+- **重述面**：`agents/openai.yaml`（default_prompt）· `README.md` · `docs/minimal-discipline.md` · `references/series-reasoning-lessons.md` · `references/self-test.md` · `site/index.html`
 - **计数类**改动会触发 SB 身份/references 计数与跨面一致性检查（SB4/SB19）；写入点换行由 SB20 把关；**散文中的派生计数**（检查项数 / `SKILL.md` 行数 / 自测条数 / references 份数）由 SB21 对齐其来源。
 
 **发布前自检**：`python scripts/selfcheck.py`（23/23）→ `uvx skilllint@1.19.2 check gpt-series-reasoning-style`（自父目录运行）→ 更新 `CHANGELOG.md` 批次 → push 后确认 CI 绿。

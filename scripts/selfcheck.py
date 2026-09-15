@@ -179,24 +179,35 @@ def run_checks() -> list:
         else:
             c.pass_("all " + str(len(cases)) + " test blocks complete")
 
-    # SB4 identity count == 21
-    c = new(4, "identity file count == 21")
-    idir = REPO_ROOT / "identities"
-    names = {p.name for p in idir.glob("*.md")}
-    names.discard("_template.md"); names.discard("README.md")
-    if len(names) != 21:
-        c.fail("found " + str(len(names)) + " identity files, expected 21")
+    # SB4 role library removed and stays removed (was: identity file count == 21;
+    # repurposed 2026-09-15 when the commander ordered the role library deleted —
+    # the guard now enforces the deletion so the library cannot silently creep
+    # back via partial restores or branch merges)
+    c = new(4, "role library removed")
+    role_leftovers = [str(p.relative_to(REPO_ROOT)) for p in (
+        REPO_ROOT / "identities",
+        REPO_ROOT / "custom-identities",
+        REPO_ROOT / "references" / "identity-library.md",
+        REPO_ROOT / "references" / "commander-roles.md",
+        REPO_ROOT / "references" / "series-reasoning-examples.md",
+        REPO_ROOT / "references" / "master-process-reference.md",
+        REPO_ROOT / "references" / "series-reasoning-workflow-en.md",
+    ) if p.exists()]
+    if role_leftovers:
+        c.fail("role library / retired assets reappeared: " + ", ".join(role_leftovers))
     else:
-        c.pass_("21 identity files present")
+        c.pass_("identities/ custom-identities/ + 5 retired references all absent")
 
-    # SB5 references count == 16
-    # (11 originals + series-reasoning-workflow-en.md mirror + project-artifacts.md + master-process-reference.md + verification-reproducibility-patterns.md + task-type-matrix.md)
-    c = new(5, "reference file count == 16")
+    # SB5 references count == 11
+    # (post role-library removal: workflow, agent-modes, multi-agent-closure-rules,
+    #  lessons, common-failures, self-test, verification-reproducibility-patterns,
+    #  task-type-matrix, project-artifacts, project-policy-template, platform-installation)
+    c = new(5, "reference file count == 11")
     refs = list((REPO_ROOT / "references").glob("*.md"))
-    if len(refs) != 16:
-        c.fail("found " + str(len(refs)) + " reference files, expected 16")
+    if len(refs) != 11:
+        c.fail("found " + str(len(refs)) + " reference files, expected 11")
     else:
-        c.pass_("16 reference .md files")
+        c.pass_("11 reference .md files")
 
     # SB6 code-fence pairing (+ escaped-fence detection, A2: a backslash-escaped
     # fence is invisible to the parser and silently drops content from tooling)
@@ -252,11 +263,10 @@ def run_checks() -> list:
     else:
         c.pass_("23-field/6-field present; no 24-field leak in live surfaces")
 
-    # SB9 gate-field surface sync (14 fields across SKILL.md, both workflows, openai.yaml, README)
+    # SB9 gate-field surface sync (14 fields across SKILL.md, CN workflow, openai.yaml, README)
     c = new(9, "gate-field 14-field surface sync")
     oai = read_text(REPO_ROOT / "agents" / "openai.yaml")
     wf_cn = read_text(REPO_ROOT / "references" / "series-reasoning-workflow.md")
-    wf_en = read_text(REPO_ROOT / "references" / "series-reasoning-workflow-en.md")
     # Authoritative 14 gate fields (mirrors artifact-check.py GATE_FIELDS)
     gate_fields_cn = [
         "我理解的目标", "任务类型", "风险分档", "形态选择", "已盘点可用资源",
@@ -272,16 +282,6 @@ def run_checks() -> list:
             missing_tokens.append("workflow-cn:" + tk)
         if tk not in readme:
             missing_tokens.append("README:" + tk)
-    # Check EN workflow has key EN gate field labels
-    gate_fields_en_key = [
-        "My understanding of the goal", "Task type", "Risk tier", "Form selection",
-        "Surveyed available resources", "Highest-impact", "Recommended plan",
-        "Alternatives", "Complete plan", "Clarification mode", "Needs your confirmation",
-        "Confirmation scope", "Validity conditions", "Completion criteria",
-    ]
-    for tk in gate_fields_en_key:
-        if tk not in wf_en:
-            missing_tokens.append("workflow-en:" + tk)
     # Check openai.yaml mentions key gate concepts
     for tk in ["task type", "validity conditions", "completion criteria", "confirmation scope"]:
         if tk.lower() not in oai.lower():
@@ -289,7 +289,7 @@ def run_checks() -> list:
     if missing_tokens:
         c.fail("missing gate field(s) across surfaces: " + ", ".join(missing_tokens))
     else:
-        c.pass_("14 gate fields synced across SKILL.md / CN workflow / EN workflow / openai.yaml / README")
+        c.pass_("14 gate fields synced across SKILL.md / CN workflow / openai.yaml / README")
 
     # SB10 install platform parameter set
     c = new(10, "install platform parameter set")
@@ -398,7 +398,6 @@ def run_checks() -> list:
     else:
         layers = [
             "references/series-reasoning-workflow.md",
-            "references/series-reasoning-examples.md",
             "references/project-policy-template.md",
             "references/agent-modes.md",
             "docs/minimal-discipline.md",
@@ -503,15 +502,15 @@ def run_checks() -> list:
             c.pass_("AGENTS.md routes to SKILL.md/VERSION; hard-rule quote intact; routed files exist")
 
     # SB18 forbidden-authorization-phrase parity (evidence: P0-4, a real 2026-09-10
-    # external-review finding — the CN authority workflow.md lagged its EN mirror and
-    # SKILL.md on the third phrase). The three phrases must appear on all three
-    # hard-rule surfaces; the check cannot judge semantics, only presence parity.
+    # external-review finding — the CN authority workflow.md lagged SKILL.md on the
+    # third phrase). The three phrases must appear on both hard-rule surfaces; the
+    # check cannot judge semantics, only presence parity. (EN mirror removed
+    # 2026-09-15 with the role library; parity is SKILL.md + CN workflow.)
     c = new(18, "forbidden-authorization-phrase parity")
     phrases = ["开始", "现在开始", "直接做"]
     surfaces = {
         "SKILL.md": skill_text,
         "references/series-reasoning-workflow.md": read_text(REPO_ROOT / "references" / "series-reasoning-workflow.md"),
-        "references/series-reasoning-workflow-en.md": read_text(REPO_ROOT / "references" / "series-reasoning-workflow-en.md"),
     }
     missing_phrases = []
     for rel, txt in surfaces.items():
@@ -525,72 +524,42 @@ def run_checks() -> list:
     if missing_phrases:
         c.fail("forbidden phrases missing on: " + ", ".join(missing_phrases))
     else:
-        c.pass_("开始/现在开始/直接做 present on SKILL.md + workflow CN/EN")
+        c.pass_("开始/现在开始/直接做 present on SKILL.md + workflow CN")
 
-    # SB19 identity-count prose consistency across surfaces (evidence: commit
-    # 9d32cbb — the qa-engineer/test-engineer merge updated SB4 and two README
-    # spots but left five prose surfaces still saying "22 个身份"; SB4 only counts
-    # FILES, so the prose drift was invisible to every check we had).
-    # Admitted under README's own rule for a 19th check: it demonstrates a real
-    # defect with an identifiable commit hash.
-    # It scans an explicit allowlist of LIVE surfaces. Deliberately excluded:
-    # CHANGELOG.md / INTERNAL-HISTORY.md / docs/reviews/ / docs/field-tests/
-    # (dated records — a past count is correct for its date) and
-    # docs/selftest-run/ (generated per run, not repo content).
-    c = new(19, "identity-count prose consistency")
-    expected_ids = 21
-    id_surfaces = [
-        "SKILL.md", "README.md", "AGENTS.md", "agents/openai.yaml",
-        "identities/README.md", "docs/minimal-discipline.md", "site/index.html",
-    ] + sorted(
+    # SB19 stale role-library prose guard (was: identity-count prose consistency;
+    # repurposed 2026-09-15 after the role library was deleted — the same drift
+    # mode it was admitted for (commit 9d32cbb: prose surfaces lag a structural
+    # change) now applies to references of the deleted assets. Any live surface
+    # still pointing at identities/, identity-library, commander-roles, the EN
+    # mirror, examples, or master-process-reference is stale prose.)
+    # Excluded as dated records: CHANGELOG.md / INTERNAL-HISTORY.md /
+    # docs/reviews/ / docs/field-tests/ / docs/selftest-run/.
+    c = new(19, "stale role-library references")
+    stale_pat = re.compile(
+        r"identities/README|custom-identities|identity-library|commander-roles"
+        r"|series-reasoning-examples|master-process-reference"
+        r"|series-reasoning-workflow-en|\b21\s+(?:built-in\s+)?(?:identities|roles)\b"
+        r"|\d+\s*个(?:内置)?(?:身份|角色)文件")
+    stale_surfaces = ["SKILL.md", "README.md", "AGENTS.md", "agents/openai.yaml",
+                      "docs/minimal-discipline.md", "site/index.html"]
+    stale_surfaces += sorted(
         p.relative_to(REPO_ROOT).as_posix()
-        for p in (REPO_ROOT / "references").glob("*.md")
-    )
-    id_cn = re.compile(r"(\d+)\s*(?:个|类)(?:内置)?(?:身份|角色|契约)")
-    id_ctx = re.compile(r"(?:当前|全部|至全部)\s*(\d+)\s*个")
-    id_ctx_guard = "内置身份"
-    id_en = re.compile(r"(\d+)\s+(?:built-in\s+)?(?:identities|roles)\b")
-    # Bold markers split the phrase ("内置身份 **22** 个文件"), so the guard is
-    # "line mentions identity AND files", and the count may sit on either side
-    # of the noun in either language.
-    id_file_cnt = re.compile(r"(\d+)\s*(?:\*\*)?\s*个\s*文件")
-    id_file_en_before = re.compile(r"(\d+)\s+(?:built-in\s+)?(?:identity|role)\s+files")
-    id_file_en_after = re.compile(r"(?:identity|role)\s+files\s*(?:\*\*)?\s*(\d+)")
-    id_file_guard = ("身份", "identity files")
-    id_bad = []
-    for rel in id_surfaces:
+        for p in (REPO_ROOT / "references").glob("*.md"))
+    stale_bad = []
+    for rel in stale_surfaces:
         p = REPO_ROOT / rel
         if not p.exists():
-            id_bad.append(rel + ": missing (surface listed for the count check)")
             continue
         for ln, line in enumerate(read_text(p).splitlines(), 1):
-            found = set()
-            for rx in (id_cn, id_en):
-                for m in rx.finditer(line):
-                    if int(m.group(1)) != expected_ids:
-                        found.add(m.group(0))
-            # The catalog size is often stated apart from the noun
-            # ("（当前 22 个，硬编码必然漂移）"). Only apply this second form on a
-            # line that also says 内置身份 -- a bare "共 N 个角色" is legitimate
-            # prose and must not trip the check.
-            if id_ctx_guard in line:
-                for m in id_ctx.finditer(line):
-                    if int(m.group(1)) != expected_ids:
-                        found.add(m.group(0))
-            # The count can also attach to the word file(s) ("内置身份 22 个文件").
-            # Only on a line that talks about identity files, so ordinary file
-            # counts elsewhere never trip the check.
-            if ("身份" in line and "文件" in line) or "identity files" in line:
-                for rx in (id_file_cnt, id_file_en_before, id_file_en_after):
-                    for m in rx.finditer(line):
-                        if int(m.group(1)) != expected_ids:
-                            found.add(m.group(0))
-            for f in sorted(found):
-                id_bad.append("{}:{}: {}".format(rel, ln, f))
-    if id_bad:
-        c.fail("identity count != {} on: {}".format(expected_ids, "; ".join(id_bad[:8])))
+            if "experiments/" in line:
+                continue
+            m = stale_pat.search(line)
+            if m:
+                stale_bad.append("{}:{}: {}".format(rel, ln, m.group(0)))
+    if stale_bad:
+        c.fail("stale role-library references on: " + "; ".join(stale_bad[:8]))
     else:
-        c.pass_("all {} live surfaces state {} identities".format(len(id_surfaces), expected_ids))
+        c.pass_("no stale role-library references on {} live surfaces".format(len(stale_surfaces)))
 
     # SB20 text-write call sites pin newline="\n" (evidence: commit bf566b9 —
     # four write sites did not, so on Windows every \n became \r\n and the
@@ -654,7 +623,6 @@ def run_checks() -> list:
             ("README.md", r"输出\s*(\d+)\s*字段确认单", "gate field count (mechanism)"),
             ("references/project-artifacts.md", r"【实现前确认】（(\d+)\s*字段快照）", "gate snapshot header"),
             ("references/project-artifacts.md", r"gate record 的\s*(\d+)\s*字段标题齐全", "artifact-check prose"),
-            ("references/series-reasoning-workflow-en.md", r"confirmation\)\s*[—-]+\s*(\d+)\s*fields:", "EN gate header"),
             ("site/index.html", r"输出\s*(\d+)\s*字段确认单", "gate field count (site)"),
             # batch 47: the site's EN line silently kept "A 10-field confirmation"
             # while the CN line, README and GATE_FIELDS all said 11 — the CN-only

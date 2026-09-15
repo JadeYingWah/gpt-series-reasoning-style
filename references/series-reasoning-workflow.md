@@ -1,7 +1,5 @@
 # GPT-Series Reasoning Workflow / GPT 系列推理工作流
 
-> **镜像 / Mirror**：`series-reasoning-workflow-en.md` 是本文件的英文镜像。本文件是中文权威版；改动门禁字段、硬规则或模板时，同版本内同步镜像（见 README Maintainer Notes）。冲突时以本文件为准。
-> **Mirror**: `series-reasoning-workflow-en.md` is the English mirror of this file. This file is the authority; sync the mirror in the same version when gate fields, hard rules, or templates change. On conflict, this file wins.
 
 ## Section Map / 分节定位（宿主按需取用，勿整读）
 
@@ -100,12 +98,12 @@ Use this protocol only after the user chooses Subagent Mode and the host support
 
 Use this protocol only after the user chooses Commander Mode. Other agents are independent recipients, not subagents.
 
-0. Before entering Commander Mode, run role identity confirmation. Show the built-in identities in `identities/` with a one-line responsibility for each candidate, ask the user which role the model should take, and read the identity file before adopting it. Stop and wait for the user to confirm the identity; do not proceed to the next step even when `commander` is the default. If the user has a custom identity, read it from `custom-identities/` (Chinese: 其他身份) or ask for its path/content. If no identity matches, state the gap honestly and do not fake a loaded identity. Use `references/identity-library.md` as the universal role contract.
+0. Before entering Commander Mode, run role identity confirmation. Present each candidate role as a one-line responsibility + deliverable description (roles are plain labels; there is no built-in catalog), ask the user which role the model should take, and state that one-line contract before adopting it. Stop and wait for the user to confirm the identity; do not proceed to the next step even when `commander` is the default. If the user provides a custom role definition, adopt that verbatim. If no role matches, state the gap honestly and do not fake a loaded identity.
 1. Output the coordination channel confirmation: dispatch method (direct tool, external session, CLI/API, or user relay), recipient, and whether the path is confirmed. Direct tools and user relay are both valid; subagent tools may also be used after role identity is confirmed. Platform tool availability is not user confirmation; mark the path as confirmed only after the user explicitly chooses it, and do not proceed to the implementation gate before then.
 1.5. Before dispatch, ask the user where the project AI identity registry is. Use a user-provided path; if none exists, propose `docs/agents/` and request authorization; if authorization is denied, return `BLOCKED`. If the user confirms only one AI is available and chooses direct tools, skip the registry and recipient prompts while keeping Mode 3 confirmation and gate rules. If no recipients are registered and user relay is required, ask what project/task to work on, select the smallest suitable role set, register those roles, and generate a standalone activation prompt for each recipient to paste into a new conversation window. Confirm relay, and persist the Mode 3 plan in project docs such as `docs/plans/`.
 2. The selected role owns the responsibilities defined in its identity file. For `commander`, that includes user communication, instruction assessment, research, divergence, the pre-implementation gate, whole-plan re-evaluation, and final acceptance.
 2.5 Before dispatching parallel agents, run the pre-dispatch conflict ledger (see `references/multi-agent-closure-rules.md`) and resolve any shared-file write conflicts by assigning a single writable DRI per file.
-3. Dispatch each agent with the mandatory complete task package defined in `references/multi-agent-closure-rules.md`. Every field there is required, and a package missing any field is not a complete handoff. Commonly missed fields: recipient identity (role + platform/window — the underlying model is optional reference), recipient activation prompt (a self-contained copy-paste text), identity declaration format, evidence required, return format, authorization, and trust tier (T1/T2/T3, defined in `references/identity-library.md`).
+3. Dispatch each agent with the mandatory complete task package defined in `references/multi-agent-closure-rules.md`. Every field there is required, and a package missing any field is not a complete handoff. Commonly missed fields: recipient identity (role + platform/window — the underlying model is optional reference), recipient activation prompt (a self-contained copy-paste text), identity declaration format, evidence required, return format, authorization, and trust tier (T1/T2/T3, defined in `references/multi-agent-closure-rules.md`).
 4. Do not relay a user instruction as if it were already confirmed. User confirmation is a commander responsibility.
 5. If dispatch uses user relay, do not assume the user has relayed. Ask "Have you relayed this to <recipient>?" and treat the task as dispatched only after the user confirms.
 6. Recipients declare identity at the declaration moments (first entry, role change, handoff, possible confusion), then return real file paths, commands, tests, and outputs. Summaries are not evidence.
@@ -118,14 +116,14 @@ Detailed rules: `references/agent-modes.md`.
 
 ## Commander Role Selection / 指挥官角色选择
 
-When the plan needs multiple independent agents, select roles from `references/commander-roles.md`.
+When the plan needs multiple independent agents, define each role as a one-line responsibility + deliverable and keep the role set minimal.
 
 - Use the smallest role set that can complete and verify the task.
 - Give every role a clear DRI, scope, required deliverable, and evidence.
 - Review roles are read-only unless explicitly authorized to modify.
 - Do not let the executor also be the final acceptance auditor.
 - The commander remains the final closure owner.
-- Read `references/identity-library.md` before adopting or dispatching roles.
+- Before adopting or dispatching a role, write its one-line contract: responsibility, deliverable, and trust tier (T1/T2/T3).
 - If no matching identity exists, ask for a custom identity or use the closest generic role with an explicit caveat.
 - Every dispatched recipient has a named identity (role + platform/window) and a selection rationale; the underlying model is optional reference metadata, and the recipient declares identity at the declaration moments (first entry, role change, handoff, possible confusion).
 - Read `references/multi-agent-closure-rules.md` before dispatch; it is the canonical source for the mandatory task package, plus DRI closure, return handling, file ownership, the pre-dispatch conflict ledger, consolidation (fan-in), the fix-loop cap, authorization separation, and context discipline.

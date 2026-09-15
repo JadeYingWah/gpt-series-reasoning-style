@@ -110,9 +110,9 @@ Delegation must include:
 - In Commander Multi-Agent Mode, other agents are independent recipients, not subagents; the commander remains the DRI and must verify real artifacts and evidence before closing any stage.
 - Commander Mode does not require subagent tools, but subagents may be used; it can cover the direct-tool path of Mode 1 and the subagent path of Mode 2 while adding Mode 3 governance. Direct tools, external sessions, CLI/API, and user relay are all valid dispatch paths.
 - Commander Mode suits any model and is recommended for stronger models that can maintain whole-plan control, evidence verification, conflict resolution, and final acceptance.
-- Before Commander Mode, confirm the model's role identity from `identities/` or `custom-identities/`; do not claim a role without reading its identity file.
-- When presenting identities, do not list only role names. Read `identities/README.md` or `references/commander-roles.md` and show a one-line responsibility for each candidate.
-- Use `references/identity-library.md` as the universal role contract; every role must return artifacts, confidence, or a blocked signal.
+- Before Commander Mode, agree on a role identity (role + platform/window) with the user; do not claim a role without stating its one-line responsibility.
+- When presenting role options, give each candidate a one-line responsibility; do not list bare role names.
+- Every role must return artifacts, confidence, or a blocked signal; dispatch with a trust tier (T1/T2/T3 per `references/multi-agent-closure-rules.md`).
 - Every dispatched task must name the recipient identity (role + platform/window) and why that recipient was selected; "another AI" is not enough.
 - For user relay, the task package must include a recipient activation prompt that loads the Skill, selects Mode 3, and assigns the recipient identity.
 - Recipient identity must be concrete (role + platform/window; `待用户指定` is incomplete and a bare "另一个 AI" is not enough). The underlying LLM model is optional reference metadata — record it if known, never require it, and never let a model change invalidate a package or ledger row. The activation prompt must be self-contained and copy-pasteable.

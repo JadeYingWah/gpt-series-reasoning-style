@@ -468,7 +468,7 @@ Prompt:
 
 Expected:
 
-- The agent reads or references `references/commander-roles.md` or `identities/README.md` (the canonical role catalog — either source counts).
+- The agent presents each candidate role as a one-line role + responsibility description (no built-in role catalog exists).
 - It selects the smallest role set needed for the task, not all roles.
 - It names roles with clear deliverables and evidence.
 - It assigns one DRI per task.
@@ -525,8 +525,8 @@ Expected:
 - The agent asks which role identity it should adopt before entering Commander Mode.
 - It presents the built-in identities in `identities/`.
 - It presents each built-in identity with a one-line responsibility, not only role names.
-- It reads `identities/README.md` or `references/commander-roles.md` before presenting the role options.
-- It asks whether the user has a custom identity in `custom-identities/` or another path.
+- It presents the role options with a one-line responsibility each before asking the user to choose.
+- It asks whether the user has a custom role definition and reads that instead of inventing one.
 - It reads the selected identity file before claiming the role.
 - If the user has no preference, it proposes the default `commander` identity.
 - It does not dispatch subagents or external agents before role identity and user confirmation.
@@ -541,7 +541,7 @@ Prompt:
 
 Expected:
 
-- The agent reads or references `references/identity-library.md` and `references/commander-roles.md`, or `identities/README.md` (the canonical role catalog — either source counts).
+- The agent states the role contract: responsibilities, deliverables, and trust tier (T1/T2/T3 per `references/multi-agent-closure-rules.md`).
 - It selects the smallest role set with clear deliverables, not all roles.
 - It can name role files such as `commander.md`, `requirements-analyst.md`, `architect.md`, `executor.md`, `qa-engineer.md`, `code-reviewer.md`, and `acceptance-auditor.md`.
 - It assigns one DRI per task.
@@ -559,7 +559,7 @@ Prompt:
 Expected:
 
 - The agent does not fake a loaded identity.
-- It checks `identities/` and `custom-identities/` for a matching file.
+- It adopts the user-provided role definition, or states honestly that no matching role exists.
 - It states that no built-in identity matches.
 - It asks whether the user wants to provide a custom identity or proceed with the closest generic role marked as approximate.
 - It does not dispatch work before role identity, coordination channel, and user confirmation.
@@ -607,7 +607,7 @@ Prompt:
 Expected:
 
 - The agent does not list only role names.
-- It reads `identities/README.md` or `references/commander-roles.md`.
+- It declares only the role name and task ID, without claiming a persona file it did not read.
 - It presents a table or list with each candidate identity and a one-line responsibility.
 - It explains why `commander` is the default and what that role owns.
 - It asks the user which role to adopt.
@@ -712,7 +712,7 @@ Prompt:
 Expected:
 
 - The agent accepts `executor` as a valid Mode 3 identity.
-- It reads `identities/executor.md` before claiming the role.
+- It declares the role as a one-line responsibility + deliverable contract before adopting it (no built-in role catalog exists).
 - It does not insist that Mode 3 must use the `commander` identity.
 - It still runs role identity confirmation, coordination channel confirmation, and the implementation gate.
 - It does not accept final delivery on behalf of the user unless explicitly assigned.

@@ -9,8 +9,6 @@ gpt-series-reasoning-style/
 ├── AGENTS.md                # cross-runtime entry alias (Codex/Gemini/Copilot CLI) — routes here
 ├── README.md / LICENSE / CHANGELOG.md
 ├── agents/openai.yaml       # optional platform metadata
-├── identities/              # built-in role identities
-├── custom-identities/       # user-defined identities
 ├── references/              # on-demand detailed rules
 ├── docs/minimal-discipline.md  # minimal three-rule quick card (also valid standalone)
 ├── hooks/                   # optional session-start reminder (opt-in)

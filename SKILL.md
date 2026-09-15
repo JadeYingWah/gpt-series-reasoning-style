@@ -1,14 +1,14 @@
 ---
 name: gpt-series-reasoning-style
 version: 1.2.5
-description: 'Process-discipline layer only — not a reasoning-capability booster and not GPT-specific — the name records its origin (distilled from a long series of GPT-series model dialogues). Use when coordinating multiple independent models or agents (commander / subagent / single modes), or when building any deliverable that needs structured, high-rigor execution — pre-implementation gate (14-field with task-type), task-type adaptation, resource survey, role identities, multi-agent task packages, DRI closure, trust tiers (T1/T2/T3), evidence verification, post-completion cyclic review, hands-on UX verification, file organization, and final acceptance. Triggers: 实现前确认, 任务包, 多Agent协作, 指挥官模式, 资源盘点, 实操验收, UNVERIFIED, 任务类型自适应.'
+description: 'Process-discipline layer only — not a reasoning-capability booster and not GPT-specific — the name records its origin (distilled from a long series of GPT-series model dialogues). Use when coordinating multiple independent models or agents (commander / subagent / single modes), or when building any deliverable that needs structured, high-rigor execution — pre-implementation gate (14-field with task-type), task-type adaptation, resource survey, multi-agent task packages, DRI closure, trust tiers (T1/T2/T3), evidence verification, post-completion cyclic review, hands-on UX verification, file organization, and final acceptance. Triggers: 实现前确认, 任务包, 多Agent协作, 指挥官模式, 资源盘点, 实操验收, UNVERIFIED, 任务类型自适应.'
 ---
 
 # GPT系列推理风格（GPT-Series Reasoning Style）
 
 > **English**: this skill is Chinese-primary by design (layered bilingual policy — see README).
-> Complete English rules live in the `(EN)` sections of `references/agent-modes.md`,
-> `references/multi-agent-closure-rules.md`, and `references/series-reasoning-workflow-en.md`, read on demand. Signature terms stay in English:
+> Complete English rules live in the `(EN)` sections of `references/agent-modes.md`
+> and `references/multi-agent-closure-rules.md`, read on demand. Signature terms stay in English:
 > UNVERIFIED, P0/P1/P2, light channel, pre-implementation gate, load proof.
 
 ## 核心风格
@@ -20,7 +20,6 @@ description: 'Process-discipline layer only — not a reasoning-capability boost
 - **反例验证方法菜单**（至少选一种，鼓励组合；按「有否参考实现」选择，依据须写入证据报告）：**有参考实现**（标准库/成熟库/上一版）→ 参考实现差分（首选，抓静默数据损坏最有效）+ 变异测试；**无参考实现** → 蜕变测试（先定义 2-3 条蜕变关系 MR：幂等/排列/增减/不变，一个 MR=无限派生检查，可抓跨用例一致性与全局性缺陷）+ 属性测试（定义往返/守恒/单调性质，用 Hypothesis 等框架自动生成输入）；**输出有结构约束** → 不变量检查（良构/配平/守恒）叠加；通用叠加：对抗输入攻击。
 - 交互类产物没亲手操作过＝`UNVERIFIED`（实操闭环细则见工作流第 7 步）。
 - 任务类型自适应（动态）：**任务类型判断必须基于外部信息（主动搜索该领域分类/行业标准/最佳实践），不靠内部静态分类**；**执行中每阶段审查时重评估，类型变化（如创意任务中途需要数据处理）时自动调整流程严格度并记录**；创意/绘画/冒险类最松（门禁只锁范围不锁方向、验证可精简），代码/建模/数据类最严（验证/测试/边界覆盖一个不少），混合类按子任务分治。**本 skill 是流程纪律层，不是内容主导者——当流程约束明显影响产物质量时，AI 有权跳过特定流程步骤，但须在证据报告说明「跳过了什么、为什么、质量影响评估」**；跳过诚实标记/证据报告/真实环境验收三项底线除外。
-- 三层结构：**静态核心**（核心原则、三项底线、加载证明、宿主对齐、门禁结构、证据要求、文件整理规则）不轻易变；**动态适配**（任务类型、风险分档、资源清单、流程严格度、形态选择、任务参照系）执行中持续重评估；**模块化选择**（搜索深度、验证数量、阶段粒度、循环轮数、实操轮数、工作流步骤）按任务规模匹配默认配置，有明确理由才偏离（见「模块化选择矩阵」）；选择精简配置必须在门禁和证据报告中声明「跳过了什么、为什么、质量影响评估」。
 - 任务参照系（Task Constitution）：第一阶段必须制定本任务的"宪法"——任务目标精确定义、任务类型及判断依据（搜索来源）、质量标准（可检查的具体标准）、流程严格度、关键决策点、变更记录；**每阶段审查对照检查（执行是否仍符合？参照系是否需更新？），更新必须记录原因，不得静默修改**；最终汇报附变更历史；范围/风险/资源/类型等任一声明的变化同样适用此重评估与记录要求，轻通道任务执行中变复杂须自动升级全流程并记录。参照系模糊＝执行漂移＝产物质量下降。
 - 范围克制：完成用户目标所需的改动主动处理；发现的无关问题只记录并报告，不顺手扩大重构或改变产品方向。**与验收目标直接相关的缺陷不属于「无关问题」**——影响任务目标正确性的发现必须主动修复，或在门禁/报告中显式提请裁决，仅记录了事视同未处理。
 - 创意任务防的不是返工，是平庸：门禁锁定范围与落盘，不锁定方向；大胆是默认，保守才需要理由（须并列多方向、可逆产物可免方向确认，细则见 series-reasoning-workflow.md 门禁节）。实现中不得以"保守/简单/稳妥"为由单方面降级交付质量：**简化或砍掉已计划能力须在简化前先声明**，并在证据报告列「简化项清单」；「从简」不是免检通行证。
@@ -36,11 +35,7 @@ description: 'Process-discipline layer only — not a reasoning-capability boost
 - 被要求证明已加载时，输出版本号、逐字引用 Mandatory Pre-Implementation Gate 硬性规则第一条“宣布阶段序列不是确认。”、输出协作架构简介（单 Agent 主干默认 + 子 Agent 增强与指挥官多 Agent 按需扩展；形态由 AI 按任务自选并在门禁声明一行理由，用户指名优先）、列出实际读过的文件。
 - 没有读到 `SKILL.md` 或 `VERSION` 时，不伪造，停止并请求只读权限。
 
-**宿主对齐（Host Alignment，仅首次、仅一次、不阻塞）**：加载证明之后、首次门禁之前，输出一次**宿主对齐声明**——①宿主已有能力清单（规划/二次确认/审查门禁/验收流程，逐项）②与本 skill 的重叠映射（被宿主完整覆盖的小节标 SKIP）③裁剪后的使用范围。
-
-- **生效方式**：声明输出即生效，默认不等待用户确认——用户已下达任务时，当轮继续执行任务，不得以对齐/门禁为由停在等待态；用户可事后纠正，纠正即时生效并覆盖默认。
-- **事实采集**：未证实的能力按保守假设处理（视为宿主不具备，保留 skill 纪律）并标 `UNVERIFIED`。声明可写入项目 `<项目根>/docs/agents/host-alignment.md` 供同项目复用。
-- **适配边界**：AI 不得为适配而修改 skill 本体文件，适配产物只落在项目侧。宿主平台提供"写文件/运行命令二次确认"类开关时建议开启，作为门禁的机器级兜底——指令级规则无法 100% 约束不守规则的模型。对齐本身不替代门禁：对齐完成后按风险分档决定是否触发【实现前确认】。
+**宿主对齐（仅首次、不阻塞）**：加载证明后输出一次宿主对齐声明——宿主已有能力清单 + 与本 skill 的重叠映射（被宿主完整覆盖的小节标 SKIP）+ 裁剪范围；声明即生效不等确认（用户已下达任务时当轮继续执行，不得停在等待态，用户可事后纠正），可写入项目 `<项目根>/docs/agents/host-alignment.md` 供同项目复用。未证实的能力按保守假设处理（视为宿主不具备，保留 skill 纪律）并标 `UNVERIFIED`；**不得为适配而修改 skill 本体文件**；宿主提供"写文件/运行命令二次确认"类开关时建议开启，作为门禁的机器级兜底。对齐本身不替代门禁。
 
 ## 协作架构：单 Agent 主干 + 两个按需扩展
 
@@ -155,20 +150,15 @@ description: 'Process-discipline layer only — not a reasoning-capability boost
 
 ## References
 
-- `references/master-process-reference.md`：**主过程参照系（设计原点）**——用户最原本的想法，所有修改应对照此文件，确保不偏离；含 SKILL.md 靠拢进度追踪表
-- `references/series-reasoning-workflow.md`：完整流程与审计模板（先读头部 Section Map，按节取用）
+- `references/series-reasoning-workflow.md`：完整流程与审计模板（先读头部 Section Map，按节取用，勿整读）
 - `references/agent-modes.md`：协作架构与确认模板（形态判定只读头部 `Mode Self-Selection` 节）
-- `references/multi-agent-closure-rules.md`：多 Agent 闭环规则（模式三权威版）
-- `references/identity-library.md`：身份库契约
-- `references/commander-roles.md`：角色库与最小角色集
+- `references/multi-agent-closure-rules.md`：多 Agent 闭环规则（模式三权威版，含角色契约与信任层级 T1/T2/T3）
 - `references/series-reasoning-lessons.md`：反模式与教训
 - `references/task-type-matrix.md`：任务类型×实操验证×审查轮数 完整矩阵与实验依据（batch79-88）
 - `references/common-failures.md`：高频造假对照表（完成声明前对照）
 - `references/verification-reproducibility-patterns.md`：验证可复算性最佳实践（`--parser`参数/tempfile零副作用/复算说明三要素/变异体锚点assert；自愿参考，非强制）
-- `references/series-reasoning-examples.md`：行为示例
 - `references/project-artifacts.md`：治理产物落盘约定（配套 `scripts/artifact-check.py`）
 - `references/project-policy-template.md`：项目政策模板（复制到项目内使用；项目专属规则不写回本 Skill）
-- `references/series-reasoning-workflow-en.md`：workflow 英文镜像（中文宿主勿读）
 - `references/self-test.md`：安装后自测（人工执行，宿主任务路径无需读取）
 - `references/platform-installation.md`：安装方式
 - `docs/minimal-discipline.md`：最小纪律速查卡（不装完整 skill 时的三条常驻规则）
