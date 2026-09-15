@@ -1,6 +1,6 @@
 ---
 name: gpt-series-reasoning-style
-version: 2.0.0
+version: 1.2.6
 description: 'Process-discipline core, 20-line edition — zero interception, evidence-driven. Use for any deliverable task. Triggers: UNVERIFIED, 证据, 实操验收, 反向敏感性, 证据包.'
 ---
 
@@ -20,4 +20,4 @@ description: 'Process-discipline core, 20-line edition — zero interception, ev
 
 ## Version
 
-Current version: 2.0.0（20 行核心版；完整版历史见 git tag v1.2.5-baseline 与 CHANGELOG）
+Current version: 1.2.6（20 行核心版；完整版历史见 git tag v1.2.5-baseline 与 CHANGELOG）

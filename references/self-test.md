@@ -1,6 +1,6 @@
 # Self-Test
 
-> 适用于 2.0.0（20 行核心版）；对 1.x 完整版的适用性见各条标注。适用于 version 2.0.0.
+> 适用于 1.2.6（20 行核心版）；对 1.x 完整版的适用性见各条标注。适用于 version 1.2.6.
 
 > **非宿主任务路径 / Not on the task path**：本文件是安装后自测（维护者/用户人工执行），宿主 AI 执行任务时**无需读取**本文件。
 > This file is the post-installation self-test (run manually by the maintainer/user). Host AIs do NOT need to read it while executing tasks.

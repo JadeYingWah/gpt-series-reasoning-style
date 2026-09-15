@@ -10,7 +10,7 @@
 一个面向 AI Agent 的**交付纪律行为层**（behavior overlay）——
 实现前门禁、资源盘点、任务类型自适应、多 Agent 协作治理、证据核验与实操验收。
 
-[![Version](https://img.shields.io/badge/version-2.0.0-blue)](#versioning--版本)
+[![Version](https://img.shields.io/badge/version-1.2.6-blue)](#versioning--版本)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](#license--许可证)
 [![Platforms](https://img.shields.io/badge/platforms-13_supported-blueviolet)](#install--安装)
 [![agentskills.io](https://img.shields.io/badge/agentskills.io-compliant-success)](#tooling--工具链)
