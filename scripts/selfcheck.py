@@ -316,7 +316,7 @@ def run_checks() -> list:
     # SB11 light-channel exclusion boundary cross-surface sync
     c = new(11, "light-channel exclusion boundary sync")
     surf = {
-        "SKILL.md": "从零新建产物默认中档",
+        "checklists/pre-flight.md": "从零新建产物默认中档",
         "references/series-reasoning-workflow.md": "从零新建产物默认中档",
         "references/agent-modes.md": "从零新建产物未完整指定",
         "README.md": "全新产物默认中档",
@@ -510,7 +510,7 @@ def run_checks() -> list:
     c = new(18, "forbidden-authorization-phrase parity")
     phrases = ["开始", "现在开始", "直接做"]
     surfaces = {
-        "SKILL.md": skill_text,
+        "checklists/pre-flight.md": read_text(REPO_ROOT / "checklists" / "pre-flight.md"),
         "references/series-reasoning-workflow.md": read_text(REPO_ROOT / "references" / "series-reasoning-workflow.md"),
     }
     missing_phrases = []

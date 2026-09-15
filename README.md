@@ -10,7 +10,7 @@
 一个面向 AI Agent 的**交付纪律行为层**（behavior overlay）——
 实现前门禁、资源盘点、任务类型自适应、多 Agent 协作治理、证据核验与实操验收。
 
-[![Version](https://img.shields.io/badge/version-1.2.5-blue)](#versioning--版本)
+[![Version](https://img.shields.io/badge/version-2.0.0-blue)](#versioning--版本)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](#license--许可证)
 [![Platforms](https://img.shields.io/badge/platforms-13_supported-blueviolet)](#install--安装)
 [![agentskills.io](https://img.shields.io/badge/agentskills.io-compliant-success)](#tooling--工具链)
@@ -106,7 +106,7 @@ AI  ：做完了，测试都过了。        AI  ：完成。附磁盘自检清�
 
 ### 定位与名称 / Positioning & Name
 
-这是一层可以装进任何 Agent 宿主的行为纪律。它是一个普通 Agent Skills 包：常驻面只有 `SKILL.md` + `VERSION`（实测约 7.0k tokens，o200k_base），
+这是一层可以装进任何 Agent 宿主的行为纪律。它是一个普通 Agent Skills 包：常驻面只有 `SKILL.md` + `VERSION`（实测约 0.64k tokens，o200k_base），
 11 份 references 按需取节加载，`AGENTS.md` 为 Codex / Gemini CLI / Copilot CLI 等运行时提供跨运行时入口别名。
 
 - **名字记录来源，不划能力边界**：规则纪律从一系列 GPT 系列大模型的真实对话记录中打磨提炼，公开发布线为 1.0.0 → 1.1.0 → **1.2.2**（更早的内部迭代已归档于 [`INTERNAL-HISTORY.md`](INTERNAL-HISTORY.md)）。
@@ -409,7 +409,7 @@ flowchart TD
 
 | 项 | Tokens（o200k） | 何时发生 |
 | --- | --- | --- |
-| 常驻面：`SKILL.md` + `VERSION` | **7,016**（SKILL.md 7,011 + VERSION 5；2026-09-15 门禁降级可选清单后重测） | 装上后的每次会话 |
+| 常驻面：`SKILL.md` + `VERSION` | **640**（SKILL.md 635 + VERSION 5；2026-09-15 20 行核心版重测） | 装上后的每次会话 |
 | 按需 references | 单份 280–17,987；workflow 按 Section Map **取节加载、勿整读**；一个中等任务全周期常驻 + 按需通常累计约 1 万–4 万 tokens（**摊在整个任务，不是每条消息**，取决于实际加载面） | 对应阶段首次需要时 |
 | Lite 档（不装整包） | 三条本体 147（整卡 518） | 常驻 |
 
@@ -420,7 +420,7 @@ flowchart TD
 
 | 参照物 | 量级 | 性质 |
 | --- | --- | --- |
-| 常驻面 7,016 tok | **128k 上下文窗口的约 5.4%**（200k 约 3.5%）；SKILL.md 含约 11.2k 字符 ≈ 7 页 A4 中文 | 精确算术 |
+| 常驻面 640 tok | **128k 上下文窗口的约 0.5%**（200k 约 0.3%）；SKILL.md 含约 1.0k 字符 ≈ 1 页 A4 中文 | 精确算术 |
 | 20 轮的任务 | 摊销 ≈ **492 tok/轮** | 精确算术 |
 | 全周期（常驻 + 按需）约 1 万–4 万 tok | 上限仍落在 **一次返工来回的常见量级**（澄清 + 重读上下文 + 重做，常见 2 万–10 万 tok）之内 | 区间为实测组合推算，非单任务实测 |
 
@@ -554,7 +554,7 @@ references 仅在当前阶段需要时按需读取。
 
 ```text
 gpt-series-reasoning-style/
-├── SKILL.md                 # 入口：加载证明、协作架构、门禁、模块化矩阵、工作流、References 索引（≈142 行 / ≈7.0k tok）
+├── SKILL.md                 # 入口：加载证明、协作架构、门禁、模块化矩阵、工作流、References 索引（≈23 行 / ≈0.64k tok）
 ├── VERSION                  # 1.2.5 —— 加载证明只需要 SKILL.md + VERSION
 ├── AGENTS.md                # 跨运行时入口别名（Codex / Gemini CLI / Copilot）——只指路，权威仍在 SKILL.md
 ├── README.md / LICENSE / CHANGELOG.md / INTERNAL-HISTORY.md / SECURITY.md
@@ -639,7 +639,7 @@ gpt-series-reasoning-style/
 
 为防"规则越写越多、检查越加越重"的失控，本仓库给自己立了预算：
 
-- **`SKILL.md` ≤ 250 行**（当前约 142 行 / 实测约 7.0k tokens 常驻，o200k_base）——入口只保留决策点，细节下沉到按需的 references；
+- **`SKILL.md` ≤ 250 行**（当前约 23 行 / 实测约 0.64k tokens 常驻，o200k_base）——入口只保留决策点，细节下沉到按需的 references；
 - **静态检查上限 23 项（SB1–SB23）**：新增第 24 项必须先证明它抓到过**真实缺陷**（可指认提交哈希）——SB18/19/20/21/22/23 均按此准入立项（SB23 守常驻面 token 声明的数量级，证据 `812c44f..f7dcf37`：Cost 表声明 3,843 而实测 9,833 的 2.5 倍漂移，SB21 只守行数未抓到）；
 - **77 条行为自测冻结**：只做"旧测失去鉴别力 → 替换"，不再扩容；
 - **收敛优先于加码**：版本对外固定 `1.2.5` 基线，post-1.2.5 增量以 CHANGELOG 的 Unreleased 批次计价，引用时注明批次。
