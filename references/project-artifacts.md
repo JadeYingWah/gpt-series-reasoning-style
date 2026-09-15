@@ -89,3 +89,40 @@ python scripts/artifact-check.py <项目根>   # 校验该项目的治理产物�
 - 本文件**不改变**任何门禁字段、台账字段或闭环规则——只是给既有义务补充落盘路径与状态机。
 - 落盘动作本身在授权矩阵内：写项目文件 = 任务授权的一部分，无需额外授权；但**不得**为落盘而
   在轻通道任务里强造文件（那正是复杂度预算禁止的仪式膨胀）。
+
+
+---
+
+# 项目政策模板（原 project-policy-template.md 合并）
+
+
+## Project Identity
+
+- Project name: `[YOUR_PROJECT]`
+- Roadmap or stage model: `[ROADMAP_OR_STAGE_MODEL]`
+- Stage code definition: `[STAGE_NAME]` means `[MEANING]`
+
+## Authorization
+
+- Planning, implementation, local commit, and push are separate authorizations.
+- `[STAGE_NAME]` requires `[AUTHORIZATION_TYPE]` before work begins.
+- Production GUI, release, or public-facing work requires `[PRODUCTION_GATE]`.
+
+## Legal And Submission
+
+- Final legal, submission, and compliance decisions default to human authority.
+- The project may explicitly delegate bounded preparation work to an agent.
+- The project must record who may sign, upload, or submit.
+
+## Roles And Identity
+
+- Project roles follow `[PROJECT_IDENTITY_DOC_PATH]`.
+- Role reports are verified against files, commands, tests, and Git state.
+- The project commander remains the acceptance owner unless the project assigns another DRI.
+
+## How To Use
+
+1. Copy this file to the project's own policy directory.
+2. Replace all placeholders with project-specific values.
+3. Load the project policy only when working in that project.
+4. Do not edit this universal skill with project-specific rules.

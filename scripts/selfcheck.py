@@ -202,12 +202,12 @@ def run_checks() -> list:
     # (post role-library removal: workflow, agent-modes, multi-agent-closure-rules,
     #  lessons, common-failures, self-test, verification-reproducibility-patterns,
     #  task-type-matrix, project-artifacts, project-policy-template, platform-installation)
-    c = new(5, "reference file count == 11")
+    c = new(5, "reference file count == 8")
     refs = list((REPO_ROOT / "references").glob("*.md"))
-    if len(refs) != 11:
-        c.fail("found " + str(len(refs)) + " reference files, expected 11")
+    if len(refs) != 8:
+        c.fail("found " + str(len(refs)) + " reference files, expected 8")
     else:
-        c.pass_("11 reference .md files")
+        c.pass_("8 reference .md files")
 
     # SB6 code-fence pairing (+ escaped-fence detection, A2: a backslash-escaped
     # fence is invisible to the parser and silently drops content from tooling)
@@ -399,7 +399,6 @@ def run_checks() -> list:
     else:
         layers = [
             "references/series-reasoning-workflow.md",
-            "references/project-policy-template.md",
             "references/agent-modes.md",
             "docs/minimal-discipline.md",
         ]

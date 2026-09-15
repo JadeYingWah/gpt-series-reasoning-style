@@ -80,7 +80,7 @@ AI 协作里最贵的两类失败，都不是"模型不够聪明"：
 1. **未授权就动手**——AI 宣布了一串"接下来我要做什么"，然后直接建目录、写文件、跑命令；
 2. **声称未验证的完成**——"已经修好了 / 测试都过了"，而磁盘上没有可核对的证据，甚至根本没跑过。
 
-一次"假完成"的返工成本（澄清 + AI 重读上下文 + 重做）通常在 2 万–10 万 token；本 skill 的常驻面开销约 9.8k token（详见 [Cost](#cost--成本)）。**它把防假完成做成第一优先级，正是因为那是 token 账上最贵的一项。**
+一次"假完成"的返工成本（澄清 + AI 重读上下文 + 重做）通常在 2 万–10 万 token；本 skill 的常驻面开销约 0.64k token（详见 [Cost](#cost--成本)）。**它把防假完成做成第一优先级，正是因为那是 token 账上最贵的一项。**
 
 它带来的改变，一眼可见：
 
@@ -107,7 +107,7 @@ AI  ：做完了，测试都过了。        AI  ：完成。附磁盘自检清�
 ### 定位与名称 / Positioning & Name
 
 这是一层可以装进任何 Agent 宿主的行为纪律。它是一个普通 Agent Skills 包：常驻面只有 `SKILL.md` + `VERSION`（实测约 0.64k tokens，o200k_base），
-11 份 references 按需取节加载，`AGENTS.md` 为 Codex / Gemini CLI / Copilot CLI 等运行时提供跨运行时入口别名。
+8 份 references 按需取节加载，`AGENTS.md` 为 Codex / Gemini CLI / Copilot CLI 等运行时提供跨运行时入口别名。
 
 - **名字记录来源，不划能力边界**：规则纪律从一系列 GPT 系列大模型的真实对话记录中打磨提炼，公开发布线为 1.0.0 → 1.1.0 → **1.2.2**（更早的内部迭代已归档于 [`INTERNAL-HISTORY.md`](INTERNAL-HISTORY.md)）。
 - **不依赖、也不限于 GPT 系列**：任何宿主模型（Claude / Gemini / DeepSeek / Qwen / GLM …）均可加载使用。
@@ -116,13 +116,13 @@ AI  ：做完了，测试都过了。        AI  ：完成。附磁盘自检清�
 
 ### 关键数字速览 / Key Numbers at a Glance
 
-> 以下为当前版本（v1.2.5）的权威数字，所有跨文件一致性由 `scripts/selfcheck.py`（SB1–SB23）自动校验。
+> 以下为当前版本（v1.2.6）的权威数字，所有跨文件一致性由 `scripts/selfcheck.py`（SB1–SB23）自动校验。
 
 | 维度 | 数字 | 说明 |
 |---|---|---|
-| 当前版本 | **v1.2.5** | `VERSION` 文件唯一权威 |
-| SKILL.md | **178 行 / 约 9.8k tokens** | 常驻面，o200k_base 分词器实测 |
-| References | **16 份** | 按需取节加载，非整读 |
+| 当前版本 | **v1.2.6** | `VERSION` 文件唯一权威 |
+| SKILL.md | **约 21 行 / 约 0.64k tokens** | 常驻面，o200k_base 分词器实测（20 行核心版） |
+| References | **8 份** | 按需取节加载，非整读 |
 | 内置角色身份 | 无（已删） | 角色 = 一行「职责 + 交付物」标签；信任层级 T1/T2/T3 见 multi-agent-closure-rules |
 | 行为自测 | **77 条** | `references/self-test.md`，v1.1.0 扩容后冻结 |
 | 静态自检 | **23 项** | SB1–SB23，CI 每次 push 自动跑 |
@@ -554,23 +554,21 @@ references 仅在当前阶段需要时按需读取。
 
 ```text
 gpt-series-reasoning-style/
-├── SKILL.md                 # 入口：加载证明、协作架构、门禁、模块化矩阵、工作流、References 索引（≈23 行 / ≈0.64k tok）
-├── VERSION                  # 1.2.5 —— 加载证明只需要 SKILL.md + VERSION
+├── SKILL.md                 # 入口：20 行执行纪律（≈21 行 / ≈0.64k tok）
+├── VERSION                  # 1.2.6 —— 加载证明只需要 SKILL.md + VERSION
 ├── AGENTS.md                # 跨运行时入口别名（Codex / Gemini CLI / Copilot）——只指路，权威仍在 SKILL.md
 ├── README.md / LICENSE / CHANGELOG.md / INTERNAL-HISTORY.md / SECURITY.md
 ├── agents/
 │   └── openai.yaml          # OpenAI/Codex 兼容面的可选 UI 元数据（display_name / default_prompt）
-├── references/              # 11 份按需规则文档
-│   ├── series-reasoning-workflow.md      # 完整流程与审计模板（中文权威版，873 行，Section Map 分节）
-│   ├── agent-modes.md                    # 协作架构、形态自选、确认模板、任务包（503 行）
-│   ├── multi-agent-closure-rules.md      # 指挥官闭环：身份、23 字段任务包、账本、信任层级（337 行）
+├── references/              # 8 份按需规则文档
+│   ├── agent-modes.md                    # 协作架构、形态自选、确认模板、任务包
+│   ├── common-failures.md               # 高频造假对照表 + 自留失败档案
+│   ├── multi-agent-closure-rules.md     # 指挥官闭环、任务包、账本、信任层级
 │   ├── project-artifacts.md              # 门禁单/台账落盘约定
-│   ├── project-policy-template.md        # 项目政策模板（复制到项目内替换占位使用）
-│   ├── common-failures.md                # 高频造假对照表 + 自留失败档案 F1–F6
-│   ├── verification-reproducibility-patterns.md  # 验证可复现性模式与反例方法目录
-│   ├── series-reasoning-lessons.md       # 反模式与教训
-│   ├── self-test.md                      # 77 条行为自测（冻结；非宿主任务路径）
-│   └── platform-installation.md          # 安装方式与平台路径
+│   ├── self-test.md                      # 77 条行为自测（冻结）
+│   ├── series-reasoning-workflow.md     # 完整流程与审计模板（中文权威版）
+│   ├── task-type-matrix.md               # 任务类型 → 必选验证映射
+│   └── verification-reproducibility-patterns.md  # 验证可复现性模式与反例方法目录
 ├── docs/
 │   ├── minimal-discipline.md             # 最小纪律速查卡（三条常驻，可独立使用）
 │   ├── field-tests/                      # 实测报告：端到端、探针、盲测、A/B 多轮、metacognition 系列
@@ -639,10 +637,10 @@ gpt-series-reasoning-style/
 
 为防"规则越写越多、检查越加越重"的失控，本仓库给自己立了预算：
 
-- **`SKILL.md` ≤ 250 行**（当前约 23 行 / 实测约 0.64k tokens 常驻，o200k_base）——入口只保留决策点，细节下沉到按需的 references；
+- **`SKILL.md` ≤ 250 行**（当前约 21 行 / 实测约 0.64k tokens 常驻，o200k_base）——入口只保留决策点，细节下沉到按需的 references；
 - **静态检查上限 23 项（SB1–SB23）**：新增第 24 项必须先证明它抓到过**真实缺陷**（可指认提交哈希）——SB18/19/20/21/22/23 均按此准入立项（SB23 守常驻面 token 声明的数量级，证据 `812c44f..f7dcf37`：Cost 表声明 3,843 而实测 9,833 的 2.5 倍漂移，SB21 只守行数未抓到）；
 - **77 条行为自测冻结**：只做"旧测失去鉴别力 → 替换"，不再扩容；
-- **收敛优先于加码**：版本对外固定 `1.2.5` 基线，post-1.2.5 增量以 CHANGELOG 的 Unreleased 批次计价，引用时注明批次。
+- **收敛优先于加码**：版本对外固定 `1.2.6` 基线，post-1.2.5 增量以 CHANGELOG 的 Unreleased 批次计价，引用时注明批次。
 
 ---
 
