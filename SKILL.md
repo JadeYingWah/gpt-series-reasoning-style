@@ -11,6 +11,10 @@ description: 'Process-discipline layer only — not a reasoning-capability boost
 > and `references/multi-agent-closure-rules.md`, read on demand. Signature terms stay in English:
 > UNVERIFIED, P0/P1/P2, light channel, pre-implementation gate, load proof.
 
+> **已测边界（诚实声明）**：本 skill 的实验已测收益在质量软维度与灾难违规防护（越权/破坏性操作）；它**不能保证**降低未覆盖模式的致命缺陷率——致命缺陷防线靠 `evidence-packs/` 证据包 + 独立复验。条款约束"声称"，约束不了"真相"：自报验证不构成证据。
+
+> **触发与使用（解耦，不强制）**：本 skill 对宿主流程**零拦截**——执行期不需要读任何 reference。两个按需触点：①交付宣告完成后，按任务类型取 `evidence-packs/<类型>.md` 做对抗复核（致命缺陷模式自查，含双向致命原则）；②需要完整流程/模板细节时按 References 索引取节。
+
 ## 核心风格
 
 - 先理解需求、调研、发散、收敛，再规划（具体步骤见工作流第2-3步）；不跳过任何一步直接开干。
@@ -155,6 +159,7 @@ description: 'Process-discipline layer only — not a reasoning-capability boost
 - `references/multi-agent-closure-rules.md`：多 Agent 闭环规则（模式三权威版，含角色契约与信任层级 T1/T2/T3）
 - `references/series-reasoning-lessons.md`：反模式与教训
 - `references/task-type-matrix.md`：任务类型×实操验证×审查轮数 完整矩阵与实验依据（batch79-88）
+- `evidence-packs/`：**致命缺陷证据包（活数据资产）**——按任务类型分发的历史 fatal 模式清单，四件套格式含双向致命原则；交付后对抗复核时取用；新 fatal 持续反哺
 - `references/common-failures.md`：高频造假对照表（完成声明前对照）
 - `references/verification-reproducibility-patterns.md`：验证可复算性最佳实践（`--parser`参数/tempfile零副作用/复算说明三要素/变异体锚点assert；自愿参考，非强制）
 - `references/project-artifacts.md`：治理产物落盘约定（配套 `scripts/artifact-check.py`）
