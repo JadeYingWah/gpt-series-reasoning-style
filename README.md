@@ -170,7 +170,7 @@ AI  ：做完了，测试都过了。        AI  ：完成。附磁盘自检清�
 
 ## How It Works / 工作原理
 
-> 完整 870+ 行流程（含授权矩阵、发散-收敛协议、审计模板）见 [`references/series-reasoning-workflow.md`](references/series-reasoning-workflow.md)（中文权威版，头部有 Section Map，按节取用，**勿整读**）。
+> 完整 811 行流程（含授权矩阵、发散-收敛协议、审计模板）见 [`references/series-reasoning-workflow.md`](references/series-reasoning-workflow.md)（中文权威版，头部有 Section Map，按节取用，**勿整读**）。
 
 ```mermaid
 flowchart TD
