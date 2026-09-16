@@ -18,18 +18,27 @@
 > **与主流 skill 设计的一处差异。** Anthropic 官方 skill 设计指南与主流 agent 框架的公开文档中，主流做法是
 > 「加载后全程在场」——挤占注意力、打断思路、耗占上下文；事后审查通常靠另起一个独立 agent，或在同一上下文里
 > 跑一遍 checklist。本 skill 的差异点是：**在同一段上下文内，执行阶段通过显式指令让模型脱离纪律、进入心流，
-> 仅在自判完成时重新加载审查规则**。已见到的相邻设计（grove-cli 三层审查、Pipecat 阶段切换）在功能上接近，
-> 但都不是「同上下文内假装没加载」。**你可以无视 skill 常见的那些负面影响，只收下它的益处。**
-> 26 次 A/B 实验实测：有用，且无负面影响。
+> 仅在自判完成时重新加载审查规则**。
+>
+> 已见到的相邻设计：① `obra/superpowers` 的 `<SUBAGENT-STOP>` 标签——授权 subagent 永久忽略元 skill；
+> ② Claude Code frontmatter 的 `disable-model-invocation: true`——静态不加载；③ grove-cli 三层审查；
+> ④ Pipecat 阶段切换。但它们分别是**一次性永久退出、静态隐藏、独立 agent 复审、跨上下文换 prompt**，
+> 都没有「执行阶段临时脱离、完成后在同一段上下文里重新加载审查规则」这个循环。
+> **你可以无视 skill 常见的那些负面影响，只收下它的益处。** 26 次 A/B 实验实测：有用，且无负面影响。
 >
 > **A point of divergence from mainstream skill design.** In Anthropic's official skill authoring guides and
 > mainstream agent-framework docs, the default is "loaded and always present" — taxing attention, interrupting
 > reasoning, burning context. Post-hoc review is typically delegated to a fresh agent or run as an in-context
 > checklist. This skill's difference: **within the same context, the execution phase explicitly tells the model
 > to set the discipline aside and enter flow, reloading the review rules only when it self-declares done.**
-> Adjacent designs we've seen (grove-cli's three-layer review, Pipecat's stage switching) are functionally
-> close but do not implement "pretend it isn't loaded in the same context." **You get the benefits without
-> paying the usual costs.** Field-tested in 26 A/B experiments: useful, with no negative side effects.
+>
+> Adjacent designs we've seen: ① `<SUBAGENT-STOP>` in `obra/superpowers` — authorizes subagents to permanently
+> ignore the meta-skill; ② Claude Code's `disable-model-invocation: true` — static non-loading;
+> ③ grove-cli's three-layer review; ④ Pipecat's stage switching. But these are respectively *one-shot permanent
+> exit, static hiding, independent-agent review, cross-context prompt swap* — none implements the loop of
+> *temporarily disengaging during execution, then reloading review rules in the same context when done.*
+> **You get the benefits without paying the usual costs.** Field-tested in 26 A/B experiments: useful, with no
+> negative side effects.
 
 > **Process-discipline layer only** — not a reasoning-capability booster and not GPT-specific —
 > the name records its origin (distilled from a long series of GPT-series model dialogues).
