@@ -234,7 +234,9 @@ git pull    # 更新；版本号见 VERSION 文件
 
 > **233 次实验测出来的不是"规则越多越好"，而是"规则越少越好，但核心那几条不能少"。**
 
-四个 test-bed 的实测定性结论（原始记录本地留存）：
+> **实验原始数据（70MB，3066 文件）已移至 [`experiments` 分支](https://github.com/JadeYingWah/gpt-series-reasoning-style/tree/experiments)。** 主仓库（main）仅含 skill 本体，AI agent clone 时不会拉取实验数据。人想复现或审查实验过程，切到 experiments 分支即可。
+
+四个 test-bed 的实测定性结论：
 
 | 测试场 | 设计 | 任务类型 | 定性结论 |
 |---|---|---|---|
