@@ -127,9 +127,9 @@ v1.2.3-draft完成后，需要做以下独立验证：
 - 全量同步包：`<实验根目录>\SYNC-PACK-UNIFIED-2026-09-13.md`（含四轮A/B实验完整结果）
 
 ### 原skill仓库
-- 路径：`<skill安装目录>
+- 路径：`<skill安装目录>`
 - 当前版本：1.2.2（工作树有未提交的v1.2.2修改）
-- GitHub：JadeYingWah/gpt-series-reasoning-style
+- GitHub：<owner>/gpt-series-reasoning-style
 
 ---
 

@@ -1,8 +1,8 @@
 ﻿# ab-v4 Stage 1 实验完整同步包（供跨 AI 信息同步，无删节）
 
-- 生成：2026-09-13 16:35 · 作者：判分/验收侧 lead（WorkBuddy 会话，总指挥=总指挥/JadeYingWah）
+- 生成：2026-09-13 16:35 · 作者：判分/验收侧 lead（WorkBuddy 会话，总指挥=总指挥）
 - 读者：任意无上下文 AI。本文自包含，读完即获得与 lead 相同的全部事实。
-- 项目：gpt-series-reasoning-style skill（仓库 <skill安装目录> JadeYingWah/gpt-series-reasoning-style，当前 HEAD fe6d876）
+- 项目：gpt-series-reasoning-style skill（仓库 <skill安装目录> <owner>/gpt-series-reasoning-style，当前 HEAD fe6d876）
 
 ---
 

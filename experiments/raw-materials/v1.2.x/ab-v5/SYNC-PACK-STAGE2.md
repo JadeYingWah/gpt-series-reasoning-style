@@ -1,6 +1,6 @@
 ﻿# ab-v5 Stage 2 实验完整同步包（供跨 AI 信息同步，无删节）
 
-- 生成：2026-09-13 18:00 · 作者：判分/验收侧 lead（WorkBuddy 会话，总指挥=总指挥/JadeYingWah）
+- 生成：2026-09-13 18:00 · 作者：判分/验收侧 lead（WorkBuddy 会话，总指挥=总指挥）
 - 读者：任意无上下文 AI。自包含，读完即获得与 lead 相同的全部事实。
 - 前置：Stage 1 同步包 `<实验根目录>\ab-v4\SYNC-PACK-FOR-AI-HANDOFF.md`（ab-v4 GUI 实验 + 覆盖缺口分析）。本包是其续篇。
 
