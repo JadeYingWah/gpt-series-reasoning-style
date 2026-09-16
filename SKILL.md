@@ -1,6 +1,6 @@
----
+﻿---
 name: gpt-series-reasoning-style
-version: 1.4.0
+version: 1.4.1
 description: 交付纪律层。规划面选形态、执行面放手、审查面把住口。
 ---
 
@@ -33,4 +33,4 @@ description: 交付纪律层。规划面选形态、执行面放手、审查面�
 只做用户要的；发现无关问题记下来，不擅自扩大重构。
 
 ## 加载
-直接读本文件和 `VERSION`，不读其他文件，不列目录。
+平时只读本文件和 `VERSION`，不列目录、不读其他。叠加形态三时，才去读 `templates/` 下的 commander / executor / reviewer 三份模板。
