@@ -1,5 +1,0 @@
-app.html 中出现 verify/ 的行数: 1
-121: /* 纯计算逻辑：不依赖 DOM，可被外部脚本原样提取复算（见 verify/core-tests.mjs） */
-
-是否存在 script/link/img/iframe 的 src|href 外链: false
-（即 verify/ 仅出现在注释里，无运行时依赖）

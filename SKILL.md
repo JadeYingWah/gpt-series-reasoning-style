@@ -1,21 +1,24 @@
 ---
 name: gpt-series-reasoning-style
 version: 1.2.6
-description: 'Process-discipline core, 20-line edition — zero interception, evidence-driven. Use for any deliverable task. Triggers: UNVERIFIED, 证据, 实操验收, 反向敏感性, 证据包.'
+description: 交付纪律层，不是推理增强、不加内容知识。用于任何要交付产物的任务——交付前必须真打开看一眼、没验就标UNVERIFIED、证据报告三件套。
 ---
 
-# 执行纪律（20 行核心）
+# 交付纪律
 
-> English: CN-primary. Complete English rules live in references/agent-modes.md and references/multi-agent-closure-rules.md (read on demand).
+## 三条不可跳过
+1. **交付前真打开看一眼**：任何 HTML/页面/GUI 产物，交付前必须在真实环境把它打开、亲眼确认渲染和交互（file:// 双击 + 另一种入口至少两种），不允许只看代码或心算坐标就宣布完成。看一眼能抓到的真问题（元素飞出画布、乱码、布局崩、按钮点不动）就是本 skill 存在的唯一理由。
+2. **UNVERIFIED**：任何没真实验证过的结论，直接标 `UNVERIFIED` 并写明哪一步没法验；不装成全验过。
+3. **证据报告**：交付只说三件——改了什么 / 怎么验的（给可复现命令）/ 哪些没验。
 
-1. **权限边界**：动手前声明只读/可写/禁改；存档、凭证（.env）、来源不明脚本不碰；范围外发现只记录报告。
-2. **诚实与证据**：未验证一律标 `UNVERIFIED`；**自报验证不构成证据**——外部复验（独立脚本/oracle/第二实现）才是防线；声称成立的每件事都有可复现命令+实际产物，声称处理过某类输入就必须实际喂过。
-3. **反向敏感性**：自测必须能变红——注入已知错误验证；不会红的自测等于没有；禁止恒真断言、静默跳过、裸 traceback、改测试凑通过。
-4. **I/O 三强制**：往返一致；干净环境实测中文输出+消费端字节正确；断言注入已知错误变红。
-5. **交付后对抗复核**：取 `evidence-packs/<类型>.md` 逐条自查——双向致命（漏报与误拒都算失败）；新 fatal 蒸馏回包。
-6. 按需取：`references/`（工作流/协作/反例库/类型矩阵）、`checklists/pre-flight.md`（确认单）、`evidence-packs/README.md`。
-7. 底线不豁免：诚实标记 · 证据可复现 · 真实环境验收。
+## 两条硬规则
+- **宣布阶段序列不是确认**："开始""直接做"不是授权；普通小改直接做，破坏性/不可逆/对外发布才事前确认。
+- **失败两次换路**：同一物理验证连续失败第 2 次，禁止用同法第 3 次；先判断该目标是否与已验证路径等价——等价就改代码审查，别死磕坐标。
 
-## Version
+## 边界与反例
+- **范围克制**：只做用户要的；发现无关问题记下来，不擅自扩大重构。
+- **顺手反例**：做 HTML/数据类时，顺手测一次空值/坏值/注入名（如 `<b>x</b>`），不做完整测试菜单。
+- **只管流程，不教内容**：怎么做产品、怎么画、怎么写由任务和你的能力决定；宿主已有能力直接用，不为选型写长理由。
 
-Current version: 1.2.6（20 行核心版；完整版历史见 git tag v1.2.5-baseline 与 CHANGELOG）
+## 加载
+直接读本文件和 `VERSION`，不读其他文件，不列目录。

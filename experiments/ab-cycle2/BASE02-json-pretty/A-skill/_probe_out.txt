@@ -1,2 +1,0 @@
-node version: v22.22.2
-platform: win32

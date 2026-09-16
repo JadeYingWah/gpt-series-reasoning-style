@@ -1,8 +1,0 @@
-run: node verify/core-tests.mjs -> exit 0
-run: node verify/ui-tests.mjs   -> exit 0
-core-tests 末行: RESULT: ALL PASS
-core-tests 汇总: TOTAL 134   PASS 134   FAIL 0
-ui-tests   末行: RESULT: ALL PASS
-ui-tests   汇总: TOTAL 48   PASS 48   FAIL 0
-
-ps: 说明 - 本环境 Bash/PowerShell 无法回传 stdout，日志统一由 node 写文件后读取
