@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-labelledby="banner-title banner-desc">
   <title id="banner-title">GPT-Series Reasoning Style · Delivery discipline layer</title>
-  <desc id="banner-desc">Bilingual banner: three stages (Planning / Execution / Review) driven by a shield icon in two states — a dashed shield with a slash means the rules step aside while you work, a solid shield with a check means the rules are reloaded to verify the delivery.</desc>
+  <desc id="banner-desc">Bilingual banner: three stages (Planning / Execution / Review) driven by a shield icon in two states — a dashed shield with a slash means the rules are not in context while you work; a solid shield with a check means the rules are loaded from file to verify the delivery. Rules load by stage, and the rule files carry their own exit conditions.</desc>
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#0B1020"/>
@@ -32,8 +32,8 @@
     <text x="640" y="152" text-anchor="middle" font-size="58" font-weight="800" fill="#F1F5F9" letter-spacing="0.5">GPT-Series Reasoning Style</text>
     <text x="640" y="204" text-anchor="middle" font-size="30" font-weight="700" fill="#C4B5FD">GPT 系列推理风格</text>
 
-    <text x="640" y="262" text-anchor="middle" font-size="23" font-weight="600" fill="#E2E8F0">Forget the rules while working · Prove it when you deliver</text>
-    <text x="640" y="298" text-anchor="middle" font-size="19" fill="#8FA3BF">干活时忘掉规则 · 交付时拿出证据</text>
+    <text x="640" y="262" text-anchor="middle" font-size="23" font-weight="600" fill="#E2E8F0">Rules load by stage — absent while working, full at delivery</text>
+    <text x="640" y="298" text-anchor="middle" font-size="19" fill="#8FA3BF">规则按阶段读入 · 干活时不在场 · 交付时零妥协</text>
 
     <!-- ===== 卡片 1 · 规划（紫） ===== -->
     <rect x="80" y="336" width="340" height="172" rx="20" fill="#131A31" stroke="#8B5CF6" stroke-width="2" stroke-opacity="0.85"/>
@@ -101,7 +101,7 @@
               fill="#22D3EE" fill-opacity="0.20" stroke="#22D3EE" stroke-width="2.2"/>
         <path d="M -6,1 L -1,6 L 7,-5" fill="none" stroke="#67E8F9" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
       </g>
-      <text x="238" y="4" font-size="13" fill="#64748B">Rules reloaded when done · five-face rhythm</text>
+      <text x="238" y="4" font-size="13" fill="#64748B">Rules loaded from file, stage by stage · five-stage timeline</text>
     </g>
     <text x="1200" y="590" text-anchor="end" font-size="15" fill="#64748B">v1.5.0 · MIT</text>
   </g>

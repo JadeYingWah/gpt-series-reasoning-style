@@ -175,13 +175,13 @@ AI agent 最贵的失败，从来不是"不会做"，而是**没验过就说做�
 ┌─ 阶段1 · 自由构想（无规则）——凭你自己想清楚要做什么
 │      退出：能一句话说清楚接下来做什么
 ┌─ 阶段2 · 规则规划（去读 references/plan-rules.md）——按规则落成计划，完整保留阶段1的构想
-│      退出：见 plan-rules.md
+│      退出：方案用户已确认（A档同意 / B档问完）＋ 风险已分级（轻/重）＋ 没有要再问用户的问题
 ┌─ 阶段3 · 执行（规则完全不存在）——凭你的能力干活，心流不被打断
 │      退出：觉得可以了，没有正在调试的问题
 ┌─ 阶段4 · 直觉检查（无规则）——凭常识快速扫一遍交付物
-│      退出：没有"等等，这里好像有问题"
+│      退出：没有"等等，这里好像有问题"的卡住感
 └─ 阶段5 · 纪律检查（去读 references/review-rules.md）——严格过 8 条纪律
-       退出：见 review-rules.md
+       退出：规则全部过一遍（轻任务3条 / 重任务8条）＋ 能说出三件套 ＋ 没有未处理的"这里好像有问题"
 ```
 
 **任务交付之后**：彻底忘记 `plan-rules.md` / `review-rules.md` / `multi-agent.md` 的具体内容——只记"有五个阶段、到哪个阶段读哪个文件"。规则长什么样，下次需要时再读。
@@ -192,6 +192,17 @@ AI agent 最贵的失败，从来不是"不会做"，而是**没验过就说做�
 
 - **创作时没有纪律**——阶段 1 与整个执行阶段，规则不污染思路；
 - **检查有两道**——直觉抓规则**没覆盖到**的问题，纪律确保规则**覆盖到**的都做到，互不替代。
+
+### 阶段 3 / 阶段 4：两头吃，零副作用
+
+**阶段 3 · 执行**——既不丢失使用者原本的**创作能力**，又已获得 skill 给予的**规划能力**：阶段 2 的规划成果（方案、风险分级、验收标准）全部在手，规则文本却完全退场。两头吃，且没有任何"纪律常驻"的副作用。
+
+**阶段 4 · 直觉检查**——**不加载纪律检查规则**，使用者自己的找问题能力不被任何清单框住、不被替代；同时 skill 在前一阶段注入的**审查能力**（真验证、交付声明对得上的意识）仍在发挥作用。直觉的广度 + 纪律的敏感度，同时在线、互不挤占。
+
+**English**
+
+- **Stage 3 · Execution** — the user's original **creative ability** stays fully intact while the **planning capability** the skill granted is already in hand: the plan, the risk tier and the acceptance criteria are all there, with the rule text completely out of the way. Both worlds, zero side effects.
+- **Stage 4 · Intuition check** — the discipline rules are **not loaded**, so the user's own problem-finding instinct is neither boxed in nor replaced; meanwhile the **review capability** the skill instilled in the earlier stage (really verify, delivery claims must match) still works. The breadth of intuition and the sensitivity of discipline, online at the same time.
 
 <details>
 
