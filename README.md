@@ -208,8 +208,6 @@ git clone https://github.com/JadeYingWah/gpt-series-reasoning-style
 | `references/multi-agent.md` | 形态二三细则：命中信号、派发规范、六步操作、红线 |
 | `templates/` | 指挥官 / 执行者 / 审查者三张角色卡 + 任务包七要素 |
 | `scripts/selfcheck.py` | 仓库一致性自检（21 项，纯只读） |
-| `CHANGELOG.md` | 公开发布线（1.2.x） |
-| `INTERNAL-HISTORY.md` | 发布前内部迭代史（0.x），按史实保留 |
 | `SECURITY.md` | 安全模型说明 |
 | `social-preview.svg / .png` | 仓库横幅图（1280×640） |
 
@@ -220,8 +218,7 @@ git clone https://github.com/JadeYingWah/gpt-series-reasoning-style
 当前版本：**1.4.49**
 
 - **v1.4.x 极简线**：三阶段五面、协作形态叠加、按需加载——当前主线，**26 次 A/B 实验背书**。
-- **v1.2.x 重版线**：179 行、模块矩阵、self-test 冻结 77 条——**207 次实验证伪**，历史保留于 `CHANGELOG.md`。
-- 更早的内部迭代（0.0.1.x–0.3.3.x）见 `INTERNAL-HISTORY.md`。
+- **v1.2.x 重版线**：179 行、模块矩阵、self-test 冻结 77 条——**207 次实验证伪**，该线已废弃。
 
 ---
 

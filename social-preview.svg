@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-labelledby="banner-title banner-desc">
+  <title id="banner-title">GPT-Series Reasoning Style · GPT 系列推理风格 — Agent Skill</title>
+  <desc id="banner-desc">Social preview: a minimal delivery-discipline agent skill. Five-face sequence alternating forget/think (plan, execute, review), three core rules, backed by 233 A/B experiments. Version line v1.4.x, MIT license.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0B1020"/>
+      <stop offset="1" stop-color="#171233"/>
+    </linearGradient>
+    <radialGradient id="glowP" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#7C3AED" stop-opacity="0.38"/>
+      <stop offset="1" stop-color="#7C3AED" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowC" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#06B6D4" stop-opacity="0.30"/>
+      <stop offset="1" stop-color="#06B6D4" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="thinkGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8B5CF6"/>
+      <stop offset="1" stop-color="#6D28D9"/>
+    </linearGradient>
+  </defs>
+
+  <!-- background -->
+  <rect width="1280" height="640" fill="url(#bg)"/>
+  <ellipse cx="170" cy="90" rx="460" ry="280" fill="url(#glowP)"/>
+  <ellipse cx="1120" cy="560" rx="480" ry="300" fill="url(#glowC)"/>
+
+  <!-- scattered decorations -->
+  <circle cx="1100" cy="96" r="2.5" fill="#22D3EE" opacity="0.4"/>
+  <circle cx="1206" cy="178" r="2" fill="#A78BFA" opacity="0.5"/>
+  <circle cx="864" cy="72" r="1.8" fill="#22D3EE" opacity="0.3"/>
+  <circle cx="64" cy="556" r="2.5" fill="#A78BFA" opacity="0.4"/>
+  <circle cx="356" cy="604" r="2" fill="#22D3EE" opacity="0.3"/>
+  <circle cx="1236" cy="308" r="1.8" fill="#22D3EE" opacity="0.3"/>
+  <path d="M1144 244 h12 M1150 238 v12" stroke="#334155" stroke-width="1.5"/>
+  <path d="M124 468 h12 M130 462 v12" stroke="#334155" stroke-width="1.5"/>
+  <path d="M706 66 h12 M712 60 v12" stroke="#334155" stroke-width="1.5"/>
+
+  <g font-family="'Segoe UI','Microsoft YaHei','PingFang SC',sans-serif">
+    <!-- top row -->
+    <text x="94" y="66" font-size="18" font-weight="600" letter-spacing="3" fill="#22D3EE" opacity="0.92">AGENT SKILL · DELIVERY DISCIPLINE LAYER</text>
+    <text x="1186" y="66" text-anchor="end" font-size="18" letter-spacing="1" fill="#94A3B8">v1.4.x · MIT</text>
+
+    <!-- title block -->
+    <rect x="94" y="104" width="8" height="80" rx="4" fill="url(#thinkGrad)"/>
+    <text x="122" y="158" font-size="58" font-weight="800" fill="#F1F5F9" letter-spacing="0.5">GPT-Series Reasoning Style</text>
+    <text x="122" y="212" font-size="30"><tspan fill="#94A3B8">把「Agent 说做完了」变成</tspan><tspan fill="#C4B5FD" font-weight="700">「Agent 证明做完了」</tspan></text>
+
+    <!-- five-face sequence caption -->
+    <text x="94" y="272" font-size="14" font-weight="600" letter-spacing="4" fill="#475569">FIVE-FACE SEQUENCE</text>
+
+    <!-- face 1: forget -->
+    <g>
+      <rect x="94" y="290" width="196" height="112" rx="16" fill="#131A31" stroke="#22D3EE" stroke-width="1.5" stroke-opacity="0.9"/>
+      <text x="192" y="318" text-anchor="middle" font-size="16" fill="#8FA3BF">规划面 1</text>
+      <text x="192" y="350" text-anchor="middle" font-size="24" font-weight="700" fill="#F1F5F9">自由构想</text>
+      <rect x="164" y="364" width="56" height="26" rx="13" fill="none" stroke="#22D3EE" stroke-width="1.5"/>
+      <text x="192" y="382" text-anchor="middle" font-size="15" font-weight="700" fill="#22D3EE">忘</text>
+    </g>
+
+    <!-- face 2: think -->
+    <g>
+      <rect x="318" y="290" width="196" height="112" rx="16" fill="url(#thinkGrad)" stroke="#C4B5FD" stroke-width="1.5" stroke-opacity="0.55"/>
+      <text x="416" y="318" text-anchor="middle" font-size="16" fill="#DDD6FE">规划面 2</text>
+      <text x="416" y="350" text-anchor="middle" font-size="24" font-weight="700" fill="#FFFFFF">规则规划</text>
+      <rect x="388" y="364" width="56" height="26" rx="13" fill="#FBBF24"/>
+      <text x="416" y="382" text-anchor="middle" font-size="15" font-weight="700" fill="#1E1B4B">想</text>
+    </g>
+
+    <!-- face 3: forget -->
+    <g>
+      <rect x="542" y="290" width="196" height="112" rx="16" fill="#131A31" stroke="#22D3EE" stroke-width="1.5" stroke-opacity="0.9"/>
+      <text x="640" y="318" text-anchor="middle" font-size="16" fill="#8FA3BF">执行面</text>
+      <text x="640" y="350" text-anchor="middle" font-size="24" font-weight="700" fill="#F1F5F9">专注干活</text>
+      <rect x="612" y="364" width="56" height="26" rx="13" fill="none" stroke="#22D3EE" stroke-width="1.5"/>
+      <text x="640" y="382" text-anchor="middle" font-size="15" font-weight="700" fill="#22D3EE">忘</text>
+    </g>
+
+    <!-- face 4: keep forgetting -->
+    <g>
+      <rect x="766" y="290" width="196" height="112" rx="16" fill="#131A31" stroke="#22D3EE" stroke-width="1.5" stroke-opacity="0.9"/>
+      <text x="864" y="318" text-anchor="middle" font-size="16" fill="#8FA3BF">审查面 1</text>
+      <text x="864" y="350" text-anchor="middle" font-size="24" font-weight="700" fill="#F1F5F9">直觉挑刺</text>
+      <rect x="828" y="364" width="72" height="26" rx="13" fill="none" stroke="#22D3EE" stroke-width="1.5"/>
+      <text x="864" y="382" text-anchor="middle" font-size="15" font-weight="700" fill="#22D3EE">继续忘</text>
+    </g>
+
+    <!-- face 5: think -->
+    <g>
+      <rect x="990" y="290" width="196" height="112" rx="16" fill="url(#thinkGrad)" stroke="#C4B5FD" stroke-width="1.5" stroke-opacity="0.55"/>
+      <text x="1088" y="318" text-anchor="middle" font-size="16" fill="#DDD6FE">审查面 2</text>
+      <text x="1088" y="350" text-anchor="middle" font-size="24" font-weight="700" fill="#FFFFFF">七条纪律</text>
+      <rect x="1060" y="364" width="56" height="26" rx="13" fill="#FBBF24"/>
+      <text x="1088" y="382" text-anchor="middle" font-size="15" font-weight="700" fill="#1E1B4B">想</text>
+    </g>
+
+    <!-- flow arrows -->
+    <polygon points="297,339 311,346 297,353" fill="#22D3EE" opacity="0.75"/>
+    <polygon points="521,339 535,346 521,353" fill="#22D3EE" opacity="0.75"/>
+    <polygon points="745,339 759,346 745,353" fill="#22D3EE" opacity="0.75"/>
+    <polygon points="969,339 983,346 969,353" fill="#22D3EE" opacity="0.75"/>
+
+    <!-- core-rule badges -->
+    <g font-size="19" font-weight="600">
+      <rect x="278" y="480" width="170" height="38" rx="19" fill="#F59E0B" fill-opacity="0.10" stroke="#F59E0B" stroke-width="1.5" stroke-opacity="0.8"/>
+      <text x="363" y="505" text-anchor="middle" fill="#FBBF24">★ 真打开看一眼</text>
+      <rect x="470" y="480" width="150" height="38" rx="19" fill="#F59E0B" fill-opacity="0.10" stroke="#F59E0B" stroke-width="1.5" stroke-opacity="0.8"/>
+      <text x="545" y="505" text-anchor="middle" fill="#FBBF24">★ 未验证标注</text>
+      <rect x="642" y="480" width="131" height="38" rx="19" fill="#F59E0B" fill-opacity="0.10" stroke="#F59E0B" stroke-width="1.5" stroke-opacity="0.8"/>
+      <text x="707.5" y="505" text-anchor="middle" fill="#FBBF24">★ 防死循环</text>
+      <rect x="795" y="480" width="208" height="38" rx="19" fill="#22D3EE" fill-opacity="0.10" stroke="#22D3EE" stroke-width="1.5" stroke-opacity="0.8"/>
+      <text x="899" y="505" text-anchor="middle" fill="#22D3EE">233 次 A/B 实验背书</text>
+    </g>
+
+    <!-- footer quote -->
+    <text x="640" y="578" text-anchor="middle" font-size="21" fill="#6B7A93">「规则越少越好，但核心那几条不能少」</text>
+  </g>
+</svg>
