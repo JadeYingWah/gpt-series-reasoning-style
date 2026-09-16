@@ -15,14 +15,21 @@
 
 </div>
 
-> **目前 skill 市场上，几乎看不到本 skill 特有的「遗忘机制」。** 别的 skill 加载即全程在场——挤占注意力、
-> 打断思路、耗占上下文；而遗忘机制让本 skill 在五面中三面彻底退场，纪律只在「落计划」和「说做完了」两个
-> 时刻短暂出现。**你可以无视 skill 常见的那些负面影响，只收下它的益处。** 26 次 A/B 实验实测：有用，且无负面影响。
+> **与主流 skill 设计的一处差异。** Anthropic 官方 skill 设计指南与主流 agent 框架的公开文档中，主流做法是
+> 「加载后全程在场」——挤占注意力、打断思路、耗占上下文；事后审查通常靠另起一个独立 agent，或在同一上下文里
+> 跑一遍 checklist。本 skill 的差异点是：**在同一段上下文内，执行阶段通过显式指令让模型脱离纪律、进入心流，
+> 仅在自判完成时重新加载审查规则**。已见到的相邻设计（grove-cli 三层审查、Pipecat 阶段切换）在功能上接近，
+> 但都不是「同上下文内假装没加载」。**你可以无视 skill 常见的那些负面影响，只收下它的益处。**
+> 26 次 A/B 实验实测：有用，且无负面影响。
 >
-> **A mechanism you won't find elsewhere.** Almost every skill on the market stays loaded all the time —
-> taxing attention, interrupting reasoning, burning context. Our unique *forgetting mechanism* makes the
-> discipline vanish in three of its five faces, stepping in only twice, briefly. **You get the benefits
-> without paying the usual costs.** Field-tested in 26 A/B experiments: useful, with no negative side effects.
+> **A point of divergence from mainstream skill design.** In Anthropic's official skill authoring guides and
+> mainstream agent-framework docs, the default is "loaded and always present" — taxing attention, interrupting
+> reasoning, burning context. Post-hoc review is typically delegated to a fresh agent or run as an in-context
+> checklist. This skill's difference: **within the same context, the execution phase explicitly tells the model
+> to set the discipline aside and enter flow, reloading the review rules only when it self-declares done.**
+> Adjacent designs we've seen (grove-cli's three-layer review, Pipecat's stage switching) are functionally
+> close but do not implement "pretend it isn't loaded in the same context." **You get the benefits without
+> paying the usual costs.** Field-tested in 26 A/B experiments: useful, with no negative side effects.
 
 > **Process-discipline layer only** — not a reasoning-capability booster and not GPT-specific —
 > the name records its origin (distilled from a long series of GPT-series model dialogues).
