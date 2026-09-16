@@ -9,9 +9,9 @@
 
 [![Version](https://img.shields.io/badge/version-1.5.0-blue)](#版本--versioning)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](#license--许可证)
-[![Size](https://img.shields.io/badge/SKILL.md-2KB·29行-orange)](#成本--cost)
+[![Size](https://img.shields.io/badge/SKILL.md-1.8KB·23行-orange)](#成本--cost)
 [![Experiments](https://img.shields.io/badge/A%2FB_实验-233_次-success)](#实测与证据--field-tests)
-[![Runtime](https://img.shields.io/badge/按需加载-8_files-blueviolet)](#成本--cost)
+[![Runtime](https://img.shields.io/badge/按需加载-18_files-blueviolet)](#成本--cost)
 
 </div>
 
@@ -47,7 +47,7 @@ It is therefore **not** a model-specific add-on. What is distilled is **behavior
 所以我们只做两件事：
 
 1. **抽取少数真正可遵守的特性**（真打开看一眼、未验证标注、全绿不算证据等）；
-2. 配上**独特的遗忘机制**——执行阶段让纪律退场，交付时再重载。
+2. 配上**独特的遗忘机制**——执行阶段规则不在上下文，交付时从文件读入。
 
 这让使用者**只享受正面增益**：
 
@@ -102,12 +102,12 @@ while **avoiding the downside**:
 | 2 | **渐进式加载规则进行规划**（阶段2 · 规则规划） | 规则载入 | 把构想落成计划，**完整保留**第一阶段的构想，不被规则覆盖 |
 | 3 | **执行**（阶段3 · 执行） | 规则退场 | 专心干活，规则完全不存在 |
 | 4 | **无规则检查**（阶段4 · 直觉检查） | 规则缺席 | 凭直觉挑刺，抓规则**没覆盖到**的问题 |
-| 5 | **渐进式加载规则进行纪律检查**（阶段5 · 纪律检查） | 规则重载 | 严格逐条过纪律，规则覆盖到的必须都做到 |
+| 5 | **渐进式加载规则进行纪律检查**（阶段5 · 纪律检查） | 规则从文件读入 | 严格逐条过纪律，规则覆盖到的必须都做到 |
 
 结果是两个「**零**」：
 
 - **执行期零干扰**——规则在执行阶段完全不存在，心流不被打断；
-- **验收期零妥协**——规则在交付那一刻完整重载，该守的一条不少。
+- **验收期零妥协**——规则在交付那一刻从文件完整读入，该守的一条不少。
 
 由此带来：**交付可信度显著提升**（带 skill 的臂在质量/纪律评分上明显更高）。
 
