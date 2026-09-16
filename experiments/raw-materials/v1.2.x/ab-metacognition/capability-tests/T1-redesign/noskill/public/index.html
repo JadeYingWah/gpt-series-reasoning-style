@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>待办事项</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>📝 待办事项</h1>
+      <p class="subtitle">管理你的日常任务</p>
+    </header>
+
+    <!-- Add Todo Form -->
+    <section class="add-section">
+      <form id="todo-form">
+        <div class="form-row">
+          <input type="text" id="title" placeholder="任务标题" required maxlength="200">
+        </div>
+        <div class="form-row">
+          <textarea id="description" placeholder="任务描述（可选）" rows="2" maxlength="1000"></textarea>
+        </div>
+        <div class="form-row form-inline">
+          <div class="form-group">
+            <label for="priority">优先级</label>
+            <select id="priority">
+              <option value="low">低</option>
+              <option value="medium" selected>中</option>
+              <option value="high">高</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="due_date">截止日期</label>
+            <input type="date" id="due_date">
+          </div>
+          <button type="submit" class="btn btn-primary">添加</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Filter & Stats -->
+    <section class="filter-section">
+      <div class="filters">
+        <button class="filter-btn active" data-filter="all">全部 <span id="count-all">0</span></button>
+        <button class="filter-btn" data-filter="active">未完成 <span id="count-active">0</span></button>
+        <button class="filter-btn" data-filter="completed">已完成 <span id="count-completed">0</span></button>
+      </div>
+      <div class="sort-group">
+        <label for="sort">排序：</label>
+        <select id="sort">
+          <option value="created_desc">最新创建</option>
+          <option value="created_asc">最早创建</option>
+          <option value="due_asc">截止日期（近→远）</option>
+          <option value="priority_desc">优先级（高→低）</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Todo List -->
+    <section class="todo-list" id="todo-list">
+      <!-- Todos rendered here -->
+    </section>
+
+    <div class="empty-state" id="empty-state" style="display:none;">
+      <p>暂无待办事项，添加一个开始吧！</p>
+    </div>
+  </div>
+
+  <!-- Edit Modal -->
+  <div class="modal-overlay" id="edit-modal" style="display:none;">
+    <div class="modal">
+      <h3>编辑待办</h3>
+      <form id="edit-form">
+        <input type="hidden" id="edit-id">
+        <div class="form-group">
+          <label for="edit-title">标题</label>
+          <input type="text" id="edit-title" required maxlength="200">
+        </div>
+        <div class="form-group">
+          <label for="edit-description">描述</label>
+          <textarea id="edit-description" rows="3" maxlength="1000"></textarea>
+        </div>
+        <div class="form-row form-inline">
+          <div class="form-group">
+            <label for="edit-priority">优先级</label>
+            <select id="edit-priority">
+              <option value="low">低</option>
+              <option value="medium">中</option>
+              <option value="high">高</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="edit-due_date">截止日期</label>
+            <input type="date" id="edit-due_date">
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="cancel-edit">取消</button>
+          <button type="submit" class="btn btn-primary">保存</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

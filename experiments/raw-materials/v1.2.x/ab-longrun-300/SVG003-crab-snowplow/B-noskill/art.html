@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SVG003 · Crab Snowplow</title>
+<!--
+  SVG003-crab-snowplow — 几何 / 运动自洽说明（与 notes.md 同步）
+
+  1. 前进方向：整体与镜头均向画面右侧推进（车头在右，雪铲朝右）。
+  2. 车轮旋转：侧视、车头朝右时，前进 = 顺时针旋转（CSS rotate + 视觉辐条方向一致）。
+  3. 履带式雪痕：地面雪纹向左飘，暗示相对地面的前进。
+  4. crab 附肢相对载具（≥2 处，非锁死平移）：
+     - 眼柄：独立 sine 摆动（左右异相），与车身 bob 不同相。
+     - 左/右螯：轻微夹持/抖动，相对方向盘有微位移。
+     - 步足：相对底盘的摆动相位错开，不与车身刚体同步。
+     - 触角：慢速摇摆。
+  5. 背景视差（≥2 层）：
+     L1 星空/极光 — 最慢
+     L2 远山 — 慢
+     L3 中景针叶林 — 中
+     L4 地面雪原 + 车体 — 基准
+     L5 前景雪丘/雪尘 — 最快
+  6. 无 CDN / 无外链 / 无框架 / 无网络请求；纯 HTML+CSS+内联 SVG。
+-->
+<style>
+  :root {
+    --sky-top: #0b1026;
+    --sky-mid: #1a2744;
+    --sky-low: #3d4f6f;
+    --snow: #d7e6f5;
+    --snow-deep: #a8c0d8;
+    --crab: #e85d3a;
+    --crab-dark: #b33a22;
+    --crab-shell: #f07850;
+    --truck: #1f3d4a;
+    --truck-hi: #2d5a6e;
+    --plow: #d4a017;
+    --plow-dark: #8a680c;
+    --beacon: #ffb020;
+    --window: #7ec8e3;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100%; height: 100%;
+    background: #060914;
+    overflow: hidden;
+    font-family: "Segoe UI", system-ui, sans-serif;
+  }
+  .stage {
+    position: relative;
+    width: 100vw; height: 100vh;
+    overflow: hidden;
+  }
+  svg.scene {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    display: block;
+  }
+  .hud {
+    position: absolute;
+    left: 16px; bottom: 12px;
+    color: rgba(200, 220, 240, 0.55);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* ── parallax helpers ── */
+  .layer { will-change: transform; }
+
+  /* ── vehicle body bob ── */
+  @keyframes bodyBob {
+    0%   { transform: translateY(0px) rotate(0deg); }
+    25%  { transform: translateY(-2.2px) rotate(0.15deg); }
+    50%  { transform: translateY(0px) rotate(0deg); }
+    75%  { transform: translateY(-1.4px) rotate(-0.12deg); }
+    100% { transform: translateY(0px) rotate(0deg); }
+  }
+  .vehicle-bob {
+    animation: bodyBob 0.55s ease-in-out infinite;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  /* ── wheels: clockwise = rightward travel ── */
+  @keyframes spinCW {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  .wheel {
+    animation: spinCW 0.45s linear infinite;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  .wheel.rear { animation-duration: 0.5s; }
+
+  /* ── plow blade micro-jitter ── */
+  @keyframes plowJitter {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    20%  { transform: translateY(0.6px) rotate(0.25deg); }
+    45%  { transform: translateY(-0.4px) rotate(-0.15deg); }
+    70%  { transform: translateY(0.3px) rotate(0.1deg); }
+  }
+  .plow-blade {
+    animation: plowJitter 0.28s ease-in-out infinite;
+    transform-box: fill-box;
+    transform-origin: 15% 50%;
+  }
+
+  /* ── crab eye stalks: independent phase ── */
+  @keyframes eyeWobbleL {
+    0%, 100% { transform: rotate(-6deg); }
+    50%      { transform: rotate(8deg); }
+  }
+  @keyframes eyeWobbleR {
+    0%, 100% { transform: rotate(7deg); }
+    50%      { transform: rotate(-5deg); }
+  }
+  .eye-stalk-l {
+    animation: eyeWobbleL 1.1s ease-in-out infinite;
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+  }
+  .eye-stalk-r {
+    animation: eyeWobbleR 0.85s ease-in-out infinite;
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+  }
+  @keyframes pupilNudge {
+    0%, 100% { transform: translateX(0); }
+    50%      { transform: translateX(1.2px); }
+  }
+  .pupils { animation: pupilNudge 1.6s ease-in-out infinite; }
+
+  /* ── claws gripping wheel ── */
+  @keyframes clawGripL {
+    0%, 100% { transform: rotate(0deg) translate(0,0); }
+    35%      { transform: rotate(-3deg) translate(0.6px, 0.4px); }
+    70%      { transform: rotate(1.5deg) translate(-0.3px, -0.2px); }
+  }
+  @keyframes clawGripR {
+    0%, 100% { transform: rotate(0deg) translate(0,0); }
+    40%      { transform: rotate(2.5deg) translate(-0.5px, 0.3px); }
+    75%      { transform: rotate(-1.2deg) translate(0.4px, -0.3px); }
+  }
+  .claw-l {
+    animation: clawGripL 0.72s ease-in-out infinite;
+    transform-box: fill-box;
+    transform-origin: 80% 30%;
+  }
+  .claw-r {
+    animation: clawGripR 0.62s ease-in-out infinite;
+    transform-box: fill-box;
+    transform-origin: 20% 30%;
+  }
+
+  /* ── walking legs (relative to vehicle) ── */
+  @keyframes legSwing1 {
+    0%, 100% { transform: rotate(-4deg); }
+    50%      { transform: rotate(7deg); }
+  }
+  @keyframes legSwing2 {
+    0%, 100% { transform: rotate(5deg); }
+    50%      { transform: rotate(-6deg); }
+  }
+  @keyframes legSwing3 {
+    0%, 100% { transform: rotate(-3deg); }
+    50%      { transform: rotate(6deg); }
+  }
+  .leg-a {
+    animation: legSwing1 0.9s ease-in-out infinite;
+    transform-box: fill-box; transform-origin: 50% 0%;
+  }
+  .leg-b {
+    animation: legSwing2 0.75s ease-in-out infinite;
+    transform-box: fill-box; transform-origin: 50% 0%;
+  }
+  .leg-c {
+    animation: legSwing3 1.05s ease-in-out infinite;
+    transform-box: fill-box; transform-origin: 50% 0%;
+  }
+
+  /* ── antennae ── */
+  @keyframes antennaWave {
+    0%, 100% { transform: rotate(-10deg); }
+    50%      { transform: rotate(12deg); }
+  }
+  .ant-l {
+    animation: antennaWave 1.4s ease-in-out infinite;
+    transform-box: fill-box; transform-origin: 50% 100%;
+  }
+  .ant-r {
+    animation: antennaWave 1.25s ease-in-out infinite reverse;
+    transform-box: fill-box; transform-origin: 50% 100%;
+  }
+
+  /* ── beacon flash ── */
+  @keyframes beaconPulse {
+    0%, 100% { opacity: 0.25; }
+    50%      { opacity: 1; }
+  }
+  .beacon-glow {
+    animation: beaconPulse 0.7s ease-in-out infinite;
+  }
+
+  /* ── exhaust puffs ── */
+  @keyframes puff {
+    0%   { opacity: 0.55; transform: translate(0,0) scale(0.6); }
+    60%  { opacity: 0.28; transform: translate(-28px,-18px) scale(1.15); }
+    100% { opacity: 0;    transform: translate(-55px,-38px) scale(1.5); }
+  }
+  .puff1 { animation: puff 1.4s ease-out infinite; }
+  .puff2 { animation: puff 1.4s ease-out infinite 0.45s; }
+  .puff3 { animation: puff 1.4s ease-out infinite 0.9s; }
+
+  /* ── snow spray from plow ── */
+  @keyframes spray {
+    0%   { opacity: 0.85; transform: translate(0,0) scale(0.5); }
+    100% { opacity: 0;   transform: translate(-40px, -50px) scale(1.3); }
+  }
+  .s1 { animation: spray 0.7s ease-out infinite; }
+  .s2 { animation: spray 0.7s ease-out infinite 0.12s; }
+  .s3 { animation: spray 0.7s ease-out infinite 0.24s; }
+  .s4 { animation: spray 0.7s ease-out infinite 0.36s; }
+  .s5 { animation: spray 0.7s ease-out infinite 0.48s; }
+  .s6 { animation: spray 0.7s ease-out infinite 0.58s; }
+
+  /* ── falling snow (JS-assisted, also CSS fallback) ── */
+  @keyframes snowFall {
+    0%   { transform: translate(0, -20px); opacity: 0; }
+    10%  { opacity: 0.9; }
+    100% { transform: translate(-30px, 720px); opacity: 0.15; }
+  }
+  .flake { animation: snowFall linear infinite; }
+
+  /* ── ground snow texture drift ── */
+  @keyframes groundDrift {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-120px); }
+  }
+  .ground-drift {
+    animation: groundDrift 3.2s linear infinite;
+  }
+
+  /* ── mid trees scroll ── */
+  @keyframes midScroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-400px); }
+  }
+  .mid-scroll {
+    animation: midScroll 14s linear infinite;
+  }
+
+  /* ── far mountains scroll ── */
+  @keyframes farScroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-300px); }
+  }
+  .far-scroll {
+    animation: farScroll 36s linear infinite;
+  }
+
+  /* ── aurora shimmer ── */
+  @keyframes aurora {
+    0%, 100% { opacity: 0.35; transform: translateY(0); }
+    50%      { opacity: 0.7;  transform: translateY(-8px); }
+  }
+  .aurora-a { animation: aurora 5s ease-in-out infinite; }
+  .aurora-b { animation: aurora 6.5s ease-in-out infinite 1s; }
+
+  /* ── star twinkle ── */
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.3; }
+    50%      { opacity: 1; }
+  }
+  .star { animation: twinkle ease-in-out infinite; }
+
+  /* ── headlight beam ── */
+  @keyframes beam {
+    0%, 100% { opacity: 0.18; }
+    50%      { opacity: 0.32; }
+  }
+  .headlight-beam {
+    animation: beam 2s ease-in-out infinite;
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+  <svg class="scene" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A cheerful orange crab driving a yellow-bladed snowplow through a night blizzard, moving to the right">
+    <defs>
+      <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#0b1026"/>
+        <stop offset="45%" stop-color="#1a2744"/>
+        <stop offset="100%" stop-color="#3d4f6f"/>
+      </linearGradient>
+      <linearGradient id="snowGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#e8f2fb"/>
+        <stop offset="100%" stop-color="#b8cfe3"/>
+      </linearGradient>
+      <linearGradient id="crabGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#f07850"/>
+        <stop offset="100%" stop-color="#d44828"/>
+      </linearGradient>
+      <linearGradient id="truckGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#2d5a6e"/>
+        <stop offset="100%" stop-color="#16303c"/>
+      </linearGradient>
+      <linearGradient id="plowGrad" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#c4900e"/>
+        <stop offset="50%" stop-color="#f0c020"/>
+        <stop offset="100%" stop-color="#d4a017"/>
+      </linearGradient>
+      <radialGradient id="beaconG" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#ffd56a" stop-opacity="1"/>
+        <stop offset="100%" stop-color="#ff8800" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="windowG" cx="30%" cy="30%" r="80%">
+        <stop offset="0%" stop-color="#b8e6f5"/>
+        <stop offset="60%" stop-color="#5a9eb8"/>
+        <stop offset="100%" stop-color="#2a5a70"/>
+      </radialGradient>
+      <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="6" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="tinyBlur" x="-40%" y="-40%" width="180%" height="180%">
+        <feGaussianBlur stdDeviation="1.5"/>
+      </filter>
+    </defs>
+
+    <!-- ══════════ L0 SKY ══════════ -->
+    <rect width="1200" height="700" fill="url(#skyGrad)"/>
+
+    <!-- ══════════ L1 STARS + AURORA (slowest parallax) ══════════ -->
+    <g class="layer" id="layer-stars">
+      <!-- stars -->
+      <circle class="star" cx="80" cy="60" r="1.2" fill="#fff" style="animation-duration:2.1s"/>
+      <circle class="star" cx="160" cy="110" r="0.9" fill="#cde" style="animation-duration:3.4s;animation-delay:0.3s"/>
+      <circle class="star" cx="240" cy="40" r="1.4" fill="#fff" style="animation-duration:1.8s;animation-delay:0.8s"/>
+      <circle class="star" cx="320" cy="90" r="0.8" fill="#dfe" style="animation-duration:2.9s;animation-delay:0.2s"/>
+      <circle class="star" cx="410" cy="55" r="1.1" fill="#fff" style="animation-duration:2.4s;animation-delay:1.1s"/>
+      <circle class="star" cx="500" cy="120" r="0.7" fill="#cdf" style="animation-duration:3.7s;animation-delay:0.5s"/>
+      <circle class="star" cx="580" cy="30" r="1.3" fill="#fff" style="animation-duration:2.0s;animation-delay:0.9s"/>
+      <circle class="star" cx="670" cy="75" r="0.9" fill="#dfe" style="animation-duration:3.1s;animation-delay:0.1s"/>
+      <circle class="star" cx="750" cy="45" r="1.0" fill="#fff" style="animation-duration:2.6s;animation-delay:1.4s"/>
+      <circle class="star" cx="840" cy="100" r="1.5" fill="#fff" style="animation-duration:1.7s;animation-delay:0.6s"/>
+      <circle class="star" cx="920" cy="50" r="0.8" fill="#cdf" style="animation-duration:3.3s;animation-delay:0.4s"/>
+      <circle class="star" cx="1010" cy="85" r="1.1" fill="#fff" style="animation-duration:2.2s;animation-delay:1.0s"/>
+      <circle class="star" cx="1100" cy="35" r="1.3" fill="#fff" style="animation-duration:1.9s;animation-delay:0.7s"/>
+      <circle class="star" cx="1150" cy="110" r="0.7" fill="#dfe" style="animation-duration:3.5s;animation-delay:1.3s"/>
+      <circle class="star" cx="60" cy="150" r="0.9" fill="#fff" style="animation-duration:2.8s;animation-delay:0.2s"/>
+      <circle class="star" cx="200" cy="180" r="0.6" fill="#cdf" style="animation-duration:4.0s;animation-delay:0.8s"/>
+      <circle class="star" cx="1050" cy="160" r="1.0" fill="#fff" style="animation-duration:2.3s;animation-delay:0.1s"/>
+      <!-- aurora ribbons -->
+      <path class="aurora-a" d="M-40,140 C120,80 280,180 450,100 C620,20 780,130 960,70 C1100,30 1240,90 1280,60"
+            fill="none" stroke="#3dffa8" stroke-width="18" stroke-opacity="0.22" stroke-linecap="round"/>
+      <path class="aurora-b" d="M-40,170 C150,120 320,200 500,130 C680,60 850,160 1050,100 C1150,70 1240,110 1280,90"
+            fill="none" stroke="#6ec8ff" stroke-width="12" stroke-opacity="0.18" stroke-linecap="round"/>
+      <path class="aurora-a" d="M-20,200 C180,150 350,220 540,160 C720,100 900,190 1100,140 C1180,120 1240,140 1280,130"
+            fill="none" stroke="#b070ff" stroke-width="8" stroke-opacity="0.12" stroke-linecap="round"/>
+    </g>
+
+    <!-- ══════════ L2 FAR MOUNTAINS ══════════ -->
+    <g class="layer" id="layer-far">
+      <g class="far-scroll">
+        <!-- two tiles of mountains, tile width 300 * 2 = seamless-ish 600 cycle drawn twice -->
+        <g opacity="0.55">
+          <!-- tile A -->
+          <path d="M0,380 L60,260 L110,320 L180,200 L240,300 L300,240 L360,340 L420,220 L480,310 L540,250 L600,300 L660,230 L720,320 L780,250 L840,310 L900,240 L960,330 L1020,260 L1080,320 L1140,250 L1200,300 L1260,260 L1320,320 L1380,250 L1440,300 L1500,240 L1560,320 L1620,260 L1680,300"
+                fill="#1a2840"/>
+          <path d="M0,380 L40,300 L90,340 L150,250 L220,330 L300,270 L370,350 L440,260 L510,330 L580,280 L650,340 L720,255 L790,330 L860,275 L930,340 L1000,265 L1070,330 L1140,270 L1210,340 L1280,260 L1350,330 L1420,275 L1490,340 L1560,265 L1630,330 L1700,280"
+                fill="#152035"/>
+          <!-- snow caps -->
+          <path d="M180,200 L200,240 L220,230 L240,250" fill="none" stroke="#8aa8c0" stroke-width="3" opacity="0.4"/>
+          <path d="M420,220 L445,255 L470,245 L490,265" fill="none" stroke="#8aa8c0" stroke-width="3" opacity="0.35"/>
+          <path d="M660,230 L685,265 L710,255 L730,275" fill="none" stroke="#8aa8c0" stroke-width="3" opacity="0.3"/>
+          <path d="M900,240 L925,275 L950,265 L970,285" fill="none" stroke="#8aa8c0" stroke-width="3" opacity="0.35"/>
+          <path d="M1140,250 L1165,285 L1190,275 L1210,295" fill="none" stroke="#8aa8c0" stroke-width="3" opacity="0.3"/>
+          <path d="M1380,250 L1405,285 L1430,275 L1450,295" fill="none" stroke="#8aa8c0" stroke-width="3" opacity="0.3"/>
+          <path d="M1620,260 L1645,295 L1670,285 L1690,305" fill="none" stroke="#8aa8c0" stroke-width="3" opacity="0.3"/>
+        </g>
+      </g>
+    </g>
+
+    <!-- ══════════ L3 MID FOREST (pine trees) ══════════ -->
+    <g class="layer" id="layer-mid">
+      <g class="mid-scroll">
+        <g opacity="0.75">
+          <!-- repeating pine trees every ~100px, tile 400 -->
+          <g id="pines">
+            <!-- helper: each tree = trunk + 3 triangles -->
+            <g transform="translate(40,0)">
+              <rect x="-4" y="360" width="8" height="30" fill="#1a1814"/>
+              <path d="M0,260 L-28,340 L28,340 Z" fill="#1e3a2f"/>
+              <path d="M0,290 L-34,360 L34,360 Z" fill="#1a3228"/>
+              <path d="M0,320 L-40,380 L40,380 Z" fill="#152a22"/>
+            </g>
+            <g transform="translate(120,10)">
+              <rect x="-4" y="350" width="8" height="28" fill="#1a1814"/>
+              <path d="M0,270 L-24,330 L24,330 Z" fill="#1e3a2f"/>
+              <path d="M0,298 L-30,350 L30,350 Z" fill="#1a3228"/>
+              <path d="M0,324 L-36,370 L36,370 Z" fill="#152a22"/>
+            </g>
+            <g transform="translate(200,-5)">
+              <rect x="-4" y="365" width="8" height="32" fill="#1a1814"/>
+              <path d="M0,250 L-32,345 L32,345 Z" fill="#1e3a2f"/>
+              <path d="M0,285 L-38,365 L38,365 Z" fill="#1a3228"/>
+              <path d="M0,318 L-44,390 L44,390 Z" fill="#152a22"/>
+            </g>
+            <g transform="translate(280,15)">
+              <rect x="-4" y="345" width="8" height="26" fill="#1a1814"/>
+              <path d="M0,280 L-22,325 L22,325 Z" fill="#1e3a2f"/>
+              <path d="M0,302 L-26,345 L26,345 Z" fill="#1a3228"/>
+              <path d="M0,322 L-30,360 L30,360 Z" fill="#152a22"/>
+            </g>
+            <g transform="translate(360,5)">
+              <rect x="-4" y="355" width="8" height="30" fill="#1a1814"/>
+              <path d="M0,265 L-26,335 L26,335 Z" fill="#1e3a2f"/>
+              <path d="M0,292 L-32,355 L32,355 Z" fill="#1a3228"/>
+              <path d="M0,320 L-38,380 L38,380 Z" fill="#152a22"/>
+            </g>
+            <!-- second tile for seamless scroll (offset +400) -->
+            <g transform="translate(440,0)">
+              <rect x="-4" y="360" width="8" height="30" fill="#1a1814"/>
+              <path d="M0,260 L-28,340 L28,340 Z" fill="#1e3a2f"/>
+              <path d="M0,290 L-34,360 L34,360 Z" fill="#1a3228"/>
+              <path d="M0,320 L-40,380 L40,380 Z" fill="#152a22"/>
+            </g>
+            <g transform="translate(520,10)">
+              <rect x="-4" y="350" width="8" height="28" fill="#1a1814"/>
+              <path d="M0,270 L-24,330 L24,330 Z" fill="#1e3a2f"/>
+              <path d="M0,298 L-30,350 L30,350 Z" fill="#1a3228"/>
+              <path d="M0,324 L-36,370 L36,370 Z" fill="#152a22"/>
+            </g>
+            <g transform="translate(600,-5)">
+              <rect x="-4" y="365" width="8" height="32" fill="#1a1814"/>
+              <path d="M0,250 L-32,345 L32,345 Z" fill="#1e3a2f"/>
+              <path d="M0,285 L-38,365 L38,365 Z" fill="#1a3228"/>
+              <path d="M0,318 L-44,390 L44,390 Z" fill="#152a22"/>
+            </g>
+            <g transform="translate(680,15)">
+              <rect x="-4" y="345" width="8" height="26" fill="#1a1814"/>
+              <path d="M0,280 L-22,325 L22,325 Z" fill="#1e3a2f"/>
+              <path d="M0,302 L-26,345 L26,345 Z" fill="#1a3228"/>
+              <path d="M0,322 L-30,360 L30,360 Z" fill="#152a22"/>
+            </g>
+            <g transform="translate(760,5)">
+              <rect x="-4" y="355" width="8" height="30" fill="#1a1814"/>
+              <path d="M0,265 L-26,335 L26,335 Z" fill="#1e3a2f"/>
+              <path d="M0,292 L-32,355 L32,355 Z" fill="#1a3228"/>
+              <path d="M0,320 L-38,380 L38,380 Z" fill="#152a22"/>
+            </g>
+            <!-- third tile -->
+            <g transform="translate(840,0)">
+              <rect x="-4" y="360" width="8" height="30" fill="#1a1814"/>
+              <path d="M0,260 L-28,340 L28,340 Z" fill="#1e3a2f"/>
+              <path d="M0,290 L-34,360 L34,360 Z" fill="#1a3228"/>
+              <path d="M0,320 L-40,380 L40,380 Z" fill="#152a22"/>
+            </g>
+            <g transform="translate(920,10)">
+              <rect x="-4" y="350" width="8" height="28" fill="#1a1814"/>
+              <path d="M0,270 L-24,330 L24,330 Z" fill="#1e3a2f"/>
+              <path d="M0,298 L-30,350 L30,350 Z" fill="#1a3228"/>
+              <path d="M0,324 L-36,370 L36,370 Z" fill="#152a22"/>
+            </g>
+            <g transform="translate(1000,-5)">
+              <rect x="-4" y="365" width="8" height="32" fill="#1a1814"/>
+              <path d="M0,250 L-32,345 L32,345 Z" fill="#1e3a2f"/>
+              <path d="M0,285 L-38,365 L38,365 Z" fill="#1a3228"/>
+              <path d="M0,318 L-44,390 L44,390 Z" fill="#152a22"/>
+            </g>
+            <g transform="translate(1080,15)">
+              <rect x="-4" y="345" width="8" height="26" fill="#1a1814"/>
+              <path d="M0,280 L-22,325 L22,325 Z" fill="#1e3a2f"/>
+              <path d="M0,302 L-26,345 L26,345 Z" fill="#1a3228"/>
+              <path d="M0,322 L-30,360 L30,360 Z" fill="#152a22"/>
+            </g>
+            <g transform="translate(1160,5)">
+              <rect x="-4" y="355" width="8" height="30" fill="#1a1814"/>
+              <path d="M0,265 L-26,335 L26,335 Z" fill="#1e3a2f"/>
+              <path d="M0,292 L-32,355 L32,355 Z" fill="#1a3228"/>
+              <path d="M0,320 L-38,380 L38,380 Z" fill="#152a22"/>
+            </g>
+            <!-- fourth tile -->
+            <g transform="translate(1240,0)">
+              <rect x="-4" y="360" width="8" height="30" fill="#1a1814"/>
+              <path d="M0,260 L-28,340 L28,340 Z" fill="#1e3a2f"/>
+              <path d="M0,290 L-34,360 L34,360 Z" fill="#1a3228"/>
+              <path d="M0,320 L-40,380 L40,380 Z" fill="#152a22"/>
+            </g>
+            <g transform="translate(1320,10)">
+              <rect x="-4" y="350" width="8" height="28" fill="#1a1814"/>
+              <path d="M0,270 L-24,330 L24,330 Z" fill="#1e3a2f"/>
+              <path d="M0,298 L-30,350 L30,350 Z" fill="#1a3228"/>
+              <path d="M0,324 L-36,370 L36,370 Z" fill="#152a22"/>
+            </g>
+            <g transform="translate(1400,-5)">
+              <rect x="-4" y="365" width="8" height="32" fill="#1a1814"/>
+              <path d="M0,250 L-32,345 L32,345 Z" fill="#1e3a2f"/>
+              <path d="M0,285 L-38,365 L38,365 Z" fill="#1a3228"/>
+              <path d="M0,318 L-44,390 L44,390 Z" fill="#152a22"/>
+            </g>
+            <g transform="translate(1480,15)">
+              <rect x="-4" y="345" width="8" height="26" fill="#1a1814"/>
+              <path d="M0,280 L-22,325 L22,325 Z" fill="#1e3a2f"/>
+              <path d="M0,302 L-26,345 L26,345 Z" fill="#1a3228"/>
+              <path d="M0,322 L-30,360 L30,360 Z" fill="#152a22"/>
+            </g>
+            <g transform="translate(1560,5)">
+              <rect x="-4" y="355" width="8" height="30" fill="#1a1814"/>
+              <path d="M0,265 L-26,335 L26,335 Z" fill="#1e3a2f"/>
+              <path d="M0,292 L-32,355 L32,355 Z" fill="#1a3228"/>
+              <path d="M0,320 L-38,380 L38,380 Z" fill="#152a22"/>
+            </g>
+          </g>
+          <!-- soft mid haze -->
+          <rect x="0" y="340" width="1600" height="80" fill="#0d1828" opacity="0.35"/>
+        </g>
+      </g>
+    </g>
+
+    <!-- ══════════ L4 GROUND SNOW ══════════ -->
+    <g class="layer" id="layer-ground">
+      <path d="M0,420 C80,400 160,430 240,415 C320,400 400,425 480,410 C560,395 640,420 720,408 C800,396 880,422 960,412 C1040,402 1120,425 1200,415 L1200,700 L0,700 Z"
+            fill="url(#snowGrad)"/>
+      <!-- ground texture / snow streaks that drift left (relative motion) -->
+      <g class="ground-drift" opacity="0.35">
+        <path d="M0,450 Q30,445 60,450" fill="none" stroke="#9bb8d0" stroke-width="1.5"/>
+        <path d="M80,470 Q110,464 140,470" fill="none" stroke="#9bb8d0" stroke-width="1.2"/>
+        <path d="M160,440 Q190,436 220,442" fill="none" stroke="#9bb8d0" stroke-width="1.4"/>
+        <path d="M240,490 Q270,484 300,490" fill="none" stroke="#9bb8d0" stroke-width="1.3"/>
+        <path d="M320,455 Q350,450 380,456" fill="none" stroke="#9bb8d0" stroke-width="1.5"/>
+        <path d="M400,475 Q430,470 460,476" fill="none" stroke="#9bb8d0" stroke-width="1.2"/>
+        <path d="M480,445 Q510,440 540,446" fill="none" stroke="#9bb8d0" stroke-width="1.4"/>
+        <path d="M560,495 Q590,488 620,495" fill="none" stroke="#9bb8d0" stroke-width="1.3"/>
+        <path d="M640,460 Q670,455 700,461" fill="none" stroke="#9bb8d0" stroke-width="1.5"/>
+        <path d="M720,480 Q750,474 780,481" fill="none" stroke="#9bb8d0" stroke-width="1.2"/>
+        <path d="M800,450 Q830,445 860,451" fill="none" stroke="#9bb8d0" stroke-width="1.4"/>
+        <path d="M880,500 Q910,493 940,500" fill="none" stroke="#9bb8d0" stroke-width="1.3"/>
+        <path d="M960,465 Q990,460 1020,466" fill="none" stroke="#9bb8d0" stroke-width="1.5"/>
+        <path d="M1040,485 Q1070,479 1100,486" fill="none" stroke="#9bb8d0" stroke-width="1.2"/>
+        <path d="M1120,455 Q1150,450 1180,456" fill="none" stroke="#9bb8d0" stroke-width="1.4"/>
+        <path d="M1200,490 Q1230,484 1260,491" fill="none" stroke="#9bb8d0" stroke-width="1.3"/>
+        <!-- duplicate set for seamless scroll (offset -120 is keyframe; content spans far) -->
+        <path d="M-100,455 Q-70,450 -40,456" fill="none" stroke="#9bb8d0" stroke-width="1.4"/>
+        <path d="M-20,475 Q10,470 40,476" fill="none" stroke="#9bb8d0" stroke-width="1.2"/>
+      </g>
+      <!-- tire tracks left behind (moving left relative to vehicle = vehicle going right) -->
+      <g class="ground-drift" opacity="0.25" transform="translate(0,530)">
+        <path d="M0,0 Q40,-2 80,0 T160,0 T240,0 T320,0 T400,0 T480,0 T560,0 T640,0 T720,0 T800,0 T880,0 T960,0 T1040,0 T1120,0 T1200,0 T1280,0"
+              fill="none" stroke="#7a96b0" stroke-width="4" stroke-dasharray="18 10"/>
+        <path d="M0,18 Q40,16 80,18 T160,18 T240,18 T320,18 T400,18 T480,18 T560,18 T640,18 T720,18 T800,18 T880,18 T960,18 T1040,18 T1120,18 T1200,18 T1280,18"
+              fill="none" stroke="#7a96b0" stroke-width="4" stroke-dasharray="18 10"/>
+      </g>
+    </g>
+
+    <!-- ══════════ VEHICLE + CRAB (hero group, rightward) ══════════ -->
+    <g id="hero" transform="translate(480, 380)">
+      <!-- shadow under vehicle -->
+      <ellipse cx="10" cy="175" rx="160" ry="18" fill="#0a1520" opacity="0.35"/>
+
+      <g class="vehicle-bob">
+        <!-- ── chassis / body ── -->
+        <!-- rear bumper -->
+        <rect x="-130" y="100" width="18" height="40" rx="4" fill="#0f2833"/>
+        <!-- main body block -->
+        <rect x="-120" y="70" width="200" height="80" rx="10" fill="url(#truckGrad)" stroke="#0d2028" stroke-width="2"/>
+        <!-- side panel detail -->
+        <rect x="-100" y="90" width="70" height="36" rx="4" fill="#1a4050" opacity="0.85"/>
+        <text x="-65" y="113" text-anchor="middle" font-size="11" font-family="sans-serif" font-weight="700" fill="#e8b84a" letter-spacing="1">CRAB-01</text>
+        <!-- fender / hood -->
+        <path d="M80,70 L130,70 L145,100 L145,130 L80,130 Z" fill="url(#truckGrad)" stroke="#0d2028" stroke-width="2"/>
+        <!-- hood front slope -->
+        <path d="M130,70 L155,95 L155,125 L145,125 L145,100 Z" fill="#245060" stroke="#0d2028" stroke-width="1.5"/>
+
+        <!-- ── cab ── -->
+        <path d="M-20,70 L-20,20 L50,20 L80,70 Z" fill="url(#truckGrad)" stroke="#0d2028" stroke-width="2"/>
+        <!-- cab roof -->
+        <rect x="-25" y="12" width="80" height="12" rx="4" fill="#2d5a6e" stroke="#0d2028" stroke-width="1.5"/>
+        <!-- window -->
+        <path d="M-8,28 L-8,62 L62,62 L48,28 Z" fill="url(#windowG)" opacity="0.9" stroke="#1a3a48" stroke-width="1.5"/>
+        <!-- window reflection -->
+        <path d="M0,32 L8,32 L2,58 L-6,58 Z" fill="#fff" opacity="0.15"/>
+
+        <!-- ── exhaust stacks ── -->
+        <rect x="-95" y="20" width="10" height="55" rx="3" fill="#2a4050" stroke="#0d2028" stroke-width="1"/>
+        <rect x="-75" y="30" width="10" height="45" rx="3" fill="#2a4050" stroke="#0d2028" stroke-width="1"/>
+        <ellipse cx="-90" cy="18" rx="7" ry="4" fill="#1a3040"/>
+        <ellipse cx="-70" cy="28" rx="7" ry="4" fill="#1a3040"/>
+
+        <!-- exhaust puffs (behind, going left = forward right) -->
+        <g opacity="0.5">
+          <circle class="puff1" cx="-90" cy="12" r="6" fill="#8aa0b4"/>
+          <circle class="puff2" cx="-90" cy="12" r="5" fill="#9ab0c4"/>
+          <circle class="puff3" cx="-70" cy="22" r="4" fill="#8aa0b4"/>
+        </g>
+
+        <!-- ── beacon light on roof ── -->
+        <rect x="-5" y="2" width="22" height="12" rx="4" fill="#c44" stroke="#822" stroke-width="1"/>
+        <circle class="beacon-glow" cx="6" cy="8" r="16" fill="url(#beaconG)" filter="url(#softGlow)"/>
+
+        <!-- ── headlight ── -->
+        <rect x="148" y="100" width="14" height="16" rx="3" fill="#ffe9a0" stroke="#a88020" stroke-width="1"/>
+        <polygon class="headlight-beam" points="162,100 280,70 280,150 162,124" fill="#ffe9a0"/>
+
+        <!-- ── PLOW ASSEMBLY ── -->
+        <g class="plow-blade">
+          <!-- plow arm -->
+          <rect x="140" y="105" width="40" height="10" rx="3" fill="#3a5060" stroke="#1a3040" stroke-width="1"/>
+          <!-- blade vertical -->
+          <path d="M175,60 L175,160 L210,150 L210,70 Z" fill="url(#plowGrad)" stroke="#5a4008" stroke-width="2.5"/>
+          <!-- blade edge (cutting edge) -->
+          <path d="M210,70 L220,75 L220,145 L210,150 Z" fill="#f5d040" stroke="#5a4008" stroke-width="1.5"/>
+          <!-- blade ribs -->
+          <line x1="185" y1="65" x2="185" y2="155" stroke="#8a680c" stroke-width="2" opacity="0.5"/>
+          <line x1="197" y1="68" x2="197" y2="152" stroke="#8a680c" stroke-width="2" opacity="0.5"/>
+          <!-- warning stripe on blade -->
+          <path d="M178,90 L205,85" stroke="#222" stroke-width="5" opacity="0.35"/>
+          <path d="M178,110 L205,105" stroke="#222" stroke-width="5" opacity="0.35"/>
+          <path d="M178,130 L205,125" stroke="#222" stroke-width="5" opacity="0.35"/>
+          <!-- upper blade flare -->
+          <path d="M170,55 L180,55 L185,62 L170,62 Z" fill="#c4900e" stroke="#5a4008" stroke-width="1"/>
+        </g>
+
+        <!-- snow spray from plow (ahead-right, arcing up-left as it's thrown) -->
+        <g filter="url(#tinyBlur)">
+          <circle class="s1" cx="215" cy="120" r="7" fill="#e8f4ff"/>
+          <circle class="s2" cx="220" cy="100" r="6" fill="#f0f8ff"/>
+          <circle class="s3" cx="210" cy="140" r="8" fill="#dceaf5"/>
+          <circle class="s4" cx="225" cy="130" r="5" fill="#e8f4ff"/>
+          <circle class="s5" cx="218" cy="80" r="6" fill="#fff"/>
+          <circle class="s6" cx="208" cy="155" r="7" fill="#d0e0f0"/>
+        </g>
+
+        <!-- ── WHEELS (clockwise = rightward) ── -->
+        <!-- rear wheel -->
+        <g transform="translate(-85, 145)">
+          <circle class="wheel rear" r="32" fill="#1a1a1a" stroke="#333" stroke-width="3"/>
+          <circle class="wheel rear" r="22" fill="#2a2a2a"/>
+          <!-- spokes / tread marks that make rotation visible -->
+          <g class="wheel rear">
+            <rect x="-3" y="-20" width="6" height="40" rx="2" fill="#4a4a4a"/>
+            <rect x="-20" y="-3" width="40" height="6" rx="2" fill="#4a4a4a"/>
+            <rect x="-3" y="-20" width="6" height="40" rx="2" fill="#3a3a3a" transform="rotate(45)"/>
+            <rect x="-20" y="-3" width="40" height="6" rx="2" fill="#3a3a3a" transform="rotate(45)"/>
+          </g>
+          <circle r="8" fill="#666" stroke="#444" stroke-width="2"/>
+          <circle r="3" fill="#888"/>
+        </g>
+        <!-- front wheel -->
+        <g transform="translate(100, 145)">
+          <circle class="wheel" r="34" fill="#1a1a1a" stroke="#333" stroke-width="3"/>
+          <circle class="wheel" r="24" fill="#2a2a2a"/>
+          <g class="wheel">
+            <rect x="-3" y="-22" width="6" height="44" rx="2" fill="#4a4a4a"/>
+            <rect x="-22" y="-3" width="44" height="6" rx="2" fill="#4a4a4a"/>
+            <rect x="-3" y="-22" width="6" height="44" rx="2" fill="#3a3a3a" transform="rotate(45)"/>
+            <rect x="-22" y="-3" width="44" height="6" rx="2" fill="#3a3a3a" transform="rotate(45)"/>
+          </g>
+          <circle r="9" fill="#666" stroke="#444" stroke-width="2"/>
+          <circle r="3.5" fill="#888"/>
+        </g>
+
+        <!-- ══════════ THE CRAB DRIVER ══════════ -->
+        <!-- positioned in the cab window area -->
+        <g id="crab" transform="translate(22, 55)">
+          <!-- legs (visible around body, relative motion) -->
+          <!-- left legs (behind body, toward rear of truck) -->
+          <g class="leg-a">
+            <path d="M-18,8 L-42,-8 L-50,-4" fill="none" stroke="#c44828" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="-50" cy="-4" r="2.5" fill="#e85d3a"/>
+          </g>
+          <g class="leg-b">
+            <path d="M-16,16 L-40,12 L-48,18" fill="none" stroke="#c44828" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="-48" cy="18" r="2.5" fill="#e85d3a"/>
+          </g>
+          <g class="leg-c">
+            <path d="M-12,24 L-34,28 L-40,36" fill="none" stroke="#c44828" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="-40" cy="36" r="2.2" fill="#e85d3a"/>
+          </g>
+          <!-- right legs (toward front) -->
+          <g class="leg-b" style="animation-delay:0.2s">
+            <path d="M22,10 L44,-2 L52,4" fill="none" stroke="#c44828" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="52" cy="4" r="2.5" fill="#e85d3a"/>
+          </g>
+          <g class="leg-c" style="animation-delay:0.35s">
+            <path d="M24,20 L46,20 L54,28" fill="none" stroke="#c44828" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="54" cy="28" r="2.5" fill="#e85d3a"/>
+          </g>
+          <g class="leg-a" style="animation-delay:0.15s">
+            <path d="M20,28 L40,34 L46,42" fill="none" stroke="#c44828" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="46" cy="42" r="2.2" fill="#e85d3a"/>
+          </g>
+
+          <!-- body / carapace -->
+          <ellipse cx="2" cy="8" rx="28" ry="20" fill="url(#crabGrad)" stroke="#a03018" stroke-width="2"/>
+          <!-- shell highlight -->
+          <ellipse cx="-4" cy="2" rx="12" ry="6" fill="#ff9a70" opacity="0.45"/>
+          <!-- shell spots -->
+          <circle cx="10" cy="12" r="3" fill="#c44828" opacity="0.5"/>
+          <circle cx="-8" cy="14" r="2.5" fill="#c44828" opacity="0.45"/>
+          <circle cx="16" cy="4" r="2" fill="#c44828" opacity="0.4"/>
+
+          <!-- antennae -->
+          <g class="ant-l">
+            <path d="M-10,-8 L-18,-28" fill="none" stroke="#e85d3a" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="-18" cy="-28" r="2" fill="#ffb090"/>
+          </g>
+          <g class="ant-r">
+            <path d="M8,-8 L16,-30" fill="none" stroke="#e85d3a" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="16" cy="-30" r="2" fill="#ffb090"/>
+          </g>
+
+          <!-- eye stalks -->
+          <g class="eye-stalk-l">
+            <line x1="-8" y1="-10" x2="-12" y2="-26" stroke="#e85d3a" stroke-width="3.5" stroke-linecap="round"/>
+            <circle cx="-12" cy="-28" r="6" fill="#fff" stroke="#222" stroke-width="1"/>
+            <circle class="pupils" cx="-10" cy="-28" r="3" fill="#1a1a2e"/>
+            <circle cx="-11.2" cy="-29.5" r="1" fill="#fff" opacity="0.8"/>
+          </g>
+          <g class="eye-stalk-r">
+            <line x1="10" y1="-10" x2="14" y2="-26" stroke="#e85d3a" stroke-width="3.5" stroke-linecap="round"/>
+            <circle cx="14" cy="-28" r="6" fill="#fff" stroke="#222" stroke-width="1"/>
+            <circle class="pupils" cx="16" cy="-28" r="3" fill="#1a1a2e"/>
+            <circle cx="14.8" cy="-29.5" r="1" fill="#fff" opacity="0.8"/>
+          </g>
+
+          <!-- smile -->
+          <path d="M-4,14 Q2,20 8,14" fill="none" stroke="#7a2010" stroke-width="1.5" stroke-linecap="round"/>
+
+          <!-- STEERING WHEEL -->
+          <ellipse cx="8" cy="32" rx="16" ry="6" fill="none" stroke="#2a2a2a" stroke-width="3.5"/>
+          <line x1="-8" y1="32" x2="24" y2="32" stroke="#2a2a2a" stroke-width="2.5"/>
+          <line x1="8" y1="26" x2="8" y2="38" stroke="#2a2a2a" stroke-width="2.5"/>
+          <circle cx="8" cy="32" r="3" fill="#444"/>
+
+          <!-- claws gripping wheel (relative motion) -->
+          <g class="claw-l">
+            <!-- left arm -->
+            <path d="M-20,10 L-8,24" fill="none" stroke="#d44828" stroke-width="5" stroke-linecap="round"/>
+            <!-- claw pincer -->
+            <path d="M-8,24 L-4,20 L-10,18 Z" fill="#e85d3a" stroke="#a03018" stroke-width="1"/>
+            <path d="M-8,24 L-2,28 L-10,30 Z" fill="#f07850" stroke="#a03018" stroke-width="1"/>
+          </g>
+          <g class="claw-r">
+            <!-- right arm -->
+            <path d="M20,12 L16,26" fill="none" stroke="#d44828" stroke-width="5" stroke-linecap="round"/>
+            <!-- claw pincer -->
+            <path d="M16,26 L20,22 L14,20 Z" fill="#e85d3a" stroke="#a03018" stroke-width="1"/>
+            <path d="M16,26 L22,30 L14,32 Z" fill="#f07850" stroke="#a03018" stroke-width="1"/>
+          </g>
+        </g>
+        <!-- end crab -->
+
+        <!-- window frame over crab so crab sits "inside" -->
+        <path d="M-8,28 L-8,62 L62,62 L48,28 Z" fill="none" stroke="#0d2028" stroke-width="2.5"/>
+        <!-- cab pillar -->
+        <line x1="-20" y1="20" x2="-20" y2="70" stroke="#0d2028" stroke-width="2"/>
+
+        <!-- side mirror -->
+        <rect x="-30" y="40" width="6" height="14" rx="1" fill="#2a4050"/>
+        <rect x="-38" y="38" width="10" height="16" rx="2" fill="#5a7080" stroke="#2a4050" stroke-width="1"/>
+
+        <!-- rust / weathering dots for grit -->
+        <circle cx="-110" cy="80" r="2" fill="#5a4030" opacity="0.4"/>
+        <circle cx="-50" cy="130" r="1.5" fill="#5a4030" opacity="0.35"/>
+        <circle cx="120" cy="75" r="1.8" fill="#5a4030" opacity="0.3"/>
+      </g>
+      <!-- end vehicle-bob -->
+    </g>
+    <!-- end hero -->
+
+    <!-- ══════════ L5 FOREGROUND snowdrifts + falling snow ══════════ -->
+    <g class="layer" id="layer-fore">
+      <g class="ground-drift" style="animation-duration:2s">
+        <path d="M-50,620 C40,580 120,640 200,600 C280,560 360,630 440,590 C520,550 600,620 680,580 C760,540 840,610 920,570 C1000,530 1080,600 1160,560 C1240,520 1320,590 1400,550 L1400,700 L-50,700 Z"
+              fill="#c5d8ea" opacity="0.7"/>
+        <path d="M-80,660 C20,630 100,680 180,650 C260,620 340,670 420,640 C500,610 580,660 660,630 C740,600 820,650 900,620 C980,590 1060,640 1140,610 C1220,580 1300,630 1380,600 L1380,700 L-80,700 Z"
+              fill="#a8c0d8" opacity="0.85"/>
+      </g>
+      <!-- falling snow particles (CSS animated) -->
+      <g id="snowfall" fill="#eef6ff">
+        <!-- generated statically for no-JS dependency -->
+        <circle class="flake" cx="50"  cy="0" r="2" style="animation-duration:7s;animation-delay:0s"/>
+        <circle class="flake" cx="120" cy="0" r="1.5" style="animation-duration:9s;animation-delay:1s"/>
+        <circle class="flake" cx="190" cy="0" r="2.5" style="animation-duration:6.5s;animation-delay:0.5s"/>
+        <circle class="flake" cx="260" cy="0" r="1.8" style="animation-duration:8s;animation-delay:2s"/>
+        <circle class="flake" cx="330" cy="0" r="2" style="animation-duration:7.5s;animation-delay:0.3s"/>
+        <circle class="flake" cx="400" cy="0" r="1.4" style="animation-duration:10s;animation-delay:1.5s"/>
+        <circle class="flake" cx="470" cy="0" r="2.2" style="animation-duration:6s;animation-delay:0.8s"/>
+        <circle class="flake" cx="540" cy="0" r="1.6" style="animation-duration:8.5s;animation-delay:2.2s"/>
+        <circle class="flake" cx="610" cy="0" r="2" style="animation-duration:7s;animation-delay:0.1s"/>
+        <circle class="flake" cx="680" cy="0" r="1.3" style="animation-duration:9.5s;animation-delay:1.8s"/>
+        <circle class="flake" cx="750" cy="0" r="2.4" style="animation-duration:6.8s;animation-delay:0.6s"/>
+        <circle class="flake" cx="820" cy="0" r="1.7" style="animation-duration:8.2s;animation-delay:2.5s"/>
+        <circle class="flake" cx="890" cy="0" r="2" style="animation-duration:7.2s;animation-delay:0.4s"/>
+        <circle class="flake" cx="960" cy="0" r="1.5" style="animation-duration:9.8s;animation-delay:1.2s"/>
+        <circle class="flake" cx="1030" cy="0" r="2.3" style="animation-duration:6.3s;animation-delay:0.9s"/>
+        <circle class="flake" cx="1100" cy="0" r="1.6" style="animation-duration:8.8s;animation-delay:2.8s"/>
+        <circle class="flake" cx="1170" cy="0" r="2" style="animation-duration:7.4s;animation-delay:0.2s"/>
+        <circle class="flake" cx="90"  cy="0" r="1.2" style="animation-duration:11s;animation-delay:3s"/>
+        <circle class="flake" cx="300" cy="0" r="1.9" style="animation-duration:7.8s;animation-delay:1.4s"/>
+        <circle class="flake" cx="500" cy="0" r="1.1" style="animation-duration:10.5s;animation-delay:0.7s"/>
+        <circle class="flake" cx="700" cy="0" r="2.1" style="animation-duration:6.6s;animation-delay:2.1s"/>
+        <circle class="flake" cx="900" cy="0" r="1.4" style="animation-duration:9.2s;animation-delay:1.6s"/>
+        <circle class="flake" cx="1100" cy="0" r="1.8" style="animation-duration:7.1s;animation-delay:0.0s"/>
+        <circle class="flake" cx="200" cy="0" r="1.0" style="animation-duration:12s;animation-delay:4s"/>
+        <circle class="flake" cx="600" cy="0" r="1.5" style="animation-duration:8.4s;animation-delay:2.4s"/>
+        <circle class="flake" cx="1000" cy="0" r="2.0" style="animation-duration:6.9s;animation-delay:1.1s"/>
+      </g>
+    </g>
+  </svg>
+
+  <div class="hud">SVG003 · crab × snowplow · rightward</div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  // Subtle extra snowflakes injected at runtime (pure DOM, no network).
+  // Purely decorative — scene is fully self-contained without this.
+  var svg = document.querySelector('svg.scene');
+  if (!svg) return;
+  var fall = document.getElementById('snowfall');
+  if (!fall) return;
+  var ns = 'http://www.w3.org/2000/svg';
+  for (var i = 0; i < 18; i++) {
+    var c = document.createElementNS(ns, 'circle');
+    c.setAttribute('class', 'flake');
+    c.setAttribute('cx', String(20 + Math.random() * 1160));
+    c.setAttribute('cy', '0');
+    c.setAttribute('r', String(0.8 + Math.random() * 1.4));
+    c.setAttribute('fill', '#eef6ff');
+    c.style.animationDuration = (5.5 + Math.random() * 6).toFixed(2) + 's';
+    c.style.animationDelay = (Math.random() * 4).toFixed(2) + 's';
+    fall.appendChild(c);
+  }
+})();
+</script>
+</body>
+</html>

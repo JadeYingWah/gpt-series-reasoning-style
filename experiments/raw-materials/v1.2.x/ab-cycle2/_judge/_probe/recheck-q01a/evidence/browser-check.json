@@ -1,0 +1,664 @@
+﻿{
+  "fileUrl": "file:///<实验根目录>/ab-cycle2/_judge/_probe/recheck-q01a/app.html",
+  "ranAt": "2026-09-13T05:42:47.757Z",
+  "total": 38,
+  "passed": 38,
+  "failed": 0,
+  "shots": [
+    "<实验根目录>\\ab-cycle2\\_judge\\_probe\\recheck-q01a\\evidence\\shots\\01-default-all.png",
+    "<实验根目录>\\ab-cycle2\\_judge\\_probe\\recheck-q01a\\evidence\\shots\\02-filter-huadong.png",
+    "<实验根目录>\\ab-cycle2\\_judge\\_probe\\recheck-q01a\\evidence\\shots\\02b-long-region-filter.png",
+    "<实验根目录>\\ab-cycle2\\_judge\\_probe\\recheck-q01a\\evidence\\shots\\03-empty-filter.png",
+    "<实验根目录>\\ab-cycle2\\_judge\\_probe\\recheck-q01a\\evidence\\shots\\04-empty-dataset.png",
+    "<实验根目录>\\ab-cycle2\\_judge\\_probe\\recheck-q01a\\evidence\\shots\\05-invalid-input.png",
+    "<实验根目录>\\ab-cycle2\\_judge\\_probe\\recheck-q01a\\evidence\\shots\\06-long-text-168.png",
+    "<实验根目录>\\ab-cycle2\\_judge\\_probe\\recheck-q01a\\evidence\\shots\\07-scale-240x24.png",
+    "<实验根目录>\\ab-cycle2\\_judge\\_probe\\recheck-q01a\\evidence\\shots\\08-offline-reload.png"
+  ],
+  "cdpExceptionsTotal": 1,
+  "results": [
+    {
+      "id": "kpi-ALL",
+      "name": "KPI 与独立复算一致（ALL）",
+      "pass": true,
+      "detail": {
+        "dom": {
+          "total": "370,100.00",
+          "orders": "30",
+          "avg": "12,336.67"
+        },
+        "exp": {
+          "total": "370,100.00",
+          "orders": 30,
+          "avg": "12,336.67"
+        },
+        "okT": true,
+        "okO": true,
+        "okA": true
+      }
+    },
+    {
+      "id": "bars-ALL",
+      "name": "柱状图各月数值与数据一致（ALL）",
+      "pass": true,
+      "detail": {
+        "dom": [
+          {
+            "month": "2026-01",
+            "value": 45100
+          },
+          {
+            "month": "2026-02",
+            "value": 46500
+          },
+          {
+            "month": "2026-03",
+            "value": 71300
+          },
+          {
+            "month": "2026-04",
+            "value": 45700
+          },
+          {
+            "month": "2026-05",
+            "value": 87600
+          },
+          {
+            "month": "2026-06",
+            "value": 73900
+          }
+        ],
+        "exp": [
+          {
+            "month": "2026-01",
+            "value": 45100
+          },
+          {
+            "month": "2026-02",
+            "value": 46500
+          },
+          {
+            "month": "2026-03",
+            "value": 71300
+          },
+          {
+            "month": "2026-04",
+            "value": 45700
+          },
+          {
+            "month": "2026-05",
+            "value": 87600
+          },
+          {
+            "month": "2026-06",
+            "value": 73900
+          }
+        ],
+        "barCount": 6,
+        "labelCount": 6
+      }
+    },
+    {
+      "id": "C1-axis",
+      "name": "月份轴与数据并集一致（含 x 轴标签）",
+      "pass": true,
+      "detail": {
+        "dom": [
+          {
+            "month": "2026-01",
+            "text": "1月"
+          },
+          {
+            "month": "2026-02",
+            "text": "2月"
+          },
+          {
+            "month": "2026-03",
+            "text": "3月"
+          },
+          {
+            "month": "2026-04",
+            "text": "4月"
+          },
+          {
+            "month": "2026-05",
+            "text": "5月"
+          },
+          {
+            "month": "2026-06",
+            "text": "6月"
+          }
+        ],
+        "exp": [
+          "2026-01",
+          "2026-02",
+          "2026-03",
+          "2026-04",
+          "2026-05",
+          "2026-06"
+        ]
+      }
+    },
+    {
+      "id": "C1-empty-hidden",
+      "name": "有数据时不显示空态",
+      "pass": true,
+      "detail": {
+        "emptyShown": false,
+        "chartDisplay": ""
+      }
+    },
+    {
+      "id": "C1-regions",
+      "name": "筛选项 = 数据中的地区集合 + 全部",
+      "pass": true,
+      "detail": {
+        "dom": [
+          "ALL",
+          "华北",
+          "华东",
+          "华南",
+          "华南·粤港澳大湾区跨境业务区",
+          "西南"
+        ],
+        "exp": [
+          "ALL",
+          "华北",
+          "华东",
+          "华南",
+          "华南·粤港澳大湾区跨境业务区",
+          "西南"
+        ]
+      }
+    },
+    {
+      "id": "C1-tooltip",
+      "name": "柱体带数值 tooltip（含金额与笔数）",
+      "pass": true,
+      "detail": "2026-01：¥45,100.00（4 笔）"
+    },
+    {
+      "id": "C2-filter-applied",
+      "name": "按键操作后筛选值生效为「华东」",
+      "pass": true,
+      "detail": {
+        "method": "keyboard",
+        "selectValue": "华东"
+      }
+    },
+    {
+      "id": "kpi-华东",
+      "name": "KPI 与独立复算一致（华东）",
+      "pass": true,
+      "detail": {
+        "dom": {
+          "total": "109,400.00",
+          "orders": "8",
+          "avg": "13,675.00"
+        },
+        "exp": {
+          "total": "109,400.00",
+          "orders": 8,
+          "avg": "13,675.00"
+        },
+        "okT": true,
+        "okO": true,
+        "okA": true
+      }
+    },
+    {
+      "id": "bars-华东",
+      "name": "柱状图各月数值与数据一致（华东）",
+      "pass": true,
+      "detail": {
+        "dom": [
+          {
+            "month": "2026-01",
+            "value": 12800
+          },
+          {
+            "month": "2026-02",
+            "value": 22300
+          },
+          {
+            "month": "2026-03",
+            "value": 17300
+          },
+          {
+            "month": "2026-04",
+            "value": 15900
+          },
+          {
+            "month": "2026-05",
+            "value": 27600
+          },
+          {
+            "month": "2026-06",
+            "value": 13500
+          }
+        ],
+        "exp": [
+          {
+            "month": "2026-01",
+            "value": 12800
+          },
+          {
+            "month": "2026-02",
+            "value": 22300
+          },
+          {
+            "month": "2026-03",
+            "value": 17300
+          },
+          {
+            "month": "2026-04",
+            "value": 15900
+          },
+          {
+            "month": "2026-05",
+            "value": 27600
+          },
+          {
+            "month": "2026-06",
+            "value": 13500
+          }
+        ],
+        "barCount": 6,
+        "labelCount": 6
+      }
+    },
+    {
+      "id": "C2-badge",
+      "name": "筛选后徽标同步显示当前地区与命中笔数",
+      "pass": true,
+      "detail": {
+        "badgeText": "华东（8 笔）"
+      }
+    },
+    {
+      "id": "C2-axis-stable",
+      "name": "筛选后月份轴不塌缩（仍为全量 6 个月）",
+      "pass": true,
+      "detail": {
+        "bars": 6,
+        "axis": 6
+      }
+    },
+    {
+      "id": "C2-zero-bars",
+      "name": "无订单月份渲染为 0 高柱而非消失",
+      "pass": true,
+      "detail": {
+        "zeroBars": 0
+      }
+    },
+    {
+      "id": "C2b-territory",
+      "name": "按键切到超长名地区「华南·粤港澳大湾区跨境业…」生效",
+      "pass": true,
+      "detail": {
+        "selectValue": "华南·粤港澳大湾区跨境业务区"
+      }
+    },
+    {
+      "id": "kpi-超长名地区",
+      "name": "KPI 与独立复算一致（超长名地区）",
+      "pass": true,
+      "detail": {
+        "dom": {
+          "total": "66,700.00",
+          "orders": "3",
+          "avg": "22,233.33"
+        },
+        "exp": {
+          "total": "66,700.00",
+          "orders": 3,
+          "avg": "22,233.33"
+        },
+        "okT": true,
+        "okO": true,
+        "okA": true
+      }
+    },
+    {
+      "id": "bars-超长名地区",
+      "name": "柱状图各月数值与数据一致（超长名地区）",
+      "pass": true,
+      "detail": {
+        "dom": [
+          {
+            "month": "2026-01",
+            "value": 0
+          },
+          {
+            "month": "2026-02",
+            "value": 0
+          },
+          {
+            "month": "2026-03",
+            "value": 21600
+          },
+          {
+            "month": "2026-04",
+            "value": 0
+          },
+          {
+            "month": "2026-05",
+            "value": 25900
+          },
+          {
+            "month": "2026-06",
+            "value": 19200
+          }
+        ],
+        "exp": [
+          {
+            "month": "2026-01",
+            "value": 0
+          },
+          {
+            "month": "2026-02",
+            "value": 0
+          },
+          {
+            "month": "2026-03",
+            "value": 21600
+          },
+          {
+            "month": "2026-04",
+            "value": 0
+          },
+          {
+            "month": "2026-05",
+            "value": 25900
+          },
+          {
+            "month": "2026-06",
+            "value": 19200
+          }
+        ],
+        "barCount": 6,
+        "labelCount": 3
+      }
+    },
+    {
+      "id": "C2b-axis-stable",
+      "name": "该地区仅 3 个月有单，月份轴仍保持全量 6 个月不塌缩",
+      "pass": true,
+      "detail": {
+        "bars": 6,
+        "nonZero": 3,
+        "exp": 6
+      }
+    },
+    {
+      "id": "C2b-long-option",
+      "name": "超长地区名在 select 中不撑破布局（无横向溢出）",
+      "pass": true,
+      "detail": {
+        "docScroll": 1258,
+        "docClient": 1258,
+        "bodyScroll": 1258
+      }
+    },
+    {
+      "id": "C3-empty-real",
+      "name": "筛选结果为空时显示空态文案（真实筛选路径）",
+      "pass": true,
+      "detail": {
+        "emptyShown": true,
+        "chartDisplay": "none",
+        "title": "暂无可展示的数据",
+        "desc": "「华东」在当前数据集里没有订单记录，换个地区看看。",
+        "meta": "原始记录 22 条 · 命中 0 条"
+      }
+    },
+    {
+      "id": "C3-empty-kpi-zero",
+      "name": "空结果时 KPI 归零且不残留旧值",
+      "pass": true,
+      "detail": {
+        "total": "0.00",
+        "orders": "0",
+        "avg": "0.00"
+      }
+    },
+    {
+      "id": "C3-empty-no-exception",
+      "name": "空结果渲染无未捕获异常",
+      "pass": true,
+      "detail": {
+        "uncaught": [],
+        "renderError": null
+      }
+    },
+    {
+      "id": "C4a-empty-dataset",
+      "name": "空数据集：显示空态、KPI 归零、无异常",
+      "pass": true,
+      "detail": {
+        "title": "暂无可展示的数据",
+        "desc": "当前数据集为空，没有任何订单记录可统计。",
+        "datasetTag": "样本数据 · 0 条记录",
+        "uncaught": [],
+        "renderError": null
+      }
+    },
+    {
+      "id": "C4b-nasty-rows",
+      "name": "含 null/非对象/非数字金额的脏数据不抛异常，仅计入有效行",
+      "pass": true,
+      "detail": {
+        "total": "1,000.00",
+        "orders": "1",
+        "uncaught": [],
+        "renderError": null
+      }
+    },
+    {
+      "id": "C4b-non-array",
+      "name": "setData(null) 不抛异常，降级为空数据",
+      "pass": true,
+      "detail": {
+        "uncaught": [],
+        "emptyShown": true
+      }
+    },
+    {
+      "id": "C4c-字符串未知地区",
+      "name": "非法筛选输入「字符串未知地区」→ 空态处理且无异常",
+      "pass": true,
+      "detail": {
+        "emptyShown": true,
+        "emptyTitle": "筛选条件无效",
+        "badgeText": "筛选值无效：火星大区",
+        "uncaught": [],
+        "renderError": null,
+        "cdpExceptions": 0
+      }
+    },
+    {
+      "id": "C4c-空字符串",
+      "name": "非法筛选输入「空字符串」→ 空态处理且无异常",
+      "pass": true,
+      "detail": {
+        "emptyShown": true,
+        "emptyTitle": "筛选条件无效",
+        "badgeText": "筛选值无效：",
+        "uncaught": [],
+        "renderError": null,
+        "cdpExceptions": 0
+      }
+    },
+    {
+      "id": "C4c-null",
+      "name": "非法筛选输入「null」→ 空态处理且无异常",
+      "pass": true,
+      "detail": {
+        "emptyShown": true,
+        "emptyTitle": "筛选条件无效",
+        "badgeText": "筛选值无效：—",
+        "uncaught": [],
+        "renderError": null,
+        "cdpExceptions": 0
+      }
+    },
+    {
+      "id": "C4c-undefined",
+      "name": "非法筛选输入「undefined」→ 空态处理且无异常",
+      "pass": true,
+      "detail": {
+        "emptyShown": true,
+        "emptyTitle": "筛选条件无效",
+        "badgeText": "筛选值无效：—",
+        "uncaught": [],
+        "renderError": null,
+        "cdpExceptions": 0
+      }
+    },
+    {
+      "id": "C4c-数字",
+      "name": "非法筛选输入「数字」→ 空态处理且无异常",
+      "pass": true,
+      "detail": {
+        "emptyShown": true,
+        "emptyTitle": "筛选条件无效",
+        "badgeText": "筛选值无效：12345",
+        "uncaught": [],
+        "renderError": null,
+        "cdpExceptions": 0
+      }
+    },
+    {
+      "id": "C4c-对象",
+      "name": "非法筛选输入「对象」→ 空态处理且无异常",
+      "pass": true,
+      "detail": {
+        "emptyShown": true,
+        "emptyTitle": "筛选条件无效",
+        "badgeText": "筛选值无效：[object Object]",
+        "uncaught": [],
+        "renderError": null,
+        "cdpExceptions": 0
+      }
+    },
+    {
+      "id": "C4c-数组",
+      "name": "非法筛选输入「数组」→ 空态处理且无异常",
+      "pass": true,
+      "detail": {
+        "emptyShown": true,
+        "emptyTitle": "筛选条件无效",
+        "badgeText": "筛选值无效：华东",
+        "uncaught": [],
+        "renderError": null,
+        "cdpExceptions": 0
+      }
+    },
+    {
+      "id": "C4c-超长字符串(5000字)",
+      "name": "非法筛选输入「超长字符串(5000字)」→ 空态处理且无异常",
+      "pass": true,
+      "detail": {
+        "emptyShown": true,
+        "emptyTitle": "筛选条件无效",
+        "badgeText": "筛选值无效：XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX…",
+        "uncaught": [],
+        "renderError": null,
+        "cdpExceptions": 0
+      }
+    },
+    {
+      "id": "C4c-含 HTML/脚本片段",
+      "name": "非法筛选输入「含 HTML/脚本片段」→ 空态处理且无异常",
+      "pass": true,
+      "detail": {
+        "emptyShown": true,
+        "emptyTitle": "筛选条件无效",
+        "badgeText": "筛选值无效：<img src=x onerror=alert(1)>",
+        "uncaught": [],
+        "renderError": null,
+        "cdpExceptions": 0
+      }
+    },
+    {
+      "id": "C4d-long-text",
+      "name": "超长地区名(168字)：不抛异常、无横向溢出、徽标省略号截断、数值仍正确",
+      "pass": true,
+      "detail": {
+        "total": "8,888.00",
+        "orders": "1",
+        "badgeTextLen": 173,
+        "badgeGeom": {
+          "w": 340,
+          "scrollW": 2065,
+          "clientW": 301,
+          "truncated": true
+        },
+        "overflow": {
+          "docScroll": 1258,
+          "docClient": 1258,
+          "bodyScroll": 1258
+        },
+        "uncaught": []
+      }
+    },
+    {
+      "id": "C4e-scale",
+      "name": "240 笔 / 24 个月 / 7 地区：渲染无异常且总额正确",
+      "pass": true,
+      "detail": {
+        "total": "240,028,680.00",
+        "exp": "240,028,680.00",
+        "bars": 24,
+        "overflow": {
+          "docScroll": 1258,
+          "docClient": 1258,
+          "bodyScroll": 1258
+        },
+        "uncaught": []
+      }
+    },
+    {
+      "id": "C5-detector-red",
+      "name": "正控：故意抛错时页面收集器与 CDP 异常事件都能变红（证明前述「无异常」不是空转）",
+      "pass": true,
+      "detail": {
+        "pageUncaught": [
+          0,
+          1
+        ],
+        "cdpExceptions": [
+          0,
+          1
+        ],
+        "probe": [
+          "Error: DETECTOR-PROBE-INTENTIONAL"
+        ]
+      }
+    },
+    {
+      "id": "C6-console",
+      "name": "全程未产生 console error",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "id": "C6-render-error",
+      "name": "全程 render 内部错误捕获器始终为空",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "id": "C7-offline",
+      "name": "断网后重载仍完整渲染（KPI + 柱状图）",
+      "pass": true,
+      "detail": {
+        "reloaded": true,
+        "orders": "30",
+        "bars": 6,
+        "uncaught": []
+      }
+    }
+  ]
+}

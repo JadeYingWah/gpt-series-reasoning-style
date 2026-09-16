@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Narwhal Hovercraft · Arctic Dash</title>
+<style>
+  :root {
+    --sky-top: #0b1035;
+    --sky-mid: #1a2a5e;
+    --sky-low: #2d4a7a;
+    --aurora-a: #3dffa8;
+    --aurora-b: #5ec8ff;
+    --aurora-c: #b388ff;
+    --ice: #c8e7f5;
+    --ice-deep: #6a9bb8;
+    --hull: #1e6f8c;
+    --hull-dark: #0f3d52;
+    --hull-light: #3da8c9;
+    --accent: #ff8a3d;
+    --accent-hot: #ffc14d;
+    --skirt: #2a4860;
+    --skin: #5b8fad;
+    --skin-light: #7eb3d0;
+    --tusk: #f0e6c8;
+    --foam: rgba(220, 245, 255, 0.85);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #050814;
+    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  }
+
+  .stage {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    min-height: 420px;
+    overflow: hidden;
+    cursor: default;
+    user-select: none;
+  }
+
+  .sky-gradient {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 90% 60% at 70% 15%, rgba(94, 200, 255, 0.18), transparent 55%),
+      linear-gradient(180deg,
+        var(--sky-top) 0%,
+        var(--sky-mid) 38%,
+        var(--sky-low) 62%,
+        #1a3048 78%,
+        #0d1a28 100%);
+    z-index: 0;
+  }
+
+  .layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  /* ---------- Parallax layers (z-index depth) ---------- */
+  .layer-stars  { z-index: 1; animation: drift-x 80s linear infinite; }
+  .layer-aurora { z-index: 2; animation: drift-x 55s linear infinite, aurora-sway 12s ease-in-out infinite; }
+  .layer-far    { z-index: 3; animation: drift-x 36s linear infinite; }
+  .layer-mid    { z-index: 4; animation: drift-x 18s linear infinite; }
+  .layer-water  { z-index: 5; }
+  .layer-near   { z-index: 6; animation: drift-x 7s linear infinite; }
+  .layer-craft  { z-index: 7; }
+  .layer-fx     { z-index: 8; }
+
+  /* Content moves LEFT so craft (facing right) appears to advance rightward */
+  @keyframes drift-x {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  @keyframes aurora-sway {
+    0%, 100% { opacity: 0.85; }
+    50%      { opacity: 1; }
+  }
+
+  /* ---------- Scene content containers (doubled for seamless loop) ---------- */
+  .strip {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 200%;
+    height: 100%;
+  }
+
+  .strip > svg {
+    position: absolute;
+    top: 0;
+    width: 50%;
+    height: 100%;
+  }
+
+  .strip > svg.a { left: 0; }
+  .strip > svg.b { left: 50%; }
+
+  /* ---------- Craft rig ---------- */
+  .craft-rig {
+    position: absolute;
+    left: 18%;
+    top: 52%;
+    width: min(520px, 62vw);
+    height: auto;
+    transform: translateY(-50%);
+    filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.45));
+  }
+
+  .craft-body {
+    animation: hover-bob 1.6s ease-in-out infinite;
+    transform-origin: 50% 70%;
+  }
+
+  @keyframes hover-bob {
+    0%   { transform: translateY(0) rotate(-0.4deg); }
+    50%  { transform: translateY(-7px) rotate(0.5deg); }
+    100% { transform: translateY(0) rotate(-0.4deg); }
+  }
+
+  .skirt-left,
+  .skirt-right,
+  .skirt-mid {
+    animation: skirt-flutter 0.55s ease-in-out infinite;
+  }
+  .skirt-right { animation-delay: -0.18s; }
+  .skirt-mid   { animation-delay: -0.36s; }
+
+  @keyframes skirt-flutter {
+    0%, 100% { transform: translateY(0) scaleY(1); }
+    50%      { transform: translateY(2.5px) scaleY(0.92); }
+  }
+
+  .prop-blades {
+    animation: prop-spin 0.28s linear infinite;
+    transform-origin: 78px 88px;
+  }
+
+  @keyframes prop-spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  .air-stream {
+    animation: stream-pulse 0.45s ease-in-out infinite;
+  }
+  @keyframes stream-pulse {
+    0%, 100% { opacity: 0.25; transform: translateX(0); }
+    50%      { opacity: 0.7;  transform: translateX(-8px); }
+  }
+
+  /* ---------- Narwhal relative motion (independent of hull lock) ---------- */
+  .n-body {
+    animation: n-bob 1.15s ease-in-out infinite;
+    transform-origin: 50% 60%;
+  }
+  @keyframes n-bob {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50%      { transform: translateY(-3.5px) rotate(1.2deg); }
+  }
+
+  .n-tail {
+    animation: n-tail-swish 0.7s ease-in-out infinite;
+    transform-origin: 92% 48%;
+  }
+  @keyframes n-tail-swish {
+    0%, 100% { transform: rotate(-10deg) translateY(0); }
+    50%      { transform: rotate(14deg) translateY(2px); }
+  }
+
+  .n-flipper-far {
+    animation: n-flip-far 0.9s ease-in-out infinite;
+    transform-origin: 80% 20%;
+  }
+  @keyframes n-flip-far {
+    0%, 100% { transform: rotate(8deg); }
+    50%      { transform: rotate(-18deg); }
+  }
+
+  .n-flipper-near {
+    animation: n-flip-near 0.9s ease-in-out infinite;
+    animation-delay: -0.45s;
+    transform-origin: 20% 30%;
+  }
+  @keyframes n-flip-near {
+    0%, 100% { transform: rotate(-6deg); }
+    50%      { transform: rotate(22deg); }
+  }
+
+  .n-tusk {
+    animation: n-tusk-nod 1.15s ease-in-out infinite;
+    transform-origin: 18% 70%;
+  }
+  @keyframes n-tusk-nod {
+    0%, 100% { transform: rotate(-2deg); }
+    50%      { transform: rotate(4deg); }
+  }
+
+  .n-blink {
+    animation: blink 4.2s step-end infinite;
+  }
+  @keyframes blink {
+    0%, 92%, 100% { opacity: 1; }
+    94%, 96%      { opacity: 0.05; }
+  }
+
+  /* ---------- Wake / spray particles ---------- */
+  .wake-dot {
+    animation: wake-rush 1.1s linear infinite;
+  }
+  @keyframes wake-rush {
+    0%   { opacity: 0; transform: translateX(0) scale(0.4); }
+    15%  { opacity: 0.85; }
+    100% { opacity: 0; transform: translateX(-140px) scale(1.15); }
+  }
+
+  .hud {
+    position: absolute;
+    left: 50%;
+    bottom: 18px;
+    transform: translateX(-50%);
+    z-index: 20;
+    color: rgba(200, 230, 245, 0.55);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    pointer-events: none;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+  }
+
+  .speed-lines line {
+    animation: speed-dash 0.6s linear infinite;
+  }
+  @keyframes speed-dash {
+    0%   { opacity: 0; stroke-dashoffset: 40; }
+    30%  { opacity: 0.6; }
+    100% { opacity: 0; stroke-dashoffset: -20; }
+  }
+</style>
+</head>
+<body>
+<div class="stage" id="stage" role="img" aria-label="A narwhal pilots a hovercraft speeding right across an arctic sea under aurora">
+  <div class="sky-gradient"></div>
+
+  <!-- ========== LAYER 1: Stars (farthest parallax) ========== -->
+  <div class="layer layer-stars">
+    <div class="strip">
+      <svg class="a" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <g fill="#e8f4ff">
+          <circle cx="80" cy="60" r="1.4" opacity="0.9"/><circle cx="200" cy="110" r="1" opacity="0.6"/>
+          <circle cx="340" cy="40" r="1.6" opacity="0.85"/><circle cx="480" cy="90" r="1.1" opacity="0.5"/>
+          <circle cx="610" cy="30" r="1.3" opacity="0.75"/><circle cx="740" cy="120" r="1.5" opacity="0.8"/>
+          <circle cx="880" cy="55" r="1" opacity="0.55"/><circle cx="1020" cy="100" r="1.7" opacity="0.9"/>
+          <circle cx="1120" cy="45" r="1.2" opacity="0.7"/><circle cx="150" cy="180" r="1" opacity="0.45"/>
+          <circle cx="420" cy="160" r="1.3" opacity="0.65"/><circle cx="690" cy="200" r="1.1" opacity="0.5"/>
+          <circle cx="950" cy="170" r="1.4" opacity="0.7"/><circle cx="280" cy="240" r="0.9" opacity="0.4"/>
+          <circle cx="560" cy="250" r="1.2" opacity="0.55"/><circle cx="830" cy="230" r="1" opacity="0.45"/>
+          <circle cx="1100" cy="210" r="1.3" opacity="0.6"/><circle cx="60" cy="280" r="1.1" opacity="0.4"/>
+          <circle cx="1000" cy="300" r="1" opacity="0.35"/><circle cx="250" cy="80" r="0.8" opacity="0.5"/>
+        </g>
+        <!-- faint distant moon -->
+        <circle cx="980" cy="90" r="22" fill="#dfe9f5" opacity="0.12"/>
+        <circle cx="972" cy="84" r="18" fill="#1a2a5e" opacity="0.35"/>
+      </svg>
+      <svg class="b" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <g fill="#e8f4ff">
+          <circle cx="80" cy="60" r="1.4" opacity="0.9"/><circle cx="200" cy="110" r="1" opacity="0.6"/>
+          <circle cx="340" cy="40" r="1.6" opacity="0.85"/><circle cx="480" cy="90" r="1.1" opacity="0.5"/>
+          <circle cx="610" cy="30" r="1.3" opacity="0.75"/><circle cx="740" cy="120" r="1.5" opacity="0.8"/>
+          <circle cx="880" cy="55" r="1" opacity="0.55"/><circle cx="1020" cy="100" r="1.7" opacity="0.9"/>
+          <circle cx="1120" cy="45" r="1.2" opacity="0.7"/><circle cx="150" cy="180" r="1" opacity="0.45"/>
+          <circle cx="420" cy="160" r="1.3" opacity="0.65"/><circle cx="690" cy="200" r="1.1" opacity="0.5"/>
+          <circle cx="950" cy="170" r="1.4" opacity="0.7"/><circle cx="280" cy="240" r="0.9" opacity="0.4"/>
+          <circle cx="560" cy="250" r="1.2" opacity="0.55"/><circle cx="830" cy="230" r="1" opacity="0.45"/>
+          <circle cx="1100" cy="210" r="1.3" opacity="0.6"/><circle cx="60" cy="280" r="1.1" opacity="0.4"/>
+          <circle cx="1000" cy="300" r="1" opacity="0.35"/><circle cx="250" cy="80" r="0.8" opacity="0.5"/>
+        </g>
+        <circle cx="980" cy="90" r="22" fill="#dfe9f5" opacity="0.12"/>
+        <circle cx="972" cy="84" r="18" fill="#1a2a5e" opacity="0.35"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ========== LAYER 2: Aurora ribbons ========== -->
+  <div class="layer layer-aurora">
+    <div class="strip">
+      <svg class="a" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs>
+          <linearGradient id="ag1" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#3dffa8" stop-opacity="0"/>
+            <stop offset="35%" stop-color="#3dffa8" stop-opacity="0.35"/>
+            <stop offset="70%" stop-color="#5ec8ff" stop-opacity="0.28"/>
+            <stop offset="100%" stop-color="#b388ff" stop-opacity="0"/>
+          </linearGradient>
+          <linearGradient id="ag2" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#5ec8ff" stop-opacity="0"/>
+            <stop offset="50%" stop-color="#7af0d0" stop-opacity="0.22"/>
+            <stop offset="100%" stop-color="#b388ff" stop-opacity="0"/>
+          </linearGradient>
+          <filter id="aurora-blur" x="-20%" y="-40%" width="140%" height="180%">
+            <feGaussianBlur stdDeviation="8"/>
+          </filter>
+        </defs>
+        <path d="M0,140 C180,80 320,200 500,120 C680,40 820,180 1000,100 C1100,70 1160,110 1200,90 L1200,160 C1040,200 900,120 760,170 C600,230 420,100 260,160 C140,200 60,170 0,190 Z"
+              fill="url(#ag1)" filter="url(#aurora-blur)"/>
+        <path d="M0,200 C200,150 360,240 560,180 C760,120 900,230 1100,170 C1160,155 1180,165 1200,160 L1200,220 C1050,250 920,190 780,230 C620,280 440,170 280,220 C160,255 60,230 0,250 Z"
+              fill="url(#ag2)" filter="url(#aurora-blur)"/>
+      </svg>
+      <svg class="b" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs>
+          <linearGradient id="ag1b" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#3dffa8" stop-opacity="0"/>
+            <stop offset="35%" stop-color="#3dffa8" stop-opacity="0.35"/>
+            <stop offset="70%" stop-color="#5ec8ff" stop-opacity="0.28"/>
+            <stop offset="100%" stop-color="#b388ff" stop-opacity="0"/>
+          </linearGradient>
+          <linearGradient id="ag2b" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#5ec8ff" stop-opacity="0"/>
+            <stop offset="50%" stop-color="#7af0d0" stop-opacity="0.22"/>
+            <stop offset="100%" stop-color="#b388ff" stop-opacity="0"/>
+          </linearGradient>
+          <filter id="aurora-blur-b" x="-20%" y="-40%" width="140%" height="180%">
+            <feGaussianBlur stdDeviation="8"/>
+          </filter>
+        </defs>
+        <path d="M0,140 C180,80 320,200 500,120 C680,40 820,180 1000,100 C1100,70 1160,110 1200,90 L1200,160 C1040,200 900,120 760,170 C600,230 420,100 260,160 C140,200 60,170 0,190 Z"
+              fill="url(#ag1b)" filter="url(#aurora-blur-b)"/>
+        <path d="M0,200 C200,150 360,240 560,180 C760,120 900,230 1100,170 C1160,155 1180,165 1200,160 L1200,220 C1050,250 920,190 780,230 C620,280 440,170 280,220 C160,255 60,230 0,250 Z"
+              fill="url(#ag2b)" filter="url(#aurora-blur-b)"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ========== LAYER 3: Far icebergs / mountains ========== -->
+  <div class="layer layer-far">
+    <div class="strip">
+      <svg class="a" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs>
+          <linearGradient id="bergA" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#8eb8d4"/>
+            <stop offset="55%" stop-color="#5a8eae"/>
+            <stop offset="100%" stop-color="#2a4a66"/>
+          </linearGradient>
+          <linearGradient id="bergB" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#a8cfe0"/>
+            <stop offset="40%" stop-color="#6a9bb8"/>
+            <stop offset="100%" stop-color="#1e3a50"/>
+          </linearGradient>
+        </defs>
+        <!-- distant berg cluster 1 -->
+        <path d="M0,420 L40,360 L90,380 L140,300 L200,340 L250,280 L310,360 L360,330 L420,400 L420,420 Z" fill="url(#bergA)" opacity="0.55"/>
+        <path d="M140,300 L175,330 L200,340 L250,280 L280,320 L250,300 Z" fill="#d4eef8" opacity="0.5"/>
+        <!-- distant berg cluster 2 -->
+        <path d="M480,410 L540,340 L600,370 L680,290 L760,350 L820,310 L900,390 L900,410 Z" fill="url(#bergB)" opacity="0.5"/>
+        <path d="M680,290 L720,330 L760,350 L820,310 L850,340 L820,320 L760,340 Z" fill="#e0f2fa" opacity="0.45"/>
+        <!-- distant berg cluster 3 -->
+        <path d="M960,420 L1020,350 L1080,380 L1140,320 L1200,370 L1200,420 Z" fill="url(#bergA)" opacity="0.48"/>
+        <path d="M1140,320 L1170,350 L1200,370 L1200,350 L1160,335 Z" fill="#d4eef8" opacity="0.4"/>
+        <!-- horizon haze -->
+        <rect x="0" y="400" width="1200" height="30" fill="url(#horizonFade)" opacity="0.3"/>
+        <defs>
+          <linearGradient id="horizonFade" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#5ec8ff" stop-opacity="0"/>
+            <stop offset="100%" stop-color="#5ec8ff" stop-opacity="0.4"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <svg class="b" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs>
+          <linearGradient id="bergAb" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#8eb8d4"/>
+            <stop offset="55%" stop-color="#5a8eae"/>
+            <stop offset="100%" stop-color="#2a4a66"/>
+          </linearGradient>
+          <linearGradient id="bergBb" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#a8cfe0"/>
+            <stop offset="40%" stop-color="#6a9bb8"/>
+            <stop offset="100%" stop-color="#1e3a50"/>
+          </linearGradient>
+        </defs>
+        <path d="M0,420 L40,360 L90,380 L140,300 L200,340 L250,280 L310,360 L360,330 L420,400 L420,420 Z" fill="url(#bergAb)" opacity="0.55"/>
+        <path d="M140,300 L175,330 L200,340 L250,280 L280,320 L250,300 Z" fill="#d4eef8" opacity="0.5"/>
+        <path d="M480,410 L540,340 L600,370 L680,290 L760,350 L820,310 L900,390 L900,410 Z" fill="url(#bergBb)" opacity="0.5"/>
+        <path d="M680,290 L720,330 L760,350 L820,310 L850,340 L820,320 L760,340 Z" fill="#e0f2fa" opacity="0.45"/>
+        <path d="M960,420 L1020,350 L1080,380 L1140,320 L1200,370 L1200,420 Z" fill="url(#bergAb)" opacity="0.48"/>
+        <path d="M1140,320 L1170,350 L1200,370 L1200,350 L1160,335 Z" fill="#d4eef8" opacity="0.4"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ========== LAYER 4: Mid ice floes ========== -->
+  <div class="layer layer-mid">
+    <div class="strip">
+      <svg class="a" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs>
+          <linearGradient id="floe" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#c8e7f5"/>
+            <stop offset="100%" stop-color="#7aadca"/>
+          </linearGradient>
+        </defs>
+        <!-- mid-distance floes sitting near waterline ~455 -->
+        <ellipse cx="100" cy="458" rx="70" ry="10" fill="url(#floe)" opacity="0.7"/>
+        <ellipse cx="160" cy="462" rx="40" ry="7" fill="#9ec8dc" opacity="0.55"/>
+        <ellipse cx="380" cy="455" rx="90" ry="12" fill="url(#floe)" opacity="0.65"/>
+        <ellipse cx="460" cy="460" rx="35" ry="6" fill="#a8d0e4" opacity="0.5"/>
+        <ellipse cx="700" cy="458" rx="55" ry="9" fill="url(#floe)" opacity="0.6"/>
+        <ellipse cx="920" cy="452" rx="80" ry="11" fill="url(#floe)" opacity="0.7"/>
+        <ellipse cx="1000" cy="460" rx="45" ry="7" fill="#9ec8dc" opacity="0.5"/>
+        <ellipse cx="1140" cy="456" rx="60" ry="8" fill="url(#floe)" opacity="0.55"/>
+        <!-- tiny berg tips poking up -->
+        <path d="M300,450 L320,420 L340,450 Z" fill="#d0eaf5" opacity="0.7"/>
+        <path d="M820,448 L845,415 L870,448 Z" fill="#d0eaf5" opacity="0.65"/>
+      </svg>
+      <svg class="b" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs>
+          <linearGradient id="floeb" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#c8e7f5"/>
+            <stop offset="100%" stop-color="#7aadca"/>
+          </linearGradient>
+        </defs>
+        <ellipse cx="100" cy="458" rx="70" ry="10" fill="url(#floeb)" opacity="0.7"/>
+        <ellipse cx="160" cy="462" rx="40" ry="7" fill="#9ec8dc" opacity="0.55"/>
+        <ellipse cx="380" cy="455" rx="90" ry="12" fill="url(#floeb)" opacity="0.65"/>
+        <ellipse cx="460" cy="460" rx="35" ry="6" fill="#a8d0e4" opacity="0.5"/>
+        <ellipse cx="700" cy="458" rx="55" ry="9" fill="url(#floeb)" opacity="0.6"/>
+        <ellipse cx="920" cy="452" rx="80" ry="11" fill="url(#floeb)" opacity="0.7"/>
+        <ellipse cx="1000" cy="460" rx="45" ry="7" fill="#9ec8dc" opacity="0.5"/>
+        <ellipse cx="1140" cy="456" rx="60" ry="8" fill="url(#floeb)" opacity="0.55"/>
+        <path d="M300,450 L320,420 L340,450 Z" fill="#d0eaf5" opacity="0.7"/>
+        <path d="M820,448 L845,415 L870,448 Z" fill="#d0eaf5" opacity="0.65"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ========== LAYER 5: Water body (static + internal wave anim) ========== -->
+  <div class="layer layer-water">
+    <svg viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" width="100%" height="100%" aria-hidden="true">
+      <defs>
+        <linearGradient id="waterGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#1a4a68"/>
+          <stop offset="30%" stop-color="#0f3048"/>
+          <stop offset="100%" stop-color="#061420"/>
+        </linearGradient>
+        <linearGradient id="waterSheen" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#5ec8ff" stop-opacity="0.25"/>
+          <stop offset="100%" stop-color="#5ec8ff" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <!-- water surface -->
+      <path d="M0,455 Q80,448 160,455 T320,455 T480,455 T640,455 T800,455 T960,455 T1120,455 T1280,455 L1280,700 L0,700 Z"
+            fill="url(#waterGrad)"/>
+      <!-- animated surface highlights -->
+      <g opacity="0.35">
+        <path d="M0,458 Q100,450 200,458 T400,458 T600,458 T800,458 T1000,458 T1200,458"
+              fill="none" stroke="#7ec8e8" stroke-width="1.5">
+          <animate attributeName="d"
+            values="M0,458 Q100,450 200,458 T400,458 T600,458 T800,458 T1000,458 T1200,458;
+                    M0,458 Q100,466 200,458 T400,458 T600,458 T800,458 T1000,458 T1200,458;
+                    M0,458 Q100,450 200,458 T400,458 T600,458 T800,458 T1000,458 T1200,458"
+            dur="3s" repeatCount="indefinite"/>
+        </path>
+        <path d="M0,480 Q150,472 300,480 T600,480 T900,480 T1200,480"
+              fill="none" stroke="#3a8aaa" stroke-width="1.2" opacity="0.6">
+          <animate attributeName="d"
+            values="M0,480 Q150,472 300,480 T600,480 T900,480 T1200,480;
+                    M0,480 Q150,488 300,480 T600,480 T900,480 T1200,480;
+                    M0,480 Q150,472 300,480 T600,480 T900,480 T1200,480"
+            dur="4.2s" repeatCount="indefinite"/>
+        </path>
+      </g>
+      <!-- sheen band -->
+      <rect x="0" y="455" width="1200" height="40" fill="url(#waterSheen)"/>
+    </svg>
+  </div>
+
+  <!-- ========== LAYER 6: Near foam / spray (fastest parallax) ========== -->
+  <div class="layer layer-near">
+    <div class="strip">
+      <svg class="a" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <g fill="var(--foam)" opacity="0.55">
+          <ellipse cx="60" cy="470" rx="18" ry="4"/>
+          <ellipse cx="200" cy="475" rx="12" ry="3"/>
+          <ellipse cx="340" cy="468" rx="22" ry="5"/>
+          <ellipse cx="520" cy="472" rx="14" ry="3.5"/>
+          <ellipse cx="700" cy="478" rx="20" ry="4"/>
+          <ellipse cx="880" cy="470" rx="16" ry="3.5"/>
+          <ellipse cx="1040" cy="474" rx="24" ry="5"/>
+          <ellipse cx="1160" cy="468" rx="12" ry="3"/>
+        </g>
+        <g fill="#b8e0f0" opacity="0.3">
+          <circle cx="130" cy="490" r="2"/><circle cx="410" cy="495" r="1.5"/>
+          <circle cx="650" cy="488" r="2.2"/><circle cx="950" cy="492" r="1.8"/>
+        </g>
+      </svg>
+      <svg class="b" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <g fill="var(--foam)" opacity="0.55">
+          <ellipse cx="60" cy="470" rx="18" ry="4"/>
+          <ellipse cx="200" cy="475" rx="12" ry="3"/>
+          <ellipse cx="340" cy="468" rx="22" ry="5"/>
+          <ellipse cx="520" cy="472" rx="14" ry="3.5"/>
+          <ellipse cx="700" cy="478" rx="20" ry="4"/>
+          <ellipse cx="880" cy="470" rx="16" ry="3.5"/>
+          <ellipse cx="1040" cy="474" rx="24" ry="5"/>
+          <ellipse cx="1160" cy="468" rx="12" ry="3"/>
+        </g>
+        <g fill="#b8e0f0" opacity="0.3">
+          <circle cx="130" cy="490" r="2"/><circle cx="410" cy="495" r="1.5"/>
+          <circle cx="650" cy="488" r="2.2"/><circle cx="950" cy="492" r="1.8"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ========== LAYER 7: THE CRAFT + NARWHAL (subject) ========== -->
+  <div class="layer layer-craft">
+    <svg class="craft-rig" viewBox="0 0 520 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <linearGradient id="hullGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#3da8c9"/>
+          <stop offset="45%" stop-color="#1e6f8c"/>
+          <stop offset="100%" stop-color="#0f3d52"/>
+        </linearGradient>
+        <linearGradient id="hullTop" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#5ec8e8"/>
+          <stop offset="100%" stop-color="#2a8aaa"/>
+        </linearGradient>
+        <linearGradient id="skirtGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#3a5a72"/>
+          <stop offset="100%" stop-color="#1a3040"/>
+        </linearGradient>
+        <linearGradient id="cabinGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#8ad4f0" stop-opacity="0.55"/>
+          <stop offset="100%" stop-color="#1a4060" stop-opacity="0.75"/>
+        </linearGradient>
+        <linearGradient id="accentGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#ff8a3d"/>
+          <stop offset="100%" stop-color="#ffc14d"/>
+        </linearGradient>
+        <linearGradient id="skinGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#7eb3d0"/>
+          <stop offset="55%" stop-color="#5b8fad"/>
+          <stop offset="100%" stop-color="#3a6a88"/>
+        </linearGradient>
+        <linearGradient id="bellyGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#c5dce8"/>
+          <stop offset="100%" stop-color="#8ab0c4"/>
+        </linearGradient>
+        <linearGradient id="tuskGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#f5edd0"/>
+          <stop offset="50%" stop-color="#e8d8a8"/>
+          <stop offset="100%" stop-color="#c4b078"/>
+        </linearGradient>
+        <radialGradient id="glowOrange" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#ffc14d" stop-opacity="0.9"/>
+          <stop offset="100%" stop-color="#ff8a3d" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="mistGrad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#d0f0ff" stop-opacity="0.55"/>
+          <stop offset="100%" stop-color="#d0f0ff" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+
+      <g class="craft-body">
+
+        <!-- ===== Rear air-stream streaks (from prop, going LEFT = backward) ===== -->
+        <g class="air-stream" stroke="#9adcf0" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.5">
+          <path d="M40,95 L0,92" />
+          <path d="M35,105 L-5,108" />
+          <path d="M42,85 L5,80" />
+          <path d="M30,115 L0,120" />
+        </g>
+
+        <!-- ===== Hover cushion mist (under skirt) ===== -->
+        <g opacity="0.7">
+          <ellipse cx="260" cy="250" rx="130" ry="18" fill="url(#mistGrad)"/>
+          <ellipse cx="180" cy="248" rx="50" ry="12" fill="url(#mistGrad)" opacity="0.7"/>
+          <ellipse cx="340" cy="252" rx="45" ry="10" fill="url(#mistGrad)" opacity="0.6"/>
+          <!-- side spray puffs -->
+          <circle cx="130" cy="240" r="14" fill="#c8e8f8" opacity="0.25"/>
+          <circle cx="115" cy="245" r="9" fill="#c8e8f8" opacity="0.18"/>
+          <circle cx="390" cy="242" r="12" fill="#c8e8f8" opacity="0.22"/>
+          <circle cx="405" cy="248" r="8" fill="#c8e8f8" opacity="0.15"/>
+        </g>
+
+        <!-- ===== Ducted fan assembly at REAR (left side of craft; craft faces RIGHT) ===== -->
+        <g transform="translate(40, 40)">
+          <!-- duct ring -->
+          <ellipse cx="78" cy="88" rx="52" ry="52" fill="none" stroke="#1a4a62" stroke-width="14"/>
+          <ellipse cx="78" cy="88" rx="52" ry="52" fill="none" stroke="#2a6a88" stroke-width="8"/>
+          <ellipse cx="78" cy="88" rx="44" ry="44" fill="#0a2030" opacity="0.7"/>
+          <!-- hub -->
+          <circle cx="78" cy="88" r="10" fill="#2a6a88"/>
+          <circle cx="78" cy="88" r="5" fill="#ffc14d"/>
+          <!-- spinning blades -->
+          <g class="prop-blades">
+            <ellipse cx="78" cy="55" rx="7" ry="28" fill="#5ec8e8" opacity="0.85" transform="rotate(0 78 88)"/>
+            <ellipse cx="78" cy="55" rx="7" ry="28" fill="#3a9abc" opacity="0.85" transform="rotate(60 78 88)"/>
+            <ellipse cx="78" cy="55" rx="7" ry="28" fill="#5ec8e8" opacity="0.85" transform="rotate(120 78 88)"/>
+            <ellipse cx="78" cy="55" rx="7" ry="28" fill="#3a9abc" opacity="0.85" transform="rotate(180 78 88)"/>
+            <ellipse cx="78" cy="55" rx="7" ry="28" fill="#5ec8e8" opacity="0.85" transform="rotate(240 78 88)"/>
+            <ellipse cx="78" cy="55" rx="7" ry="28" fill="#3a9abc" opacity="0.85" transform="rotate(300 78 88)"/>
+          </g>
+          <!-- motion blur disc -->
+          <circle cx="78" cy="88" r="40" fill="#7ec8e8" opacity="0.12"/>
+        </g>
+
+        <!-- ===== Skirt (flexible cushion bag) ===== -->
+        <g class="skirt-left">
+          <path d="M140,200 Q120,240 130,255 L200,255 Q190,230 195,200 Z" fill="url(#skirtGrad)"/>
+          <path d="M145,210 Q135,235 142,248" fill="none" stroke="#4a7088" stroke-width="1.5" opacity="0.5"/>
+          <path d="M160,208 Q152,232 158,248" fill="none" stroke="#4a7088" stroke-width="1.5" opacity="0.5"/>
+          <path d="M175,205 Q168,230 174,248" fill="none" stroke="#4a7088" stroke-width="1.5" opacity="0.5"/>
+        </g>
+        <g class="skirt-mid">
+          <path d="M195,200 Q185,245 210,258 L310,258 Q330,245 325,200 Z" fill="url(#skirtGrad)"/>
+          <path d="M210,210 Q205,240 215,250" fill="none" stroke="#4a7088" stroke-width="1.4" opacity="0.45"/>
+          <path d="M235,208 Q230,240 240,252" fill="none" stroke="#4a7088" stroke-width="1.4" opacity="0.45"/>
+          <path d="M260,206 Q255,238 265,252" fill="none" stroke="#4a7088" stroke-width="1.4" opacity="0.45"/>
+          <path d="M285,205 Q282,236 290,250" fill="none" stroke="#4a7088" stroke-width="1.4" opacity="0.45"/>
+          <path d="M305,205 Q305,235 310,248" fill="none" stroke="#4a7088" stroke-width="1.4" opacity="0.45"/>
+        </g>
+        <g class="skirt-right">
+          <path d="M325,200 Q340,240 330,255 L390,255 Q400,230 385,200 Z" fill="url(#skirtGrad)"/>
+          <path d="M340,210 Q350,235 345,248" fill="none" stroke="#4a7088" stroke-width="1.5" opacity="0.5"/>
+          <path d="M360,208 Q370,232 365,248" fill="none" stroke="#4a7088" stroke-width="1.5" opacity="0.5"/>
+        </g>
+
+        <!-- ===== Hull body ===== -->
+        <!-- main hull -->
+        <path d="M120,175
+                 Q115,140 150,125
+                 L200,110
+                 Q250,95 320,100
+                 L400,115
+                 Q440,125 455,155
+                 L460,175
+                 Q460,200 440,210
+                 L160,210
+                 Q125,205 120,175 Z"
+              fill="url(#hullGrad)"/>
+        <!-- hull top highlight -->
+        <path d="M150,125 L200,110 Q250,95 320,100 L400,115 Q420,120 430,130
+                 Q380,115 320,110 Q250,105 200,118 L155,135 Z"
+              fill="url(#hullTop)" opacity="0.7"/>
+        <!-- accent racing stripe -->
+        <path d="M140,165 L460,160 L460,172 L138,178 Z" fill="url(#accentGrad)" opacity="0.9"/>
+        <!-- nose cone (pointing RIGHT = forward) -->
+        <path d="M430,130 Q470,145 490,165 Q470,185 430,200 L455,155 Q460,145 430,130 Z"
+              fill="#2a8aaa"/>
+        <path d="M470,155 L490,165 L470,175 Q475,165 470,155 Z" fill="#ffc14d"/>
+        <!-- headlight glow (forward = right) -->
+        <circle cx="478" cy="165" r="16" fill="url(#glowOrange)" opacity="0.7"/>
+        <circle cx="482" cy="165" r="5" fill="#fff5d0"/>
+
+        <!-- cabin / windshield -->
+        <path d="M220,120 Q230,85 280,78 L360,82 Q395,90 400,120 L400,125 L220,130 Z"
+              fill="url(#cabinGrad)" stroke="#5ec8e8" stroke-width="1.5" opacity="0.9"/>
+        <!-- cabin frame -->
+        <path d="M250,125 L255,90" stroke="#1a4a62" stroke-width="2" fill="none"/>
+        <path d="M320,122 L325,85" stroke="#1a4a62" stroke-width="2" fill="none"/>
+        <!-- side vent lines -->
+        <line x1="170" y1="150" x2="195" y2="148" stroke="#0a2838" stroke-width="2" opacity="0.5"/>
+        <line x1="170" y1="158" x2="198" y2="156" stroke="#0a2838" stroke-width="2" opacity="0.5"/>
+        <line x1="170" y1="166" x2="196" y2="164" stroke="#0a2838" stroke-width="2" opacity="0.5"/>
+
+        <!-- nav light on top -->
+        <circle cx="360" cy="82" r="4" fill="#ff4d6a">
+          <animate attributeName="opacity" values="1;0.3;1" dur="1.2s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="360" cy="82" r="8" fill="#ff4d6a" opacity="0.25">
+          <animate attributeName="r" values="6;12;6" dur="1.2s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.35;0;0.35" dur="1.2s" repeatCount="indefinite"/>
+        </circle>
+
+        <!-- ===== NARWHAL PILOT (in cabin, parts animate independently) ===== -->
+
+        <!-- far flipper (behind body, still wiggles) -->
+        <g class="n-flipper-far">
+          <path d="M300,150 Q330,140 350,155 Q335,160 310,158 Z" fill="#3a6a88" opacity="0.75"/>
+        </g>
+
+        <!-- tail flukes sticking out the BACK of the cabin (leftward) -->
+        <g class="n-tail">
+          <path d="M230,145
+                   Q200,130 175,125
+                   Q195,140 205,148
+                   Q195,155 180,165
+                   Q210,160 230,155 Z"
+                fill="url(#skinGrad)"/>
+          <path d="M230,148 Q205,140 185,132" fill="none" stroke="#2a5068" stroke-width="1" opacity="0.4"/>
+        </g>
+
+        <!-- main narwhal body / head poking out of cabin -->
+        <g class="n-body">
+          <!-- body -->
+          <ellipse cx="300" cy="145" rx="55" ry="32" fill="url(#skinGrad)"/>
+          <!-- belly -->
+          <ellipse cx="305" cy="158" rx="38" ry="16" fill="url(#bellyGrad)" opacity="0.85"/>
+          <!-- head bulge -->
+          <ellipse cx="345" cy="135" rx="28" ry="24" fill="url(#skinGrad)"/>
+          <!-- melon (forehead) -->
+          <ellipse cx="355" cy="122" rx="18" ry="14" fill="#6a9cb8"/>
+          <!-- spots -->
+          <circle cx="280" cy="135" r="2.5" fill="#3a6a88" opacity="0.45"/>
+          <circle cx="295" cy="128" r="2" fill="#3a6a88" opacity="0.4"/>
+          <circle cx="310" cy="138" r="2.2" fill="#3a6a88" opacity="0.4"/>
+          <circle cx="270" cy="148" r="1.8" fill="#3a6a88" opacity="0.35"/>
+          <circle cx="320" cy="130" r="1.6" fill="#3a6a88" opacity="0.35"/>
+
+          <!-- tusk (long spiral horn, pointing forward-up-right) -->
+          <g class="n-tusk">
+            <path d="M365,118
+                     Q400,95 450,70
+                     Q455,68 458,72
+                     Q410,98 372,122 Z"
+                  fill="url(#tuskGrad)"/>
+            <!-- spiral grooves on tusk -->
+            <path d="M380,112 Q410,92 440,75" fill="none" stroke="#b8a060" stroke-width="0.8" opacity="0.5"/>
+            <path d="M385,116 Q415,95 445,78" fill="none" stroke="#b8a060" stroke-width="0.6" opacity="0.35"/>
+            <path d="M375,108 Q405,88 435,72" fill="none" stroke="#d4c088" stroke-width="0.5" opacity="0.4"/>
+            <!-- tusk tip highlight -->
+            <circle cx="455" cy="71" r="2" fill="#fff8e0" opacity="0.7"/>
+          </g>
+
+          <!-- eye -->
+          <g class="n-blink">
+            <ellipse cx="350" cy="128" rx="5.5" ry="6" fill="#0a1820"/>
+            <ellipse cx="352" cy="126" rx="2" ry="2.2" fill="#e8f8ff"/>
+            <circle cx="349" cy="130" r="1" fill="#5ec8e8" opacity="0.6"/>
+          </g>
+          <!-- eyelid for blink (covers when opacity animates) -->
+          <ellipse cx="350" cy="128" rx="5.5" ry="6" fill="#5b8fad" opacity="0"/>
+
+          <!-- smile -->
+          <path d="M338,142 Q348,150 360,144" fill="none" stroke="#2a5068" stroke-width="1.8" stroke-linecap="round"/>
+          <!-- blush -->
+          <ellipse cx="332" cy="138" rx="6" ry="3.5" fill="#e88a9a" opacity="0.3"/>
+
+          <!-- near flipper (in front, waving) -->
+          <g class="n-flipper-near">
+            <path d="M290,155
+                     Q275,175 265,190
+                     Q280,185 295,175
+                     Q305,165 305,155 Z"
+                  fill="url(#skinGrad)"/>
+            <path d="M292,160 Q280,175 272,185" fill="none" stroke="#3a6a88" stroke-width="1" opacity="0.4"/>
+          </g>
+
+          <!-- tiny captain's scarf / bandana -->
+          <path d="M330,148 Q340,155 355,150 L350,158 Q335,162 325,155 Z" fill="#ff8a3d"/>
+          <path d="M325,155 Q315,165 310,175" fill="none" stroke="#ff8a3d" stroke-width="3" stroke-linecap="round">
+            <animate attributeName="d"
+              values="M325,155 Q315,165 310,175;M325,155 Q312,168 305,180;M325,155 Q315,165 310,175"
+              dur="0.8s" repeatCount="indefinite"/>
+          </path>
+        </g>
+
+        <!-- small dorsal suggestion on hull rear for silhouette -->
+        <path d="M155,125 Q160,105 175,100 Q180,115 170,125 Z" fill="#2a6a88" opacity="0.5"/>
+
+      </g>
+    </svg>
+  </div>
+
+  <!-- ========== LAYER 8: Wake FX behind craft ========== -->
+  <div class="layer layer-fx">
+    <svg viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" width="100%" height="100%" aria-hidden="true">
+      <defs>
+        <radialGradient id="wakeG" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#d0f0ff" stop-opacity="0.7"/>
+          <stop offset="100%" stop-color="#d0f0ff" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <!-- wake trail particles positioned relative to craft at ~18% left, mid height -->
+      <g>
+        <circle class="wake-dot" cx="220" cy="400" r="8" fill="url(#wakeG)" style="animation-delay:0s"/>
+        <circle class="wake-dot" cx="220" cy="410" r="6" fill="url(#wakeG)" style="animation-delay:0.2s"/>
+        <circle class="wake-dot" cx="220" cy="395" r="10" fill="url(#wakeG)" style="animation-delay:0.4s"/>
+        <circle class="wake-dot" cx="220" cy="415" r="5" fill="url(#wakeG)" style="animation-delay:0.6s"/>
+        <circle class="wake-dot" cx="220" cy="405" r="7" fill="url(#wakeG)" style="animation-delay:0.8s"/>
+        <circle class="wake-dot" cx="220" cy="398" r="9" fill="url(#wakeG)" style="animation-delay:1.0s"/>
+      </g>
+      <!-- V-shaped wake foam on water -->
+      <g opacity="0.4" stroke="#b8e0f0" stroke-width="1.5" fill="none">
+        <path d="M250,420 Q180,440 100,460">
+          <animate attributeName="opacity" values="0.5;0.15;0.5" dur="1.5s" repeatCount="indefinite"/>
+        </path>
+        <path d="M250,425 Q170,450 80,470">
+          <animate attributeName="opacity" values="0.35;0.1;0.35" dur="1.8s" repeatCount="indefinite"/>
+        </path>
+      </g>
+      <!-- speed lines behind craft -->
+      <g class="speed-lines" stroke="#9adcf0" stroke-width="1.5" stroke-linecap="round" opacity="0.45">
+        <line x1="150" y1="360" x2="80" y2="360" stroke-dasharray="20 30">
+          <animate attributeName="opacity" values="0;0.6;0" dur="0.7s" repeatCount="indefinite"/>
+        </line>
+        <line x1="160" y1="380" x2="70" y2="380" stroke-dasharray="25 25">
+          <animate attributeName="opacity" values="0;0.5;0" dur="0.9s" repeatCount="indefinite" begin="0.2s"/>
+        </line>
+        <line x1="145" y1="400" x2="60" y2="400" stroke-dasharray="18 32">
+          <animate attributeName="opacity" values="0;0.55;0" dur="0.6s" repeatCount="indefinite" begin="0.1s"/>
+        </line>
+      </g>
+    </svg>
+  </div>
+
+  <div class="hud">NARWHAL · HOVERCRAFT · ARCTIC DASH</div>
+</div>
+
+<!--
+  ========== GEOMETRY & MOTION NOTES (self-consistency) ==========
+
+  DIRECTION:
+  - Craft nose / headlight / tusk all point RIGHT (+X).
+  - Background layers translate LEFT (drift-x to -50%), so relative motion
+    is craft advancing rightward across the landscape.
+  - Propeller is mounted at the REAR (left side of the hull). Its axis is
+    along the craft's longitudinal axis. Blades spin; air-stream streaks
+    extend further LEFT (backward), matching thrust that drives the craft
+    RIGHT. This is Newton-3 consistent: fan accelerates air aft → craft
+    pushed forward.
+
+  PROPULSION (no wheels/tracks — this is a hovercraft):
+  - Lift: cushion mist + skirt flutter under the hull (air cushion).
+  - Thrust: rear ducted propeller, CSS rotation 360° / 0.28s, plus
+    .air-stream paths animating leftward.
+  - Skirt pleats (.skirt-left/mid/right) flutter on independent phase
+    offsets (0 / -0.18s / -0.36s) so the bag breathes rather than
+    vibrating as one rigid piece.
+
+  NARWHAL RELATIVE MOTION (≥2 independent appendages, not body-locked):
+  1. .n-tail   — tail flukes swish ±10–14° at 0.7s, origin at fluke root.
+  2. .n-flipper-near — pectoral flipper paddles ±6–22° at 0.9s.
+  3. .n-flipper-far  — far flipper counter-phase.
+  4. .n-tusk   — tusk nods ±2–4° at hull-independent 1.15s.
+  5. .n-body   — torso bobs/rotates at 1.15s vs hull bob at 1.6s
+     (different period → non-synchronous, not a single rigid translate).
+  6. Scarf streamer SVG-animate at 0.8s (another independent phase).
+
+  PARALLAX (≥2 layers, implemented as 5 moving + 1 water + 1 fx):
+  - Stars      : 80s / full width  (farthest, slowest)
+  - Aurora     : 55s
+  - Far bergs  : 36s
+  - Mid floes  : 18s
+  - Near foam  : 7s   (fastest ground plane)
+  Each strip is 200% width with two identical SVG tiles (a/b) so the
+  translateX(-50%) loop is seamless. Craft is position:fixed relative
+  to viewport (does not parallax), reinforcing “we ride with the craft”.
+
+  NO EXTERNAL RESOURCES:
+  - Single HTML file, inline CSS + SVG only.
+  - No fonts, images, scripts, or CDN references.
+-->
+</body>
+</html>

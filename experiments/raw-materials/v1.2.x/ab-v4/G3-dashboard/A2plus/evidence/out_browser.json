@@ -1,0 +1,35 @@
+﻿{
+  "browser": "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
+  "dumps": {
+    "all": {
+      "url": "file:///<实验根目录>/ab-v4/G3-dashboard/A2plus/index.html",
+      "ok": true,
+      "problems": [],
+      "snapshot": "out_render/scope-all.html"
+    },
+    "q1": {
+      "url": "file:///<实验根目录>/ab-v4/G3-dashboard/A2plus/index.html?scope=q1",
+      "ok": true,
+      "problems": [],
+      "snapshot": "out_render/scope-q1.html"
+    },
+    "q2": {
+      "url": "file:///<实验根目录>/ab-v4/G3-dashboard/A2plus/index.html?scope=q2",
+      "ok": true,
+      "problems": [],
+      "snapshot": "out_render/scope-q2.html"
+    },
+    "q3": {
+      "url": "file:///<实验根目录>/ab-v4/G3-dashboard/A2plus/index.html?scope=q3",
+      "ok": true,
+      "problems": [],
+      "snapshot": "out_render/scope-q3.html"
+    },
+    "q4": {
+      "url": "file:///<实验根目录>/ab-v4/G3-dashboard/A2plus/index.html?scope=q4",
+      "ok": true,
+      "problems": [],
+      "snapshot": "out_render/scope-q4.html"
+    }
+  }
+}

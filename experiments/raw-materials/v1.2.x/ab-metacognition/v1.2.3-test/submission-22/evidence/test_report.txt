@@ -1,0 +1,105 @@
+﻿CSV Parser Verification Report
+======================================================================
+Parser: <实验根目录>\ab-metacognition\v1.2.3-test\v1.2.2\csv_parser.py
+Python: 3.14.7 (main, Aug 25 2026, 14:01:25) [MSC v.1944 64 bit (AMD64)]
+Total: 96, Passed: 96, Failed: 0, Errors: 0
+Status: ALL GREEN
+
+
+All passed test names:
+  F1.1 basic three fields
+  F1.2 all quoted fields
+  F1.3 mixed quoted/unquoted
+  F2.1 comma inside quotes
+  F2.2 newline inside quotes
+  F2.3 escaped quote inside quotes
+  F2.4 combined special chars in quotes
+  F3.1 empty middle field
+  F3.2 empty leading field
+  F3.3 empty trailing field
+  F3.4 empty line between rows
+  F4.1 LF line endings
+  F4.2 CRLF line endings
+  F4.3 CR-only line endings
+  F5.1 BOM + normal content
+  F5.2 BOM-only input
+  F5.3 BOM + newline
+  F6.1 returns list
+  F6.2 each row is list
+  F6.3 each field is str
+  E1.1 unclosed quote mid-file
+  E1.2 unclosed quote at EOF
+  E1.3 unclosed quote spanning lines
+  E2.1 spaces preserved in unquoted fields
+  E2.2 spaces preserved in quoted fields
+  E2.3 single field with surrounding spaces
+  E2.4 space-before-quote is literal
+  E3.1 last line no newline
+  E3.2 single line no newline
+  E3.3 single field no newline
+  E4.1 single newline
+  E4.2 two newlines
+  E4.3 three newlines
+  E5.1 CRLF + LF + CR mixed
+  E5.2 CR + LF + CRLF mixed single-field
+  E6.1 BOM + multi-row no trailing newline
+  E6.2 BOM + quoted field with comma
+  B1.1 empty string
+  B2.1 BOM-only returns empty list
+  B3.1 single field
+  B3.2 single field no newline
+  B4.1 quoted empty field
+  B4.2 quoted empty field between others
+  B5.1 four quotes = one literal quote
+  B6.1 three blank lines between
+  B7.1 trailing comma no newline
+  B7.2 trailing comma with newline
+  B8.1 leading comma
+  A1.1 single lone quote
+  A2.1 unclosed quote after comma
+  X1.1 quote in middle of unquoted field is literal
+  X2.1 content after closing quote
+  X3.1 large 10000-char field
+  X4.1 1000 rows
+  oracle.O01 basic
+  oracle.O02 quoted comma
+  oracle.O03 quoted newline
+  oracle.O04 escaped quote
+  oracle.O05 empty middle
+  oracle.O06 empty leading
+  oracle.O07 empty trailing
+  oracle.O08 blank line
+  oracle.O09 CRLF
+  oracle.O10 CR only
+  oracle.O11 mixed endings
+  oracle.O12 no trailing newline
+  oracle.O13 single newline
+  oracle.O14 two newlines
+  oracle.O15 spaces
+  oracle.O16 quoted spaces
+  oracle.O17 quoted empty
+  oracle.O18 four quotes
+  oracle.O19 single field
+  oracle.O20 mixed quote types
+  oracle.O21 nested specials
+  oracle.O22 trailing comma
+  oracle.O23 leading comma
+  oracle.O24 only commas
+  oracle.O25 quoted with CR inside
+  oracle.O26 large field
+  oracle.O27 many rows
+  oracle.O28 content after quote
+  oracle.O29 quote in middle
+  oracle.O30 empty string
+  oracle.summary_all_match
+  F7.1 CLI normal file
+  F7.2 CLI missing file returns 1
+  F7.3 CLI no args returns 2
+  F7.4 CLI unclosed quote returns 1
+  F7.5 CLI BOM file parsed correctly
+  mutation.M1_no_bom.caught (6 test(s) failed)
+  mutation.M2_no_cr.caught (4 test(s) failed)
+  mutation.M3_no_escape.caught (3 test(s) failed)
+  mutation.M4_no_unclosed.caught (5 test(s) failed)
+  mutation.M5_strip_spaces.caught (4 test(s) failed)
+  mutation.M6_extra_row.caught (43 test(s) failed)

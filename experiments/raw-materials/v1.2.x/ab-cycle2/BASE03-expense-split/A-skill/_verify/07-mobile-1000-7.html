@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>聚餐 AA 分摊计算器</title>
+<style>
+  :root {
+    --bg: #0f1420;
+    --card: #1a2233;
+    --card-2: #212b40;
+    --line: #2e3b56;
+    --text: #e8edf7;
+    --muted: #93a1bd;
+    --accent: #4f8cff;
+    --ok: #35c98a;
+    --warn: #ffb020;
+    --err: #ff5f6d;
+    --mono: ui-monospace, SFMono-Regular, Consolas, "Courier New", monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 28px 16px 60px;
+    background: radial-gradient(1200px 600px at 50% -10%, #1b2740 0%, var(--bg) 60%);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 22px; margin: 0 0 6px; letter-spacing: .5px; }
+  .sub { color: var(--muted); font-size: 13px; margin-bottom: 22px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.28);
+  }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
+  label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 7px; }
+  .field { position: relative; }
+  .field input {
+    width: 100%;
+    background: var(--card-2);
+    border: 1px solid var(--line);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 17px;
+    font-family: var(--mono);
+    outline: none;
+    transition: border-color .15s, box-shadow .15s, background .15s;
+  }
+  .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,140,255,.18); }
+  .field.bad input { border-color: var(--err); box-shadow: 0 0 0 3px rgba(255,95,109,.16); }
+  .field.good input { border-color: rgba(53,201,138,.6); }
+  .hint { min-height: 18px; font-size: 12px; margin-top: 6px; color: var(--muted); line-height: 1.45; }
+  .hint.bad { color: var(--err); }
+  .hint.warn { color: var(--warn); }
+  .hint.good { color: var(--ok); }
+
+  .result {
+    margin-top: 20px;
+    border-top: 1px dashed var(--line);
+    padding-top: 18px;
+  }
+  .amount-big { font-size: 40px; font-weight: 700; font-family: var(--mono); letter-spacing: -1px; }
+  @media (max-width: 400px) { .amount-big { font-size: 30px; letter-spacing: -.5px; } }
+  .amount-big .unit { font-size: 18px; color: var(--muted); font-weight: 500; margin-left: 4px; }
+  .result.zero .amount-big { color: var(--muted); }
+  .result.err .amount-big { color: var(--err); }
+
+  .lines { margin-top: 14px; display: grid; gap: 8px; }
+  .row {
+    display: flex; justify-content: space-between; gap: 12px;
+    background: var(--card-2); border: 1px solid var(--line);
+    border-radius: 9px; padding: 10px 12px; font-size: 14px;
+  }
+  .row .k { color: var(--muted); }
+  .row .v { font-family: var(--mono); }
+  .chip {
+    display: inline-block; padding: 2px 8px; border-radius: 999px;
+    font-size: 12px; background: rgba(79,140,255,.15); color: #9dc0ff;
+    border: 1px solid rgba(79,140,255,.35);
+  }
+  .note { margin-top: 16px; font-size: 12.5px; color: var(--muted); line-height: 1.65; }
+  .note b { color: var(--text); font-weight: 600; }
+  .note code { font-family: var(--mono); background: #101728; padding: 1px 5px; border-radius: 4px; color: #cdd9f2; }
+  .quick { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+  .quick button {
+    background: var(--card-2); color: var(--muted); border: 1px solid var(--line);
+    border-radius: 8px; padding: 7px 12px; font-size: 12.5px; cursor: pointer;
+    font-family: inherit; transition: all .15s;
+  }
+  .quick button:hover { color: var(--text); border-color: var(--accent); }
+  .quick button:active { transform: translateY(1px); }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>聚餐 AA 分摊计算器</h1>
+  <div class="sub">输入总金额与人数，实时计算每人应付。全部计算在本地完成，无网络请求。</div>
+
+  <div class="card">
+    <div class="grid">
+      <div>
+        <label for="total">总金额（元）</label>
+        <div class="field" id="totalField">
+          <input id="total" type="text" inputmode="decimal" autocomplete="off"
+                 maxlength="20" placeholder="例如 300 或 128.50" aria-describedby="totalHint">
+        </div>
+        <div class="hint" id="totalHint">支持小数，超过 2 位小数会自动四舍五入规整。</div>
+      </div>
+      <div>
+        <label for="people">人数</label>
+        <div class="field" id="peopleField">
+          <input id="people" type="text" inputmode="numeric" autocomplete="off"
+                 maxlength="10" placeholder="例如 8" aria-describedby="peopleHint">
+        </div>
+        <div class="hint" id="peopleHint">必须为大于 0 的整数。</div>
+      </div>
+    </div>
+
+    <div class="quick">
+      <button type="button" data-fill="total:1000 people:7">示例：1000 元 / 7 人</button>
+      <button type="button" data-fill="total:128.555 people:3">示例：128.555 元 / 3 人</button>
+      <button type="button" data-fill="total: people:0">边界：人数 0</button>
+      <button type="button" data-fill="total: people:">清空</button>
+    </div>
+
+    <div class="result" id="result" aria-live="polite">
+      <div class="amount-big" id="bigAmount">—<span class="unit">元 / 人</span></div>
+      <div class="lines" id="lines"></div>
+    </div>
+
+    <div class="note" id="note">
+      <b>余数处理方式：</b>以「分」为单位做整数除法，先算得每人应付的基准金额，
+      不能整除的余数（不足 1 分 × 人数）平均分配给靠前的若干人，使 <code>各人相加 = 总金额</code> 精确成立，不多收也不少收。
+    </div>
+  </div>
+</div>
+
+<script id="core">
+/* ===== 纯计算核心：不触碰 DOM，可被 test 脚本单独抽出复算 ===== */
+(function (root) {
+  'use strict';
+
+  var MAX_INT_DIGITS = 13;   // 允许的最大整数位数（约 10 万亿元）
+  var MAX_PEOPLE = 1000000;  // 人数上限
+
+  // 规整金额字符串 -> { ok, cents, normalized, rounded, code, message, empty }
+  function normalizeAmount(raw) {
+    if (raw === null || raw === undefined) raw = '';
+    if (typeof raw !== 'string') raw = String(raw);
+    var s = raw.replace(/[,，\s\u00a5\uFFE5]/g, '');   // 去掉千分位、空格、￥ ¥
+    if (s === '') return fail('EMPTY', '不能为空', raw);
+    if (!/^\d*(\.\d*)?$/.test(s)) return fail('INVALID', '只能包含数字和一个小数点', raw);
+    if (s === '.') return fail('INVALID', '格式不正确（缺少数字）', raw);
+
+    var parts = s.split('.');
+    var intPart = parts[0] || '0';
+    var fracPart = parts[1] || '';
+    var trimmedInt = intPart.replace(/^0+/, '') || '0';
+    if (trimmedInt.length > MAX_INT_DIGITS) return fail('TOO_LARGE', '过大（上限约 10 万亿元）', raw);
+
+    var rounded = fracPart.length > 2;
+    var carry = rounded && fracPart.charCodeAt(2) >= 53 /* '5' */ ? 1 : 0;
+    var cents = Number(trimmedInt) * 100
+              + Number((fracPart.slice(0, 2) + '00').slice(0, 2))
+              + carry;
+
+    return {
+      ok: true, code: 'OK', message: '',
+      cents: cents,
+      normalized: (cents / 100).toFixed(2),
+      rounded: rounded,
+      raw: raw
+    };
+  }
+
+  function normalizePeople(raw) {
+    if (raw === null || raw === undefined) raw = '';
+    if (typeof raw !== 'string') raw = String(raw);
+    var s = raw.trim();
+    if (s === '') return fail('EMPTY', '不能为空', raw);
+    if (!/^\d+$/.test(s)) return fail('INVALID', '必须是正整数', raw);
+    var n = Number(s);
+    if (n < 1) return fail('ZERO', '必须大于 0', raw);
+    if (n > MAX_PEOPLE) return fail('TOO_LARGE', '过大（上限 ' + MAX_PEOPLE.toLocaleString('en-US') + '）', raw);
+    return { ok: true, code: 'OK', message: '', n: n, raw: raw };
+  }
+
+  // 整数分拆分 -> 基准 + 余数分配
+  function computeSplit(cents, people) {
+    var base = Math.floor(cents / people);
+    var remainder = cents - base * people;      // 0 <= remainder < people
+    return {
+      cents: cents,
+      people: people,
+      baseCents: base,
+      remainder: remainder,
+      highCount: remainder,                      // 多付 1 分的人数
+      lowCount: people - remainder,
+      perPerson: (base / 100).toFixed(2),
+      perPersonHigh: ((base + 1) / 100).toFixed(2),
+      sumCheck: base * people + remainder        // 应恒等于 cents
+    };
+  }
+
+  function fail(code, message, raw) {
+    return { ok: false, code: code, message: message, raw: raw };
+  }
+
+  root.AACore = {
+    MAX_INT_DIGITS: MAX_INT_DIGITS,
+    MAX_PEOPLE: MAX_PEOPLE,
+    normalizeAmount: normalizeAmount,
+    normalizePeople: normalizePeople,
+    computeSplit: computeSplit
+  };
+})(typeof window !== 'undefined' ? window : this);
+</script>
+
+<script id="ui">
+/* ===== UI 绑定：实时反馈 + 不抛未捕获异常 ===== */
+(function () {
+  'use strict';
+  var C = window.AACore;
+  var $ = function (id) { return document.getElementById(id); };
+
+  var totalEl = $('total'), peopleEl = $('people');
+  var totalField = $('totalField'), peopleField = $('peopleField');
+  var totalHint = $('totalHint'), peopleHint = $('peopleHint');
+  var result = $('result'), bigAmount = $('bigAmount'), lines = $('lines');
+
+  function setField(fieldEl, hintEl, state, msg) {
+    fieldEl.classList.remove('bad', 'good');
+    hintEl.classList.remove('bad', 'warn', 'good');
+    if (state === 'bad') { fieldEl.classList.add('bad'); hintEl.classList.add('bad'); }
+    else if (state === 'good') { fieldEl.classList.add('good'); hintEl.classList.add('good'); }
+    else if (state === 'warn') { hintEl.classList.add('warn'); }
+    hintEl.textContent = msg;
+  }
+
+  function clearLines() { while (lines.firstChild) lines.removeChild(lines.firstChild); }
+
+  function addRow(k, v, chip) {
+    var row = document.createElement('div');
+    row.className = 'row';
+    var kEl = document.createElement('span');
+    kEl.className = 'k';
+    kEl.textContent = k;
+    var vEl = document.createElement('span');
+    vEl.className = 'v';
+    vEl.textContent = v;
+    if (chip) {
+      vEl.appendChild(document.createTextNode(' '));
+      var c = document.createElement('span');
+      c.className = 'chip';
+      c.textContent = chip;
+      vEl.appendChild(c);
+    }
+    row.appendChild(kEl);
+    row.appendChild(vEl);
+    lines.appendChild(row);
+  }
+
+  function render() {
+    try {
+      var aRaw = totalEl.value;
+      var pRaw = peopleEl.value;
+      var a = C.normalizeAmount(aRaw);
+      var p = C.normalizePeople(pRaw);
+
+      // 金额字段反馈
+      if (!a.ok) {
+        setField(totalField, totalHint, 'bad', a.message);
+      } else if (a.rounded) {
+        setField(totalField, totalHint, 'warn',
+          '已按四舍五入规整为 ¥' + a.normalized + '（原始输入含超过 2 位小数）');
+      } else {
+        setField(totalField, totalHint, 'good', '识别金额：¥' + a.normalized);
+      }
+
+      // 人数字段反馈
+      if (!p.ok) {
+        setField(peopleField, peopleHint, 'bad', p.message);
+      } else {
+        setField(peopleField, peopleHint, 'good', '人数：' + p.n + ' 人');
+      }
+
+      // 结果区
+      result.classList.remove('zero', 'err');
+      clearLines();
+
+      if (!a.ok || !p.ok) {
+        result.classList.add('err');
+        bigAmount.textContent = '—';
+        var unit = document.createElement('span');
+        unit.className = 'unit';
+        unit.textContent = '元 / 人';
+        bigAmount.appendChild(unit);
+
+        var msgs = [];
+        if (!a.ok) msgs.push(a.message === '不能为空' ? '金额不能为空' : '金额：' + a.message);
+        if (!p.ok) msgs.push(p.message === '不能为空' ? '人数不能为空' : '人数：' + p.message);
+        addRow('状态', msgs.join('；'));
+        return;
+      }
+
+      var r = C.computeSplit(a.cents, p.n);
+
+      if (r.cents === 0) result.classList.add('zero');
+      bigAmount.textContent = r.perPerson;
+      var unit2 = document.createElement('span');
+      unit2.className = 'unit';
+      unit2.textContent = r.highCount > 0 ? '元 / 人（基准）' : '元 / 人';
+      bigAmount.appendChild(unit2);
+
+      addRow('总金额', '¥' + a.normalized);
+      addRow('人数', p.n + ' 人');
+      if (r.highCount > 0) {
+        addRow('分摊明细',
+          r.highCount + ' 人 × ¥' + r.perPersonHigh + '，' + r.lowCount + ' 人 × ¥' + r.perPerson,
+          '余数 ' + r.remainder + ' 分');
+        addRow('校验', '合计 ¥' + (r.sumCheck / 100).toFixed(2) + '  =  总金额 ¥' + a.normalized,
+          r.sumCheck === r.cents ? '一致' : '不一致');
+      } else {
+        addRow('分摊明细', '每人 ¥' + r.perPerson + '，可整除无余数');
+        addRow('校验', '合计 ¥' + (r.sumCheck / 100).toFixed(2) + '  =  总金额 ¥' + a.normalized, '一致');
+      }
+    } catch (err) {
+      // 兜底：任何意外都不外泄为未捕获异常
+      result.classList.remove('zero');
+      result.classList.add('err');
+      clearLines();
+      bigAmount.textContent = '—';
+      addRow('状态', '输入无法解析，请检查后重试');
+      if (window.console && console.error) console.error('[AA] render error:', err);
+    }
+  }
+
+  totalEl.addEventListener('input', render);
+  peopleEl.addEventListener('input', render);
+  totalEl.addEventListener('change', render);
+  peopleEl.addEventListener('change', render);
+
+  document.querySelectorAll('.quick button').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var data = btn.getAttribute('data-fill') || '';
+      data.split(/\s+/).forEach(function (kv) {
+        var pair = kv.split(':');
+        if (pair[0] === 'total') totalEl.value = pair[1] || '';
+        if (pair[0] === 'people') peopleEl.value = pair[1] || '';
+      });
+      render();
+    });
+  });
+
+  // 全局兜底，防止任何遗漏的错误冒泡
+  window.addEventListener('error', function (e) {
+    try {
+      clearLines();
+      result.classList.add('err');
+      addRow('状态', '发生异常，已安全降级');
+      e.preventDefault();
+    } catch (_) {}
+  });
+
+  render();
+})();
+</script>
+
+<script>
+(function(){
+  var t=document.getElementById('total'), p=document.getElementById('people');
+  t.value="1000"; p.value="7";
+  t.dispatchEvent(new Event('input')); p.dispatchEvent(new Event('input'));
+})();
+</script>
+</body>
+</html>

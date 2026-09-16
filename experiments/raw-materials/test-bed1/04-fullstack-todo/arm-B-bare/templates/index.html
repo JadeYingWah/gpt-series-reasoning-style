@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>待办清单</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+      background: #f0f2f5;
+      display: flex;
+      justify-content: center;
+      padding: 40px 16px;
+      min-height: 100vh;
+    }
+    .container {
+      width: 100%;
+      max-width: 520px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+      padding: 28px;
+      height: fit-content;
+    }
+    h1 { font-size: 22px; color: #1f2329; margin-bottom: 20px; }
+    .add-row { display: flex; gap: 8px; margin-bottom: 20px; }
+    #todo-input {
+      flex: 1;
+      padding: 10px 12px;
+      border: 1px solid #d0d5dd;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+    }
+    #todo-input:focus { border-color: #3370ff; }
+    #add-btn {
+      padding: 10px 20px;
+      background: #3370ff;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    #add-btn:hover { background: #2b5fd9; }
+    .status { font-size: 13px; margin-bottom: 12px; min-height: 18px; }
+    .status.ok { color: #2ea44f; }
+    .status.err { color: #d93026; }
+    #todo-list { list-style: none; }
+    #todo-list li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border: 1px solid #eceff1;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    #todo-list li.done .title {
+      text-decoration: line-through;
+      color: #9aa0a6;
+    }
+    #todo-list .title { flex: 1; font-size: 14px; color: #1f2329; word-break: break-all; }
+    #todo-list input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
+    #todo-list .del-btn {
+      background: none;
+      border: none;
+      color: #d93026;
+      font-size: 13px;
+      cursor: pointer;
+      opacity: 0.7;
+    }
+    #todo-list .del-btn:hover { opacity: 1; }
+    .empty { text-align: center; color: #9aa0a6; font-size: 14px; padding: 24px 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>待办清单</h1>
+
+    <div class="add-row">
+      <input id="todo-input" type="text" placeholder="输入待办事项，回车或点击添加"
+             autocomplete="off" autofocus>
+      <button id="add-btn">添加</button>
+    </div>
+
+    <div id="status" class="status"></div>
+    <ul id="todo-list"></ul>
+  </div>
+
+  <script>
+    const API = "/api/todos";
+    const input = document.getElementById("todo-input");
+    const addBtn = document.getElementById("add-btn");
+    const listEl = document.getElementById("todo-list");
+    const statusEl = document.getElementById("status");
+
+    function setStatus(msg, ok) {
+      statusEl.textContent = msg;
+      statusEl.className = "status " + (ok ? "ok" : "err");
+      if (msg) setTimeout(() => { statusEl.textContent = ""; }, 2500);
+    }
+
+    // 拉取并渲染列表
+    async function loadTodos() {
+      const res = await fetch(API);
+      const data = await res.json();
+      listEl.innerHTML = "";
+      if (!data.todos.length) {
+        listEl.innerHTML = '<div class="empty">暂无待办，添加一条吧</div>';
+        return;
+      }
+      for (const todo of data.todos) {
+        const li = document.createElement("li");
+        if (todo.done) li.classList.add("done");
+
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.checked = todo.done;
+        cb.addEventListener("change", () => toggleTodo(todo));
+
+        const span = document.createElement("span");
+        span.className = "title";
+        span.textContent = todo.title;
+
+        const del = document.createElement("button");
+        del.className = "del-btn";
+        del.textContent = "删除";
+        del.addEventListener("click", () => deleteTodo(todo));
+
+        li.append(cb, span, del);
+        listEl.appendChild(li);
+      }
+    }
+
+    // 添加待办
+    async function addTodo() {
+      const title = input.value.trim();
+      if (!title) { setStatus("请输入内容", false); return; }
+      const res = await fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title })
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        setStatus(err.error || "添加失败", false);
+        return;
+      }
+      input.value = "";
+      input.focus();
+      setStatus("已添加", true);
+      await loadTodos();
+    }
+
+    // 切换完成状态
+    async function toggleTodo(todo) {
+      await fetch(`${API}/${todo.id}`, { method: "PUT" });
+      await loadTodos();
+    }
+
+    // 删除待办
+    async function deleteTodo(todo) {
+      await fetch(`${API}/${todo.id}`, { method: "DELETE" });
+      setStatus("已删除", true);
+      await loadTodos();
+    }
+
+    addBtn.addEventListener("click", addTodo);
+    input.addEventListener("keydown", (e) => { if (e.key === "Enter") addTodo(); });
+
+    loadTodos();
+  </script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+{
+  "merge_rule": "union of m1/m2/m3 intervals; merge when overlap or gap<=60min",
+  "n_intervals_per_method": {
+    "m1": 13,
+    "m2": 35,
+    "m3": 11
+  },
+  "n_anom_points_per_method": {
+    "m1": 98,
+    "m2": 1411,
+    "m3": 46
+  },
+  "n_merged_intervals": 40,
+  "n_confirmed_by_ge2": 9,
+  "n_single_method": 31,
+  "pairwise": {
+    "m1-m2": {
+      "point_jaccard": 0.0162,
+      "point_intersection": 24,
+      "m1_points": 98,
+      "m2_points": 1411,
+      "m1_intervals_confirmed_by_m2": 3,
+      "m2_intervals_confirmed_by_m1": 3,
+      "m1_n_intervals": 13,
+      "m2_n_intervals": 35
+    },
+    "m1-m3": {
+      "point_jaccard": 0.0909,
+      "point_intersection": 12,
+      "m1_points": 98,
+      "m3_points": 46,
+      "m1_intervals_confirmed_by_m3": 1,
+      "m3_intervals_confirmed_by_m1": 1,
+      "m1_n_intervals": 13,
+      "m3_n_intervals": 11
+    },
+    "m2-m3": {
+      "point_jaccard": 0.0125,
+      "point_intersection": 18,
+      "m2_points": 1411,
+      "m3_points": 46,
+      "m2_intervals_confirmed_by_m3": 7,
+      "m3_intervals_confirmed_by_m2": 8,
+      "m2_n_intervals": 35,
+      "m3_n_intervals": 11
+    }
+  }
+}

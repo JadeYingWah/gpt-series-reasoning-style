@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>METRO OWL · Line 7 Eastbound</title>
+<!--
+  SVG018-owl-subway · A-skill
+  主题：猫头鹰驾驶地铁，画面右侧前进
+  场景：蓝调时刻高架线 · CITY ELEVATED · LINE 7 EASTBOUND
+  约束：单文件 / 无外链 / 附肢相对运动 / ≥2 层视差
+-->
+<style>
+  :root{
+    --ink:#0b1224;
+    --sky:#15203a;
+    --far:#1c2b4d;
+    --mid:#243656;
+    --near:#1a2740;
+    --cream:#f3efe6;
+    --stripe:#ff6b35;
+    --stripe-deep:#e85a28;
+    --rail:#8b97ad;
+    --rail-dark:#3d4a62;
+    --window:#7dd3fc;
+    --warm:#ffd166;
+    --amber:#f4a261;
+    --owl-body:#c4a574;
+    --owl-belly:#f0e6d0;
+    --owl-dark:#5c4033;
+    --owl-eye:#ff9f1c;
+    --cyan:#5eead4;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:100%;height:100%;overflow:hidden;background:var(--ink)}
+  body{
+    font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+  }
+  #stage{
+    width:100%;
+    height:100%;
+    display:block;
+    background:var(--ink);
+  }
+
+  /* ========== 视差层：世界相对列车左移 ========== */
+  .layer-far{animation:scroll-far 64s linear infinite}
+  .layer-mid{animation:scroll-mid 32s linear infinite}
+  .layer-near{animation:scroll-near 16s linear infinite}
+  .layer-rail{animation:scroll-rail 10s linear infinite}
+
+  @keyframes scroll-far{
+    0%{transform:translateX(0)}
+    100%{transform:translateX(-900px)}
+  }
+  @keyframes scroll-mid{
+    0%{transform:translateX(0)}
+    100%{transform:translateX(-900px)}
+  }
+  @keyframes scroll-near{
+    0%{transform:translateX(0)}
+    100%{transform:translateX(-900px)}
+  }
+  @keyframes scroll-rail{
+    0%{transform:translateX(0)}
+    100%{transform:translateX(-900px)}
+  }
+
+  /* ========== 列车车体：仅竖直微颠 ========== */
+  #train-group{
+    animation:train-bob 0.62s ease-in-out infinite;
+    transform-origin:600px 420px;
+  }
+  @keyframes train-bob{
+    0%,100%{transform:translateY(0)}
+    40%{transform:translateY(-2.8px)}
+    70%{transform:translateY(1.4px)}
+  }
+
+  /* ========== 车轮：顺时针（向右前进） ========== */
+  .wheel-spin{
+    animation:wheel-spin 0.9s linear infinite;
+  }
+  .wheel-spin-rear{
+    animation:wheel-spin 1.05s linear infinite;
+  }
+  @keyframes wheel-spin{
+    0%{transform:rotate(0deg)}
+    100%{transform:rotate(360deg)}
+  }
+
+  /* ========== Owl 附肢（相对车体独立） ========== */
+  #owl-head{
+    animation:head-scan 3.6s ease-in-out infinite;
+    transform-origin:720px 318px;
+  }
+  #owl-wing-l{
+    animation:wing-l 0.78s ease-in-out infinite;
+    transform-origin:700px 350px;
+  }
+  #owl-wing-r{
+    animation:wing-r 0.78s ease-in-out infinite;
+    transform-origin:742px 348px;
+  }
+  #tuft-l{
+    animation:tuft-l 1.7s ease-in-out infinite;
+    transform-origin:708px 292px;
+  }
+  #tuft-r{
+    animation:tuft-r 1.7s ease-in-out infinite;
+    transform-origin:732px 292px;
+  }
+  #owl-eyes{
+    animation:blink 5.1s ease-in-out infinite;
+    transform-origin:720px 322px;
+  }
+  #owl-tail{
+    animation:tail-flick 1.15s ease-in-out infinite;
+    transform-origin:710px 378px;
+  }
+  #owl-crest{
+    animation:crest-puff 2.4s ease-in-out infinite;
+    transform-origin:720px 300px;
+  }
+
+  @keyframes head-scan{
+    0%,100%{transform:rotate(-4deg)}
+    35%{transform:rotate(6deg)}
+    65%{transform:rotate(2deg)}
+  }
+  @keyframes wing-l{
+    0%,100%{transform:rotate(0deg) translateY(0)}
+    50%{transform:rotate(-11deg) translateY(2px)}
+  }
+  @keyframes wing-r{
+    0%,100%{transform:rotate(0deg) translateY(0)}
+    50%{transform:rotate(9deg) translateY(1px)}
+  }
+  @keyframes tuft-l{
+    0%,100%{transform:rotate(-6deg)}
+    50%{transform:rotate(10deg)}
+  }
+  @keyframes tuft-r{
+    0%,100%{transform:rotate(7deg)}
+    50%{transform:rotate(-9deg)}
+  }
+  @keyframes blink{
+    0%,92%,100%{transform:scaleY(1)}
+    95%{transform:scaleY(0.08)}
+  }
+  @keyframes tail-flick{
+    0%,100%{transform:rotate(-3deg)}
+    50%{transform:rotate(8deg)}
+  }
+  @keyframes crest-puff{
+    0%,100%{transform:scaleY(1)}
+    50%{transform:scaleY(1.08)}
+  }
+
+  /* ========== 灯光 / 氛围 ========== */
+  #headlight-beam{
+    animation:beam-pulse 2.2s ease-in-out infinite;
+    transform-origin:1040px 392px;
+  }
+  @keyframes beam-pulse{
+    0%,100%{opacity:0.55}
+    50%{opacity:0.9}
+  }
+  .win-glow{
+    animation:win-flicker 3.4s ease-in-out infinite;
+  }
+  .win-glow-b{
+    animation:win-flicker 4.1s ease-in-out infinite;
+    animation-delay:-1.2s;
+  }
+  @keyframes win-flicker{
+    0%,100%{opacity:0.75}
+    40%{opacity:1}
+    60%{opacity:0.55}
+  }
+  #cab-lamp{
+    animation:lamp-pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes lamp-pulse{
+    0%,100%{opacity:0.85}
+    50%{opacity:1}
+  }
+  .star{
+    animation:twinkle 3s ease-in-out infinite;
+  }
+  .star-b{animation:twinkle 4.2s ease-in-out infinite;animation-delay:-1s}
+  @keyframes twinkle{
+    0%,100%{opacity:0.25}
+    50%{opacity:0.95}
+  }
+
+  /* 速度拖尾：向左 = 前进向右 */
+  #speed-lines{
+    animation:speed-dash 0.55s linear infinite;
+  }
+  @keyframes speed-dash{
+    0%{transform:translateX(0);opacity:0.85}
+    100%{transform:translateX(-28px);opacity:0}
+  }
+
+  /* 车顶受电弓微颤 */
+  #pantograph{
+    animation:panto-shake 0.45s ease-in-out infinite;
+    transform-origin:860px 268px;
+  }
+  @keyframes panto-shake{
+    0%,100%{transform:rotate(-1.2deg)}
+    50%{transform:rotate(1.4deg)}
+  }
+
+  /* 地面接触阴影呼吸 */
+  #ground-shadow{
+    animation:shadow-breathe 0.62s ease-in-out infinite;
+  }
+  @keyframes shadow-breathe{
+    0%,100%{opacity:0.35}
+    40%{opacity:0.22}
+  }
+</style>
+</head>
+<body>
+<svg id="stage" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a1020"/>
+      <stop offset="40%" stop-color="#15203a"/>
+      <stop offset="75%" stop-color="#1e3050"/>
+      <stop offset="100%" stop-color="#2a4060"/>
+    </linearGradient>
+    <linearGradient id="horizonGlow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ff8c42" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#ff8c42" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#ffd166" stop-opacity="0.05"/>
+    </linearGradient>
+    <linearGradient id="trainBody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#faf7f0"/>
+      <stop offset="45%" stop-color="#e8e2d6"/>
+      <stop offset="100%" stop-color="#b8b0a0"/>
+    </linearGradient>
+    <linearGradient id="trainNose" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#e0d8cc"/>
+      <stop offset="100%" stop-color="#9a9286"/>
+    </linearGradient>
+    <linearGradient id="glassGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#b8e4ff" stop-opacity="0.92"/>
+      <stop offset="50%" stop-color="#6bb8d4" stop-opacity="0.78"/>
+      <stop offset="100%" stop-color="#3d7a96" stop-opacity="0.88"/>
+    </linearGradient>
+    <linearGradient id="cabGlass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#d4f1ff" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#5a9ab4" stop-opacity="0.82"/>
+    </linearGradient>
+    <linearGradient id="beamGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#fff3b0" stop-opacity="0.55"/>
+      <stop offset="40%" stop-color="#ffd166" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#ffd166" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="railGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c5cedd"/>
+      <stop offset="45%" stop-color="#7a8699"/>
+      <stop offset="100%" stop-color="#3d4a62"/>
+    </linearGradient>
+    <radialGradient id="eyeGrad" cx="40%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#ffe066"/>
+      <stop offset="45%" stop-color="#ff9f1c"/>
+      <stop offset="100%" stop-color="#e76f51"/>
+    </radialGradient>
+    <radialGradient id="lampGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fff8d6" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#ffd166" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="farBlur" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="1.2"/>
+    </filter>
+    <clipPath id="cabClip">
+      <path d="M900 300 C960 288, 1020 292, 1055 310 L1055 400 L900 400 Z"/>
+    </clipPath>
+    <clipPath id="sideWinA">
+      <rect x="560" y="318" width="70" height="52" rx="8"/>
+    </clipPath>
+    <clipPath id="sideWinB">
+      <rect x="640" y="318" width="70" height="52" rx="8"/>
+    </clipPath>
+    <clipPath id="sideWinC">
+      <rect x="720" y="318" width="70" height="52" rx="8"/>
+    </clipPath>
+    <clipPath id="sideWinD">
+      <rect x="800" y="318" width="70" height="52" rx="8"/>
+    </clipPath>
+  </defs>
+
+  <!-- ========== 天空（静态基底） ========== -->
+  <rect x="0" y="0" width="1200" height="700" fill="url(#skyGrad)"/>
+  <rect x="0" y="280" width="1200" height="160" fill="url(#horizonGlow)"/>
+
+  <!-- 星星 -->
+  <g fill="#e8f0ff">
+    <circle class="star" cx="80" cy="48" r="1.2"/>
+    <circle class="star-b" cx="160" cy="90" r="0.9"/>
+    <circle class="star" cx="240" cy="36" r="1.4"/>
+    <circle class="star-b" cx="320" cy="110" r="0.8"/>
+    <circle class="star" cx="410" cy="55" r="1.1"/>
+    <circle class="star-b" cx="520" cy="28" r="1.3"/>
+    <circle class="star" cx="640" cy="70" r="0.9"/>
+    <circle class="star-b" cx="760" cy="40" r="1.2"/>
+    <circle class="star" cx="880" cy="95" r="0.8"/>
+    <circle class="star-b" cx="980" cy="50" r="1.1"/>
+    <circle class="star" cx="1080" cy="30" r="1.3"/>
+    <circle class="star-b" cx="1140" cy="80" r="0.9"/>
+  </g>
+  <!-- 月亮 -->
+  <circle cx="160" cy="100" r="28" fill="#f0e6c8" opacity="0.9"/>
+  <circle cx="172" cy="92" r="22" fill="#15203a"/>
+
+  <!-- ========== L1 远景天际线（64s） ========== -->
+  <g class="layer-far" filter="url(#farBlur)" opacity="0.55">
+    <g id="far-tile-a">
+      <!-- 远楼群 -->
+      <rect x="0" y="210" width="55" height="170" fill="#1c2b4d"/>
+      <rect x="12" y="230" width="6" height="8" fill="#f4a261" opacity="0.35"/>
+      <rect x="28" y="250" width="6" height="8" fill="#f4a261" opacity="0.25"/>
+      <rect x="40" y="230" width="6" height="8" fill="#7dd3fc" opacity="0.3"/>
+      <rect x="60" y="170" width="70" height="210" fill="#1e2f52"/>
+      <rect x="72" y="190" width="7" height="9" fill="#ffd166" opacity="0.3"/>
+      <rect x="90" y="210" width="7" height="9" fill="#ffd166" opacity="0.2"/>
+      <rect x="108" y="190" width="7" height="9" fill="#7dd3fc" opacity="0.25"/>
+      <rect x="72" y="240" width="7" height="9" fill="#f4a261" opacity="0.2"/>
+      <rect x="90" y="260" width="7" height="9" fill="#ffd166" opacity="0.3"/>
+      <rect x="140" y="230" width="48" height="150" fill="#1a2848"/>
+      <rect x="150" y="250" width="6" height="8" fill="#7dd3fc" opacity="0.28"/>
+      <rect x="195" y="190" width="80" height="190" fill="#1e2f52"/>
+      <rect x="210" y="210" width="7" height="9" fill="#ffd166" opacity="0.25"/>
+      <rect x="230" y="230" width="7" height="9" fill="#f4a261" opacity="0.3"/>
+      <rect x="250" y="210" width="7" height="9" fill="#ffd166" opacity="0.2"/>
+      <rect x="210" y="270" width="7" height="9" fill="#7dd3fc" opacity="0.22"/>
+      <rect x="285" y="240" width="40" height="140" fill="#1a2848"/>
+      <rect x="335" y="160" width="65" height="220" fill="#1c2b4d"/>
+      <rect x="348" y="180" width="6" height="8" fill="#ffd166" opacity="0.3"/>
+      <rect x="365" y="200" width="6" height="8" fill="#ffd166" opacity="0.22"/>
+      <rect x="380" y="180" width="6" height="8" fill="#7dd3fc" opacity="0.25"/>
+      <rect x="410" y="220" width="50" height="160" fill="#1e2f52"/>
+      <rect x="470" y="185" width="75" height="195" fill="#1a2848"/>
+      <rect x="485" y="205" width="6" height="8" fill="#f4a261" opacity="0.28"/>
+      <rect x="505" y="225" width="6" height="8" fill="#ffd166" opacity="0.22"/>
+      <rect x="525" y="205" width="6" height="8" fill="#7dd3fc" opacity="0.25"/>
+      <rect x="555" y="240" width="45" height="140" fill="#1c2b4d"/>
+      <rect x="610" y="200" width="70" height="180" fill="#1e2f52"/>
+      <rect x="622" y="220" width="6" height="8" fill="#ffd166" opacity="0.25"/>
+      <rect x="640" y="245" width="6" height="8" fill="#f4a261" opacity="0.2"/>
+      <rect x="690" y="230" width="55" height="150" fill="#1a2848"/>
+      <rect x="705" y="250" width="6" height="8" fill="#7dd3fc" opacity="0.28"/>
+      <rect x="755" y="175" width="85" height="205" fill="#1c2b4d"/>
+      <rect x="770" y="195" width="7" height="9" fill="#ffd166" opacity="0.3"/>
+      <rect x="790" y="215" width="7" height="9" fill="#ffd166" opacity="0.2"/>
+      <rect x="810" y="195" width="7" height="9" fill="#f4a261" opacity="0.25"/>
+      <rect x="850" y="235" width="50" height="145" fill="#1e2f52"/>
+    </g>
+    <g id="far-tile-b" transform="translate(900,0)">
+      <rect x="0" y="210" width="55" height="170" fill="#1c2b4d"/>
+      <rect x="12" y="230" width="6" height="8" fill="#f4a261" opacity="0.35"/>
+      <rect x="28" y="250" width="6" height="8" fill="#f4a261" opacity="0.25"/>
+      <rect x="40" y="230" width="6" height="8" fill="#7dd3fc" opacity="0.3"/>
+      <rect x="60" y="170" width="70" height="210" fill="#1e2f52"/>
+      <rect x="72" y="190" width="7" height="9" fill="#ffd166" opacity="0.3"/>
+      <rect x="90" y="210" width="7" height="9" fill="#ffd166" opacity="0.2"/>
+      <rect x="108" y="190" width="7" height="9" fill="#7dd3fc" opacity="0.25"/>
+      <rect x="72" y="240" width="7" height="9" fill="#f4a261" opacity="0.2"/>
+      <rect x="90" y="260" width="7" height="9" fill="#ffd166" opacity="0.3"/>
+      <rect x="140" y="230" width="48" height="150" fill="#1a2848"/>
+      <rect x="150" y="250" width="6" height="8" fill="#7dd3fc" opacity="0.28"/>
+      <rect x="195" y="190" width="80" height="190" fill="#1e2f52"/>
+      <rect x="210" y="210" width="7" height="9" fill="#ffd166" opacity="0.25"/>
+      <rect x="230" y="230" width="7" height="9" fill="#f4a261" opacity="0.3"/>
+      <rect x="250" y="210" width="7" height="9" fill="#ffd166" opacity="0.2"/>
+      <rect x="210" y="270" width="7" height="9" fill="#7dd3fc" opacity="0.22"/>
+      <rect x="285" y="240" width="40" height="140" fill="#1a2848"/>
+      <rect x="335" y="160" width="65" height="220" fill="#1c2b4d"/>
+      <rect x="348" y="180" width="6" height="8" fill="#ffd166" opacity="0.3"/>
+      <rect x="365" y="200" width="6" height="8" fill="#ffd166" opacity="0.22"/>
+      <rect x="380" y="180" width="6" height="8" fill="#7dd3fc" opacity="0.25"/>
+      <rect x="410" y="220" width="50" height="160" fill="#1e2f52"/>
+      <rect x="470" y="185" width="75" height="195" fill="#1a2848"/>
+      <rect x="485" y="205" width="6" height="8" fill="#f4a261" opacity="0.28"/>
+      <rect x="505" y="225" width="6" height="8" fill="#ffd166" opacity="0.22"/>
+      <rect x="525" y="205" width="6" height="8" fill="#7dd3fc" opacity="0.25"/>
+      <rect x="555" y="240" width="45" height="140" fill="#1c2b4d"/>
+      <rect x="610" y="200" width="70" height="180" fill="#1e2f52"/>
+      <rect x="622" y="220" width="6" height="8" fill="#ffd166" opacity="0.25"/>
+      <rect x="640" y="245" width="6" height="8" fill="#f4a261" opacity="0.2"/>
+      <rect x="690" y="230" width="55" height="150" fill="#1a2848"/>
+      <rect x="705" y="250" width="6" height="8" fill="#7dd3fc" opacity="0.28"/>
+      <rect x="755" y="175" width="85" height="205" fill="#1c2b4d"/>
+      <rect x="770" y="195" width="7" height="9" fill="#ffd166" opacity="0.3"/>
+      <rect x="790" y="215" width="7" height="9" fill="#ffd166" opacity="0.2"/>
+      <rect x="810" y="195" width="7" height="9" fill="#f4a261" opacity="0.25"/>
+      <rect x="850" y="235" width="50" height="145" fill="#1e2f52"/>
+    </g>
+  </g>
+
+  <!-- ========== L2 中景楼群 + 站台（32s） ========== -->
+  <g class="layer-mid" opacity="0.85">
+    <g id="mid-tile-a">
+      <rect x="0" y="280" width="90" height="120" fill="#243656"/>
+      <rect x="10" y="295" width="10" height="14" fill="#ffd166" opacity="0.45"/>
+      <rect x="30" y="315" width="10" height="14" fill="#7dd3fc" opacity="0.4"/>
+      <rect x="50" y="295" width="10" height="14" fill="#ffd166" opacity="0.35"/>
+      <rect x="70" y="320" width="10" height="14" fill="#f4a261" opacity="0.4"/>
+      <!-- 站台雨棚 -->
+      <rect x="100" y="300" width="160" height="12" fill="#2e4062"/>
+      <rect x="110" y="312" width="8" height="88" fill="#283850"/>
+      <rect x="240" y="312" width="8" height="88" fill="#283850"/>
+      <rect x="105" y="288" width="150" height="14" rx="2" fill="#ff6b35"/>
+      <text x="180" y="299" text-anchor="middle" fill="#0b1224" font-size="10" font-weight="700" font-family="system-ui,sans-serif">LINE 7</text>
+      <rect x="120" y="330" width="50" height="4" fill="#5eead4" opacity="0.6"/>
+      <rect x="120" y="340" width="70" height="3" fill="#5eead4" opacity="0.35"/>
+      <rect x="120" y="350" width="40" height="3" fill="#5eead4" opacity="0.25"/>
+      <!-- 中楼 -->
+      <rect x="280" y="260" width="100" height="140" fill="#223452"/>
+      <rect x="295" y="280" width="12" height="16" fill="#ffd166" opacity="0.5"/>
+      <rect x="315" y="300" width="12" height="16" fill="#ffd166" opacity="0.35"/>
+      <rect x="335" y="280" width="12" height="16" fill="#7dd3fc" opacity="0.4"/>
+      <rect x="315" y="330" width="12" height="16" fill="#f4a261" opacity="0.35"/>
+      <rect x="390" y="290" width="70" height="110" fill="#283850"/>
+      <rect x="400" y="305" width="10" height="12" fill="#ffd166" opacity="0.4"/>
+      <rect x="420" y="325" width="10" height="12" fill="#7dd3fc" opacity="0.35"/>
+      <rect x="470" y="250" width="110" height="150" fill="#223452"/>
+      <rect x="485" y="270" width="12" height="16" fill="#ffd166" opacity="0.45"/>
+      <rect x="505" y="295" width="12" height="16" fill="#ffd166" opacity="0.3"/>
+      <rect x="525" y="270" width="12" height="16" fill="#f4a261" opacity="0.4"/>
+      <rect x="505" y="340" width="12" height="16" fill="#7dd3fc" opacity="0.35"/>
+      <rect x="590" y="300" width="80" height="100" fill="#283850"/>
+      <rect x="605" y="315" width="10" height="14" fill="#ffd166" opacity="0.4"/>
+      <rect x="625" y="335" width="10" height="14" fill="#f4a261" opacity="0.35"/>
+      <!-- 广告牌 -->
+      <rect x="690" y="285" width="90" height="55" rx="3" fill="#1a2740"/>
+      <rect x="695" y="290" width="80" height="35" rx="2" fill="#ff6b35" opacity="0.85"/>
+      <text x="735" y="312" text-anchor="middle" fill="#fff" font-size="9" font-weight="700" font-family="system-ui,sans-serif">NIGHT OWL</text>
+      <rect x="710" y="340" width="50" height="8" fill="#3d4a62"/>
+      <rect x="790" y="270" width="95" height="130" fill="#223452"/>
+      <rect x="805" y="290" width="11" height="14" fill="#ffd166" opacity="0.4"/>
+      <rect x="825" y="310" width="11" height="14" fill="#7dd3fc" opacity="0.35"/>
+      <rect x="845" y="290" width="11" height="14" fill="#ffd166" opacity="0.3"/>
+    </g>
+    <g id="mid-tile-b" transform="translate(900,0)">
+      <rect x="0" y="280" width="90" height="120" fill="#243656"/>
+      <rect x="10" y="295" width="10" height="14" fill="#ffd166" opacity="0.45"/>
+      <rect x="30" y="315" width="10" height="14" fill="#7dd3fc" opacity="0.4"/>
+      <rect x="50" y="295" width="10" height="14" fill="#ffd166" opacity="0.35"/>
+      <rect x="70" y="320" width="10" height="14" fill="#f4a261" opacity="0.4"/>
+      <rect x="100" y="300" width="160" height="12" fill="#2e4062"/>
+      <rect x="110" y="312" width="8" height="88" fill="#283850"/>
+      <rect x="240" y="312" width="8" height="88" fill="#283850"/>
+      <rect x="105" y="288" width="150" height="14" rx="2" fill="#ff6b35"/>
+      <text x="180" y="299" text-anchor="middle" fill="#0b1224" font-size="10" font-weight="700" font-family="system-ui,sans-serif">LINE 7</text>
+      <rect x="120" y="330" width="50" height="4" fill="#5eead4" opacity="0.6"/>
+      <rect x="120" y="340" width="70" height="3" fill="#5eead4" opacity="0.35"/>
+      <rect x="120" y="350" width="40" height="3" fill="#5eead4" opacity="0.25"/>
+      <rect x="280" y="260" width="100" height="140" fill="#223452"/>
+      <rect x="295" y="280" width="12" height="16" fill="#ffd166" opacity="0.5"/>
+      <rect x="315" y="300" width="12" height="16" fill="#ffd166" opacity="0.35"/>
+      <rect x="335" y="280" width="12" height="16" fill="#7dd3fc" opacity="0.4"/>
+      <rect x="315" y="330" width="12" height="16" fill="#f4a261" opacity="0.35"/>
+      <rect x="390" y="290" width="70" height="110" fill="#283850"/>
+      <rect x="400" y="305" width="10" height="12" fill="#ffd166" opacity="0.4"/>
+      <rect x="420" y="325" width="10" height="12" fill="#7dd3fc" opacity="0.35"/>
+      <rect x="470" y="250" width="110" height="150" fill="#223452"/>
+      <rect x="485" y="270" width="12" height="16" fill="#ffd166" opacity="0.45"/>
+      <rect x="505" y="295" width="12" height="16" fill="#ffd166" opacity="0.3"/>
+      <rect x="525" y="270" width="12" height="16" fill="#f4a261" opacity="0.4"/>
+      <rect x="505" y="340" width="12" height="16" fill="#7dd3fc" opacity="0.35"/>
+      <rect x="590" y="300" width="80" height="100" fill="#283850"/>
+      <rect x="605" y="315" width="10" height="14" fill="#ffd166" opacity="0.4"/>
+      <rect x="625" y="335" width="10" height="14" fill="#f4a261" opacity="0.35"/>
+      <rect x="690" y="285" width="90" height="55" rx="3" fill="#1a2740"/>
+      <rect x="695" y="290" width="80" height="35" rx="2" fill="#ff6b35" opacity="0.85"/>
+      <text x="735" y="312" text-anchor="middle" fill="#fff" font-size="9" font-weight="700" font-family="system-ui,sans-serif">NIGHT OWL</text>
+      <rect x="710" y="340" width="50" height="8" fill="#3d4a62"/>
+      <rect x="790" y="270" width="95" height="130" fill="#223452"/>
+      <rect x="805" y="290" width="11" height="14" fill="#ffd166" opacity="0.4"/>
+      <rect x="825" y="310" width="11" height="14" fill="#7dd3fc" opacity="0.35"/>
+      <rect x="845" y="290" width="11" height="14" fill="#ffd166" opacity="0.3"/>
+    </g>
+  </g>
+
+  <!-- ========== L3 近景：电杆 / 接触网 / 剪影（16s） ========== -->
+  <g class="layer-near">
+    <g id="near-tile-a">
+      <!-- 接触网立柱 -->
+      <rect x="40" y="200" width="6" height="260" fill="#1a2740"/>
+      <rect x="20" y="210" width="46" height="5" fill="#1a2740"/>
+      <rect x="30" y="225" width="26" height="3" fill="#2a3d5c"/>
+      <circle cx="43" cy="208" r="3" fill="#5eead4" opacity="0.5"/>
+      <!-- 围栏剪影 -->
+      <rect x="0" y="400" width="180" height="8" fill="#15203a"/>
+      <rect x="15" y="380" width="4" height="28" fill="#15203a"/>
+      <rect x="45" y="380" width="4" height="28" fill="#15203a"/>
+      <rect x="75" y="380" width="4" height="28" fill="#15203a"/>
+      <rect x="105" y="380" width="4" height="28" fill="#15203a"/>
+      <rect x="135" y="380" width="4" height="28" fill="#15203a"/>
+      <rect x="165" y="380" width="4" height="28" fill="#15203a"/>
+      <!-- 信号灯 -->
+      <rect x="200" y="240" width="8" height="160" fill="#1a2740"/>
+      <rect x="192" y="230" width="24" height="36" rx="4" fill="#0f182c"/>
+      <circle cx="204" cy="242" r="5" fill="#22c55e" opacity="0.9" filter="url(#softGlow)"/>
+      <circle cx="204" cy="254" r="5" fill="#22c55e" opacity="0.3"/>
+      <!-- 电杆 2 -->
+      <rect x="320" y="190" width="7" height="270" fill="#1a2740"/>
+      <rect x="298" y="200" width="52" height="6" fill="#1a2740"/>
+      <rect x="308" y="218" width="32" height="3" fill="#2a3d5c"/>
+      <rect x="310" y="230" width="28" height="3" fill="#2a3d5c"/>
+      <!-- 树剪影 -->
+      <ellipse cx="400" cy="360" rx="28" ry="45" fill="#121c30"/>
+      <rect x="395" y="380" width="8" height="30" fill="#121c30"/>
+      <ellipse cx="460" cy="370" rx="20" ry="32" fill="#15203a"/>
+      <rect x="456" y="385" width="6" height="22" fill="#15203a"/>
+      <!-- 电杆 3 -->
+      <rect x="560" y="195" width="6" height="265" fill="#1a2740"/>
+      <rect x="538" y="205" width="50" height="5" fill="#1a2740"/>
+      <circle cx="563" cy="200" r="3" fill="#5eead4" opacity="0.45"/>
+      <!-- 隧道口剪影（中右） -->
+      <path d="M640 420 L640 300 Q700 260 760 300 L760 420 Z" fill="#0f182c" opacity="0.7"/>
+      <path d="M655 420 L655 315 Q700 285 745 315 L745 420 Z" fill="#1a2740" opacity="0.5"/>
+      <!-- 电杆 4 -->
+      <rect x="820" y="188" width="7" height="272" fill="#1a2740"/>
+      <rect x="798" y="198" width="52" height="6" fill="#1a2740"/>
+      <rect x="808" y="216" width="32" height="3" fill="#2a3d5c"/>
+      <!-- 路牌 -->
+      <rect x="880" y="340" width="6" height="70" fill="#1a2740"/>
+      <rect x="860" y="330" width="46" height="28" rx="3" fill="#ff6b35"/>
+      <text x="883" y="348" text-anchor="middle" fill="#0b1224" font-size="9" font-weight="700" font-family="system-ui,sans-serif">E 7</text>
+    </g>
+    <g id="near-tile-b" transform="translate(900,0)">
+      <rect x="40" y="200" width="6" height="260" fill="#1a2740"/>
+      <rect x="20" y="210" width="46" height="5" fill="#1a2740"/>
+      <rect x="30" y="225" width="26" height="3" fill="#2a3d5c"/>
+      <circle cx="43" cy="208" r="3" fill="#5eead4" opacity="0.5"/>
+      <rect x="0" y="400" width="180" height="8" fill="#15203a"/>
+      <rect x="15" y="380" width="4" height="28" fill="#15203a"/>
+      <rect x="45" y="380" width="4" height="28" fill="#15203a"/>
+      <rect x="75" y="380" width="4" height="28" fill="#15203a"/>
+      <rect x="105" y="380" width="4" height="28" fill="#15203a"/>
+      <rect x="135" y="380" width="4" height="28" fill="#15203a"/>
+      <rect x="165" y="380" width="4" height="28" fill="#15203a"/>
+      <rect x="200" y="240" width="8" height="160" fill="#1a2740"/>
+      <rect x="192" y="230" width="24" height="36" rx="4" fill="#0f182c"/>
+      <circle cx="204" cy="242" r="5" fill="#22c55e" opacity="0.9" filter="url(#softGlow)"/>
+      <circle cx="204" cy="254" r="5" fill="#22c55e" opacity="0.3"/>
+      <rect x="320" y="190" width="7" height="270" fill="#1a2740"/>
+      <rect x="298" y="200" width="52" height="6" fill="#1a2740"/>
+      <rect x="308" y="218" width="32" height="3" fill="#2a3d5c"/>
+      <rect x="310" y="230" width="28" height="3" fill="#2a3d5c"/>
+      <ellipse cx="400" cy="360" rx="28" ry="45" fill="#121c30"/>
+      <rect x="395" y="380" width="8" height="30" fill="#121c30"/>
+      <ellipse cx="460" cy="370" rx="20" ry="32" fill="#15203a"/>
+      <rect x="456" y="385" width="6" height="22" fill="#15203a"/>
+      <rect x="560" y="195" width="6" height="265" fill="#1a2740"/>
+      <rect x="538" y="205" width="50" height="5" fill="#1a2740"/>
+      <circle cx="563" cy="200" r="3" fill="#5eead4" opacity="0.45"/>
+      <path d="M640 420 L640 300 Q700 260 760 300 L760 420 Z" fill="#0f182c" opacity="0.7"/>
+      <path d="M655 420 L655 315 Q700 285 745 315 L745 420 Z" fill="#1a2740" opacity="0.5"/>
+      <rect x="820" y="188" width="7" height="272" fill="#1a2740"/>
+      <rect x="798" y="198" width="52" height="6" fill="#1a2740"/>
+      <rect x="808" y="216" width="32" height="3" fill="#2a3d5c"/>
+      <rect x="880" y="340" width="6" height="70" fill="#1a2740"/>
+      <rect x="860" y="330" width="46" height="28" rx="3" fill="#ff6b35"/>
+      <text x="883" y="348" text-anchor="middle" fill="#0b1224" font-size="9" font-weight="700" font-family="system-ui,sans-serif">E 7</text>
+    </g>
+  </g>
+
+  <!-- ========== L4 高架桥 + 轨道（10s） ========== -->
+  <g class="layer-rail">
+    <g id="rail-tile-a">
+      <!-- 高架梁 -->
+      <rect x="0" y="430" width="900" height="18" fill="#2a3550"/>
+      <rect x="0" y="448" width="900" height="6" fill="#1a2740"/>
+      <!-- 桥墩 -->
+      <rect x="80" y="454" width="28" height="200" fill="#1e2a42"/>
+      <rect x="300" y="454" width="32" height="200" fill="#1e2a42"/>
+      <rect x="520" y="454" width="28" height="200" fill="#1e2a42"/>
+      <rect x="740" y="454" width="32" height="200" fill="#1e2a42"/>
+      <!-- 枕木 -->
+      <rect x="20" y="430" width="36" height="8" fill="#3d4a62"/>
+      <rect x="80" y="430" width="36" height="8" fill="#3d4a62"/>
+      <rect x="140" y="430" width="36" height="8" fill="#3d4a62"/>
+      <rect x="200" y="430" width="36" height="8" fill="#3d4a62"/>
+      <rect x="260" y="430" width="36" height="8" fill="#3d4a62"/>
+      <rect x="320" y="430" width="36" height="8" fill="#3d4a62"/>
+      <rect x="380" y="430" width="36" height="8" fill="#3d4a62"/>
+      <rect x="440" y="430" width="36" height="8" fill="#3d4a62"/>
+      <rect x="500" y="430" width="36" height="8" fill="#3d4a62"/>
+      <rect x="560" y="430" width="36" height="8" fill="#3d4a62"/>
+      <rect x="620" y="430" width="36" height="8" fill="#3d4a62"/>
+      <rect x="680" y="430" width="36" height="8" fill="#3d4a62"/>
+      <rect x="740" y="430" width="36" height="8" fill="#3d4a62"/>
+      <rect x="800" y="430" width="36" height="8" fill="#3d4a62"/>
+      <rect x="860" y="430" width="36" height="8" fill="#3d4a62"/>
+      <!-- 钢轨 -->
+      <rect x="0" y="428" width="900" height="4" fill="url(#railGrad)"/>
+      <rect x="0" y="418" width="900" height="3" fill="url(#railGrad)" opacity="0.7"/>
+      <!-- 第三轨 -->
+      <rect x="0" y="436" width="900" height="2" fill="#5eead4" opacity="0.25"/>
+    </g>
+    <g id="rail-tile-b" transform="translate(900,0)">
+      <rect x="0" y="430" width="900" height="18" fill="#2a3550"/>
+      <rect x="0" y="448" width="900" height="6" fill="#1a2740"/>
+      <rect x="80" y="454" width="28" height="200" fill="#1e2a42"/>
+      <rect x="300" y="454" width="32" height="200" fill="#1e2a42"/>
+      <rect x="520" y="454" width="28" height="200" fill="#1e2a42"/>
+      <rect x="740" y="454" width="32" height="200" fill="#1e2a42"/>
+      <rect x="20" y="430" width="36" height="8" fill="#3d4a62"/>
+      <rect x="80" y="430" width="36" height="8" fill="#3d4a62"/>
+      <rect x="140" y="430" width="36" height="8" fill="#3d4a62"/>
+      <rect x="200" y="430" width="36" height="8" fill="#3d4a62"/>
+      <rect x="260" y="430" width="36" height="8" fill="#3d4a62"/>
+      <rect x="320" y="430" width="36" height="8" fill="#3d4a62"/>
+      <rect x="380" y="430" width="36" height="8" fill="#3d4a62"/>
+      <rect x="440" y="430" width="36" height="8" fill="#3d4a62"/>
+      <rect x="500" y="430" width="36" height="8" fill="#3d4a62"/>
+      <rect x="560" y="430" width="36" height="8" fill="#3d4a62"/>
+      <rect x="620" y="430" width="36" height="8" fill="#3d4a62"/>
+      <rect x="680" y="430" width="36" height="8" fill="#3d4a62"/>
+      <rect x="740" y="430" width="36" height="8" fill="#3d4a62"/>
+      <rect x="800" y="430" width="36" height="8" fill="#3d4a62"/>
+      <rect x="860" y="430" width="36" height="8" fill="#3d4a62"/>
+      <rect x="0" y="428" width="900" height="4" fill="url(#railGrad)"/>
+      <rect x="0" y="418" width="900" height="3" fill="url(#railGrad)" opacity="0.7"/>
+      <rect x="0" y="436" width="900" height="2" fill="#5eead4" opacity="0.25"/>
+    </g>
+  </g>
+
+  <!-- ========== 速度拖尾（车尾左侧，向左消失） ========== -->
+  <g id="speed-lines" opacity="0.7">
+    <rect x="280" y="340" width="50" height="2" rx="1" fill="#7dd3fc" opacity="0.6"/>
+    <rect x="300" y="355" width="70" height="2" rx="1" fill="#7dd3fc" opacity="0.45"/>
+    <rect x="270" y="370" width="40" height="2" rx="1" fill="#7dd3fc" opacity="0.35"/>
+    <rect x="310" y="385" width="55" height="2" rx="1" fill="#ffd166" opacity="0.35"/>
+  </g>
+
+  <!-- ========== 列车主体 ========== -->
+  <g id="train-group">
+    <!-- 地面接触阴影 -->
+    <ellipse id="ground-shadow" cx="700" cy="448" rx="280" ry="10" fill="#000" opacity="0.3"/>
+
+    <!-- 车顶受电弓 -->
+    <g id="pantograph">
+      <line x1="820" y1="268" x2="860" y2="230" stroke="#8b97ad" stroke-width="3"/>
+      <line x1="900" y1="268" x2="860" y2="230" stroke="#8b97ad" stroke-width="3"/>
+      <line x1="840" y1="230" x2="880" y2="230" stroke="#c5cedd" stroke-width="4"/>
+      <rect x="852" y="224" width="16" height="8" rx="2" fill="#ffd166" opacity="0.8"/>
+      <circle cx="860" cy="226" r="4" fill="#5eead4" opacity="0.6" filter="url(#softGlow)"/>
+    </g>
+
+    <!-- 尾车（左） -->
+    <g id="car-rear">
+      <path d="M320 300 L560 300 L560 410 L320 410 Z" fill="url(#trainBody)"/>
+      <path d="M320 300 L340 300 L340 410 L320 410 Z" fill="#d0c8b8"/>
+      <!-- 顶带 -->
+      <rect x="320" y="300" width="240" height="14" fill="#e8e2d6"/>
+      <!-- 色带 -->
+      <rect x="320" y="330" width="240" height="10" fill="#ff6b35"/>
+      <rect x="320" y="340" width="240" height="3" fill="#e85a28"/>
+      <!-- 车窗 -->
+      <g class="win-glow">
+        <rect x="340" y="318" width="50" height="40" rx="6" fill="url(#glassGrad)"/>
+        <rect x="348" y="326" width="20" height="10" rx="2" fill="#fff" opacity="0.25"/>
+      </g>
+      <g class="win-glow-b">
+        <rect x="400" y="318" width="50" height="40" rx="6" fill="url(#glassGrad)"/>
+        <rect x="408" y="326" width="20" height="10" rx="2" fill="#fff" opacity="0.2"/>
+      </g>
+      <g class="win-glow">
+        <rect x="460" y="318" width="50" height="40" rx="6" fill="url(#glassGrad)"/>
+        <rect x="468" y="326" width="20" height="10" rx="2" fill="#fff" opacity="0.22"/>
+      </g>
+      <!-- 车门缝 -->
+      <line x1="390" y1="300" x2="390" y2="410" stroke="#b8b0a0" stroke-width="1.5"/>
+      <line x1="450" y1="300" x2="450" y2="410" stroke="#b8b0a0" stroke-width="1.5"/>
+      <!-- 裙板 -->
+      <rect x="330" y="395" width="220" height="15" fill="#9a9286"/>
+      <!-- 标识 -->
+      <text x="440" y="385" text-anchor="middle" fill="#8b8478" font-size="11" font-weight="700" font-family="system-ui,sans-serif">M7-218</text>
+    </g>
+
+    <!-- 连接处 -->
+    <rect x="555" y="320" width="14" height="70" fill="#5c4033" rx="3"/>
+
+    <!-- 中车 -->
+    <g id="car-mid">
+      <path d="M568 300 L820 300 L820 410 L568 410 Z" fill="url(#trainBody)"/>
+      <rect x="568" y="300" width="252" height="14" fill="#e8e2d6"/>
+      <rect x="568" y="330" width="252" height="10" fill="#ff6b35"/>
+      <rect x="568" y="340" width="252" height="3" fill="#e85a28"/>
+      <g class="win-glow-b" clip-path="url(#sideWinA)">
+        <rect x="560" y="318" width="70" height="52" rx="8" fill="url(#glassGrad)"/>
+      </g>
+      <g class="win-glow" clip-path="url(#sideWinB)">
+        <rect x="640" y="318" width="70" height="52" rx="8" fill="url(#glassGrad)"/>
+      </g>
+      <g class="win-glow-b" clip-path="url(#sideWinC)">
+        <rect x="720" y="318" width="70" height="52" rx="8" fill="url(#glassGrad)"/>
+      </g>
+      <g class="win-glow" clip-path="url(#sideWinD)">
+        <rect x="800" y="318" width="70" height="52" rx="8" fill="url(#glassGrad)"/>
+      </g>
+      <line x1="630" y1="300" x2="630" y2="410" stroke="#b8b0a0" stroke-width="1.5"/>
+      <line x1="710" y1="300" x2="710" y2="410" stroke="#b8b0a0" stroke-width="1.5"/>
+      <line x1="790" y1="300" x2="790" y2="410" stroke="#b8b0a0" stroke-width="1.5"/>
+      <rect x="578" y="395" width="232" height="15" fill="#9a9286"/>
+      <text x="700" y="388" text-anchor="middle" fill="#8b8478" font-size="11" font-weight="700" font-family="system-ui,sans-serif">METRO OWL · L7</text>
+    </g>
+
+    <!-- 连接处 2 -->
+    <rect x="815" y="320" width="14" height="70" fill="#5c4033" rx="3"/>
+
+    <!-- 驾驶室车头（右侧 = 前进方向） -->
+    <g id="car-cab">
+      <!-- 流线型车头：从 x=828 拉到 x=1080 -->
+      <path d="M828 300
+               L920 300
+               C980 295, 1035 305, 1068 330
+               C1082 345, 1082 380, 1060 400
+               C1040 412, 1000 414, 960 412
+               L828 412 Z" fill="url(#trainBody)"/>
+      <!-- 车鼻高光 -->
+      <path d="M920 300
+               C980 295, 1035 305, 1068 330
+               C1082 345, 1082 380, 1060 400
+               C1040 412, 1000 414, 960 412
+               L960 300 Z" fill="url(#trainNose)"/>
+      <!-- 色带延伸到车头 -->
+      <path d="M828 330 L1000 330 C1030 330, 1055 338, 1065 350
+               L1058 358 C1040 348, 1015 342, 990 342 L828 342 Z" fill="#ff6b35"/>
+      <path d="M828 342 L990 342 C1015 342, 1040 348, 1058 358
+               L1055 362 C1035 352, 1010 346, 985 346 L828 346 Z" fill="#e85a28"/>
+      <!-- 顶带 -->
+      <path d="M828 300 L920 300 C980 295, 1035 305, 1068 330
+               L1062 334 C1030 310, 975 300, 920 304 L828 304 Z" fill="#e8e2d6"/>
+      <!-- 驾驶窗 -->
+      <g id="cab-window-frame">
+        <path d="M910 308 C960 304, 1010 312, 1042 335
+                 L1038 378 C1010 392, 960 396, 910 394 Z" fill="#1a2740"/>
+        <path d="M916 312 C960 308, 1005 316, 1034 336
+                 L1030 374 C1005 386, 960 390, 916 388 Z" fill="url(#cabGlass)"/>
+        <!-- 窗内高光 -->
+        <path d="M920 318 C955 315, 990 322, 1015 340
+                 L1012 350 C990 335, 955 328, 920 330 Z" fill="#fff" opacity="0.18"/>
+      </g>
+      <!-- 窗框分割 -->
+      <line x1="975" y1="308" x2="975" y2="394" stroke="#1a2740" stroke-width="3" opacity="0.6"/>
+
+      <!-- ========== OWL 驾驶员（在驾驶室内） ========== -->
+      <g id="owl-group">
+        <!-- 身体 -->
+        <ellipse cx="955" cy="360" rx="36" ry="42" fill="#c4a574"/>
+        <ellipse cx="955" cy="368" rx="24" ry="28" fill="#f0e6d0"/>
+        <!-- 胸羽纹理 -->
+        <path d="M940 360 Q955 368 970 360" fill="none" stroke="#d4c4a8" stroke-width="1.2"/>
+        <path d="M938 370 Q955 378 972 370" fill="none" stroke="#d4c4a8" stroke-width="1.2"/>
+        <path d="M940 380 Q955 388 970 380" fill="none" stroke="#d4c4a8" stroke-width="1.2"/>
+
+        <!-- 尾羽（独立运动） -->
+        <g id="owl-tail">
+          <path d="M930 385 Q915 400 920 415 Q935 405 945 395 Z" fill="#a8885c"/>
+          <path d="M938 390 Q928 408 935 420 Q945 408 950 398 Z" fill="#8b7048"/>
+        </g>
+
+        <!-- 头部（独立运动） -->
+        <g id="owl-head">
+          <!-- 面盘 -->
+          <ellipse cx="962" cy="318" rx="32" ry="30" fill="#e8d9bc"/>
+          <ellipse cx="962" cy="322" rx="26" ry="24" fill="#f5ecd9"/>
+          <!-- 头顶 -->
+          <ellipse cx="962" cy="300" rx="30" ry="22" fill="#c4a574"/>
+          <!-- 眉纹 -->
+          <path d="M940 308 Q955 300 970 308" fill="none" stroke="#5c4033" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M954 308 Q962 300 978 306" fill="none" stroke="#5c4033" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+
+          <!-- 耳簇（独立运动，左右反相） -->
+          <g id="tuft-l">
+            <path d="M940 285 Q932 265 938 255 Q948 268 950 285 Z" fill="#a8885c"/>
+            <path d="M942 282 Q936 268 940 262 Q946 272 948 282 Z" fill="#5c4033" opacity="0.5"/>
+          </g>
+          <g id="tuft-r">
+            <path d="M982 282 Q992 262 986 252 Q976 268 974 285 Z" fill="#a8885c"/>
+            <path d="M980 280 Q988 266 984 260 Q976 270 976 280 Z" fill="#5c4033" opacity="0.5"/>
+          </g>
+
+          <!-- 眼睛组（眨眼） -->
+          <g id="owl-eyes">
+            <!-- 左眼 -->
+            <circle cx="948" cy="318" r="11" fill="#1a1208"/>
+            <circle cx="948" cy="318" r="8.5" fill="url(#eyeGrad)"/>
+            <circle cx="948" cy="318" r="4" fill="#1a1208"/>
+            <circle cx="945" cy="315" r="2" fill="#fff" opacity="0.85"/>
+            <!-- 右眼 -->
+            <circle cx="976" cy="316" r="12" fill="#1a1208"/>
+            <circle cx="976" cy="316" r="9" fill="url(#eyeGrad)"/>
+            <circle cx="976" cy="316" r="4.5" fill="#1a1208"/>
+            <circle cx="973" cy="313" r="2.2" fill="#fff" opacity="0.85"/>
+            <!-- 眼眶高光环 -->
+            <circle cx="948" cy="318" r="11" fill="none" stroke="#5c4033" stroke-width="1.2"/>
+            <circle cx="976" cy="316" r="12" fill="none" stroke="#5c4033" stroke-width="1.2"/>
+          </g>
+
+          <!-- 喙（朝右 = 前进方向偏右） -->
+          <path d="M964 328 L972 336 L964 342 L958 334 Z" fill="#e8a838"/>
+          <path d="M964 328 L972 336 L964 338 Z" fill="#c48820"/>
+
+          <!-- 驾驶帽/制服领 -->
+          <path d="M938 338 Q962 348 986 336 L984 348 Q962 358 940 348 Z" fill="#1e3a5f"/>
+          <rect x="956" y="342" width="10" height="6" rx="1" fill="#ffd166"/>
+          <circle cx="961" cy="345" r="2" fill="#ff6b35"/>
+        </g>
+
+        <!-- 左翼搭油门杆（独立运动） -->
+        <g id="owl-wing-l">
+          <path d="M925 350 Q900 355 888 370 Q900 375 920 368 Q930 360 925 350 Z" fill="#a8885c"/>
+          <path d="M920 355 Q905 358 896 368 Q908 370 918 365 Z" fill="#8b7048"/>
+          <!-- 翼尖羽 -->
+          <path d="M892 368 Q880 378 878 388 Q890 382 898 374 Z" fill="#8b7048"/>
+          <!-- 爪 -->
+          <ellipse cx="890" cy="378" rx="6" ry="4" fill="#e8a838"/>
+          <line x1="886" y1="380" x2="884" y2="386" stroke="#c48820" stroke-width="1.5"/>
+          <line x1="890" y1="381" x2="890" y2="387" stroke="#c48820" stroke-width="1.5"/>
+          <line x1="894" y1="380" x2="896" y2="386" stroke="#c48820" stroke-width="1.5"/>
+        </g>
+
+        <!-- 右翼扶仪表（独立运动，反相） -->
+        <g id="owl-wing-r">
+          <path d="M980 350 Q1000 352 1012 365 Q998 372 982 364 Q975 356 980 350 Z" fill="#a8885c"/>
+          <path d="M984 355 Q998 358 1008 366 Q996 370 986 364 Z" fill="#8b7048"/>
+          <path d="M1008 365 Q1018 372 1020 380 Q1010 376 1004 370 Z" fill="#8b7048"/>
+          <ellipse cx="1014" cy="376" rx="5" ry="3.5" fill="#e8a838"/>
+        </g>
+      </g>
+
+      <!-- 仪表盘（在 owl 前下方） -->
+      <g id="dashboard">
+        <path d="M900 390 L1040 388 L1035 405 L905 405 Z" fill="#1a2740"/>
+        <rect x="910" y="392" width="18" height="8" rx="1" fill="#22c55e" opacity="0.7"/>
+        <rect x="932" y="392" width="18" height="8" rx="1" fill="#ffd166" opacity="0.6"/>
+        <rect x="954" y="392" width="18" height="8" rx="1" fill="#7dd3fc" opacity="0.5"/>
+        <rect x="976" y="392" width="12" height="8" rx="1" fill="#ff6b35" opacity="0.6"/>
+        <circle cx="1010" cy="396" r="6" fill="#0b1224" stroke="#5eead4" stroke-width="1.5"/>
+        <line x1="1010" y1="396" x2="1013" y2="392" stroke="#5eead4" stroke-width="1.5"/>
+        <circle cx="1025" cy="396" r="4" fill="#ff6b35" opacity="0.8"/>
+      </g>
+
+      <!-- 油门杆 -->
+      <g id="throttle">
+        <rect x="880" y="370" width="4" height="30" fill="#8b97ad" transform="rotate(-15 882 385)"/>
+        <circle cx="876" cy="368" r="5" fill="#ff6b35"/>
+      </g>
+
+      <!-- 驾驶室灯 -->
+      <circle id="cab-lamp" cx="990" cy="305" r="4" fill="#ffd166" opacity="0.9" filter="url(#softGlow)"/>
+
+      <!-- 头灯（朝右） -->
+      <circle cx="1065" cy="365" r="10" fill="#fff8d6" filter="url(#softGlow)"/>
+      <circle cx="1065" cy="365" r="6" fill="#fff"/>
+      <circle cx="1055" cy="390" r="5" fill="#ffd166" opacity="0.7"/>
+      <circle cx="1055" cy="340" r="5" fill="#ffd166" opacity="0.5"/>
+
+      <!-- 头灯光锥（朝右） -->
+      <polygon id="headlight-beam"
+        points="1068,355 1200,300 1200,430 1068,375"
+        fill="url(#beamGrad)"/>
+
+      <!-- 车头线路牌 -->
+      <rect x="1000" y="312" width="36" height="14" rx="2" fill="#0b1224"/>
+      <text x="1018" y="322" text-anchor="middle" fill="#ff6b35" font-size="9" font-weight="700" font-family="system-ui,sans-serif">7 EAST</text>
+    </g>
+
+    <!-- ========== 车轮 ========== -->
+    <!-- 尾车轮 -->
+    <g transform="translate(360,430)">
+      <g class="wheel-spin-rear">
+        <circle r="16" fill="#2a3550" stroke="#5c6a82" stroke-width="3"/>
+        <circle r="5" fill="#8b97ad"/>
+        <line x1="0" y1="-14" x2="0" y2="14" stroke="#5c6a82" stroke-width="2"/>
+        <line x1="-14" y1="0" x2="14" y2="0" stroke="#5c6a82" stroke-width="2"/>
+        <line x1="-10" y1="-10" x2="10" y2="10" stroke="#5c6a82" stroke-width="1.5"/>
+        <line x1="-10" y1="10" x2="10" y2="-10" stroke="#5c6a82" stroke-width="1.5"/>
+      </g>
+    </g>
+    <g transform="translate(480,430)">
+      <g class="wheel-spin-rear">
+        <circle r="16" fill="#2a3550" stroke="#5c6a82" stroke-width="3"/>
+        <circle r="5" fill="#8b97ad"/>
+        <line x1="0" y1="-14" x2="0" y2="14" stroke="#5c6a82" stroke-width="2"/>
+        <line x1="-14" y1="0" x2="14" y2="0" stroke="#5c6a82" stroke-width="2"/>
+        <line x1="-10" y1="-10" x2="10" y2="10" stroke="#5c6a82" stroke-width="1.5"/>
+        <line x1="-10" y1="10" x2="10" y2="-10" stroke="#5c6a82" stroke-width="1.5"/>
+      </g>
+    </g>
+    <!-- 中车轮 -->
+    <g transform="translate(620,430)">
+      <g class="wheel-spin">
+        <circle r="16" fill="#2a3550" stroke="#5c6a82" stroke-width="3"/>
+        <circle r="5" fill="#8b97ad"/>
+        <line x1="0" y1="-14" x2="0" y2="14" stroke="#5c6a82" stroke-width="2"/>
+        <line x1="-14" y1="0" x2="14" y2="0" stroke="#5c6a82" stroke-width="2"/>
+        <line x1="-10" y1="-10" x2="10" y2="10" stroke="#5c6a82" stroke-width="1.5"/>
+        <line x1="-10" y1="10" x2="10" y2="-10" stroke="#5c6a82" stroke-width="1.5"/>
+      </g>
+    </g>
+    <g transform="translate(760,430)">
+      <g class="wheel-spin">
+        <circle r="16" fill="#2a3550" stroke="#5c6a82" stroke-width="3"/>
+        <circle r="5" fill="#8b97ad"/>
+        <line x1="0" y1="-14" x2="0" y2="14" stroke="#5c6a82" stroke-width="2"/>
+        <line x1="-14" y1="0" x2="14" y2="0" stroke="#5c6a82" stroke-width="2"/>
+        <line x1="-10" y1="-10" x2="10" y2="10" stroke="#5c6a82" stroke-width="1.5"/>
+        <line x1="-10" y1="10" x2="10" y2="-10" stroke="#5c6a82" stroke-width="1.5"/>
+      </g>
+    </g>
+    <!-- 驾驶室轮 -->
+    <g transform="translate(900,430)">
+      <g class="wheel-spin">
+        <circle r="18" fill="#2a3550" stroke="#6a7a92" stroke-width="3"/>
+        <circle r="6" fill="#8b97ad"/>
+        <line x1="0" y1="-16" x2="0" y2="16" stroke="#6a7a92" stroke-width="2"/>
+        <line x1="-16" y1="0" x2="16" y2="0" stroke="#6a7a92" stroke-width="2"/>
+        <line x1="-11" y1="-11" x2="11" y2="11" stroke="#6a7a92" stroke-width="1.5"/>
+        <line x1="-11" y1="11" x2="11" y2="-11" stroke="#6a7a92" stroke-width="1.5"/>
+      </g>
+    </g>
+    <g transform="translate(1000,430)">
+      <g class="wheel-spin">
+        <circle r="18" fill="#2a3550" stroke="#6a7a92" stroke-width="3"/>
+        <circle r="6" fill="#8b97ad"/>
+        <line x1="0" y1="-16" x2="0" y2="16" stroke="#6a7a92" stroke-width="2"/>
+        <line x1="-16" y1="0" x2="16" y2="0" stroke="#6a7a92" stroke-width="2"/>
+        <line x1="-11" y1="-11" x2="11" y2="11" stroke="#6a7a92" stroke-width="1.5"/>
+        <line x1="-11" y1="11" x2="11" y2="-11" stroke="#6a7a92" stroke-width="1.5"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- ========== 前景暗角 ========== -->
+  <rect x="0" y="0" width="1200" height="700" fill="url(#horizonGlow)" opacity="0.15" pointer-events="none"/>
+  <rect x="0" y="600" width="1200" height="100" fill="#0a1020" opacity="0.45"/>
+</svg>
+
+<!--
+  ===== 几何/运动自洽说明（与 notes.md 对应） =====
+  1. 前进方向 = 画面右侧
+     - 驾驶室车头流线鼻端 x≈1080（最右）
+     - 头灯锥 polygon 1068→1200 朝右
+     - 速度线 speed-dash translateX 负向（向左拖尾）
+     - 四层背景 translateX(0→-900px) 世界左移
+  2. 车轮顺时针（0→360deg），接触点在下 → 相对向右推进
+  3. 视差时长比 far64 : mid32 : near16 : rail10 ≈ 1 : 2 : 4 : 6.4
+     同为 900px 循环 → 远慢近快
+  4. Owl 附肢独立于车体 bob(0.62s)：
+     - #owl-head 3.6s 扫视
+     - #owl-wing-l / #owl-wing-r 0.78s 反相摆翼
+     - #tuft-l / #tuft-r 1.7s 反相耳簇
+     - #owl-eyes 5.1s 眨眼
+     - #owl-tail 1.15s 尾羽
+     - #owl-crest 2.4s 羽冠
+  5. 无外部资源：仅系统字体 + 内联 SVG/CSS
+-->
+</body>
+</html>

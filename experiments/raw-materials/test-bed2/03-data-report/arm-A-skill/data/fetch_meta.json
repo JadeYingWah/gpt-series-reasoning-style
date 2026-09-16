@@ -1,0 +1,158 @@
+{
+  "stock_code": "600519.SH",
+  "stock_name": "贵州茅台",
+  "source": "腾讯公开行情接口 web.ifzq.gtimg.cn/appstock/app/fqkline/get (日K, 前复权/不复权)",
+  "independent_check_source": "westock-data kline sh600519 (agentic_search 2026-09-16 15:46 CST 返回)",
+  "fetch_time": "2026-09-16 15:55:02 CST",
+  "rows_qfq": 1627,
+  "rows_raw": 1627,
+  "date_start": "2020-01-02",
+  "date_end": "2026-09-16",
+  "volume_unit": "手 (1手=100股)",
+  "sanity_problems_qfq": [],
+  "sanity_problems_raw": [],
+  "cross_check_anchor_count": 10,
+  "cross_check_mismatch_count": 0,
+  "cross_check_detail": [
+    {
+      "date": "2026-09-16",
+      "status": "一致",
+      "max_abs_diff": {
+        "open": 0.0,
+        "close": 0.0,
+        "high": 0.0,
+        "low": 0.0,
+        "volume": 0.0
+      }
+    },
+    {
+      "date": "2026-09-15",
+      "status": "一致",
+      "max_abs_diff": {
+        "open": 0.0,
+        "close": 0.0,
+        "high": 0.0,
+        "low": 0.0,
+        "volume": 0.0
+      }
+    },
+    {
+      "date": "2026-09-14",
+      "status": "一致",
+      "max_abs_diff": {
+        "open": 0.0,
+        "close": 0.0,
+        "high": 0.0,
+        "low": 0.0,
+        "volume": 0.0
+      }
+    },
+    {
+      "date": "2026-09-11",
+      "status": "一致",
+      "max_abs_diff": {
+        "open": 0.0,
+        "close": 0.0,
+        "high": 0.0,
+        "low": 0.0,
+        "volume": 0.0
+      }
+    },
+    {
+      "date": "2026-09-10",
+      "status": "一致",
+      "max_abs_diff": {
+        "open": 0.0,
+        "close": 0.0,
+        "high": 0.0,
+        "low": 0.0,
+        "volume": 0.0
+      }
+    },
+    {
+      "date": "2026-09-09",
+      "status": "一致",
+      "max_abs_diff": {
+        "open": 0.0,
+        "close": 0.0,
+        "high": 0.0,
+        "low": 0.0,
+        "volume": 0.0
+      }
+    },
+    {
+      "date": "2026-09-08",
+      "status": "一致",
+      "max_abs_diff": {
+        "open": 0.0,
+        "close": 0.0,
+        "high": 0.0,
+        "low": 0.0,
+        "volume": 0.0
+      }
+    },
+    {
+      "date": "2026-09-07",
+      "status": "一致",
+      "max_abs_diff": {
+        "open": 0.0,
+        "close": 0.0,
+        "high": 0.0,
+        "low": 0.0,
+        "volume": 0.0
+      }
+    },
+    {
+      "date": "2026-09-04",
+      "status": "一致",
+      "max_abs_diff": {
+        "open": 0.0,
+        "close": 0.0,
+        "high": 0.0,
+        "low": 0.0,
+        "volume": 0.0
+      }
+    },
+    {
+      "date": "2026-09-03",
+      "status": "一致",
+      "max_abs_diff": {
+        "open": 0.0,
+        "close": 0.0,
+        "high": 0.0,
+        "low": 0.0,
+        "volume": 0.0
+      }
+    }
+  ],
+  "realtime_snapshot": {
+    "name": "贵州茅台",
+    "price": 1258.0,
+    "prev_close": 1272.75,
+    "open": 1273.93,
+    "volume_hand": 26235.0,
+    "quote_time": "20260916155500",
+    "high": 1274.98,
+    "low": 1254.1
+  },
+  "append_today_notes": {
+    "qfq": null,
+    "raw": null
+  },
+  "last_bar_raw": {
+    "date": "2026-09-16",
+    "open": 1273.93,
+    "close": 1258.0,
+    "high": 1274.98,
+    "low": 1254.1,
+    "volume": 26235.0
+  },
+  "last_bar_qfq": {
+    "date": "2026-09-16",
+    "open": 1273.93,
+    "close": 1258.0,
+    "high": 1274.98,
+    "low": 1254.1,
+    "volume": 26235.0
+  }
+}

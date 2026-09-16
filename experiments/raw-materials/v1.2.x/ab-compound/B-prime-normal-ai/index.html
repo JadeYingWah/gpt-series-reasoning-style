@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>个人财务仪表盘</title>
+<style>
+  :root {
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --text: #1e293b;
+    --text-secondary: #64748b;
+    --primary: #3b82f6;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --border: #e2e8f0;
+    --radius: 12px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 24px;
+    line-height: 1.6;
+  }
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  .header h1 { font-size: 24px; font-weight: 700; }
+  .period-selector {
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card);
+    font-size: 14px;
+  }
+  .summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px;
+    border: 1px solid var(--border);
+  }
+  .card-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+  }
+  .card-value {
+    font-size: 28px;
+    font-weight: 700;
+  }
+  .card-trend {
+    font-size: 12px;
+    margin-top: 4px;
+  }
+  .trend-up { color: var(--success); }
+  .trend-down { color: var(--danger); }
+  .main-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .chart-container {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px;
+    border: 1px solid var(--border);
+  }
+  .chart-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+  .bar-chart {
+    display: flex;
+    align-items: flex-end;
+    height: 200px;
+    gap: 12px;
+    padding: 0 8px;
+  }
+  .bar-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    justify-content: flex-end;
+  }
+  .bar {
+    width: 100%;
+    max-width: 40px;
+    border-radius: 4px 4px 0 0;
+    transition: height 0.3s;
+  }
+  .bar-income { background: var(--success); }
+  .bar-expense { background: var(--danger); opacity: 0.7; }
+  .bar-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 8px;
+  }
+  .category-list {
+    list-style: none;
+  }
+  .category-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .category-item:last-child { border-bottom: none; }
+  .category-name { font-size: 14px; }
+  .category-amount { font-weight: 600; font-size: 14px; }
+  .category-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-top: 4px;
+    overflow: hidden;
+  }
+  .category-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+  }
+  .transactions {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px;
+    border: 1px solid var(--border);
+  }
+  .transaction-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .transaction-item:last-child { border-bottom: none; }
+  .transaction-info { display: flex; align-items: center; gap: 12px; }
+  .transaction-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    background: #f1f5f9;
+  }
+  .transaction-details h4 { font-size: 14px; font-weight: 600; }
+  .transaction-details p { font-size: 12px; color: var(--text-secondary); }
+  .transaction-amount { font-weight: 600; font-size: 14px; }
+  .amount-income { color: var(--success); }
+  .amount-expense { color: var(--text); }
+  .budget-alert {
+    background: #fef3c7;
+    border: 1px solid #fcd34d;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: #92400e;
+  }
+  @media (max-width: 768px) {
+    .main-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>财务仪表盘</h1>
+  <select class="period-selector">
+    <option>本月</option>
+    <option>上月</option>
+    <option>本季度</option>
+    <option>本年</option>
+  </select>
+</div>
+
+<div class="budget-alert">
+  ⚠️ 餐饮支出已超预算 15%（预算2000元，已支出2300元）
+</div>
+
+<div class="summary-cards">
+  <div class="card">
+    <div class="card-label">总收入</div>
+    <div class="card-value">¥15,000</div>
+    <div class="card-trend trend-up">↑ 12% 较上月</div>
+  </div>
+  <div class="card">
+    <div class="card-label">总支出</div>
+    <div class="card-value">¥8,500</div>
+    <div class="card-trend trend-down">↑ 5% 较上月</div>
+  </div>
+  <div class="card">
+    <div class="card-label">结余</div>
+    <div class="card-value" style="color: var(--success)">¥6,500</div>
+    <div class="card-trend">储蓄率 43%</div>
+  </div>
+  <div class="card">
+    <div class="card-label">预算使用</div>
+    <div class="card-value">85%</div>
+    <div class="card-trend">剩余 ¥1,500</div>
+  </div>
+</div>
+
+<div class="main-grid">
+  <div class="chart-container">
+    <div class="chart-title">月度收支趋势</div>
+    <div class="bar-chart" id="trendChart"></div>
+  </div>
+  <div class="chart-container">
+    <div class="chart-title">支出分类</div>
+    <ul class="category-list" id="categoryList"></ul>
+  </div>
+</div>
+
+<div class="transactions">
+  <div class="chart-title">最近交易</div>
+  <div id="transactionList"></div>
+</div>
+
+<script>
+const monthlyData = [
+  { month: '1月', income: 12000, expense: 7000 },
+  { month: '2月', income: 13000, expense: 7500 },
+  { month: '3月', income: 15000, expense: 8500 },
+];
+
+const categories = [
+  { name: '餐饮', amount: 2300, color: '#f59e0b', percent: 27 },
+  { name: '购物', amount: 2000, color: '#3b82f6', percent: 24 },
+  { name: '交通', amount: 800, color: '#10b981', percent: 9 },
+  { name: '娱乐', amount: 1200, color: '#8b5cf6', percent: 14 },
+  { name: '居住', amount: 1500, color: '#ef4444', percent: 18 },
+  { name: '其他', amount: 700, color: '#6b7280', percent: 8 },
+];
+
+const transactions = [
+  { icon: '🍜', name: '午餐', desc: '餐饮 · 今天 12:30', amount: -35 },
+  { icon: '💰', name: '工资', desc: '收入 · 昨天', amount: 15000 },
+  { icon: '🚇', name: '地铁充值', desc: '交通 · 2天前', amount: -100 },
+  { icon: '🛒', name: '超市购物', desc: '购物 · 3天前', amount: -256 },
+  { icon: '🎬', name: '电影票', desc: '娱乐 · 4天前', amount: -80 },
+];
+
+// 渲染趋势图
+const chart = document.getElementById('trendChart');
+const maxVal = Math.max(...monthlyData.flatMap(d => [d.income, d.expense]));
+monthlyData.forEach(d => {
+  const group = document.createElement('div');
+  group.className = 'bar-group';
+  group.innerHTML = `
+    <div class="bar bar-income" style="height: ${(d.income/maxVal)*80}%"></div>
+    <div class="bar bar-expense" style="height: ${(d.expense/maxVal)*80}%"></div>
+    <div class="bar-label">${d.month}</div>
+  `;
+  chart.appendChild(group);
+});
+
+// 渲染分类
+const catList = document.getElementById('categoryList');
+categories.forEach(c => {
+  const li = document.createElement('li');
+  li.className = 'category-item';
+  li.innerHTML = `
+    <div style="flex:1">
+      <div style="display:flex;justify-content:space-between">
+        <span class="category-name">${c.name}</span>
+        <span class="category-amount">¥${c.amount}</span>
+      </div>
+      <div class="category-bar">
+        <div class="category-bar-fill" style="width:${c.percent}%;background:${c.color}"></div>
+      </div>
+    </div>
+  `;
+  catList.appendChild(li);
+});
+
+// 渲染交易
+const txList = document.getElementById('transactionList');
+transactions.forEach(t => {
+  const div = document.createElement('div');
+  div.className = 'transaction-item';
+  const amountClass = t.amount > 0 ? 'amount-income' : 'amount-expense';
+  const amountStr = t.amount > 0 ? `+¥${t.amount}` : `¥${t.amount}`;
+  div.innerHTML = `
+    <div class="transaction-info">
+      <div class="transaction-icon">${t.icon}</div>
+      <div class="transaction-details">
+        <h4>${t.name}</h4>
+        <p>${t.desc}</p>
+      </div>
+    </div>
+    <div class="transaction-amount ${amountClass}">${amountStr}</div>
+  `;
+  txList.appendChild(div);
+});
+
+console.log('财务仪表盘加载完成');
+console.log('总收入:', monthlyData.reduce((s,d) => s+d.income, 0));
+console.log('总支出:', monthlyData.reduce((s,d) => s+d.expense, 0));
+</script>
+</body>
+</html>

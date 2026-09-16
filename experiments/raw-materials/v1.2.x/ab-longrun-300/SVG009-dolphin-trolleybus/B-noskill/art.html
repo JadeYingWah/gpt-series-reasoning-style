@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dolphin Trolleybus · SVG009</title>
+<style>
+  /* ========== self-contained: no external fonts / CDN / network ========== */
+  :root {
+    --sky-top: #0b1d36;
+    --sky-mid: #1a3a5c;
+    --sky-low: #e07a5f;
+    --sky-glow: #f2cc8f;
+    --ink: #0d1b2a;
+    --bus-body: #2a9d8f;
+    --bus-dark: #1f7a70;
+    --bus-accent: #e9c46a;
+    --bus-window: #a8dadc;
+    --dolphin: #6c8ebf;
+    --dolphin-light: #a8c0d6;
+    --dolphin-belly: #e8eef5;
+    --road: #1b2430;
+    --road-mark: #f4e8c1;
+    --wire: #c9d4de;
+    --neon: #ff6b6b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #06101c;
+    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  }
+
+  .stage {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    cursor: crosshair;
+    user-select: none;
+  }
+
+  .scene {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* ---------- HUD ---------- */
+  .hud {
+    position: absolute;
+    left: 18px;
+    top: 16px;
+    z-index: 20;
+    color: #e8f1f8;
+    background: rgba(8, 18, 32, 0.55);
+    border: 1px solid rgba(168, 213, 230, 0.25);
+    border-radius: 10px;
+    padding: 10px 14px;
+    backdrop-filter: blur(6px);
+    font-size: 12px;
+    line-height: 1.55;
+    letter-spacing: 0.02em;
+    max-width: min(340px, 70vw);
+  }
+  .hud strong { color: #f2cc8f; font-weight: 600; }
+  .hud .tag {
+    display: inline-block;
+    margin-right: 6px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: rgba(42, 157, 143, 0.35);
+    border: 1px solid rgba(42, 157, 143, 0.6);
+    font-size: 10px;
+    text-transform: uppercase;
+  }
+
+  .badge {
+    position: absolute;
+    right: 16px;
+    bottom: 14px;
+    z-index: 20;
+    color: rgba(232, 241, 248, 0.7);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* ---------- Parallax scroll helpers (CSS animation on SVG groups) ---------- */
+  @keyframes drift-far {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-1200px); }
+  }
+  @keyframes drift-mid {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-1800px); }
+  }
+  @keyframes drift-near {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-2400px); }
+  }
+  @keyframes drift-road {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-800px); }
+  }
+
+  .layer-far  { animation: drift-far  48s linear infinite; }
+  .layer-mid  { animation: drift-mid  28s linear infinite; }
+  .layer-near { animation: drift-near 16s linear infinite; }
+  .layer-road { animation: drift-road  6s linear infinite; }
+
+  /* Wheels: clockwise = vehicle advances to the right */
+  @keyframes spin-wheel {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  .wheel {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: spin-wheel 0.9s linear infinite;
+  }
+
+  /* Trolley poles: slight spring against wire */
+  @keyframes pole-sway {
+    0%, 100% { transform: rotate(0deg); }
+    50%      { transform: rotate(-1.6deg); }
+  }
+  .pole {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+    animation: pole-sway 1.8s ease-in-out infinite;
+  }
+  .pole-b { animation-delay: -0.35s; }
+
+  /* Bus body: gentle chassis bob (vehicle frame only) */
+  @keyframes bus-bob {
+    0%, 100% { transform: translateY(0); }
+    25%      { transform: translateY(-1.5px); }
+    50%      { transform: translateY(0.8px); }
+    75%      { transform: translateY(-0.6px); }
+  }
+  .bus-chassis {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: bus-bob 1.1s ease-in-out infinite;
+  }
+
+  /* Dolphin body: independent of chassis — slight vertical bob + micro lean */
+  @keyframes dolphin-bob {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    30%      { transform: translate(0.6px, -3.2px) rotate(-0.8deg); }
+    60%      { transform: translate(-0.4px, 1.6px) rotate(0.5deg); }
+  }
+  .dolphin-torso {
+    transform-box: fill-box;
+    transform-origin: 50% 80%;
+    animation: dolphin-bob 1.65s ease-in-out infinite;
+  }
+
+  /* Right flipper on steering wheel — rotates with wheel-ish path (different rate) */
+  @keyframes flipper-steer {
+    0%, 100% { transform: rotate(0deg); }
+    25%      { transform: rotate(-18deg); }
+    50%      { transform: rotate(4deg); }
+    75%      { transform: rotate(-12deg); }
+  }
+  .flipper-r {
+    transform-box: fill-box;
+    transform-origin: 85% 20%;
+    animation: flipper-steer 1.35s ease-in-out infinite;
+  }
+
+  /* Left flipper: free wave — completely different phase & amplitude */
+  @keyframes flipper-wave {
+    0%, 100% { transform: rotate(0deg) translateY(0); }
+    20%      { transform: rotate(-28deg) translateY(-2px); }
+    45%      { transform: rotate(12deg) translateY(1px); }
+    70%      { transform: rotate(-16deg) translateY(-1px); }
+  }
+  .flipper-l {
+    transform-box: fill-box;
+    transform-origin: 90% 30%;
+    animation: flipper-wave 2.05s ease-in-out infinite;
+    animation-delay: -0.6s;
+  }
+
+  /* Tail flukes: vertical flap, third independent rhythm */
+  @keyframes tail-flap {
+    0%, 100% { transform: rotate(0deg) translateY(0); }
+    35%      { transform: rotate(14deg) translateY(-4px); }
+    70%      { transform: rotate(-10deg) translateY(2px); }
+  }
+  .tail {
+    transform-box: fill-box;
+    transform-origin: 100% 50%;
+    animation: tail-flap 1.15s ease-in-out infinite;
+    animation-delay: -0.2s;
+  }
+
+  /* Dorsal fin micro-flick */
+  @keyframes dorsal-flick {
+    0%, 100% { transform: rotate(0deg); }
+    50%      { transform: rotate(-3deg); }
+  }
+  .dorsal {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+    animation: dorsal-flick 2.4s ease-in-out infinite;
+  }
+
+  /* Blowhole puff */
+  @keyframes puff {
+    0%   { opacity: 0; transform: translate(0,0) scale(0.4); }
+    15%  { opacity: 0.85; }
+    100% { opacity: 0; transform: translate(18px,-42px) scale(1.8); }
+  }
+  .puff {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: puff 3.2s ease-out infinite;
+  }
+  .puff-b { animation-delay: -1.6s; }
+
+  /* Headlight glow pulse */
+  @keyframes lamp {
+    0%, 100% { opacity: 0.75; }
+    50%      { opacity: 1; }
+  }
+  .lamp-glow { animation: lamp 2.2s ease-in-out infinite; }
+
+  /* Wire spark / current dash */
+  @keyframes current {
+    from { stroke-dashoffset: 40; }
+    to   { stroke-dashoffset: 0; }
+  }
+  .wire-current {
+    stroke-dasharray: 6 14;
+    animation: current 0.55s linear infinite;
+  }
+
+  /* Star twinkle */
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.25; }
+    50%      { opacity: 1; }
+  }
+  .star { animation: twinkle 3s ease-in-out infinite; }
+  .star:nth-child(2n) { animation-duration: 4.2s; animation-delay: -1s; }
+  .star:nth-child(3n) { animation-duration: 2.6s; animation-delay: -0.5s; }
+
+  /* Bubble trail from bus */
+  @keyframes bubble-rise {
+    0%   { opacity: 0; transform: translate(0,0) scale(0.5); }
+    20%  { opacity: 0.7; }
+    100% { opacity: 0; transform: translate(-70px, -55px) scale(1.3); }
+  }
+  .bubble {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: bubble-rise 2.8s ease-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .layer-far, .layer-mid, .layer-near, .layer-road,
+    .wheel, .pole, .bus-chassis, .dolphin-torso,
+    .flipper-r, .flipper-l, .tail, .dorsal, .puff,
+    .lamp-glow, .wire-current, .star, .bubble {
+      animation: none !important;
+    }
+  }
+</style>
+</head>
+<body>
+<!--
+  SVG009 · dolphin × trolleybus
+  Self-consistency notes (also mirrored in notes.md):
+
+  1) Forward direction = screen RIGHT.
+     - Wheels use spin-wheel 0→360deg (clockwise) which is the correct
+       rotation for rightward ground travel (contact point moves backward).
+     - Road dashes + curb + skyline layers translate LEFT via drift-* keyframes,
+       reinforcing relative motion to the right.
+     - Trolley poles lean slightly rearward (left) against the overhead wires,
+       matching forward travel.
+
+  2) Dolphin appendages vs vehicle — NOT locked together:
+     - .bus-chassis  bob period 1.10s
+     - .dolphin-torso bob period 1.65s (different amplitude & phase)
+     - .flipper-r (steering) 1.35s ease-in-out, origin at shoulder
+     - .flipper-l (free wave) 2.05s, delayed -0.6s, larger amplitude
+     - .tail flukes 1.15s, delayed -0.2s, vertical flap
+     - .dorsal 2.4s micro-flick
+     Five independent rhythms on the dolphin vs one chassis rhythm →
+     at least two appendages always out of phase with the bus body.
+
+  3) Parallax depth (3+ layers):
+     L0 sky gradient + stars (static / near-static glow)
+     L1 far skyline  drift 48s / 1200px
+     L2 mid buildings + wires  drift 28s / 1800px
+     L3 near street furniture  drift 16s / 2400px
+     L4 road surface dashes    drift 6s / 800px
+     Faster foreground = classic parallax.
+
+  4) No external resources. All CSS/JS/SVG inline. Zero network requests.
+-->
+<div class="stage" id="stage">
+  <div class="hud">
+    <div><span class="tag">SVG009</span><strong>dolphin × trolleybus</strong></div>
+    <div>Route 7 · Harbor Line · heading <strong>→ east</strong></div>
+    <div>Click stage to honk / boost current.</div>
+  </div>
+  <div class="badge">single-file · no CDN · CSS+SVG</div>
+
+  <svg class="scene" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-label="A dolphin driving a trolleybus toward the right">
+    <defs>
+      <!-- sky gradient -->
+      <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"  stop-color="#0b1d36"/>
+        <stop offset="38%" stop-color="#1a3a5c"/>
+        <stop offset="72%" stop-color="#c45c4a"/>
+        <stop offset="88%" stop-color="#e07a5f"/>
+        <stop offset="100%" stop-color="#f2cc8f"/>
+      </linearGradient>
+
+      <!-- sea-sky band (surreal underwater sky) -->
+      <linearGradient id="seaBand" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#1b4965" stop-opacity="0.0"/>
+        <stop offset="40%" stop-color="#1b4965" stop-opacity="0.35"/>
+        <stop offset="100%" stop-color="#62b6cb" stop-opacity="0.15"/>
+      </linearGradient>
+
+      <radialGradient id="moonGrad" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#fff6d8"/>
+        <stop offset="55%" stop-color="#f2cc8f"/>
+        <stop offset="100%" stop-color="#f2cc8f" stop-opacity="0"/>
+      </radialGradient>
+
+      <linearGradient id="busBody" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#3db8a8"/>
+        <stop offset="45%" stop-color="#2a9d8f"/>
+        <stop offset="100%" stop-color="#1f7a70"/>
+      </linearGradient>
+
+      <linearGradient id="busRoof" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#e9c46a"/>
+        <stop offset="100%" stop-color="#c9a227"/>
+      </linearGradient>
+
+      <linearGradient id="winGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#d4f1f4"/>
+        <stop offset="50%" stop-color="#a8dadc"/>
+        <stop offset="100%" stop-color="#7ec8cc"/>
+      </linearGradient>
+
+      <linearGradient id="dolphinSkin" x1="0" y1="0" x2="0.3" y2="1">
+        <stop offset="0%" stop-color="#8fadcc"/>
+        <stop offset="55%" stop-color="#6c8ebf"/>
+        <stop offset="100%" stop-color="#54749c"/>
+      </linearGradient>
+
+      <linearGradient id="dolphinBelly" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#f5f8fc"/>
+        <stop offset="100%" stop-color="#d5e2ef"/>
+      </linearGradient>
+
+      <linearGradient id="roadGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#2a3544"/>
+        <stop offset="40%" stop-color="#1b2430"/>
+        <stop offset="100%" stop-color="#121820"/>
+      </linearGradient>
+
+      <linearGradient id="headBeam" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#fff3b0" stop-opacity="0.85"/>
+        <stop offset="100%" stop-color="#fff3b0" stop-opacity="0"/>
+      </linearGradient>
+
+      <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="6" result="b"/>
+        <feMerge>
+          <feMergeNode in="b"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+
+      <filter id="tinyBlur" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur stdDeviation="1.2"/>
+      </filter>
+
+      <!-- wheel spoke group reused -->
+      <g id="wheelArt">
+        <circle r="52" fill="#1a222d" stroke="#2f3b4c" stroke-width="4"/>
+        <circle r="38" fill="#243040" stroke="#3d4d63" stroke-width="2"/>
+        <circle r="12" fill="#e9c46a" stroke="#b8892a" stroke-width="2"/>
+        <!-- spokes: visual cue that rotation is happening -->
+        <g stroke="#5a6d86" stroke-width="3" stroke-linecap="round">
+          <line x1="0" y1="-12" x2="0" y2="-36"/>
+          <line x1="0" y1="12"  x2="0" y2="36"/>
+          <line x1="-12" y1="0" x2="-36" y2="0"/>
+          <line x1="12" y1="0"  x2="36" y2="0"/>
+          <line x1="-8.5" y1="-8.5" x2="-25.5" y2="-25.5"/>
+          <line x1="8.5" y1="8.5"   x2="25.5" y2="25.5"/>
+          <line x1="8.5" y1="-8.5"  x2="25.5" y2="-25.5"/>
+          <line x1="-8.5" y1="8.5"  x2="-25.5" y2="25.5"/>
+        </g>
+        <!-- tire tread marks -->
+        <circle r="46" fill="none" stroke="#0d1218" stroke-width="6" stroke-dasharray="10 6"/>
+      </g>
+    </defs>
+
+    <!-- ========== L0 SKY ========== -->
+    <rect width="1600" height="900" fill="url(#skyGrad)"/>
+
+    <!-- stars (far) -->
+    <g class="layer-far" opacity="0.9">
+      <!-- duplicated tile 0 and 1200 for seamless-ish loop -->
+      <g fill="#f0f6ff">
+        <circle class="star" cx="80" cy="60" r="1.6"/>
+        <circle class="star" cx="160" cy="120" r="1.2"/>
+        <circle class="star" cx="240" cy="40" r="1.8"/>
+        <circle class="star" cx="320" cy="90" r="1.1"/>
+        <circle class="star" cx="410" cy="50" r="1.5"/>
+        <circle class="star" cx="500" cy="130" r="1.3"/>
+        <circle class="star" cx="580" cy="30" r="1.7"/>
+        <circle class="star" cx="670" cy="100" r="1.0"/>
+        <circle class="star" cx="760" cy="70" r="1.4"/>
+        <circle class="star" cx="850" cy="40" r="1.2"/>
+        <circle class="star" cx="940" cy="110" r="1.6"/>
+        <circle class="star" cx="1030" cy="55" r="1.1"/>
+        <circle class="star" cx="1120" cy="85" r="1.5"/>
+        <circle class="star" cx="80" cy="60" r="1.6"/>
+      </g>
+      <g fill="#f0f6ff" transform="translate(1200,0)">
+        <circle class="star" cx="80" cy="60" r="1.6"/>
+        <circle class="star" cx="160" cy="120" r="1.2"/>
+        <circle class="star" cx="240" cy="40" r="1.8"/>
+        <circle class="star" cx="320" cy="90" r="1.1"/>
+        <circle class="star" cx="410" cy="50" r="1.5"/>
+        <circle class="star" cx="500" cy="130" r="1.3"/>
+        <circle class="star" cx="580" cy="30" r="1.7"/>
+        <circle class="star" cx="670" cy="100" r="1.0"/>
+        <circle class="star" cx="760" cy="70" r="1.4"/>
+      </g>
+    </g>
+
+    <!-- moon -->
+    <g transform="translate(1280,140)">
+      <circle r="70" fill="url(#moonGrad)" opacity="0.55"/>
+      <circle r="34" fill="#fff6d8" opacity="0.95"/>
+      <circle cx="-8" cy="-6" r="5" fill="#e8d9a8" opacity="0.55"/>
+      <circle cx="10" cy="8" r="7" fill="#e8d9a8" opacity="0.4"/>
+      <circle cx="4" cy="-12" r="3" fill="#e8d9a8" opacity="0.45"/>
+    </g>
+
+    <!-- surreal sea-cloud band in the sky -->
+    <ellipse cx="400" cy="220" rx="280" ry="36" fill="url(#seaBand)" opacity="0.7"/>
+    <ellipse cx="900" cy="180" rx="220" ry="28" fill="url(#seaBand)" opacity="0.5"/>
+    <ellipse cx="1300" cy="250" rx="200" ry="30" fill="url(#seaBand)" opacity="0.45"/>
+
+    <!-- ========== L1 FAR SKYLINE ========== -->
+    <g class="layer-far" opacity="0.55">
+      <g fill="#0e2438">
+        <!-- tile A -->
+        <rect x="0"   y="380" width="70"  height="220"/>
+        <rect x="70"  y="320" width="50"  height="280"/>
+        <rect x="120" y="360" width="90"  height="240"/>
+        <rect x="210" y="300" width="40"  height="300"/>
+        <rect x="250" y="340" width="80"  height="260"/>
+        <rect x="330" y="280" width="55"  height="320"/>
+        <rect x="385" y="350" width="100" height="250"/>
+        <rect x="485" y="310" width="45"  height="290"/>
+        <rect x="530" y="370" width="75"  height="230"/>
+        <rect x="605" y="290" width="60"  height="310"/>
+        <rect x="665" y="340" width="95"  height="260"/>
+        <rect x="760" y="300" width="50"  height="300"/>
+        <rect x="810" y="360" width="85"  height="240"/>
+        <rect x="895" y="270" width="48"  height="330"/>
+        <rect x="943" y="330" width="110" height="270"/>
+        <rect x="1053" y="310" width="55" height="290"/>
+        <rect x="1108" y="360" width="80" height="240"/>
+        <!-- tile B (offset for loop) -->
+        <g transform="translate(1200,0)">
+          <rect x="0"   y="380" width="70"  height="220"/>
+          <rect x="70"  y="320" width="50"  height="280"/>
+          <rect x="120" y="360" width="90"  height="240"/>
+          <rect x="210" y="300" width="40"  height="300"/>
+          <rect x="250" y="340" width="80"  height="260"/>
+          <rect x="330" y="280" width="55"  height="320"/>
+          <rect x="385" y="350" width="100" height="250"/>
+          <rect x="485" y="310" width="45"  height="290"/>
+          <rect x="530" y="370" width="75"  height="230"/>
+          <rect x="605" y="290" width="60"  height="310"/>
+        </g>
+      </g>
+      <!-- far windows -->
+      <g fill="#f2cc8f" opacity="0.35">
+        <rect x="90" y="350" width="6" height="8"/>
+        <rect x="100" y="380" width="6" height="8"/>
+        <rect x="270" y="370" width="6" height="8"/>
+        <rect x="400" y="390" width="6" height="8"/>
+        <rect x="620" y="330" width="6" height="8"/>
+        <rect x="690" y="380" width="6" height="8"/>
+        <rect x="910" y="300" width="6" height="8"/>
+        <rect x="980" y="360" width="6" height="8"/>
+      </g>
+    </g>
+
+    <!-- ========== L2 MID BUILDINGS + OVERHEAD WIRES ========== -->
+    <g class="layer-mid">
+      <!-- buildings silhouette -->
+      <g fill="#122a3d">
+        <rect x="20"  y="400" width="90"  height="220" rx="2"/>
+        <rect x="130" y="340" width="70"  height="280" rx="2"/>
+        <path d="M220 360 h100 v260 h-100 z"/>
+        <rect x="220" y="340" width="100" height="20"/>
+        <rect x="350" y="380" width="60"  height="240"/>
+        <rect x="430" y="310" width="85"  height="310"/>
+        <rect x="540" y="370" width="50"  height="250"/>
+        <rect x="610" y="350" width="110" height="270"/>
+        <rect x="750" y="300" width="55"  height="320"/>
+        <rect x="830" y="360" width="90"  height="260"/>
+        <rect x="950" y="330" width="65"  height="290"/>
+        <rect x="1040" y="390" width="80" height="230"/>
+        <rect x="1140" y="320" width="50" height="300"/>
+        <!-- second tile -->
+        <g transform="translate(1220,0)">
+          <rect x="20"  y="400" width="90"  height="220" rx="2"/>
+          <rect x="130" y="340" width="70"  height="280" rx="2"/>
+          <path d="M220 360 h100 v260 h-100 z"/>
+          <rect x="220" y="340" width="100" height="20"/>
+          <rect x="350" y="380" width="60"  height="240"/>
+          <rect x="430" y="310" width="85"  height="310"/>
+        </g>
+      </g>
+
+      <!-- neon signs / windows mid -->
+      <g>
+        <g fill="#f2cc8f" opacity="0.7">
+          <rect x="40" y="430" width="10" height="14" rx="1"/>
+          <rect x="58" y="430" width="10" height="14" rx="1"/>
+          <rect x="40" y="460" width="10" height="14" rx="1"/>
+          <rect x="150" y="380" width="10" height="14" rx="1"/>
+          <rect x="168" y="410" width="10" height="14" rx="1"/>
+          <rect x="250" y="400" width="10" height="14" rx="1"/>
+          <rect x="270" y="430" width="10" height="14" rx="1"/>
+          <rect x="450" y="360" width="10" height="14" rx="1"/>
+          <rect x="470" y="400" width="10" height="14" rx="1"/>
+          <rect x="640" y="390" width="10" height="14" rx="1"/>
+          <rect x="680" y="420" width="10" height="14" rx="1"/>
+          <rect x="770" y="350" width="10" height="14" rx="1"/>
+          <rect x="860" y="400" width="10" height="14" rx="1"/>
+          <rect x="970" y="370" width="10" height="14" rx="1"/>
+        </g>
+        <!-- pink neon blob -->
+        <rect x="630" y="470" width="70" height="18" rx="4" fill="#ff6b6b" opacity="0.55" filter="url(#softGlow)"/>
+        <text x="665" y="484" text-anchor="middle" font-size="11" fill="#fff" font-family="Segoe UI, sans-serif" opacity="0.9">AQUA</text>
+      </g>
+
+      <!-- catenary poles + dual overhead wires -->
+      <g stroke="#3d4d63" stroke-width="4" fill="none">
+        <line x1="180" y1="200" x2="180" y2="620"/>
+        <line x1="520" y1="200" x2="520" y2="620"/>
+        <line x1="880" y1="200" x2="880" y2="620"/>
+        <line x1="1240" y1="200" x2="1240" y2="620"/>
+        <!-- crossarms -->
+        <line x1="150" y1="230" x2="210" y2="230"/>
+        <line x1="490" y1="230" x2="550" y2="230"/>
+        <line x1="850" y1="230" x2="910" y2="230"/>
+        <line x1="1210" y1="230" x2="1270" y2="230"/>
+      </g>
+      <!-- two contact wires (trolleybus needs dual poles) -->
+      <g stroke="url(#wire)" stroke-width="2.5" fill="none" opacity="0.85">
+        <path d="M0 248 C200 242, 400 254, 600 248 S1000 242, 1200 250 S1450 244, 1600 248"/>
+        <path d="M0 268 C200 262, 400 274, 600 268 S1000 262, 1200 270 S1450 264, 1600 268"/>
+      </g>
+      <!-- animated current on wires -->
+      <g stroke="#7dfff0" stroke-width="1.5" fill="none" opacity="0.65" filter="url(#tinyBlur)">
+        <path class="wire-current" d="M0 248 C200 242, 400 254, 600 248 S1000 242, 1200 250 S1450 244, 1600 248"/>
+        <path class="wire-current" d="M0 268 C200 262, 400 274, 600 268 S1000 262, 1200 270 S1450 264, 1600 268" style="animation-delay:-0.2s"/>
+      </g>
+    </g>
+
+    <!-- ========== L3 NEAR STREET ========== -->
+    <g class="layer-near">
+      <!-- street lamps -->
+      <g fill="none" stroke="#2c3a4d" stroke-width="5" stroke-linecap="round">
+        <path d="M300 620 V420 H360"/>
+        <path d="M720 620 V400 H780"/>
+        <path d="M1140 620 V410 H1200"/>
+      </g>
+      <g fill="#ffe08a" opacity="0.85">
+        <circle cx="365" cy="420" r="8" filter="url(#softGlow)"/>
+        <circle cx="785" cy="400" r="8" filter="url(#softGlow)"/>
+        <circle cx="1205" cy="410" r="8" filter="url(#softGlow)"/>
+      </g>
+      <!-- light cones -->
+      <path d="M365 428 L320 620 L410 620 Z" fill="#ffe08a" opacity="0.06"/>
+      <path d="M785 408 L740 620 L830 620 Z" fill="#ffe08a" opacity="0.06"/>
+      <path d="M1205 418 L1160 620 L1250 620 Z" fill="#ffe08a" opacity="0.06"/>
+
+      <!-- hydrant / mailbox accents -->
+      <g transform="translate(480,580)">
+        <rect x="-10" y="0" width="20" height="36" rx="4" fill="#c44536"/>
+        <rect x="-14" y="8" width="28" height="8" rx="3" fill="#a33428"/>
+        <circle cy="-4" r="8" fill="#c44536"/>
+      </g>
+      <g transform="translate(1080,575)">
+        <rect x="-12" y="0" width="24" height="42" rx="3" fill="#3d5a80"/>
+        <rect x="-16" y="6" width="32" height="6" fill="#2c4460"/>
+      </g>
+    </g>
+
+    <!-- ========== ROAD ========== -->
+    <rect x="0" y="620" width="1600" height="280" fill="url(#roadGrad)"/>
+    <!-- curb -->
+    <rect x="0" y="612" width="1600" height="14" fill="#4a5568"/>
+    <rect x="0" y="612" width="1600" height="4" fill="#718096"/>
+
+    <!-- road dashes (fastest layer) -->
+    <g class="layer-road">
+      <g fill="url(#road-mark)" opacity="0.85">
+        <rect x="0"   y="760" width="80" height="10" rx="3"/>
+        <rect x="140" y="760" width="80" height="10" rx="3"/>
+        <rect x="280" y="760" width="80" height="10" rx="3"/>
+        <rect x="420" y="760" width="80" height="10" rx="3"/>
+        <rect x="560" y="760" width="80" height="10" rx="3"/>
+        <rect x="700" y="760" width="80" height="10" rx="3"/>
+        <rect x="840" y="760" width="80" height="10" rx="3"/>
+        <rect x="980" y="760" width="80" height="10" rx="3"/>
+        <rect x="1120" y="760" width="80" height="10" rx="3"/>
+        <rect x="1260" y="760" width="80" height="10" rx="3"/>
+        <rect x="1400" y="760" width="80" height="10" rx="3"/>
+        <rect x="1540" y="760" width="80" height="10" rx="3"/>
+        <!-- second tile -->
+        <rect x="800" y="760" width="80" height="10" rx="3" opacity="0"/>
+      </g>
+      <!-- wet reflection streaks -->
+      <g fill="#a8dadc" opacity="0.06">
+        <rect x="40" y="700" width="120" height="6" rx="3"/>
+        <rect x="300" y="720" width="180" height="5" rx="2"/>
+        <rect x="700" y="690" width="100" height="7" rx="3"/>
+        <rect x="1000" y="730" width="160" height="5" rx="2"/>
+        <rect x="1300" y="705" width="140" height="6" rx="3"/>
+      </g>
+    </g>
+
+    <!-- ========== BUS SHADOW (grounded) ========== -->
+    <ellipse cx="820" cy="778" rx="340" ry="22" fill="#000" opacity="0.45"/>
+
+    <!-- ========== TROLLEYBUS + DOLPHIN (hero group) ========== -->
+    <!-- Hero sits mid-right so "heading right" is readable -->
+    <g id="hero" transform="translate(620, 390)">
+
+      <!-- headlight beams (forward = +x / right) -->
+      <g class="lamp-glow">
+        <path d="M520 175 L780 145 L780 215 L520 195 Z" fill="url(#headBeam)"/>
+      </g>
+
+      <!-- trolley poles (behind body, contacting wires above) -->
+      <!-- poles go UP from roof-rear toward overhead wires (wires at y≈248 absolute;
+           hero origin y=390, so local y≈-142 for wires) -->
+      <g class="pole" transform="translate(40, 0)">
+        <!-- base at roof -->
+        <rect x="-6" y="-20" width="12" height="18" rx="3" fill="#5a6d86"/>
+        <line x1="0" y1="-18" x2="-70" y2="-155" stroke="#8b9bb0" stroke-width="5" stroke-linecap="round"/>
+        <line x1="0" y1="-18" x2="-70" y2="-155" stroke="#c5d0dc" stroke-width="1.5" stroke-linecap="round"/>
+        <!-- shoe -->
+        <ellipse cx="-70" cy="-155" rx="14" ry="5" fill="#e9c46a"/>
+      </g>
+      <g class="pole pole-b" transform="translate(100, 0)">
+        <rect x="-6" y="-20" width="12" height="18" rx="3" fill="#5a6d86"/>
+        <line x1="0" y1="-18" x2="-50" y2="-175" stroke="#8b9bb0" stroke-width="5" stroke-linecap="round"/>
+        <line x1="0" y1="-18" x2="-50" y2="-175" stroke="#c5d0dc" stroke-width="1.5" stroke-linecap="round"/>
+        <ellipse cx="-50" cy="-175" rx="14" ry="5" fill="#e9c46a"/>
+      </g>
+
+      <!-- ===== BUS CHASSIS (bobbing) ===== -->
+      <g class="bus-chassis">
+
+        <!-- main body -->
+        <path d="M20 40
+                 C20 20, 40 8, 80 8
+                 L480 8
+                 C510 8, 530 22, 535 50
+                 L545 150
+                 C548 175, 535 190, 510 192
+                 L40 192
+                 C18 192, 8 175, 8 150
+                 L8 70
+                 C8 52, 12 42, 20 40 Z"
+              fill="url(#busBody)" stroke="#145a53" stroke-width="3"/>
+
+        <!-- roof cap -->
+        <path d="M80 8 L480 8 C500 8, 515 14, 522 28 L90 28 C82 20, 78 12, 80 8 Z"
+              fill="url(#busRoof)" opacity="0.95"/>
+
+        <!-- side stripe -->
+        <rect x="20" y="150" width="500" height="16" rx="4" fill="#e9c46a" opacity="0.9"/>
+        <rect x="20" y="150" width="500" height="4" rx="2" fill="#fff3b0" opacity="0.5"/>
+
+        <!-- rear panel (left = rear since we drive right) -->
+        <path d="M8 70 C8 52, 12 42, 20 40 L20 190 L10 175 Z" fill="#1a6b62"/>
+        <rect x="12" y="95" width="14" height="50" rx="3" fill="#7ec8cc" opacity="0.7"/>
+
+        <!-- destination sign (front-top) -->
+        <rect x="400" y="22" width="110" height="28" rx="4" fill="#0d1b2a" stroke="#e9c46a" stroke-width="1.5"/>
+        <text x="455" y="41" text-anchor="middle" font-size="14" font-weight="700"
+              fill="#f2cc8f" font-family="Segoe UI, sans-serif">7 HARBOR</text>
+
+        <!-- passenger windows (rear → mid) -->
+        <g fill="url(#winGrad)" stroke="#1f7a70" stroke-width="2">
+          <rect x="40" y="55" width="70" height="55" rx="5"/>
+          <rect x="120" y="55" width="70" height="55" rx="5"/>
+          <rect x="200" y="55" width="70" height="55" rx="5"/>
+          <rect x="280" y="55" width="70" height="55" rx="5"/>
+        </g>
+        <!-- window reflections -->
+        <g fill="#ffffff" opacity="0.22">
+          <path d="M45 60 L70 60 L50 105 L45 105 Z"/>
+          <path d="M125 60 L150 60 L130 105 L125 105 Z"/>
+          <path d="M205 60 L230 60 L210 105 L205 105 Z"/>
+          <path d="M285 60 L310 60 L290 105 L285 105 Z"/>
+        </g>
+        <!-- tiny passengers (fish silhouettes — whimsy) -->
+        <g fill="#2a4a6b" opacity="0.55">
+          <ellipse cx="75" cy="95" rx="12" ry="7"/>
+          <ellipse cx="155" cy="98" rx="10" ry="6"/>
+          <ellipse cx="235" cy="92" rx="13" ry="7"/>
+        </g>
+
+        <!-- door (mid) -->
+        <rect x="360" y="70" width="36" height="110" rx="4" fill="#1a6b62" stroke="#145a53" stroke-width="2"/>
+        <line x1="378" y1="70" x2="378" y2="180" stroke="#0f4a44" stroke-width="2"/>
+        <rect x="364" y="78" width="12" height="40" rx="2" fill="#7ec8cc" opacity="0.55"/>
+        <rect x="380" y="78" width="12" height="40" rx="2" fill="#7ec8cc" opacity="0.55"/>
+
+        <!-- windshield / cab (front = right) -->
+        <path d="M420 48
+                 C450 48, 500 52, 522 70
+                 L535 130
+                 C538 148, 528 158, 510 158
+                 L420 158 Z"
+              fill="url(#winGrad)" stroke="#145a53" stroke-width="3" opacity="0.95"/>
+        <!-- windshield glare -->
+        <path d="M430 55 L470 55 L445 150 L428 150 Z" fill="#ffffff" opacity="0.2"/>
+
+        <!-- front nose / bumper -->
+        <path d="M535 50 C545 70, 550 110, 545 160
+                 C542 180, 530 190, 510 192
+                 L510 170 C530 165, 538 140, 535 50 Z"
+              fill="#1f7a70" stroke="#145a53" stroke-width="2"/>
+        <rect x="520" y="168" width="30" height="14" rx="4" fill="#c9d4de"/>
+
+        <!-- headlight -->
+        <ellipse cx="538" cy="120" rx="12" ry="10" fill="#fff3b0" filter="url(#softGlow)"/>
+        <ellipse cx="538" cy="120" rx="6" ry="5" fill="#fffbe6"/>
+
+        <!-- rear light -->
+        <ellipse cx="14" cy="160" rx="6" ry="5" fill="#ff6b6b" filter="url(#softGlow)"/>
+
+        <!-- side mirror -->
+        <line x1="535" y1="70" x2="560" y2="55" stroke="#5a6d86" stroke-width="3"/>
+        <ellipse cx="564" cy="52" rx="8" ry="12" fill="#8fa3b8" stroke="#5a6d86" stroke-width="2"/>
+
+        <!-- bumper details -->
+        <circle cx="500" cy="175" r="3" fill="#e9c46a"/>
+
+        <!-- undercarriage -->
+        <rect x="40" y="185" width="460" height="18" rx="4" fill="#0f1822"/>
+        <rect x="60" y="195" width="420" height="8" fill="#1a222d"/>
+
+        <!-- wheel wells -->
+        <path d="M90 192 A55 55 0 0 1 200 192" fill="#0f1822"/>
+        <path d="M360 192 A55 55 0 0 1 470 192" fill="#0f1822"/>
+      </g>
+      <!-- end chassis -->
+
+      <!-- ===== WHEELS (clockwise = rightward advance) ===== -->
+      <!-- rear wheel -->
+      <g transform="translate(145, 210)">
+        <g class="wheel">
+          <use href="#wheelArt"/>
+        </g>
+      </g>
+      <!-- front wheel -->
+      <g transform="translate(415, 210)">
+        <g class="wheel" style="animation-delay:-0.12s">
+          <use href="#wheelArt"/>
+        </g>
+      </g>
+
+      <!-- ===== DOLPHIN DRIVER ===== -->
+      <!-- seated in cab, visible through windshield; body independent of chassis -->
+
+      <!-- tail flukes poke out rear-side of cab (playful, shows motion) -->
+      <g class="tail" transform="translate(400, 130)">
+        <path d="M0 0
+                 C-20 -8, -48 -28, -62 -40
+                 C-58 -22, -50 -6, -30 4
+                 C-48 8, -58 22, -62 38
+                 C-45 28, -18 14, 0 8 Z"
+              fill="url(#dolphinSkin)" stroke="#4a678a" stroke-width="1.5"/>
+        <path d="M-10 2 C-28 -2, -42 -18, -50 -28" stroke="#a8c0d6" stroke-width="1" fill="none" opacity="0.6"/>
+      </g>
+
+      <!-- torso / head group -->
+      <g class="dolphin-torso">
+
+        <!-- body (upright, seated) -->
+        <ellipse cx="470" cy="100" rx="38" ry="52"
+                 fill="url(#dolphinSkin)" stroke="#4a678a" stroke-width="2"
+                 transform="rotate(-8 470 100)"/>
+        <!-- belly -->
+        <ellipse cx="478" cy="112" rx="22" ry="34"
+                 fill="url(#dolphinBelly)" opacity="0.9"
+                 transform="rotate(-8 478 112)"/>
+
+        <!-- head / rostrum -->
+        <ellipse cx="490" cy="58" rx="32" ry="28"
+                 fill="url(#dolphinSkin)" stroke="#4a678a" stroke-width="2"/>
+        <!-- beak / rostrum pointing right (forward) -->
+        <path d="M510 58
+                 C528 54, 548 56, 558 62
+                 C548 70, 528 72, 510 66 Z"
+              fill="url(#dolphinSkin)" stroke="#4a678a" stroke-width="1.5"/>
+        <path d="M512 62 C528 60, 542 62, 552 64" stroke="#c5d4e6" stroke-width="1" fill="none"/>
+        <!-- melon (forehead) -->
+        <ellipse cx="482" cy="42" rx="20" ry="16" fill="#7a9cc9" opacity="0.85"/>
+
+        <!-- eye -->
+        <ellipse cx="500" cy="52" rx="7" ry="8" fill="#0d1b2a"/>
+        <circle cx="502" cy="50" r="2.4" fill="#fff"/>
+        <circle cx="498" cy="55" r="1.2" fill="#fff" opacity="0.5"/>
+        <!-- happy brow -->
+        <path d="M492 42 Q500 38 508 42" stroke="#3d5a80" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+        <!-- smile -->
+        <path d="M512 68 Q522 74 534 70" stroke="#3d5a80" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+        <!-- blowhole -->
+        <ellipse cx="478" cy="34" rx="5" ry="3" fill="#4a678a"/>
+        <!-- puffs -->
+        <g class="puff">
+          <circle cx="478" cy="28" r="5" fill="#d4e8f0" opacity="0.7"/>
+        </g>
+        <g class="puff puff-b">
+          <circle cx="476" cy="26" r="4" fill="#d4e8f0" opacity="0.55"/>
+        </g>
+
+        <!-- dorsal fin -->
+        <g class="dorsal">
+          <path d="M458 70
+                   C448 40, 442 22, 452 12
+                   C462 24, 470 48, 468 72 Z"
+                fill="url(#dolphinSkin)" stroke="#4a678a" stroke-width="1.5"/>
+        </g>
+
+        <!-- LEFT flipper (free, waves — independent) -->
+        <g class="flipper-l">
+          <path d="M445 95
+                   C420 88, 395 78, 380 70
+                   C392 88, 408 105, 430 118
+                   C438 112, 444 104, 445 95 Z"
+                fill="url(#dolphinSkin)" stroke="#4a678a" stroke-width="1.5"/>
+          <path d="M440 100 C420 92, 405 82, 392 74" stroke="#a8c0d6" stroke-width="1" fill="none" opacity="0.55"/>
+        </g>
+
+        <!-- RIGHT flipper on steering wheel (steering motion, different rate) -->
+        <g class="flipper-r">
+          <!-- flipper -->
+          <path d="M500 95
+                   C520 90, 545 88, 562 92
+                   C550 105, 530 115, 508 116
+                   C500 110, 498 102, 500 95 Z"
+                fill="url(#dolphinSkin)" stroke="#4a678a" stroke-width="1.5"/>
+          <!-- steering wheel (held) -->
+          <g transform="translate(560, 100)">
+            <circle r="28" fill="none" stroke="#2c3a4d" stroke-width="5"/>
+            <circle r="8" fill="#5a6d86"/>
+            <line x1="0" y1="0" x2="0" y2="-22" stroke="#2c3a4d" stroke-width="3"/>
+            <line x1="0" y1="0" x2="18" y2="12" stroke="#2c3a4d" stroke-width="3"/>
+            <line x1="0" y1="0" x2="-18" y2="12" stroke="#2c3a4d" stroke-width="3"/>
+          </g>
+        </g>
+
+        <!-- captain hat (tiny, charming) -->
+        <g transform="translate(480, 22)">
+          <ellipse cx="0" cy="8" rx="22" ry="6" fill="#0d1b2a"/>
+          <rect x="-16" y="-6" width="32" height="14" rx="3" fill="#1a2a40"/>
+          <rect x="-16" y="-6" width="32" height="5" fill="#e9c46a"/>
+          <circle cx="0" cy="1" r="3" fill="#e9c46a"/>
+        </g>
+
+        <!-- scarf trailing backward (left) — motion cue -->
+        <path d="M462 78
+                 C440 72, 410 68, 385 78
+                 C400 82, 420 86, 438 88
+                 C420 92, 405 98, 395 108
+                 C420 100, 445 92, 465 88 Z"
+              fill="#ff6b6b" opacity="0.9"/>
+        <path d="M462 78 C450 76, 440 75, 428 76" stroke="#ffb3b3" stroke-width="1" fill="none"/>
+      </g>
+      <!-- end dolphin-torso -->
+
+      <!-- bus number plate -->
+      <rect x="180" y="125" width="50" height="22" rx="3" fill="#0d1b2a" stroke="#e9c46a" stroke-width="1"/>
+      <text x="205" y="141" text-anchor="middle" font-size="12" fill="#e9c46a"
+            font-family="Segoe UI, sans-serif">B-009</text>
+
+    </g>
+    <!-- end hero -->
+
+    <!-- ========== BUBBLE TRAIL behind bus ========== -->
+    <g>
+      <g class="bubble" transform="translate(560, 560)">
+        <circle r="6" fill="none" stroke="#a8dadc" stroke-width="1.5" opacity="0.7"/>
+      </g>
+      <g class="bubble" transform="translate(520, 580)" style="animation-delay:-0.9s">
+        <circle r="4" fill="none" stroke="#a8dadc" stroke-width="1.2" opacity="0.55"/>
+      </g>
+      <g class="bubble" transform="translate(480, 550)" style="animation-delay:-1.7s">
+        <circle r="7" fill="none" stroke="#a8dadc" stroke-width="1.5" opacity="0.6"/>
+      </g>
+      <g class="bubble" transform="translate(430, 590)" style="animation-delay:-2.3s">
+        <circle r="5" fill="none" stroke="#a8dadc" stroke-width="1.2" opacity="0.5"/>
+      </g>
+    </g>
+
+    <!-- ========== FOREGROUND VIGNETTE / FOG ========== -->
+    <rect y="820" width="1600" height="80" fill="#0a121c" opacity="0.55"/>
+    <ellipse cx="800" cy="900" rx="900" ry="80" fill="#0a121c" opacity="0.4"/>
+
+    <!-- speed lines (subtle, reinforce rightward motion) -->
+    <g stroke="#a8dadc" stroke-linecap="round" opacity="0.15">
+      <line x1="100" y1="500" x2="180" y2="500" stroke-width="2"/>
+      <line x1="60"  y1="540" x2="160" y2="540" stroke-width="1.5"/>
+      <line x1="90"  y1="580" x2="200" y2="580" stroke-width="2"/>
+      <line x1="40"  y1="650" x2="130" y2="650" stroke-width="1.5"/>
+    </g>
+
+  </svg>
+</div>
+
+<script>
+/* Interactivity: honk + current boost. No network, no deps. */
+(function () {
+  var stage = document.getElementById('stage');
+  var svg = stage.querySelector('svg');
+  var wires = svg.querySelectorAll('.wire-current');
+  var baseDur = [];
+
+  wires.forEach(function (w) {
+    baseDur.push(getComputedStyle(w).animationDuration);
+  });
+
+  var honkFlash = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  honkFlash.setAttribute('opacity', '0');
+  honkFlash.innerHTML =
+    '<text x="1200" y="360" text-anchor="middle" font-size="42" font-weight="700" ' +
+    'fill="#f2cc8f" font-family="Segoe UI, sans-serif" filter="url(#softGlow)">HONK!</text>';
+  // place near front of bus (hero at 620,390; nose ~+540 → ~1160)
+  honkFlash.setAttribute('transform', 'translate(0,0)');
+  svg.appendChild(honkFlash);
+
+  var t = 0;
+  stage.addEventListener('click', function () {
+    // boost wire current briefly
+    wires.forEach(function (w, i) {
+      w.style.animationDuration = '0.18s';
+      w.style.stroke = '#b8fff5';
+    });
+    // honk flash
+    honkFlash.setAttribute('opacity', '1');
+    clearTimeout(t);
+    t = setTimeout(function () {
+      wires.forEach(function (w, i) {
+        w.style.animationDuration = baseDur[i];
+        w.style.stroke = '';
+      });
+      honkFlash.setAttribute('opacity', '0');
+    }, 700);
+  });
+})();
+</script>
+</body>
+</html>

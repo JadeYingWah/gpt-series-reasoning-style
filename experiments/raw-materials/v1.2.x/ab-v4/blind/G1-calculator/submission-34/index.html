@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>计算器</title>
+<style>
+  :root {
+    --bg: #14161d;
+    --panel: #1e212b;
+    --screen: #101218;
+    --key: #2a2e3a;
+    --key-hover: #343949;
+    --fn: #3a3f4f;
+    --accent: #e8a13c;
+    --accent-press: #f0b45c;
+    --text: #e8eaf0;
+    --text-dim: #8b90a0;
+    --error: #ff6b6b;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at 30% 20%, #1b1e29 0%, var(--bg) 60%);
+    font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+  }
+  .calc {
+    width: 340px;
+    background: var(--panel);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .5);
+  }
+  .display {
+    background: var(--screen);
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 16px;
+    text-align: right;
+    overflow: hidden;
+  }
+  .expression {
+    min-height: 1.4em;
+    font-size: 16px;
+    color: var(--text-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .current {
+    min-height: 1.2em;
+    font-size: 42px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-variant-numeric: tabular-nums;
+  }
+  .current.error { color: var(--error); font-size: 34px; }
+  .keys {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: 62px;
+    gap: 10px;
+  }
+  button {
+    border: none;
+    border-radius: 12px;
+    background: var(--key);
+    color: var(--text);
+    font-size: 22px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background .08s, transform .05s;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+  }
+  button:hover { background: var(--key-hover); }
+  button:active, button.pressed { background: var(--key-hover); transform: scale(.95); }
+  button.fn { background: var(--fn); color: var(--accent); font-size: 20px; }
+  button.op { background: var(--fn); color: var(--accent); font-size: 26px; }
+  button.eq { background: var(--accent); color: #201505; font-size: 28px; grid-row: span 2; }
+  button.eq:active, button.eq.pressed { background: var(--accent-press); }
+  button.zero { grid-column: span 2; }
+</style>
+</head>
+<body>
+<main class="calc" aria-label="计算器">
+  <div class="display">
+    <div class="expression" id="expression"></div>
+    <div class="current" id="current">0</div>
+  </div>
+  <div class="keys">
+    <button data-key="C" class="fn">C</button>
+    <button data-key="back" class="fn" aria-label="退格">⌫</button>
+    <button data-key="/" class="op">÷</button>
+    <button data-key="*" class="op">×</button>
+
+    <button data-key="7">7</button>
+    <button data-key="8">8</button>
+    <button data-key="9">9</button>
+    <button data-key="-" class="op">−</button>
+
+    <button data-key="4">4</button>
+    <button data-key="5">5</button>
+    <button data-key="6">6</button>
+    <button data-key="+" class="op">+</button>
+
+    <button data-key="1">1</button>
+    <button data-key="2">2</button>
+    <button data-key="3">3</button>
+    <button data-key="=" class="eq">=</button>
+
+    <button data-key="0" class="zero">0</button>
+    <button data-key=".">.</button>
+  </div>
+</main>
+<script>
+(function () {
+  'use strict';
+
+  /*CALC-CORE-START*/
+  function evalExpression(s) {
+    var tokens = [];
+    var i = 0;
+    while (i < s.length) {
+      var c = s[i];
+      if ((c >= '0' && c <= '9') || c === '.') {
+        var j = i;
+        while (j < s.length && ((s[j] >= '0' && s[j] <= '9') || s[j] === '.')) j++;
+        var numStr = s.slice(i, j);
+        if (!/^\d+(\.\d*)?$|^\.\d+$/.test(numStr)) return { ok: false, error: 'SYNTAX' };
+        tokens.push({ t: 'num', v: parseFloat(numStr) });
+        i = j;
+      } else if (c === '+' || c === '-' || c === '*' || c === '/') {
+        tokens.push({ t: 'op', v: c });
+        i++;
+      } else {
+        return { ok: false, error: 'SYNTAX' };
+      }
+    }
+    if (tokens.length === 0) return { ok: false, error: 'EMPTY' };
+    if (tokens[0].t !== 'num') return { ok: false, error: 'SYNTAX' };
+    for (var k = 1; k < tokens.length; k++) {
+      if (tokens[k].t === tokens[k - 1].t) return { ok: false, error: 'SYNTAX' };
+    }
+    var pass1 = [tokens[0]];
+    for (var m = 1; m < tokens.length; m += 2) {
+      var op = tokens[m], num = tokens[m + 1];
+      if (!num) return { ok: false, error: 'SYNTAX' };
+      if (op.v === '*') {
+        pass1[pass1.length - 1] = { t: 'num', v: pass1[pass1.length - 1].v * num.v };
+      } else if (op.v === '/') {
+        if (num.v === 0) return { ok: false, error: 'DIV0' };
+        pass1[pass1.length - 1] = { t: 'num', v: pass1[pass1.length - 1].v / num.v };
+      } else {
+        pass1.push(op, num);
+      }
+    }
+    var acc = pass1[0].v;
+    for (var p = 1; p < pass1.length; p += 2) {
+      if (pass1[p].v === '+') acc += pass1[p + 1].v;
+      else acc -= pass1[p + 1].v;
+    }
+    return { ok: true, value: acc };
+  }
+
+  function cleanNumber(n) {
+    return parseFloat(n.toPrecision(12));
+  }
+
+  function formatNumber(n) {
+    return String(cleanNumber(n));
+  }
+  /*CALC-CORE-END*/
+
+  function isOpChar(ch) { return ch === '+' || ch === '-' || ch === '*' || ch === '/'; }
+
+  function toDisplay(s) {
+    return s.replace(/\*/g, '×').replace(/\//g, '÷').replace(/-/g, '−');
+  }
+
+  var expr = '';            // 机器符号表达式（单一事实源）
+  var justEvaluated = false;
+  var error = false;
+  var topOverride = null;   // "=" 后表达式行固定文本
+  var MAX_SEG = 18;
+  var EXP_RE = /e/i;
+
+  var $expr = document.getElementById('expression');
+  var $cur = document.getElementById('current');
+
+  function trailingSegment() {
+    var idx = -1;
+    for (var i = expr.length - 1; i >= 0; i--) {
+      if (isOpChar(expr[i])) { idx = i; break; }
+    }
+    return expr.slice(idx + 1);
+  }
+
+  function render() {
+    var seg = trailingSegment();
+    $expr.textContent = topOverride !== null ? topOverride : toDisplay(expr);
+    $cur.textContent = error ? '错误' : (justEvaluated ? toDisplay(expr) : (seg === '' ? '0' : toDisplay(seg)));
+    $cur.classList.toggle('error', error);
+  }
+
+  function doClear() {
+    expr = '';
+    justEvaluated = false;
+    error = false;
+    topOverride = null;
+  }
+
+  function doDigit(d) {
+    if (error) doClear();
+    if (justEvaluated) { expr = ''; topOverride = null; justEvaluated = false; }
+    var seg = trailingSegment();
+    if (seg === '0') expr = expr.slice(0, -1) + d;
+    else if (seg.length < MAX_SEG) expr += d;
+  }
+
+  function doDot() {
+    if (error) doClear();
+    if (justEvaluated) { expr = '0.'; topOverride = null; justEvaluated = false; return; }
+    var seg = trailingSegment();
+    if (seg.indexOf('.') === -1) expr += (seg === '' ? '0.' : '.');
+  }
+
+  function doOp(op) {
+    if (error) return;
+    if (justEvaluated) {
+      if (EXP_RE.test(expr)) return; // 科学计数法结果不可直接续算
+      expr += op;
+      topOverride = null;
+      justEvaluated = false;
+      return;
+    }
+    if (expr === '') return;
+    if (isOpChar(expr.charAt(expr.length - 1))) expr = expr.slice(0, -1) + op;
+    else expr += op;
+  }
+
+  function doEquals() {
+    if (error || expr === '') return;
+    if (justEvaluated && EXP_RE.test(expr)) return;
+    var full = expr;
+    if (isOpChar(full.charAt(full.length - 1))) full = full.slice(0, -1);
+    var r = evalExpression(full);
+    if (!r.ok || !isFinite(r.value)) {
+      topOverride = toDisplay(full) + ' =';
+      error = true;
+      justEvaluated = false;
+      return;
+    }
+    topOverride = toDisplay(full) + ' =';
+    expr = formatNumber(r.value);
+    justEvaluated = true;
+  }
+
+  function doBack() {
+    if (error) { doClear(); return; }
+    if (expr === '') return;
+    if (justEvaluated) { justEvaluated = false; topOverride = null; }
+    expr = expr.slice(0, -1);
+  }
+
+  function pressKey(k) {
+    if (k === 'C') doClear();
+    else if (k === 'back') doBack();
+    else if (k === '=') doEquals();
+    else if (k === '.') doDot();
+    else if ('0123456789'.indexOf(k) >= 0) doDigit(k);
+    else if (isOpChar(k)) doOp(k);
+    render();
+  }
+
+  // ---- 键盘输入 ----
+  var KEYMAP = {
+    'Enter': '=', '=': '=', 'Backspace': 'back', 'Escape': 'C', 'Delete': 'C',
+    '+': '+', '-': '-', '*': '*', '/': '/', 'x': '*', 'X': '*'
+  };
+
+  function flashKey(k) {
+    var btn = document.querySelector('.keys button[data-key="' + k + '"]');
+    if (!btn) return;
+    btn.classList.add('pressed');
+    setTimeout(function () { btn.classList.remove('pressed'); }, 150);
+  }
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === ' ') { e.preventDefault(); return; }
+    var k = null;
+    if (e.key >= '0' && e.key <= '9') k = e.key;
+    else if (e.key === '.') k = '.';
+    else if (e.key === 'c' || e.key === 'C') k = 'C';
+    else if (Object.prototype.hasOwnProperty.call(KEYMAP, e.key)) k = KEYMAP[e.key];
+    if (k === null) return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    e.preventDefault();
+    flashKey(k);
+    pressKey(k);
+  });
+
+  // ---- 鼠标点击 ----
+  var buttons = document.querySelectorAll('.keys button');
+  Array.prototype.forEach.call(buttons, function (btn) {
+    btn.addEventListener('click', function () {
+      pressKey(btn.dataset.key);
+      btn.blur();
+    });
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

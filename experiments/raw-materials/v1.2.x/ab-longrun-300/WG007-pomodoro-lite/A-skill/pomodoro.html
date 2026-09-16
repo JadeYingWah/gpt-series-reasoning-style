@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>番茄钟 · Pomodoro Lite</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --card: #fffcf7;
+      --ink: #1c1917;
+      --muted: #78716c;
+      --line: #e7e0d5;
+      --accent: #c2410c;
+      --accent-soft: #ffedd5;
+      --ok: #15803d;
+      --shadow: 0 18px 40px rgba(28, 25, 23, 0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background:
+        radial-gradient(circle at top left, #fff7ed 0%, transparent 45%),
+        var(--bg);
+      color: var(--ink);
+    }
+    .shell {
+      width: min(100%, 380px);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      padding: 36px 32px 28px;
+    }
+    .eyebrow {
+      text-align: center;
+      font-size: 0.78rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 18px;
+    }
+    .clock {
+      font-variant-numeric: tabular-nums;
+      font-size: clamp(3.4rem, 12vw, 4.2rem);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      line-height: 1;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .clock.is-done { color: var(--accent); }
+    .state {
+      text-align: center;
+      min-height: 1.5em;
+      font-size: 0.95rem;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+    .state.is-done {
+      color: var(--accent);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+    .actions {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    button {
+      appearance: none;
+      border: 0;
+      border-radius: 999px;
+      padding: 14px 16px;
+      font: inherit;
+      font-weight: 650;
+      cursor: pointer;
+      transition: transform 0.12s ease, background 0.15s ease, opacity 0.15s ease;
+    }
+    button:active { transform: scale(0.98); }
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .btn-main {
+      background: var(--ink);
+      color: #fff;
+    }
+    .btn-main:hover:not(:disabled) { background: #292524; }
+    .btn-ghost {
+      background: transparent;
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+    .btn-ghost:hover:not(:disabled) { background: #faf7f2; }
+    .config {
+      display: grid;
+      gap: 10px;
+      padding-top: 22px;
+      border-top: 1px solid var(--line);
+    }
+    .config-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .config label {
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+    .config input {
+      width: 96px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      color: var(--ink);
+      padding: 10px 12px;
+      font: inherit;
+      text-align: center;
+    }
+    .config input:focus {
+      outline: 2px solid #fdba74;
+      outline-offset: 1px;
+      border-color: #fdba74;
+    }
+    .config input:disabled {
+      background: #f5f5f4;
+      color: var(--muted);
+    }
+    .note {
+      font-size: 0.78rem;
+      line-height: 1.5;
+      color: var(--muted);
+      min-height: 2.4em;
+    }
+    .note.error { color: var(--accent); }
+    .note strong { color: var(--ok); font-weight: 650; }
+  </style>
+</head>
+<body>
+  <main class="shell" id="app">
+    <p class="eyebrow">Pomodoro Lite</p>
+    <div class="clock" id="clock" aria-live="polite">25:00</div>
+    <div class="state" id="stateText">就绪</div>
+    <div class="actions">
+      <button type="button" class="btn-main" id="btnPrimary">开始</button>
+      <button type="button" class="btn-ghost" id="btnReset">重置</button>
+    </div>
+    <div class="config">
+      <div class="config-row">
+        <label for="minutesInput">时长（分钟）</label>
+        <input
+          id="minutesInput"
+          type="number"
+          min="1"
+          max="60"
+          step="1"
+          value="25"
+          inputmode="numeric"
+          autocomplete="off"
+        />
+      </div>
+      <p class="note" id="note">仅接受 1–60 的正整数。到时状态文案变为「时间到」，并尝试播放提示音（Web Audio，无外链）。</p>
+    </div>
+  </main>
+
+  <script>
+    "use strict";
+
+    /* ========== pure core (Node-reviewable; no DOM) ========== */
+    var MIN_MINUTES = 1;
+    var MAX_MINUTES = 60;
+    var DEFAULT_MINUTES = 25;
+    var TICK_MS = 200;
+
+    var STATES = {
+      READY: "ready",
+      RUNNING: "running",
+      PAUSED: "paused",
+      DONE: "done"
+    };
+
+    function clampMinutes(n) {
+      if (typeof n !== "number" || !isFinite(n)) return null;
+      var i = Math.trunc(n);
+      if (n !== i) return null;
+      if (i < MIN_MINUTES || i > MAX_MINUTES) return null;
+      return i;
+    }
+
+    function parseMinutes(raw) {
+      var s = String(raw == null ? "" : raw).trim();
+      if (!/^\d+$/.test(s)) return null;
+      return clampMinutes(parseInt(s, 10));
+    }
+
+    function formatMs(ms) {
+      if (!(ms > 0)) return "00:00";
+      var totalSec = Math.ceil(ms / 1000);
+      var m = Math.floor(totalSec / 60);
+      var s = totalSec % 60;
+      return (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s;
+    }
+
+    function minutesToMs(min) {
+      return min * 60 * 1000;
+    }
+
+    function remainingFrom(endMs, nowMs) {
+      var left = endMs - nowMs;
+      return left > 0 ? left : 0;
+    }
+
+    /** Pure state machine. Returns next state label + side-effect flags. */
+    function transition(state, action, payload) {
+      payload = payload || {};
+      switch (state) {
+        case STATES.READY:
+          if (action === "start" && payload.remainingMs > 0) {
+            return { state: STATES.RUNNING, status: "进行中", primary: "暂停", lockConfig: true, finished: false };
+          }
+          if (action === "reset") {
+            return { state: STATES.READY, status: "就绪", primary: "开始", lockConfig: false, finished: false };
+          }
+          if (action === "setMinutes" && payload.minutes >= MIN_MINUTES) {
+            return { state: STATES.READY, status: "就绪", primary: "开始", lockConfig: false, finished: false };
+          }
+          return null;
+        case STATES.RUNNING:
+          if (action === "pause") {
+            return { state: STATES.PAUSED, status: "已暂停", primary: "继续", lockConfig: true, finished: false };
+          }
+          if (action === "reset") {
+            return { state: STATES.READY, status: "就绪", primary: "开始", lockConfig: false, finished: false };
+          }
+          if (action === "tick" && payload.remainingMs <= 0) {
+            return { state: STATES.DONE, status: "时间到", primary: "开始", lockConfig: false, finished: true };
+          }
+          return null;
+        case STATES.PAUSED:
+          if (action === "start" && payload.remainingMs > 0) {
+            return { state: STATES.RUNNING, status: "进行中", primary: "暂停", lockConfig: true, finished: false };
+          }
+          if (action === "reset") {
+            return { state: STATES.READY, status: "就绪", primary: "开始", lockConfig: false, finished: false };
+          }
+          return null;
+        case STATES.DONE:
+          if (action === "start") {
+            // fresh cycle from current configured duration
+            return { state: STATES.RUNNING, status: "进行中", primary: "暂停", lockConfig: true, finished: false, restart: true };
+          }
+          if (action === "reset") {
+            return { state: STATES.READY, status: "就绪", primary: "开始", lockConfig: false, finished: false };
+          }
+          if (action === "setMinutes" && payload.minutes >= MIN_MINUTES) {
+            return { state: STATES.READY, status: "就绪", primary: "开始", lockConfig: false, finished: false };
+          }
+          return null;
+        default:
+          return null;
+      }
+    }
+
+    /* ========== browser shell ========== */
+    var elClock = document.getElementById("clock");
+    var elState = document.getElementById("stateText");
+    var elPrimary = document.getElementById("btnPrimary");
+    var elReset = document.getElementById("btnReset");
+    var elMinutes = document.getElementById("minutesInput");
+    var elNote = document.getElementById("note");
+
+    var configuredMinutes = DEFAULT_MINUTES;
+    var remainingMs = minutesToMs(configuredMinutes);
+    var endTime = 0;
+    var intervalId = null;
+    var machineState = STATES.READY;
+
+    var NOTE_DEFAULT = elNote.textContent;
+
+    function setNote(text, isError) {
+      elNote.textContent = text;
+      if (isError) elNote.classList.add("error");
+      else elNote.classList.remove("error");
+    }
+
+    function paint() {
+      elClock.textContent = formatMs(remainingMs);
+    }
+
+    function applyTransition(next) {
+      if (!next) return;
+      machineState = next.state;
+      elState.textContent = next.status;
+      elState.classList.toggle("is-done", !!next.finished);
+      elClock.classList.toggle("is-done", !!next.finished);
+      elPrimary.textContent = next.primary;
+      elMinutes.disabled = !!next.lockConfig;
+    }
+
+    function stopTicker() {
+      if (intervalId !== null) {
+        clearInterval(intervalId);
+        intervalId = null;
+      }
+    }
+
+    function playBeep() {
+      try {
+        var Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return false;
+        var ctx = new Ctx();
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.value = 740;
+        gain.gain.value = 0.0001;
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        var t0 = ctx.currentTime;
+        gain.gain.exponentialRampToValueAtTime(0.12, t0 + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.55);
+        osc.start(t0);
+        osc.stop(t0 + 0.6);
+        osc.onended = function () {
+          try { ctx.close(); } catch (e) { /* ignore */ }
+        };
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function enterDone() {
+      stopTicker();
+      remainingMs = 0;
+      paint();
+      applyTransition(transition(STATES.RUNNING, "tick", { remainingMs: 0 }));
+      var beeped = playBeep();
+      setNote(
+        beeped
+          ? "时间到。已尝试播放提示音。点「开始」可开新一轮。"
+          : "时间到。浏览器未允许提示音（AudioContext 受限），状态文案仍已更新。点「开始」可开新一轮。",
+        false
+      );
+    }
+
+    function startTicker() {
+      stopTicker();
+      intervalId = setInterval(function () {
+        remainingMs = remainingFrom(endTime, Date.now());
+        paint();
+        if (remainingMs <= 0) enterDone();
+      }, TICK_MS);
+    }
+
+    function beginRun(fromMs) {
+      remainingMs = fromMs;
+      if (remainingMs <= 0) return;
+      endTime = Date.now() + remainingMs;
+      applyTransition(transition(machineState, "start", { remainingMs: remainingMs }));
+      paint();
+      startTicker();
+    }
+
+    function onPrimary() {
+      if (machineState === STATES.RUNNING) {
+        stopTicker();
+        remainingMs = remainingFrom(endTime, Date.now());
+        paint();
+        applyTransition(transition(STATES.RUNNING, "pause", { remainingMs: remainingMs }));
+        setNote("已暂停。剩余时间保留在内存中；刷新页面会丢失。", false);
+        return;
+      }
+      if (machineState === STATES.DONE) {
+        remainingMs = minutesToMs(configuredMinutes);
+        beginRun(remainingMs);
+        setNote(NOTE_DEFAULT, false);
+        return;
+      }
+      // ready | paused
+      beginRun(remainingMs > 0 ? remainingMs : minutesToMs(configuredMinutes));
+      setNote(NOTE_DEFAULT, false);
+    }
+
+    function hardReset() {
+      stopTicker();
+      var parsed = parseMinutes(elMinutes.value);
+      if (parsed !== null) configuredMinutes = parsed;
+      remainingMs = minutesToMs(configuredMinutes);
+      paint();
+      applyTransition(transition(machineState, "reset", { remainingMs: remainingMs }));
+      setNote(NOTE_DEFAULT, false);
+    }
+
+    function tryApplyMinutes(showFeedback) {
+      var parsed = parseMinutes(elMinutes.value);
+      if (parsed === null) {
+        if (showFeedback) setNote("请输入 1–60 的正整数（当前配置未改动）。", true);
+        return false;
+      }
+      configuredMinutes = parsed;
+      if (machineState === STATES.READY || machineState === STATES.DONE) {
+        remainingMs = minutesToMs(configuredMinutes);
+        paint();
+        applyTransition(transition(machineState, "setMinutes", { minutes: parsed, remainingMs: remainingMs }));
+      }
+      if (showFeedback) setNote("已应用时长 " + parsed + " 分钟。", false);
+      return true;
+    }
+
+    elPrimary.addEventListener("click", onPrimary);
+    elReset.addEventListener("click", hardReset);
+    elMinutes.addEventListener("change", function () {
+      if (machineState === STATES.RUNNING || machineState === STATES.PAUSED) return;
+      tryApplyMinutes(true);
+    });
+    elMinutes.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        if (machineState === STATES.RUNNING || machineState === STATES.PAUSED) return;
+        tryApplyMinutes(true);
+      }
+    });
+
+    paint();
+  </script>
+</body>
+</html>

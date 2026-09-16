@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2025 年度销售数据看板</title>
+<style>
+  :root{
+    --bg:#f5f7fb; --card:#ffffff; --ink:#111827; --muted:#4b5563;
+    --line:#e5e7eb; --accent:#1e40af; --accent2:#3b82f6;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{
+    font-family:"Microsoft YaHei","PingFang SC","Segoe UI",Arial,sans-serif;
+    background:var(--bg); color:var(--ink); padding:24px;
+  }
+  header h1{ font-size:20px; }
+  header p{ color:var(--muted); font-size:13px; margin-top:4px; }
+  .filters{ margin:20px 0 16px; display:flex; gap:8px; flex-wrap:wrap; }
+  .filters button{
+    border:1px solid var(--line); background:var(--card); color:var(--ink);
+    padding:8px 18px; border-radius:8px; font-size:14px; cursor:pointer;
+  }
+  .filters button:hover{ border-color:var(--accent2); }
+  .filters button:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  .filters button.active{ background:var(--accent); border-color:var(--accent); color:#ffffff; }
+  .cards{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:18px 20px; }
+  .card .label{ font-size:13px; color:var(--muted); }
+  .card .value{ font-size:28px; font-weight:700; margin-top:6px; }
+  .card .value small{ font-size:13px; font-weight:400; color:var(--muted); margin-left:4px; }
+  .chart-card{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:20px; margin-top:16px; }
+  .chart-card h2{ font-size:15px; margin-bottom:12px; }
+  svg .tick{ font-size:11px; fill:#6b7280; }
+  svg .mlabel{ font-size:12px; fill:#374151; }
+  svg .val{ font-size:12px; font-weight:bold; fill:#111827; }
+  svg .grid{ stroke:var(--line); stroke-width:1; }
+  svg .bar{ fill:var(--accent2); }
+  svg .bar-peak{ fill:var(--accent); }
+  footer{ margin-top:16px; font-size:12px; color:var(--muted); }
+  #chart{ max-width:640px; }
+  #chart svg{ width:100%; height:auto; }
+  @media (max-width:720px){ .cards{ grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>2025 年度销售数据看板</h1>
+  <p>数据单位：万元 · 范围：2025 年 1–12 月 · 演示数据（虚构编制，页面展示与内联数据一致）</p>
+</header>
+
+<div class="filters" role="group" aria-label="季度筛选">
+  <button type="button" data-scope="all" class="active" aria-pressed="true">全年</button>
+  <button type="button" data-scope="q1" aria-pressed="false">第一季度</button>
+  <button type="button" data-scope="q2" aria-pressed="false">第二季度</button>
+  <button type="button" data-scope="q3" aria-pressed="false">第三季度</button>
+  <button type="button" data-scope="q4" aria-pressed="false">第四季度</button>
+</div>
+
+<section class="cards" aria-label="汇总指标">
+  <div class="card"><div class="label">销售总额</div><div class="value" id="kpi-total">1,975<small> 万元</small></div></div>
+  <div class="card"><div class="label">月均值</div><div class="value" id="kpi-avg">164.6<small> 万元/月</small></div></div>
+  <div class="card"><div class="label">峰值月</div><div class="value" id="kpi-peak">11月<small>234 万元</small></div></div>
+</section>
+
+<section class="chart-card">
+  <h2 id="chart-title">月度销售额趋势（全年）</h2>
+  <div id="chart"><svg width="640" height="320" viewBox="0 0 640 320" role="img" aria-label="全年月度销售额柱状图"><line x1="52" y1="278" x2="624" y2="278" class="grid"></line><text x="44" y="282" text-anchor="end" class="tick">0</text><line x1="52" y1="228.4" x2="624" y2="228.4" class="grid"></line><text x="44" y="232.4" text-anchor="end" class="tick">50</text><line x1="52" y1="178.8" x2="624" y2="178.8" class="grid"></line><text x="44" y="182.8" text-anchor="end" class="tick">100</text><line x1="52" y1="129.2" x2="624" y2="129.2" class="grid"></line><text x="44" y="133.2" text-anchor="end" class="tick">150</text><line x1="52" y1="79.6" x2="624" y2="79.6" class="grid"></line><text x="44" y="83.6" text-anchor="end" class="tick">200</text><line x1="52" y1="30" x2="624" y2="30" class="grid"></line><text x="44" y="34" text-anchor="end" class="tick">250</text><rect x="62.83333333333333" y="151.024" width="26" height="126.976" rx="3" class="bar" data-v="128"></rect><text x="75.83333333333333" y="145.024" text-anchor="middle" class="val">128</text><text x="75.83333333333333" y="296" text-anchor="middle" class="mlabel">1月</text><rect x="110.49999999999999" y="182.768" width="26" height="95.232" rx="3" class="bar" data-v="96"></rect><text x="123.49999999999999" y="176.768" text-anchor="middle" class="val">96</text><text x="123.49999999999999" y="296" text-anchor="middle" class="mlabel">2月</text><rect x="158.16666666666666" y="134.16" width="26" height="143.84" rx="3" class="bar" data-v="145"></rect><text x="171.16666666666666" y="128.16" text-anchor="middle" class="val">145</text><text x="171.16666666666666" y="296" text-anchor="middle" class="mlabel">3月</text><rect x="205.83333333333334" y="147.056" width="26" height="130.944" rx="3" class="bar" data-v="132"></rect><text x="218.83333333333334" y="141.056" text-anchor="middle" class="val">132</text><text x="218.83333333333334" y="296" text-anchor="middle" class="mlabel">4月</text><rect x="253.5" y="121.26400000000001" width="26" height="156.736" rx="3" class="bar" data-v="158"></rect><text x="266.5" y="115.26400000000001" text-anchor="middle" class="val">158</text><text x="266.5" y="296" text-anchor="middle" class="mlabel">5月</text><rect x="301.16666666666663" y="103.40799999999999" width="26" height="174.592" rx="3" class="bar" data-v="176"></rect><text x="314.16666666666663" y="97.40799999999999" text-anchor="middle" class="val">176</text><text x="314.16666666666663" y="296" text-anchor="middle" class="mlabel">6月</text><rect x="348.8333333333333" y="136.144" width="26" height="141.856" rx="3" class="bar" data-v="143"></rect><text x="361.8333333333333" y="130.144" text-anchor="middle" class="val">143</text><text x="361.8333333333333" y="296" text-anchor="middle" class="mlabel">7月</text><rect x="396.49999999999994" y="128.208" width="26" height="149.792" rx="3" class="bar" data-v="151"></rect><text x="409.49999999999994" y="122.208" text-anchor="middle" class="val">151</text><text x="409.49999999999994" y="296" text-anchor="middle" class="mlabel">8月</text><rect x="444.16666666666663" y="90.512" width="26" height="187.488" rx="3" class="bar" data-v="189"></rect><text x="457.16666666666663" y="84.512" text-anchor="middle" class="val">189</text><text x="457.16666666666663" y="296" text-anchor="middle" class="mlabel">9月</text><rect x="491.8333333333333" y="74.63999999999999" width="26" height="203.36" rx="3" class="bar" data-v="205"></rect><text x="504.8333333333333" y="68.63999999999999" text-anchor="middle" class="val">205</text><text x="504.8333333333333" y="296" text-anchor="middle" class="mlabel">10月</text><rect x="539.5" y="45.872000000000014" width="26" height="232.128" rx="3" class="bar bar-peak" data-v="234"></rect><text x="552.5" y="39.872000000000014" text-anchor="middle" class="val">234</text><text x="552.5" y="296" text-anchor="middle" class="mlabel">11月</text><rect x="587.1666666666666" y="61.744" width="26" height="216.256" rx="3" class="bar" data-v="218"></rect><text x="600.1666666666666" y="55.744" text-anchor="middle" class="val">218</text><text x="600.1666666666666" y="296" text-anchor="middle" class="mlabel">12月</text></svg></div>
+</section>
+
+<footer>静态单文件看板 · 无外部依赖 · 指标卡与图表数据可由内联数据独立复算</footer>
+
+<script>
+"use strict";
+/* 12 个月销售数据（万元，演示用虚构数值） */
+var MONTHS = [
+  { m:"1月",  v:128 }, { m:"2月",  v:96 },  { m:"3月",  v:145 },
+  { m:"4月",  v:132 }, { m:"5月",  v:158 }, { m:"6月",  v:176 },
+  { m:"7月",  v:143 }, { m:"8月",  v:151 }, { m:"9月",  v:189 },
+  { m:"10月", v:205 }, { m:"11月", v:234 }, { m:"12月", v:218 }
+];
+var SCOPES = {
+  all: { label:"全年",     idx:[0,1,2,3,4,5,6,7,8,9,10,11] },
+  q1:  { label:"第一季度", idx:[0,1,2] },
+  q2:  { label:"第二季度", idx:[3,4,5] },
+  q3:  { label:"第三季度", idx:[6,7,8] },
+  q4:  { label:"第四季度", idx:[9,10,11] }
+};
+
+function computeMetrics(rows){
+  var total = 0, peak = rows[0], i;
+  for (i = 0; i < rows.length; i++){
+    total += rows[i].v;
+    if (rows[i].v > peak.v){ peak = rows[i]; }
+  }
+  return { count: rows.length, total: total, avg: total / rows.length,
+           peakMonth: peak.m, peakValue: peak.v };
+}
+function fmtInt(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+function fmtAvg(n){ return (Math.round(n * 10) / 10).toFixed(1); }
+
+function setCard(id, main, unit){
+  var node = document.getElementById(id);
+  node.textContent = "";
+  node.appendChild(document.createTextNode(main));
+  var s = document.createElement("small");
+  s.textContent = unit;
+  node.appendChild(s);
+}
+
+function buildChart(rows, scopeLabel){
+  var W = 640, H = 320, L = 52, R = 16, T = 30, B = 42;
+  var pw = W - L - R, ph = H - T - B;
+  var vmax = 0, pv = 0, i;
+  for (i = 0; i < rows.length; i++){
+    if (rows[i].v > vmax){ vmax = rows[i].v; pv = rows[i].v; }
+  }
+  var ymax = Math.ceil(vmax / 50) * 50;
+  var band = pw / rows.length;
+  var barW = Math.min(Math.round(band * 0.55), 72);
+
+  var NS = "http://www.w3.org/2000/svg";
+  var svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("width", W);
+  svg.setAttribute("height", H);
+  svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+  svg.setAttribute("role", "img");
+  svg.setAttribute("aria-label", scopeLabel + "月度销售额柱状图");
+
+  function txt(x, y, s, anchor, cls){
+    var t = document.createElementNS(NS, "text");
+    t.setAttribute("x", x); t.setAttribute("y", y);
+    t.setAttribute("text-anchor", anchor || "middle");
+    t.setAttribute("class", cls);
+    t.textContent = s;
+    return t;
+  }
+  function gridLine(y){
+    var l = document.createElementNS(NS, "line");
+    l.setAttribute("x1", L); l.setAttribute("y1", y);
+    l.setAttribute("x2", L + pw); l.setAttribute("y2", y);
+    l.setAttribute("class", "grid");
+    return l;
+  }
+  var steps = 5;
+  for (i = 0; i <= steps; i++){
+    var yv = ymax / steps * i;
+    var y = T + ph - (ph * yv / ymax);
+    svg.appendChild(gridLine(y));
+    svg.appendChild(txt(L - 8, y + 4, String(yv), "end", "tick"));
+  }
+  for (i = 0; i < rows.length; i++){
+    var r = rows[i];
+    var bh = ph * r.v / ymax;
+    var x = L + band * i + (band - barW) / 2;
+    var y2 = T + ph - bh;
+    var rect = document.createElementNS(NS, "rect");
+    rect.setAttribute("x", x); rect.setAttribute("y", y2);
+    rect.setAttribute("width", barW); rect.setAttribute("height", bh);
+    rect.setAttribute("rx", 3);
+    rect.setAttribute("class", r.v === pv ? "bar bar-peak" : "bar");
+    rect.setAttribute("data-v", r.v);
+    svg.appendChild(rect);
+    svg.appendChild(txt(x + barW / 2, y2 - 6, String(r.v), "middle", "val"));
+    svg.appendChild(txt(L + band * i + band / 2, T + ph + 18, r.m, "middle", "mlabel"));
+  }
+  var chart = document.getElementById("chart");
+  chart.textContent = "";
+  chart.appendChild(svg);
+}
+
+function render(scopeKey){
+  var sc = SCOPES[scopeKey];
+  var rows = sc.idx.map(function(i){ return MONTHS[i]; });
+  var mt = computeMetrics(rows);
+  setCard("kpi-total", fmtInt(mt.total), " 万元");
+  setCard("kpi-avg", fmtAvg(mt.avg), " 万元/月");
+  setCard("kpi-peak", mt.peakMonth, mt.peakValue + " 万元");
+  document.getElementById("chart-title").textContent = "月度销售额趋势（" + sc.label + "）";
+  buildChart(rows, sc.label);
+  var btns = document.querySelectorAll(".filters button");
+  for (var i = 0; i < btns.length; i++){
+    var on = btns[i].getAttribute("data-scope") === scopeKey;
+    if (on){ btns[i].classList.add("active"); } else { btns[i].classList.remove("active"); }
+    btns[i].setAttribute("aria-pressed", on ? "true" : "false");
+  }
+}
+function setScope(k){ if (SCOPES[k]){ render(k); } }
+
+(function init(){
+  var btns = document.querySelectorAll(".filters button");
+  for (var i = 0; i < btns.length; i++){
+    (function(b){
+      b.addEventListener("click", function(){ setScope(b.getAttribute("data-scope")); });
+    })(btns[i]);
+  }
+  var initial = "all";
+  try {
+    var sp = new URLSearchParams(location.search);
+    var s = sp.get("scope");
+    if (s && SCOPES[s]){ initial = s; }
+  } catch (e) { /* 不支持 URLSearchParams 时回退全年视图 */ }
+  render(initial);
+})();
+</script>
+
+
+</body></html>

@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JSON 格式化 / 压缩工具</title>
+<style>
+  :root{
+    --bg:#0f1420;
+    --panel:#171d2b;
+    --panel-2:#1e2536;
+    --line:#2b3448;
+    --fg:#e6ebf5;
+    --muted:#93a0b8;
+    --accent:#4d8dff;
+    --accent-2:#3a6fd8;
+    --ok:#37c08a;
+    --warn:#e0a03a;
+    --err:#ff6b6b;
+    --mono:Consolas,"Cascadia Mono","Courier New",monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;background:var(--bg);color:var(--fg);
+    font:14px/1.5 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
+    display:flex;flex-direction:column;min-height:100vh;
+  }
+  header{
+    padding:14px 18px;border-bottom:1px solid var(--line);
+    display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;
+  }
+  header h1{font-size:16px;margin:0;font-weight:600}
+  header .sub{color:var(--muted);font-size:12px}
+  main{
+    flex:1;display:grid;gap:12px;padding:12px;
+    grid-template-columns:1fr 1fr;grid-template-rows:auto 1fr auto;
+    min-height:0;
+  }
+  .toolbar{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  button{
+    background:var(--panel-2);color:var(--fg);border:1px solid var(--line);
+    padding:8px 14px;border-radius:6px;cursor:pointer;font-size:13px;
+    transition:background .12s,border-color .12s;
+  }
+  button:hover:not(:disabled){background:#26304a;border-color:#3b4767}
+  button:active:not(:disabled){transform:translateY(1px)}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  button.primary:hover:not(:disabled){background:var(--accent-2)}
+  button.ghost{background:transparent}
+  .spacer{flex:1}
+  .pane{display:flex;flex-direction:column;min-height:0;background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .pane-head{
+    padding:8px 12px;border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted)
+  }
+  .pane-head .title{color:var(--fg);font-weight:600;font-size:13px}
+  textarea{
+    flex:1;width:100%;min-height:0;resize:none;border:0;outline:none;
+    background:transparent;color:var(--fg);padding:12px;
+    font-family:var(--mono);font-size:13px;line-height:1.55;white-space:pre;
+    tab-size:2;
+  }
+  textarea[readonly]{color:#cfe0ff;background:#141a27}
+  #errbox{
+    grid-column:1/-1;border-radius:8px;border:1px solid var(--line);
+    background:var(--panel);padding:10px 12px;font-size:13px;min-height:44px;
+    display:flex;gap:10px;align-items:flex-start;
+  }
+  #errbox .badge{
+    flex:0 0 auto;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;
+    border:1px solid transparent;letter-spacing:.5px
+  }
+  #errbox.info .badge{background:rgba(77,141,255,.15);color:var(--accent);border-color:rgba(77,141,255,.4)}
+  #errbox.ok .badge{background:rgba(55,192,138,.15);color:var(--ok);border-color:rgba(55,192,138,.4)}
+  #errbox.error .badge{background:rgba(255,107,107,.15);color:var(--err);border-color:rgba(255,107,107,.4)}
+  #errbox.warn .badge{background:rgba(224,160,58,.15);color:var(--warn);border-color:rgba(224,160,58,.4)}
+  #errmsg{flex:1;min-width:0;word-break:break-word;white-space:pre-wrap;font-family:var(--mono)}
+  #errmsg .pos{color:var(--warn)}
+  #errmsg .ctx{color:var(--muted)}
+  #errmsg .hi{color:#fff;background:#7a2b2b;border-radius:2px;padding:0 1px}
+  #stats{grid-column:1/-1;color:var(--muted);font-size:12px;font-family:var(--mono);display:flex;gap:16px;flex-wrap:wrap}
+  #stats b{color:var(--fg);font-weight:600}
+  @media (max-width:820px){
+    main{grid-template-columns:1fr;grid-template-rows:auto minmax(180px,1fr) minmax(180px,1fr) auto auto}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>JSON 格式化 / 压缩工具</h1>
+  <span class="sub">单文件 · 无外部依赖 · 离线可用</span>
+</header>
+
+<main>
+  <div class="toolbar">
+    <button id="btnPretty" class="primary">美化（2 空格缩进）</button>
+    <button id="btnMinify">压缩</button>
+    <button id="btnCopy">复制结果</button>
+    <button id="btnSample" class="ghost">载入示例</button>
+    <button id="btnSwap" class="ghost">结果 → 输入</button>
+    <button id="btnClear" class="ghost">清空</button>
+    <span class="spacer"></span>
+    <button id="btnEsc" class="ghost" title="压缩后再转义为 JSON 字符串字面量">转义为字符串</button>
+  </div>
+
+  <section class="pane">
+    <div class="pane-head">
+      <span class="title">输入</span>
+      <span id="inMeta">0 字符</span>
+    </div>
+    <textarea id="input" spellcheck="false" placeholder="在此粘贴 JSON，然后点击「美化」或「压缩」…"></textarea>
+  </section>
+
+  <section class="pane">
+    <div class="pane-head">
+      <span class="title">结果</span>
+      <span id="outMeta">空</span>
+    </div>
+    <textarea id="output" readonly spellcheck="false" placeholder="结果将显示在这里"></textarea>
+  </section>
+
+  <div id="errbox" class="info">
+    <span class="badge">就绪</span>
+    <span id="errmsg">等待输入。所有处理均在本机浏览器内完成，不会发起任何网络请求。</span>
+  </div>
+
+  <div id="stats">
+    <span>输入：<b id="s-in">0</b> 字符</span>
+    <span>输出：<b id="s-out">0</b> 字符</span>
+    <span>字节(UTF-8)：<b id="s-bytes">0</b></span>
+    <span>压缩比：<b id="s-ratio">—</b></span>
+    <span>耗时：<b id="s-time">—</b></span>
+  </div>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---------- 内嵌数据（不请求网络） ----------
+  var SAMPLE = {
+    name: "BASE02-json-pretty",
+    version: "1.0.0",
+    offline: true,
+    tags: ["json", "formatter", "minify", "no-deps"],
+    limits: { maxRecommendedBytes: 5242880, indent: 2 },
+    nested: {
+      level1: {
+        level2: [
+          { id: 1, text: "包含中文与转义 \\\" 引号", ok: true },
+          { id: 2, text: "换行\n制表\t符", ok: false, n: -1.5e3 },
+          { id: 3, text: null, ok: null }
+        ]
+      },
+      empty: {},
+      emptyArr: []
+    },
+    trailing: "结尾"
+  };
+
+  var MAX_BYTES_WARN = 5 * 1024 * 1024; // 超过 5MB 给出提示，但仍尝试处理
+
+  var el = {
+    input: document.getElementById("input"),
+    output: document.getElementById("output"),
+    inMeta: document.getElementById("inMeta"),
+    outMeta: document.getElementById("outMeta"),
+    box: document.getElementById("errbox"),
+    msg: document.getElementById("errmsg"),
+    badge: null,
+    sIn: document.getElementById("s-in"),
+    sOut: document.getElementById("s-out"),
+    sBytes: document.getElementById("s-bytes"),
+    sRatio: document.getElementById("s-ratio"),
+    sTime: document.getElementById("s-time")
+  };
+  el.badge = el.box.querySelector(".badge");
+
+  var buttons = ["btnPretty", "btnMinify", "btnCopy", "btnSample", "btnSwap", "btnClear", "btnEsc"]
+    .map(function (id) { return document.getElementById(id); });
+
+  // ---------- 状态反馈 ----------
+  function setStatus(kind, text, html) {
+    el.box.className = kind;
+    el.badge.textContent = ({ info: "就绪", ok: "成功", error: "错误", warn: "提示" })[kind] || "就绪";
+    if (html) { el.msg.innerHTML = text; } else { el.msg.textContent = text; }
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c];
+    });
+  }
+
+  function utf8Bytes(str) {
+    try {
+      if (typeof TextEncoder !== "undefined") { return new TextEncoder().encode(str).length; }
+      if (typeof Blob !== "undefined") { return new Blob([str]).size; }
+    } catch (e) { /* 退回到手算 */ }
+    var n = 0;
+    for (var i = 0; i < str.length; i++) {
+      var c = str.charCodeAt(i);
+      if (c < 0x80) { n += 1; }
+      else if (c < 0x800) { n += 2; }
+      else if (c >= 0xD800 && c <= 0xDBFF && i + 1 < str.length) {
+        var d = str.charCodeAt(i + 1);
+        if (d >= 0xDC00 && d <= 0xDFFF) { n += 4; i++; } else { n += 3; }
+      } else { n += 3; }
+    }
+    return n;
+  }
+
+  function refreshInputMeta() {
+    var v = el.input.value;
+    el.inMeta.textContent = v.length + " 字符 / " + utf8Bytes(v) + " 字节";
+    el.sIn.textContent = v.length;
+  }
+
+  function refreshOutputMeta() {
+    var v = el.output.value;
+    if (!v) {
+      el.outMeta.textContent = "空";
+      el.sOut.textContent = "0";
+      el.sBytes.textContent = "0";
+      return;
+    }
+    var bytes = utf8Bytes(v); // 只算一次，避免大输出被重复全量扫描
+    el.outMeta.textContent = v.length + " 字符 / " + bytes + " 字节";
+    el.sOut.textContent = v.length;
+    el.sBytes.textContent = bytes;
+  }
+
+  function busy(on) {
+    for (var i = 0; i < buttons.length; i++) { buttons[i].disabled = !!on; }
+  }
+
+  // ---------- 位置换算：字符偏移 -> 行/列 ----------
+  function posToLineCol(text, pos) {
+    var line = 1, col = 1;
+    var end = Math.min(Math.max(pos, 0), text.length);
+    for (var i = 0; i < end; i++) {
+      var c = text.charCodeAt(i);
+      if (c === 10) { line++; col = 1; }
+      else if (c === 13) { if (text.charCodeAt(i + 1) === 10) { i++; } line++; col = 1; }
+      else { col++; }
+    }
+    return { line: line, col: col };
+  }
+
+  function renderError(text, pos, message) {
+    var lc = posToLineCol(text, pos);
+    var from = Math.max(0, pos - 30);
+    var to = Math.min(text.length, pos + 30);
+    var before = text.slice(from, pos);
+    var at = text.slice(pos, pos + 1);
+    var after = text.slice(pos + 1, to);
+    var snippet = escapeHtml(before) +
+      (at ? "<span class='hi'>" + escapeHtml(at) + "</span>" : "<span class='hi'>␄</span>") +
+      escapeHtml(after);
+    setStatus("error",
+      "JSON 解析失败：" + escapeHtml(message) + "\n" +
+      "位置：<span class='pos'>第 " + lc.line + " 行，第 " + lc.col + " 列</span>" +
+      "（字符偏移 <span class='pos'>" + pos + "</span>，0 起算）\n" +
+      "上下文：<span class='ctx'>…" + snippet + "…</span>",
+      true);
+
+    // 在输入框中选中出错位置，给出直观反馈
+    try {
+      el.input.focus();
+      el.input.setSelectionRange(pos, Math.min(pos + 1, text.length));
+    } catch (e) { /* 忽略：某些浏览器对超长文本 setSelectionRange 有限制 */ }
+  }
+
+  // ---------- 自研扫描器：仅在 JSON.parse 失败时用于定位错误位置 ----------
+  // 作用是把 V8 的 "at position N" 兜底为总能算出 行/列
+  function locateError(text) {
+    var i = 0, n = text.length;
+
+    function fail(pos, msg) { return { ok: false, pos: pos, msg: msg }; }
+    function ws() {
+      while (i < n) {
+        var c = text.charCodeAt(i);
+        if (c === 32 || c === 9 || c === 10 || c === 13) { i++; } else { break; }
+      }
+    }
+    function lit(word) {
+      if (text.substr(i, word.length) === word) { i += word.length; return true; }
+      return false;
+    }
+    function parseString() {
+      var start = i; i++; // 跳过开引号
+      while (i < n) {
+        var c = text[i];
+        if (c === "\\") { i += 2; continue; }
+        if (c === '"') { i++; return null; }
+        if (c.charCodeAt(0) < 32) { return fail(i, "字符串内出现未转义的控制字符（U+" + c.charCodeAt(0).toString(16).toUpperCase() + "）"); }
+        i++;
+      }
+      return fail(start, "字符串没有闭合的引号");
+    }
+    function parseNumber() {
+      var start = i;
+      var re = /-?(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?/y;
+      re.lastIndex = i;
+      var m = re.exec(text);
+      if (!m || m.index !== i) { return fail(start, "数字格式非法"); }
+      i = re.lastIndex;
+      return null;
+    }
+    function parseValue(depth) {
+      if (depth > 1000) { return fail(i, "嵌套层级过深（超过 1000 层）"); }
+      ws();
+      if (i >= n) { return fail(i, "输入意外结束：这里还应该有一个值"); }
+      var c = text[i];
+      if (c === "{") { return parseObject(depth); }
+      if (c === "[") { return parseArray(depth); }
+      if (c === '"') { return parseString(); }
+      if (c === "-" || (c >= "0" && c <= "9")) { return parseNumber(); }
+      if (lit("true") || lit("false") || lit("null")) { return null; }
+      return fail(i, "遇到无法识别的字符 " + JSON.stringify(c) + "（这里应该是一个值）");
+    }
+    function parseObject(depth) {
+      i++; ws();
+      if (text[i] === "}") { i++; return null; }
+      for (;;) {
+        ws();
+        if (i >= n) { return fail(i, "对象没有闭合的 }"); }
+        if (text[i] !== '"') { return fail(i, "对象的键必须是双引号字符串"); }
+        var r = parseString(); if (r) { return r; }
+        ws();
+        if (text[i] !== ":") { return fail(i, "键之后缺少冒号 :"); }
+        i++;
+        r = parseValue(depth + 1); if (r) { return r; }
+        ws();
+        if (text[i] === ",") { i++; continue; }
+        if (text[i] === "}") { i++; return null; }
+        if (i >= n) { return fail(i, "对象没有闭合的 }"); }
+        return fail(i, "对象成员之间缺少逗号 , 或缺少 }");
+      }
+    }
+    function parseArray(depth) {
+      i++; ws();
+      if (text[i] === "]") { i++; return null; }
+      for (;;) {
+        var r = parseValue(depth + 1); if (r) { return r; }
+        ws();
+        if (text[i] === ",") { i++; continue; }
+        if (text[i] === "]") { i++; return null; }
+        if (i >= n) { return fail(i, "数组没有闭合的 ]"); }
+        return fail(i, "数组元素之间缺少逗号 , 或缺少 ]");
+      }
+    }
+
+    var res = parseValue(0);
+    if (res) { return res; }
+    ws();
+    if (i < n) { return fail(i, "JSON 结束后仍有多余内容 " + JSON.stringify(text[i])); }
+    return { ok: true, pos: -1, msg: "" };
+  }
+
+  function extractParseError(err, text) {
+    var msg = (err && err.message) ? String(err.message) : "未知解析错误";
+    var pos = -1, m;
+
+    m = /position\s+(\d+)/i.exec(msg);
+    if (m) { pos = parseInt(m[1], 10); }
+
+    var line = -1, col = -1;
+    m = /line\s+(\d+)\s+column\s+(\d+)/i.exec(msg);
+    if (m) { line = parseInt(m[1], 10); col = parseInt(m[2], 10); }
+
+    if (pos < 0 && line > 0) {
+      // 由 行/列 反推偏移
+      var cur = 1, off = 0;
+      while (off < text.length && cur < line) {
+        if (text.charCodeAt(off) === 10) { cur++; }
+        off++;
+      }
+      pos = off + (col - 1);
+      if (pos > text.length) { pos = text.length; }
+    }
+
+    if (pos < 0) {
+      var scan = locateError(text);
+      if (!scan.ok) { pos = scan.pos; msg = msg + "（自研扫描器定位：" + scan.msg + "）"; }
+      else { pos = 0; }
+    }
+    return { pos: pos, msg: msg };
+  }
+
+  // ---------- 核心操作 ----------
+  function pretty(text) { return JSON.stringify(JSON.parse(text), null, 2); }
+  function minify(text) { return JSON.stringify(JSON.parse(text)); }
+
+  function getInput() {
+    var v = el.input.value;
+    if (v === null || v === undefined) { return ""; }
+    return String(v);
+  }
+
+  function run(kind) {
+    var text = getInput();
+    var trimmed = text.replace(/^\uFEFF/, "").trim();
+
+    if (trimmed === "") {
+      setStatus("warn", "输入为空：请先粘贴一段 JSON 文本。（空输入按边界情况处理，不抛异常）");
+      el.output.value = "";
+      refreshOutputMeta();
+      el.sRatio.textContent = "—";
+      el.sTime.textContent = "—";
+      return;
+    }
+
+    var bytes = utf8Bytes(text);
+    var big = bytes > MAX_BYTES_WARN;
+
+    busy(true);
+    setStatus("info", (big ? "输入较大（" + bytes + " 字节），正在处理…" : "正在处理…"));
+
+    // 先让状态画到界面上，再执行耗时逻辑
+    setTimeout(function () {
+      var t0 = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
+      try {
+        var out = (kind === "minify") ? minify(trimmed) : pretty(trimmed);
+        var t1 = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
+
+        el.output.value = out;
+        refreshOutputMeta();
+
+        var inLen = text.length, outLen = out.length;
+        el.sRatio.textContent = inLen > 0 ? (Math.round(outLen / inLen * 1000) / 10) + "%" : "—";
+        el.sTime.textContent = (Math.round((t1 - t0) * 10) / 10) + " ms";
+
+        var verb = (kind === "minify") ? "压缩" : "美化";
+        setStatus("ok",
+          verb + "成功。输入 " + inLen + " 字符 → 输出 " + outLen + " 字符，耗时 " +
+          (Math.round((t1 - t0) * 10) / 10) + " ms。" + (big ? "（输入超过 5MB 阈值，已正常返回）" : ""));
+      } catch (e) {
+        var info = extractParseError(e, text);
+        el.output.value = "";
+        refreshOutputMeta();
+        el.sRatio.textContent = "—";
+        el.sTime.textContent = "—";
+        renderError(text, info.pos, info.msg);
+      } finally {
+        busy(false);
+      }
+    }, 0);
+  }
+
+  function outIsEmpty() { return el.output.value === ""; }
+
+  // ---------- 复制 ----------
+  function flashButton(btn, text, restoreMs) {
+    if (!btn) { return; }
+    if (!btn.dataset.orig) { btn.dataset.orig = btn.textContent; }
+    btn.textContent = text;
+    clearTimeout(btn._t);
+    btn._t = setTimeout(function () { btn.textContent = btn.dataset.orig; }, restoreMs || 1400);
+  }
+
+  function legacyCopy(str) {
+    var ta = document.createElement("textarea");
+    ta.value = str;
+    ta.setAttribute("readonly", "");
+    ta.style.position = "fixed";
+    ta.style.top = "-1000px";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, str.length);
+    var ok = false;
+    try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+    document.body.removeChild(ta);
+    return ok;
+  }
+
+  function copyResult() {
+    var btn = document.getElementById("btnCopy");
+    if (outIsEmpty()) {
+      setStatus("warn", "结果为空：先执行「美化」或「压缩」再复制。");
+      el.output.focus();
+      return;
+    }
+    var text = el.output.value;
+    var done = function (ok) {
+      if (ok) {
+        setStatus("ok", "已复制 " + text.length + " 个字符到剪贴板。");
+        flashButton(btn, "已复制 ✓");
+      } else {
+        el.output.focus();
+        try { el.output.setSelectionRange(0, text.length); } catch (e) { /* 忽略 */ }
+        setStatus("warn", "浏览器拒绝了自动复制：结果已全选，请按 Ctrl+C 复制。");
+        flashButton(btn, "请按 Ctrl+C");
+      }
+    };
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(legacyCopy(text)); });
+      } else {
+        done(legacyCopy(text));
+      }
+    } catch (e) {
+      done(legacyCopy(text));
+    }
+  }
+
+  // ---------- 事件绑定 ----------
+  document.getElementById("btnPretty").addEventListener("click", function () { run("pretty"); });
+  document.getElementById("btnMinify").addEventListener("click", function () { run("minify"); });
+  document.getElementById("btnCopy").addEventListener("click", copyResult);
+
+  document.getElementById("btnSample").addEventListener("click", function () {
+    el.input.value = JSON.stringify(SAMPLE, null, 2);
+    refreshInputMeta();
+    setStatus("info", "已载入内嵌示例数据（未请求网络），可直接点「压缩」或「美化」。");
+  });
+
+  document.getElementById("btnSwap").addEventListener("click", function () {
+    if (outIsEmpty()) { setStatus("warn", "结果为空，无法移到输入框。"); return; }
+    el.input.value = el.output.value;
+    el.output.value = "";
+    refreshInputMeta(); refreshOutputMeta();
+    setStatus("info", "结果已移动到输入框。");
+  });
+
+  document.getElementById("btnClear").addEventListener("click", function () {
+    el.input.value = ""; el.output.value = "";
+    refreshInputMeta(); refreshOutputMeta();
+    el.sRatio.textContent = "—"; el.sTime.textContent = "—";
+    setStatus("info", "已清空输入与结果。");
+    el.input.focus();
+  });
+
+  document.getElementById("btnEsc").addEventListener("click", function () {
+    var text = getInput();
+    if (text.trim() === "") { setStatus("warn", "输入为空，无可转义内容。"); return; }
+    try {
+      var s = JSON.stringify(JSON.parse(text));
+      el.output.value = JSON.stringify(s);
+      refreshOutputMeta();
+      el.sRatio.textContent = text.length ? (Math.round(el.output.value.length / text.length * 1000) / 10) + "%" : "—";
+      setStatus("ok", "已转义为 JSON 字符串字面量（" + el.output.value.length + " 字符）。");
+    } catch (e) {
+      var info = extractParseError(e, text);
+      renderError(text, info.pos, info.msg);
+    }
+  });
+
+  el.input.addEventListener("input", function () {
+    refreshInputMeta();
+    var v = el.input.value;
+    if (v.trim() === "") { setStatus("info", "输入为空。"); return; }
+    setStatus("info", "已输入 " + v.length + " 字符，等待操作。");
+  });
+
+  // 全局兜底：任何未捕获异常都转成界面提示，而不是静默失败
+  window.addEventListener("error", function (ev) {
+    try { setStatus("error", "页面出现未捕获错误：" + (ev && ev.message ? ev.message : "未知错误")); } catch (e) { /* 忽略 */ }
+  });
+  window.addEventListener("unhandledrejection", function (ev) {
+    try { setStatus("error", "出现未处理的 Promise 异常：" + ((ev && ev.reason && ev.reason.message) || "未知错误")); } catch (e) { /* 忽略 */ }
+  });
+
+  refreshInputMeta();
+  refreshOutputMeta();
+})();
+</script>
+</body>
+</html>

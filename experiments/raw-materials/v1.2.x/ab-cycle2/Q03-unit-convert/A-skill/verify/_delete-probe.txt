@@ -1,0 +1,2 @@
+﻿unlink _probe.txt -> name=Error code=undefined errno=undefined syscall=undefined msg=[safe-delete][SAFE_DELETE_BULK_CONFIRM_REQUIRED] {"count":50,"threshold":50,"scope":"turn","targets":["<实验根目录>\\ab-cycle2\\Q03-unit-convert\\A-skill\\_probe.txt"],"targetCount":1}
+unlink verify/_probe3.mjs -> name=Error code=undefined errno=undefined syscall=undefined msg=[safe-delete][SAFE_DELETE_BULK_CONFIRM_REQUIRED] {"count":50,"threshold":50,"scope":"turn","targets":["<实验根目录>\\ab-cycle2\\Q03-unit-convert\\A-skill\\verify\\_probe3.mjs"],"targetCount":1}

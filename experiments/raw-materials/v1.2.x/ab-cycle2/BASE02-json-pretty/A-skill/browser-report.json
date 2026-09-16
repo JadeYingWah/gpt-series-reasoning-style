@@ -1,0 +1,15 @@
+﻿{
+  "pass": 0,
+  "fail": 1,
+  "port": 23624,
+  "netRequests": [],
+  "exceptions": [],
+  "consoleErrors": [],
+  "records": [
+    {
+      "name": "脚本执行",
+      "status": "FAIL",
+      "detail": "Error: EBUSY: resource busy or locked, unlink 'C:\\Users\\<用户名>\\AppData\\Local\\Temp\\cdp-base02-profile\\Default\\Cache\\No_Vary_Search\\journal.baj'"
+    }
+  ]
+}

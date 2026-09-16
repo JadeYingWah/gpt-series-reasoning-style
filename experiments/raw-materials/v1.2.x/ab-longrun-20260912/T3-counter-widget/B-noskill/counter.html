@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>计数器</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --panel: #1a2332;
+      --border: #2d3a4d;
+      --text: #e7ecf3;
+      --muted: #8b9bb4;
+      --accent: #3d8bfd;
+      --accent-hover: #5c9fff;
+      --danger: #f07178;
+      --danger-bg: rgba(240, 113, 120, 0.12);
+      --ok: #7fd99a;
+      --ok-bg: rgba(127, 217, 154, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: radial-gradient(ellipse at top, #1a2740 0%, var(--bg) 60%);
+      color: var(--text);
+    }
+
+    .widget {
+      width: min(360px, 92vw);
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 24px 24px;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .value {
+      font-size: 64px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      text-align: center;
+      line-height: 1.1;
+      margin: 12px 0 6px;
+      transition: color 0.15s ease;
+    }
+
+    .value.at-max {
+      color: var(--danger);
+    }
+
+    .value.at-min {
+      color: var(--danger);
+    }
+
+    .status {
+      text-align: center;
+      font-size: 12px;
+      min-height: 18px;
+      margin-bottom: 18px;
+      color: var(--muted);
+    }
+
+    .status.limit {
+      color: var(--danger);
+    }
+
+    .status.ok {
+      color: var(--ok);
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    button {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: #243044;
+      color: var(--text);
+      font-size: 18px;
+      font-weight: 600;
+      padding: 12px 8px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.12s ease, border-color 0.12s ease, transform 0.08s ease;
+    }
+
+    button:hover:not(:disabled) {
+      background: #2d3d56;
+      border-color: #3d5270;
+    }
+
+    button:active:not(:disabled) {
+      transform: scale(0.97);
+    }
+
+    button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    button.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    button.primary:hover:not(:disabled) {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+    }
+
+    button.shake {
+      animation: shake 0.35s ease;
+      border-color: var(--danger) !important;
+      background: var(--danger-bg) !important;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-4px); }
+      40% { transform: translateX(4px); }
+      60% { transform: translateX(-3px); }
+      80% { transform: translateX(3px); }
+    }
+
+    .step-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .step-row label {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .step-row input {
+      width: 88px;
+      padding: 8px 10px;
+      font-size: 15px;
+      text-align: center;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #121a26;
+      color: var(--text);
+      outline: none;
+    }
+
+    .step-row input:focus {
+      border-color: var(--accent);
+    }
+
+    .step-row input.invalid {
+      border-color: var(--danger);
+      background: var(--danger-bg);
+    }
+
+    .step-hint {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+      text-align: right;
+      flex: 1;
+    }
+
+    .step-hint.error {
+      color: var(--danger);
+    }
+  </style>
+</head>
+<body>
+  <div class="widget" role="application" aria-label="计数器">
+    <h1>Counter</h1>
+    <div class="value" id="value" aria-live="polite">0</div>
+    <div class="status" id="status">范围 −99 ~ 99</div>
+
+    <div class="controls">
+      <button type="button" id="btnMinus" aria-label="减少">−1</button>
+      <button type="button" id="btnReset" aria-label="重置">重置</button>
+      <button type="button" id="btnPlus" class="primary" aria-label="增加">+1</button>
+    </div>
+
+    <div class="step-row">
+      <div style="flex:1">
+        <label for="step">步长</label>
+        <input
+          id="step"
+          type="number"
+          min="1"
+          step="1"
+          value="1"
+          inputmode="numeric"
+          aria-describedby="stepHint"
+        />
+      </div>
+      <div class="step-hint" id="stepHint">仅正整数，默认 1</div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var MIN = -99;
+      var MAX = 99;
+      var STORAGE_KEY = "counter-widget-v1";
+
+      var valueEl = document.getElementById("value");
+      var statusEl = document.getElementById("status");
+      var stepInput = document.getElementById("step");
+      var stepHint = document.getElementById("stepHint");
+      var btnPlus = document.getElementById("btnPlus");
+      var btnMinus = document.getElementById("btnMinus");
+      var btnReset = document.getElementById("btnReset");
+
+      var state = {
+        count: 0,
+        step: 1
+      };
+
+      function clamp(n) {
+        if (n > MAX) return MAX;
+        if (n < MIN) return MIN;
+        return n;
+      }
+
+      function parseStep(raw) {
+        var n = parseInt(raw, 10);
+        if (!isFinite(n) || n < 1 || String(n) !== String(raw).trim()) {
+          return null;
+        }
+        return n;
+      }
+
+      function save() {
+        try {
+          localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify({ count: state.count, step: state.step })
+          );
+        } catch (e) {
+          /* ignore quota / private mode */
+        }
+      }
+
+      function load() {
+        try {
+          var raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return;
+          var data = JSON.parse(raw);
+          if (typeof data.count === "number" && isFinite(data.count)) {
+            state.count = clamp(Math.trunc(data.count));
+          }
+          if (typeof data.step === "number" && isFinite(data.step) && data.step >= 1) {
+            state.step = Math.trunc(data.step);
+            stepInput.value = String(state.step);
+          }
+        } catch (e) {
+          /* corrupted storage — keep defaults */
+        }
+      }
+
+      function setStatus(text, kind) {
+        statusEl.textContent = text;
+        statusEl.className = "status" + (kind ? " " + kind : "");
+      }
+
+      function shake(btn) {
+        btn.classList.remove("shake");
+        void btn.offsetWidth;
+        btn.classList.add("shake");
+      }
+
+      function render() {
+        valueEl.textContent = String(state.count);
+        valueEl.classList.toggle("at-max", state.count >= MAX);
+        valueEl.classList.toggle("at-min", state.count <= MIN);
+
+        btnPlus.disabled = state.count >= MAX;
+        btnMinus.disabled = state.count <= MIN;
+
+        if (state.count >= MAX) {
+          setStatus("已达上限 99", "limit");
+        } else if (state.count <= MIN) {
+          setStatus("已达下限 −99", "limit");
+        } else {
+          setStatus("范围 −99 ~ 99", "");
+        }
+      }
+
+      function applyDelta(delta) {
+        var next = clamp(state.count + delta);
+        if (next === state.count) {
+          // already at boundary — visual feedback on the blocked button
+          if (delta > 0) shake(btnPlus);
+          if (delta < 0) shake(btnMinus);
+          return;
+        }
+        state.count = next;
+        save();
+        render();
+      }
+
+      btnPlus.addEventListener("click", function () {
+        applyDelta(state.step);
+      });
+
+      btnMinus.addEventListener("click", function () {
+        applyDelta(-state.step);
+      });
+
+      btnReset.addEventListener("click", function () {
+        if (state.count === 0) {
+          setStatus("已是 0", "ok");
+          return;
+        }
+        state.count = 0;
+        save();
+        render();
+        setStatus("已重置", "ok");
+      });
+
+      stepInput.addEventListener("input", function () {
+        var parsed = parseStep(stepInput.value);
+        if (parsed === null) {
+          stepInput.classList.add("invalid");
+          stepHint.classList.add("error");
+          stepHint.textContent = "请输入 ≥1 的正整数";
+          return;
+        }
+        stepInput.classList.remove("invalid");
+        stepHint.classList.remove("error");
+        stepHint.textContent = "仅正整数，默认 1";
+        state.step = parsed;
+        save();
+      });
+
+      // keyboard: ArrowUp / ArrowDown
+      document.addEventListener("keydown", function (e) {
+        if (e.target === stepInput) return;
+        if (e.key === "ArrowUp" || e.key === "+") {
+          e.preventDefault();
+          applyDelta(state.step);
+        } else if (e.key === "ArrowDown" || e.key === "-") {
+          e.preventDefault();
+          applyDelta(-state.step);
+        } else if (e.key === "r" || e.key === "R") {
+          state.count = 0;
+          save();
+          render();
+          setStatus("已重置", "ok");
+        }
+      });
+
+      load();
+      render();
+    })();
+  </script>
+</body>
+</html>

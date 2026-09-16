@@ -1,0 +1,65 @@
+======================================================================
+CROSS-VALIDATION REPORT — 3 independent runs
+======================================================================
+
+[1] Data shape
+  run1: rows=1599, cols=12
+  run2: rows=1599, cols=12
+  run3: rows=1599, cols=12
+  CONSISTENT: True
+
+[2] Pearson correlations — 3-way comparison
+  Feature                           Run1         Run2         Run3  Match
+  alcohol                   +0.476166 +0.476166 +0.476166    YES
+  volatile acidity          -0.390558 -0.390558 -0.390558    YES
+  sulphates                 +0.251397 +0.251397 +0.251397    YES
+  citric acid               +0.226373 +0.226373 +0.226373    YES
+  total sulfur dioxide      -0.185100 -0.185100 -0.185100    YES
+  density                   -0.174919 -0.174919 -0.174919    YES
+  chlorides                 -0.128907 -0.128907 -0.128907    YES
+  fixed acidity             +0.124052 +0.124052 +0.124052    YES
+  pH                        -0.057731 -0.057731 -0.057731    YES
+  free sulfur dioxide       -0.050656 -0.050656 -0.050656    YES
+  residual sugar            +0.013732 +0.013732 +0.013732    YES
+  ALL MATCH: True
+
+[3] Quality counts — 3-way comparison
+   Quality   Run1   Run2   Run3  Match
+         3     10     10     10    YES
+         4     53     53     53    YES
+         5    681    681    681    YES
+         6    638    638    638    YES
+         7    199    199    199    YES
+         8     18     18     18    YES
+  ALL MATCH: True
+  Total: 1599 (expected 1599: True)
+
+[4] Alcohol means — 3-way comparison
+  Metric                            Run1         Run2         Run3  Match
+  alcohol_high_quality            11.518       11.518       11.518    YES
+  alcohol_low_quality            10.2159      10.2159      10.2159    YES
+  alcohol_diff                    1.3022       1.3022       1.3022    YES
+  n_high_quality                     217          217          217    YES
+  n_low_quality                       63           63           63    YES
+  ALL MATCH: True
+
+[5] Mutation test summary (from Run3)
+  All true |r| values exceed max permutation |r| → correlations are non-spurious
+  alcohol                  : true|r|=0.476166 > max_perm|r|=0.079157 → True
+  volatile acidity         : true|r|=0.390558 > max_perm|r|=0.103306 → True
+  sulphates                : true|r|=0.251397 > max_perm|r|=0.088034 → True
+  citric acid              : true|r|=0.226373 > max_perm|r|=0.088499 → True
+  total sulfur dioxide     : true|r|=0.185100 > max_perm|r|=0.101475 → True
+  density                  : true|r|=0.174919 > max_perm|r|=0.083303 → True
+  chlorides                : true|r|=0.128907 > max_perm|r|=0.079827 → True
+  fixed acidity            : true|r|=0.124052 > max_perm|r|=0.084015 → True
+  pH                       : true|r|=0.057731 > max_perm|r|=0.078611 → False
+  free sulfur dioxide      : true|r|=0.050656 > max_perm|r|=0.083659 → False
+  residual sugar           : true|r|=0.013732 > max_perm|r|=0.077914 → False
+
+[6] Bootstrap 95% CI for alcohol diff: [1.0378, 1.5619]
+  Point estimate 1.3022 within CI: True
+
+======================================================================
+OVERALL 3-WAY CONSISTENCY: PASS
+======================================================================

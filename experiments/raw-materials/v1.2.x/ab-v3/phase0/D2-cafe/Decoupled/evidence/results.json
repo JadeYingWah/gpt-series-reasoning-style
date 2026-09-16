@@ -1,0 +1,76 @@
+{
+  "method1": {
+    "repaired": 462,
+    "valid_rows": 9960,
+    "total_revenue": 88952.0,
+    "missing_ts": 502,
+    "missing_qty": 479,
+    "missing_item": 969,
+    "inconsistent": 0,
+    "item_revenue": {
+      "Coffee": 7062.0,
+      "Cake": 10395.0,
+      "Cookie": 3223.0,
+      "Salad": 17320.0,
+      "Smoothie": 13320.0,
+      "Sandwich": 13664.0,
+      "Juice": 10509.0,
+      "Tea": 4951.5
+    },
+    "item_count": {
+      "Coffee": 1159,
+      "Cake": 1137,
+      "Cookie": 1087,
+      "Salad": 1145,
+      "Smoothie": 1091,
+      "Sandwich": 1123,
+      "Juice": 1167,
+      "Tea": 1085
+    },
+    "valid_ts_missing_item_rev": 8507.5,
+    "valid_ts_missing_item_cnt": 966
+  },
+  "method2": {
+    "repaired": 462,
+    "valid_rows": 9960,
+    "total_revenue": 88952.0,
+    "missing_ts": 502,
+    "missing_qty": 479,
+    "missing_item": 969,
+    "inconsistent": 0,
+    "item_revenue": {
+      "Coffee": 7062.0,
+      "Cake": 10395.0,
+      "Cookie": 3223.0,
+      "Salad": 17320.0,
+      "Smoothie": 13320.0,
+      "Sandwich": 13664.0,
+      "Juice": 10509.0,
+      "Tea": 4951.5
+    },
+    "item_count": {
+      "Coffee": 1159,
+      "Cake": 1137,
+      "Cookie": 1087,
+      "Salad": 1145,
+      "Smoothie": 1091,
+      "Sandwich": 1123,
+      "Juice": 1167,
+      "Tea": 1085
+    },
+    "valid_ts_missing_item_rev": 8507.5,
+    "valid_ts_missing_item_cnt": 966
+  },
+  "method3": {
+    "raw_valid_revenue": 84763.5,
+    "repaired_revenue": 4188.5,
+    "total_revenue": 88952.0,
+    "repaired": 462
+  },
+  "mutation_test": {
+    "mutation_injected": true,
+    "inconsistent_detected": 1,
+    "test_passed": true
+  },
+  "cross_validation_agree": true
+}

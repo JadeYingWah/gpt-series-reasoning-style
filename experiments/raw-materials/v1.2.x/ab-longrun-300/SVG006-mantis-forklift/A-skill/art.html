@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mantis Forklift · Night Shift</title>
+<style>
+  :root {
+    --lift-yellow: #f0b429;
+    --lift-orange: #e07a2f;
+    --mantis-green: #6fbf4a;
+    --mantis-lime: #b8ef6a;
+    --mantis-deep: #2f6b2a;
+    --eye-red: #ff4d6d;
+    --neon-cyan: #3de0ff;
+    --neon-amber: #ffb347;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: #05070f;
+    color: #e8eefc;
+    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    overflow: hidden;
+  }
+
+  .stage {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    min-height: 480px;
+    overflow: hidden;
+    background:
+      radial-gradient(120% 80% at 70% 20%, #1a2a55 0%, transparent 55%),
+      radial-gradient(80% 60% at 20% 80%, #3a1a28 0%, transparent 50%),
+      linear-gradient(180deg, #0a1230 0%, #121a3a 40%, #1a1530 70%, #0a0814 100%);
+  }
+
+  .hud {
+    position: absolute;
+    top: 14px;
+    left: 18px;
+    z-index: 20;
+    pointer-events: none;
+  }
+  .hud h1 {
+    margin: 0;
+    font-size: clamp(16px, 2.2vw, 26px);
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: linear-gradient(90deg, #fff6d8, #ffb347, #3de0ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .hud p {
+    margin: 4px 0 0;
+    font-size: 12px;
+    opacity: 0.7;
+    letter-spacing: 0.12em;
+  }
+  .badge {
+    position: absolute;
+    right: 16px;
+    top: 14px;
+    z-index: 20;
+    padding: 6px 12px;
+    border: 1px solid rgba(61, 224, 255, 0.35);
+    border-radius: 999px;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--neon-cyan);
+    background: rgba(10, 18, 40, 0.45);
+    pointer-events: none;
+  }
+
+  .scene {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* Parallax: background slides LEFT while vehicle faces RIGHT */
+  .layer-far  { animation: slideFar  42s linear infinite; }
+  .layer-mid  { animation: slideMid  20s linear infinite; }
+  .layer-near { animation: slideNear  8s linear infinite; }
+  @keyframes slideFar  { from { transform: translateX(0);} to { transform: translateX(-420px);} }
+  @keyframes slideMid  { from { transform: translateX(0);} to { transform: translateX(-560px);} }
+  @keyframes slideNear { from { transform: translateX(0);} to { transform: translateX(-480px);} }
+
+  /* Whole rig: gentle chassis bounce (not full lock to limbs) */
+  .rig {
+    animation: rigBob 1.25s ease-in-out infinite;
+    transform-origin: 420px 360px;
+  }
+  @keyframes rigBob {
+    0%,100% { transform: translate(0,0) rotate(0deg); }
+    45%     { transform: translate(1px,-2px) rotate(-0.2deg); }
+    75%     { transform: translate(-0.4px,0.8px) rotate(0.12deg); }
+  }
+
+  /* Clockwise = forward-right */
+  .wheel-spin {
+    animation: spin 0.5s linear infinite;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  .wheel-spin-rear { animation-duration: 0.62s; }
+  @keyframes spin { from { transform: rotate(0deg);} to { transform: rotate(360deg);} }
+
+  .mast-group {
+    animation: mastSway 2.2s ease-in-out infinite;
+    transform-origin: 500px 310px;
+  }
+  @keyframes mastSway {
+    0%,100% { transform: rotate(0deg) translateY(0); }
+    50%     { transform: rotate(0.55deg) translateY(-1.2px); }
+  }
+
+  .crate {
+    animation: crateJiggle 1.05s ease-in-out infinite;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  @keyframes crateJiggle {
+    0%,100% { transform: translate(0,0) rotate(0deg); }
+    35%     { transform: translate(0.4px,-1.1px) rotate(-0.35deg); }
+    70%     { transform: translate(-0.3px,0.5px) rotate(0.25deg); }
+  }
+
+  .beacon-core { animation: beaconPulse 0.65s ease-in-out infinite; }
+  .beacon-glow { animation: beaconGlow 0.65s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+  @keyframes beaconPulse { 0%,100% { opacity: 1;} 50% { opacity: 0.2;} }
+  @keyframes beaconGlow {
+    0%,100% { opacity: 0.9; transform: scale(1);}
+    50%     { opacity: 0.15; transform: scale(0.8);}
+  }
+
+  .puff {
+    animation: puff 1.5s ease-out infinite;
+    opacity: 0;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  .puff-2 { animation-delay: 0.45s; }
+  .puff-3 { animation-delay: 0.95s; }
+  @keyframes puff {
+    0%   { opacity: 0; transform: translate(0,0) scale(0.35);}
+    18%  { opacity: 0.55;}
+    100% { opacity: 0; transform: translate(-75px,-16px) scale(1.9);}
+  }
+
+  /* ===== Mantis limbs: relative motion, NOT wheel-locked ===== */
+  .antennae .a1 { animation: ant1 1.7s ease-in-out infinite; transform-origin: 500px 198px; transform-box: view-box; }
+  .antennae .a2 { animation: ant2 2.05s ease-in-out infinite; transform-origin: 505px 196px; transform-box: view-box; }
+  @keyframes ant1 { 0%,100% { transform: rotate(0deg);} 50% { transform: rotate(-8deg);} }
+  @keyframes ant2 { 0%,100% { transform: rotate(1.5deg);} 50% { transform: rotate(-4.5deg);} }
+
+  .forearm-r {
+    animation: forearmR 0.85s ease-in-out infinite;
+    transform-origin: 468px 268px;
+    transform-box: view-box;
+  }
+  .forearm-l {
+    animation: forearmL 1.1s ease-in-out infinite;
+    transform-origin: 455px 278px;
+    transform-box: view-box;
+  }
+  @keyframes forearmR {
+    0%,100% { transform: rotate(0deg) translateY(0);}
+    40%     { transform: rotate(-4deg) translateY(1px);}
+    70%     { transform: rotate(2.2deg) translateY(-0.4px);}
+  }
+  @keyframes forearmL {
+    0%,100% { transform: rotate(0deg);}
+    50%     { transform: rotate(5deg);}
+  }
+
+  .mantis-head {
+    animation: headLook 3s ease-in-out infinite;
+    transform-origin: 495px 215px;
+    transform-box: view-box;
+  }
+  @keyframes headLook {
+    0%,100% { transform: rotate(0deg);}
+    32%     { transform: rotate(-5deg) translate(0.4px,-0.4px);}
+    68%     { transform: rotate(3.5deg) translate(-0.3px,0.3px);}
+  }
+
+  .eye-glint { animation: glint 2.3s ease-in-out infinite; }
+  @keyframes glint {
+    0%,82%,100% { opacity: 0.95;}
+    88%         { opacity: 0.15;}
+    94%         { opacity: 1;}
+  }
+
+  .mantis-abdomen {
+    animation: abdBounce 1s ease-in-out infinite;
+    transform-origin: 430px 275px;
+    transform-box: view-box;
+  }
+  @keyframes abdBounce {
+    0%,100% { transform: translate(0,0) rotate(0deg);}
+    50%     { transform: translate(-1.8px,2.2px) rotate(-2.5deg);}
+  }
+
+  .midleg-r {
+    animation: legR 0.9s ease-in-out infinite;
+    transform-origin: 455px 295px;
+    transform-box: view-box;
+  }
+  .midleg-l {
+    animation: legL 1.2s ease-in-out infinite;
+    transform-origin: 448px 298px;
+    transform-box: view-box;
+  }
+  @keyframes legR { 0%,100% { transform: rotate(0deg);} 50% { transform: rotate(-6deg);} }
+  @keyframes legL { 0%,100% { transform: rotate(0deg);} 50% { transform: rotate(7deg);} }
+
+  .mantis-thorax {
+    animation: breathe 1.55s ease-in-out infinite;
+    transform-origin: 470px 255px;
+    transform-box: view-box;
+  }
+  @keyframes breathe {
+    0%,100% { transform: scale(1);}
+    50%     { transform: scale(1.025, 0.975);}
+  }
+
+  .streak {
+    animation: streakMove 0.85s linear infinite;
+    opacity: 0;
+  }
+  .streak:nth-child(2) { animation-delay: 0.28s; }
+  .streak:nth-child(3) { animation-delay: 0.55s; }
+  @keyframes streakMove {
+    0%   { opacity: 0; transform: translateX(30px);}
+    20%  { opacity: 0.75;}
+    100% { opacity: 0; transform: translateX(-130px);}
+  }
+
+  .lamp-glow { animation: flicker 3.8s ease-in-out infinite; }
+  @keyframes flicker {
+    0%,100% { opacity: 0.75;}
+    42%     { opacity: 0.92;}
+    46%     { opacity: 0.35;}
+    50%     { opacity: 0.88;}
+  }
+
+  .footer-note {
+    position: absolute;
+    bottom: 10px;
+    left: 18px;
+    z-index: 20;
+    font-size: 11px;
+    opacity: 0.45;
+    letter-spacing: 0.06em;
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .layer-far, .layer-mid, .layer-near,
+    .rig, .wheel-spin, .wheel-spin-rear,
+    .mast-group, .crate, .beacon-core, .beacon-glow,
+    .puff, .antennae .a1, .antennae .a2,
+    .forearm-r, .forearm-l, .mantis-head, .eye-glint,
+    .mantis-abdomen, .midleg-r, .midleg-l, .mantis-thorax,
+    .streak, .lamp-glow {
+      animation: none !important;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="hud">
+    <h1>Mantis Forklift</h1>
+    <p>NIGHT SHIFT · AISLE 7 · RIGHTBOUND</p>
+  </div>
+  <div class="badge">SVG · CSS ANIM · NO CDN</div>
+  <div class="footer-note">wheel CW · antenna lag · forearm grasp · 3-layer parallax</div>
+
+  <!--
+    Motion self-consistency:
+    - Forward = +X (right). Wheel @keyframes spin rotates 0→360deg (clockwise) → matches rightward travel.
+    - Relative limb motion (≥2, not body-locked):
+      * antennae a1/a2 independent periods 1.7s / 2.05s
+      * forearm-r 0.85s / forearm-l 1.1s (vs wheel 0.5s)
+      * abdomen bounce, head look, mid-legs, thorax breathe
+    - Parallax speeds ordered far < mid < near (42s / 20s / 8s over different tile widths).
+  -->
+  <svg class="scene" viewBox="0 0 960 540" preserveAspectRatio="xMidYMid slice" aria-label="A praying mantis driving a yellow forklift to the right through a neon warehouse aisle">
+    <defs>
+      <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#0b1638"/>
+        <stop offset="45%" stop-color="#1b2a5a"/>
+        <stop offset="100%" stop-color="#2a1840"/>
+      </linearGradient>
+      <linearGradient id="floorGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#2a3348"/>
+        <stop offset="100%" stop-color="#0d1018"/>
+      </linearGradient>
+      <linearGradient id="liftBody" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#ffd56a"/>
+        <stop offset="45%" stop-color="#f0b429"/>
+        <stop offset="100%" stop-color="#e07a2f"/>
+      </linearGradient>
+      <linearGradient id="mantisBody" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#b8ef6a"/>
+        <stop offset="50%" stop-color="#6fbf4a"/>
+        <stop offset="100%" stop-color="#2f6b2a"/>
+      </linearGradient>
+      <radialGradient id="beaconG" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#ff6b6b" stop-opacity="0.9"/>
+        <stop offset="100%" stop-color="#ff6b6b" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="lampG" cx="50%" cy="0%" r="80%">
+        <stop offset="0%" stop-color="#ffe6a0" stop-opacity="0.5"/>
+        <stop offset="100%" stop-color="#ffe6a0" stop-opacity="0"/>
+      </radialGradient>
+      <linearGradient id="headlight" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#fff6c8" stop-opacity="0.5"/>
+        <stop offset="100%" stop-color="#fff6c8" stop-opacity="0"/>
+      </linearGradient>
+      <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="2.5" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="blurSm" x="-40%" y="-40%" width="180%" height="180%">
+        <feGaussianBlur stdDeviation="2"/>
+      </filter>
+      <radialGradient id="vig" cx="50%" cy="50%" r="70%">
+        <stop offset="58%" stop-color="#000" stop-opacity="0"/>
+        <stop offset="100%" stop-color="#000" stop-opacity="0.55"/>
+      </radialGradient>
+    </defs>
+
+    <!-- ========== FAR PARALLAX ========== -->
+    <g class="layer-far">
+      <rect x="-420" y="0" width="1800" height="540" fill="url(#skyGrad)"/>
+      <g fill="#121a32">
+        <rect x="-220" y="190" width="90" height="200"/>
+        <rect x="-120" y="160" width="70" height="230"/>
+        <rect x="-40" y="205" width="110" height="180"/>
+        <rect x="80" y="150" width="60" height="240"/>
+        <rect x="150" y="180" width="100" height="205"/>
+        <rect x="260" y="160" width="80" height="225"/>
+        <rect x="350" y="195" width="120" height="190"/>
+        <rect x="480" y="155" width="65" height="235"/>
+        <rect x="555" y="175" width="95" height="210"/>
+        <rect x="660" y="160" width="70" height="225"/>
+        <rect x="740" y="190" width="110" height="195"/>
+        <rect x="860" y="155" width="75" height="230"/>
+        <rect x="940" y="190" width="90" height="200"/>
+        <rect x="1040" y="160" width="70" height="230"/>
+        <rect x="1120" y="205" width="110" height="180"/>
+        <rect x="1240" y="150" width="60" height="240"/>
+        <rect x="1310" y="180" width="100" height="205"/>
+        <rect x="1420" y="160" width="80" height="225"/>
+        <rect x="1510" y="195" width="120" height="190"/>
+        <rect x="1640" y="155" width="65" height="235"/>
+      </g>
+      <g fill="#ffb347" opacity="0.5">
+        <rect x="0" y="180" width="7" height="5"/>
+        <rect x="20" y="198" width="7" height="5"/>
+        <rect x="100" y="175" width="7" height="5"/>
+        <rect x="175" y="210" width="7" height="5"/>
+        <rect x="280" y="190" width="7" height="5"/>
+        <rect x="380" y="220" width="7" height="5"/>
+        <rect x="500" y="185" width="7" height="5"/>
+        <rect x="580" y="205" width="7" height="5"/>
+        <rect x="680" y="195" width="7" height="5"/>
+        <rect x="770" y="220" width="7" height="5"/>
+        <rect x="880" y="185" width="7" height="5"/>
+        <rect x="1060" y="180" width="7" height="5"/>
+        <rect x="1260" y="175" width="7" height="5"/>
+        <rect x="1530" y="220" width="7" height="5"/>
+      </g>
+      <g fill="#243058" opacity="0.4">
+        <ellipse cx="100" cy="88" rx="78" ry="20"/>
+        <ellipse cx="340" cy="68" rx="96" ry="16"/>
+        <ellipse cx="600" cy="98" rx="68" ry="15"/>
+        <ellipse cx="840" cy="72" rx="88" ry="18"/>
+        <ellipse cx="1080" cy="88" rx="78" ry="20"/>
+        <ellipse cx="1380" cy="68" rx="96" ry="16"/>
+      </g>
+      <g fill="#cfe4ff" opacity="0.65">
+        <circle cx="70" cy="38" r="1.2"/>
+        <circle cx="190" cy="52" r="1"/>
+        <circle cx="330" cy="28" r="1.3"/>
+        <circle cx="470" cy="46" r="1"/>
+        <circle cx="690" cy="34" r="1.2"/>
+        <circle cx="810" cy="58" r="1"/>
+        <circle cx="990" cy="40" r="1.2"/>
+        <circle cx="1180" cy="26" r="1"/>
+        <circle cx="1440" cy="48" r="1.2"/>
+      </g>
+    </g>
+
+    <!-- ========== MID PARALLAX ========== -->
+    <g class="layer-mid">
+      <g>
+        <rect x="20" y="200" width="30" height="220" fill="#2c3550"/>
+        <rect x="20" y="200" width="11" height="220" fill="#3d4a6e"/>
+        <rect x="10" y="194" width="50" height="12" fill="#1a2238"/>
+        <rect x="260" y="210" width="34" height="210" fill="#2c3550"/>
+        <rect x="260" y="210" width="13" height="210" fill="#3d4a6e"/>
+        <rect x="248" y="204" width="58" height="12" fill="#1a2238"/>
+        <rect x="540" y="200" width="30" height="220" fill="#2c3550"/>
+        <rect x="540" y="200" width="11" height="220" fill="#3d4a6e"/>
+        <rect x="800" y="210" width="34" height="210" fill="#2c3550"/>
+        <rect x="800" y="210" width="13" height="210" fill="#3d4a6e"/>
+        <rect x="1060" y="200" width="30" height="220" fill="#2c3550"/>
+        <rect x="1300" y="210" width="34" height="210" fill="#2c3550"/>
+        <rect x="1580" y="200" width="30" height="220" fill="#2c3550"/>
+      </g>
+
+      <g>
+        <line x1="130" y1="78" x2="130" y2="148" stroke="#4a5578" stroke-width="2"/>
+        <path d="M110 148 h40 l-8 14 h-24 z" fill="#3a4568"/>
+        <ellipse class="lamp-glow" cx="130" cy="172" rx="38" ry="34" fill="url(#lampG)"/>
+        <circle cx="130" cy="156" r="4" fill="#ffe6a0" filter="url(#softGlow)"/>
+
+        <line x1="430" y1="68" x2="430" y2="138" stroke="#4a5578" stroke-width="2"/>
+        <path d="M410 138 h40 l-8 14 h-24 z" fill="#3a4568"/>
+        <ellipse class="lamp-glow" cx="430" cy="162" rx="38" ry="34" fill="url(#lampG)" style="animation-delay:1.1s"/>
+        <circle cx="430" cy="146" r="4" fill="#ffe6a0" filter="url(#softGlow)"/>
+
+        <line x1="730" y1="82" x2="730" y2="152" stroke="#4a5578" stroke-width="2"/>
+        <path d="M710 152 h40 l-8 14 h-24 z" fill="#3a4568"/>
+        <ellipse class="lamp-glow" cx="730" cy="176" rx="38" ry="34" fill="url(#lampG)" style="animation-delay:2s"/>
+        <circle cx="730" cy="160" r="4" fill="#ffe6a0" filter="url(#softGlow)"/>
+
+        <line x1="1030" y1="78" x2="1030" y2="148" stroke="#4a5578" stroke-width="2"/>
+        <circle cx="1030" cy="156" r="4" fill="#ffe6a0"/>
+        <line x1="1330" y1="68" x2="1330" y2="138" stroke="#4a5578" stroke-width="2"/>
+        <circle cx="1330" cy="146" r="4" fill="#ffe6a0"/>
+      </g>
+
+      <g>
+        <g transform="translate(160, 300)">
+          <rect width="70" height="50" fill="#3a2a18"/>
+          <rect x="4" y="4" width="62" height="18" fill="#5a4030"/>
+          <rect x="4" y="26" width="62" height="18" fill="#4a3424"/>
+          <rect x="0" y="50" width="70" height="8" fill="#2a2030"/>
+        </g>
+        <g transform="translate(340, 290)">
+          <rect width="55" height="60" fill="#3a2a18"/>
+          <rect x="3" y="4" width="49" height="24" fill="#5a4030"/>
+          <rect x="3" y="32" width="49" height="24" fill="#4a3424"/>
+        </g>
+        <g transform="translate(620, 305)">
+          <rect width="80" height="45" fill="#3a2a18"/>
+          <rect x="4" y="4" width="72" height="16" fill="#5a4030"/>
+          <rect x="4" y="24" width="72" height="16" fill="#4a3424"/>
+        </g>
+        <g transform="translate(880, 295)">
+          <rect width="60" height="55" fill="#3a2a18"/>
+          <rect x="3" y="4" width="54" height="20" fill="#5a4030"/>
+          <rect x="3" y="28" width="54" height="20" fill="#4a3424"/>
+        </g>
+        <g transform="translate(1160, 300)">
+          <rect width="70" height="50" fill="#3a2a18"/>
+          <rect x="4" y="4" width="62" height="18" fill="#5a4030"/>
+        </g>
+        <g transform="translate(1460, 290)">
+          <rect width="55" height="60" fill="#3a2a18"/>
+        </g>
+      </g>
+
+      <g font-family="Segoe UI, sans-serif" font-size="13" font-weight="700">
+        <rect x="80" y="230" width="42" height="26" fill="#1a2838" stroke="#3de0ff" stroke-width="1"/>
+        <text x="101" y="248" text-anchor="middle" fill="#3de0ff">A7</text>
+        <rect x="480" y="235" width="42" height="26" fill="#1a2838" stroke="#ffb347" stroke-width="1"/>
+        <text x="501" y="253" text-anchor="middle" fill="#ffb347">A8</text>
+        <rect x="880" y="230" width="42" height="26" fill="#1a2838" stroke="#3de0ff" stroke-width="1"/>
+        <text x="901" y="248" text-anchor="middle" fill="#3de0ff">A7</text>
+        <rect x="1280" y="235" width="42" height="26" fill="#1a2838" stroke="#ffb347" stroke-width="1"/>
+        <text x="1301" y="253" text-anchor="middle" fill="#ffb347">A8</text>
+      </g>
+    </g>
+
+    <rect x="0" y="400" width="960" height="140" fill="url(#floorGrad)"/>
+    <line x1="0" y1="400" x2="960" y2="400" stroke="#3de0ff" stroke-opacity="0.28" stroke-width="2"/>
+
+    <!-- ========== NEAR PARALLAX ========== -->
+    <g class="layer-near">
+      <g stroke="#3a4a68" stroke-opacity="0.35" stroke-width="1">
+        <line x1="-480" y1="420" x2="960" y2="420"/>
+        <line x1="-480" y1="460" x2="960" y2="460"/>
+        <line x1="-480" y1="500" x2="960" y2="500"/>
+        <line x1="-400" y1="400" x2="-360" y2="540"/>
+        <line x1="-240" y1="400" x2="-200" y2="540"/>
+        <line x1="-80" y1="400" x2="-40" y2="540"/>
+        <line x1="80" y1="400" x2="120" y2="540"/>
+        <line x1="240" y1="400" x2="280" y2="540"/>
+        <line x1="400" y1="400" x2="440" y2="540"/>
+        <line x1="560" y1="400" x2="600" y2="540"/>
+        <line x1="720" y1="400" x2="760" y2="540"/>
+        <line x1="880" y1="400" x2="920" y2="540"/>
+      </g>
+      <g stroke="#f0b429" stroke-opacity="0.22" stroke-width="3">
+        <line x1="-300" y1="432" x2="960" y2="432"/>
+        <line x1="-200" y1="512" x2="960" y2="512"/>
+      </g>
+      <g>
+        <rect x="40" y="472" width="34" height="20" fill="#2a1e12" opacity="0.8"/>
+        <rect x="180" y="492" width="18" height="12" fill="#2a1e12" opacity="0.7"/>
+        <rect x="280" y="478" width="26" height="15" fill="#2a1e12" opacity="0.75"/>
+        <rect x="520" y="496" width="16" height="11" fill="#2a1e12" opacity="0.65"/>
+        <rect x="660" y="480" width="28" height="16" fill="#2a1e12" opacity="0.8"/>
+        <rect x="880" y="490" width="20" height="13" fill="#2a1e12" opacity="0.7"/>
+      </g>
+      <g stroke="#9ecbff" stroke-linecap="round" stroke-width="2">
+        <line class="streak" x1="90" y1="448" x2="150" y2="448"/>
+        <line class="streak" x1="300" y1="472" x2="370" y2="472"/>
+        <line class="streak" x1="580" y1="458" x2="660" y2="458"/>
+      </g>
+      <g fill="#c8d8ff" opacity="0.32">
+        <circle cx="120" cy="382" r="1.4"/>
+        <circle cx="280" cy="362" r="1"/>
+        <circle cx="480" cy="392" r="1.6"/>
+        <circle cx="680" cy="352" r="1.1"/>
+        <circle cx="830" cy="376" r="1.4"/>
+      </g>
+    </g>
+
+    <!-- ========== VEHICLE + MANTIS ========== -->
+    <g class="rig">
+      <ellipse cx="430" cy="412" rx="150" ry="13" fill="#000" opacity="0.42"/>
+
+      <!-- exhaust puffs -->
+      <g class="puff"><circle cx="330" cy="318" r="7" fill="#8899aa" opacity="0.45" filter="url(#blurSm)"/></g>
+      <g class="puff puff-2"><circle cx="330" cy="322" r="5.5" fill="#8899aa" opacity="0.35" filter="url(#blurSm)"/></g>
+      <g class="puff puff-3"><circle cx="330" cy="316" r="6" fill="#8899aa" opacity="0.4" filter="url(#blurSm)"/></g>
+
+      <!-- headlight -->
+      <polygon points="545,310 640,288 640,340" fill="url(#headlight)"/>
+
+      <!-- ===== FORKLIFT BODY ===== -->
+      <g id="forklift">
+        <!-- rear counterweight -->
+        <path d="M300 320
+                 L318 288
+                 L390 282
+                 L410 292
+                 L418 350
+                 L308 356 Z"
+              fill="url(#liftBody)" stroke="#2a1a08" stroke-width="2.5"/>
+
+        <!-- overhead guard posts -->
+        <rect x="332" y="250" width="7" height="50" fill="#f0b429" stroke="#2a1a08" stroke-width="1"/>
+        <rect x="392" y="246" width="7" height="50" fill="#f0b429" stroke="#2a1a08" stroke-width="1"/>
+        <!-- roof -->
+        <path d="M325 250 L330 238 L405 234 L412 248 L400 252 L335 255 Z"
+              fill="#2a3348" stroke="#1a2030" stroke-width="1.5"/>
+        <!-- back glass hint -->
+        <rect x="340" y="255" width="50" height="28" fill="#1a4060" opacity="0.4"/>
+
+        <!-- seat -->
+        <path d="M355 310 L350 278 L372 274 L376 310 Z" fill="#1a1a22" stroke="#0a0a10" stroke-width="1.5"/>
+
+        <!-- side stripe + ID -->
+        <path d="M315 318 L405 312 L408 328 L316 334 Z" fill="#e07a2f" opacity="0.9"/>
+        <text x="340" y="330" font-size="11" font-family="Segoe UI, sans-serif" fill="#2a1a08" font-weight="700">M-07</text>
+
+        <!-- hood / front body -->
+        <path d="M410 292
+                 L500 296
+                 L520 318
+                 L520 352
+                 L410 352 Z"
+              fill="url(#liftBody)" stroke="#2a1a08" stroke-width="2.5"/>
+        <rect x="430" y="304" width="42" height="9" rx="2" fill="#3d2914" opacity="0.45"/>
+
+        <!-- floor plate for feet -->
+        <rect x="360" y="348" width="70" height="9" fill="#1a2030"/>
+
+        <!-- steering column + wheel -->
+        <line x1="490" y1="318" x2="505" y2="278" stroke="#222" stroke-width="5"/>
+        <circle cx="512" cy="270" r="15" fill="none" stroke="#111" stroke-width="5"/>
+        <circle cx="512" cy="270" r="3.5" fill="#333"/>
+        <line x1="512" y1="256" x2="512" y2="284" stroke="#222" stroke-width="2.5"/>
+        <line x1="498" y1="270" x2="526" y2="270" stroke="#222" stroke-width="2.5"/>
+
+        <!-- hydraulic lever -->
+        <line x1="475" y1="322" x2="486" y2="292" stroke="#444" stroke-width="3"/>
+        <circle cx="487" cy="289" r="3.5" fill="#c0392b"/>
+
+        <!-- ===== MAST + FORKS ===== -->
+        <g class="mast-group">
+          <rect x="528" y="220" width="11" height="185" fill="#4a5568" stroke="#1a2030" stroke-width="1.5"/>
+          <rect x="543" y="220" width="9" height="185" fill="#3a4558" stroke="#1a2030" stroke-width="1.5"/>
+          <line x1="528" y1="255" x2="552" y2="255" stroke="#2a3348" stroke-width="4"/>
+          <line x1="528" y1="330" x2="552" y2="330" stroke="#2a3348" stroke-width="4"/>
+          <rect x="524" y="342" width="36" height="16" fill="#5a6a80" stroke="#1a2030" stroke-width="1.5"/>
+          <!-- forks -->
+          <rect x="558" y="352" width="88" height="5.5" fill="#8a9ab0" stroke="#1a2030" stroke-width="1"/>
+          <rect x="558" y="362" width="88" height="5.5" fill="#7a8a9e" stroke="#1a2030" stroke-width="1"/>
+          <rect x="552" y="348" width="10" height="24" fill="#6a7a90" stroke="#1a2030" stroke-width="1"/>
+
+          <!-- crate -->
+          <g class="crate">
+            <rect x="562" y="288" width="76" height="64" fill="#8b5a2b" stroke="#3a2008" stroke-width="2"/>
+            <rect x="562" y="288" width="76" height="11" fill="#c48a4a"/>
+            <line x1="600" y1="288" x2="600" y2="352" stroke="#3a2008" stroke-width="1.5"/>
+            <line x1="562" y1="308" x2="638" y2="308" stroke="#3a2008" stroke-width="1"/>
+            <line x1="562" y1="330" x2="638" y2="330" stroke="#3a2008" stroke-width="1"/>
+            <rect x="572" y="312" width="34" height="14" fill="#f0e6c8" stroke="#333" stroke-width="1"/>
+            <text x="589" y="322" font-size="7.5" text-anchor="middle" fill="#c0392b" font-weight="700">FRAGILE</text>
+          </g>
+        </g>
+
+        <!-- beacon -->
+        <g>
+          <circle class="beacon-glow" cx="365" cy="232" r="13" fill="url(#beaconG)"/>
+          <circle class="beacon-core" cx="365" cy="232" r="5.5" fill="#ff4d6d" filter="url(#softGlow)"/>
+          <rect x="361" y="238" width="8" height="5" fill="#333"/>
+        </g>
+
+        <!-- exhaust stack -->
+        <rect x="318" y="288" width="8" height="36" fill="#2a3348"/>
+        <ellipse cx="322" cy="288" rx="6" ry="3" fill="#3a4558"/>
+
+        <!-- ===== WHEELS (metal rims high-contrast; CW matches rightward travel) ===== -->
+        <!-- front (drive) -->
+        <g class="wheel-spin" transform="translate(500,380)">
+          <circle r="32" fill="#1c1c1c" stroke="#d7e2f2" stroke-width="3.5"/>
+          <circle r="24" fill="none" stroke="#9aabc4" stroke-width="2" stroke-dasharray="4 6"/>
+          <circle r="15" fill="#3a4558" stroke="#f2f6ff" stroke-width="2"/>
+          <circle r="6" fill="#f2f6ff"/>
+          <line x1="0" y1="-21" x2="0" y2="21" stroke="#f2f6ff" stroke-width="3.2"/>
+          <line x1="-21" y1="0" x2="21" y2="0" stroke="#f2f6ff" stroke-width="3.2"/>
+          <line x1="-15" y1="-15" x2="15" y2="15" stroke="#9ecbff" stroke-width="2"/>
+          <line x1="15" y1="-15" x2="-15" y2="15" stroke="#9ecbff" stroke-width="2"/>
+        </g>
+        <!-- rear (steer, smaller) -->
+        <g class="wheel-spin wheel-spin-rear" transform="translate(328,392)">
+          <circle r="24" fill="#1c1c1c" stroke="#d7e2f2" stroke-width="3"/>
+          <circle r="17" fill="none" stroke="#9aabc4" stroke-width="1.8" stroke-dasharray="3 5"/>
+          <circle r="11" fill="#3a4558" stroke="#f2f6ff" stroke-width="1.8"/>
+          <circle r="4.5" fill="#f2f6ff"/>
+          <line x1="0" y1="-16" x2="0" y2="16" stroke="#f2f6ff" stroke-width="2.6"/>
+          <line x1="-16" y1="0" x2="16" y2="0" stroke="#f2f6ff" stroke-width="2.6"/>
+        </g>
+      </g>
+
+      <!-- ===== PRAYING MANTIS DRIVER (sized to sit in cab) ===== -->
+      <g id="mantis">
+        <!-- abdomen: trails behind thorax, bounces relative to chassis -->
+        <g class="mantis-abdomen">
+          <path d="M430 268
+                   C405 266, 378 274, 365 288
+                   C356 298, 360 310, 378 312
+                   C400 316, 425 304, 438 290
+                   C444 282, 440 270, 430 268 Z"
+                fill="url(#mantisBody)" stroke="#1e4018" stroke-width="2"/>
+          <path d="M385 276 Q390 294 398 304" fill="none" stroke="#1e4018" stroke-width="1.1" opacity="0.65"/>
+          <path d="M404 272 Q408 290 418 300" fill="none" stroke="#1e4018" stroke-width="1.1" opacity="0.65"/>
+          <path d="M422 270 Q426 286 432 296" fill="none" stroke="#1e4018" stroke-width="1.1" opacity="0.65"/>
+        </g>
+
+        <!-- mid legs relative step -->
+        <g class="midleg-r" fill="none" stroke="#2f6b2a" stroke-width="3.2" stroke-linecap="round">
+          <path d="M455 295 L468 322 L476 348"/>
+          <circle cx="476" cy="349" r="2.3" fill="#2f6b2a"/>
+        </g>
+        <g class="midleg-l" fill="none" stroke="#2f6b2a" stroke-width="2.8" stroke-linecap="round" opacity="0.85">
+          <path d="M448 298 L438 326 L432 350"/>
+          <circle cx="432" cy="351" r="2" fill="#2f6b2a"/>
+        </g>
+
+        <!-- thorax -->
+        <g class="mantis-thorax">
+          <path d="M448 275
+                   L462 242
+                   L488 236
+                   L502 258
+                   L495 295
+                   L462 300
+                   L445 288 Z"
+                fill="url(#mantisBody)" stroke="#1e4018" stroke-width="2.2"/>
+          <path d="M462 250 L488 245 L492 272 L466 278 Z" fill="#4a9a38" opacity="0.5" stroke="#1e4018" stroke-width="1"/>
+        </g>
+
+        <!-- raptorial forearms -->
+        <g class="forearm-r" fill="none" stroke="#2f6b2a" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M485 258 L508 265 L522 278 L512 292"/>
+          <path d="M506 267 L520 278" stroke="#b8ef6a" stroke-width="2"/>
+          <circle cx="512" cy="293" r="2.8" fill="#2f6b2a" stroke="none"/>
+        </g>
+        <g class="forearm-l" fill="none" stroke="#2f6b2a" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.95">
+          <path d="M468 270 L452 288 L448 308 L458 316"/>
+          <path d="M453 289 L449 307" stroke="#b8ef6a" stroke-width="1.7"/>
+          <circle cx="459" cy="317" r="2.5" fill="#2f6b2a" stroke="none"/>
+        </g>
+
+        <!-- head + antennae -->
+        <g class="mantis-head">
+          <path d="M488 240 L496 222 L512 220 L514 238 L498 245 Z"
+                fill="url(#mantisBody)" stroke="#1e4018" stroke-width="1.6"/>
+          <!-- triangular head facing right -->
+          <path d="M492 218
+                   L528 198
+                   L548 224
+                   L526 242
+                   L496 236 Z"
+                fill="url(#mantisBody)" stroke="#1e4018" stroke-width="2"/>
+          <!-- compound eyes -->
+          <ellipse cx="524" cy="212" rx="12.5" ry="11" fill="#1a3010" stroke="#0a1a08" stroke-width="1.4"/>
+          <ellipse cx="540" cy="222" rx="9" ry="8" fill="#1a3010" stroke="#0a1a08" stroke-width="1.4"/>
+          <ellipse cx="526" cy="212" rx="4.5" ry="4" fill="#ff4d6d" filter="url(#softGlow)"/>
+          <ellipse cx="541" cy="222" rx="3.2" ry="2.8" fill="#ff6b85"/>
+          <circle class="eye-glint" cx="528" cy="209" r="1.4" fill="#fff"/>
+          <!-- mandibles -->
+          <path d="M548 228 L558 233 L548 237" fill="none" stroke="#1e4018" stroke-width="1.8"/>
+          <!-- antennae -->
+          <g class="antennae" fill="none" stroke="#1e4018" stroke-width="2" stroke-linecap="round">
+            <path class="a1" d="M515 202 C510 178, 490 162, 462 154"/>
+            <path class="a2" d="M522 200 C526 174, 548 158, 580 150"/>
+          </g>
+          <circle cx="462" cy="154" r="2" fill="#b8ef6a"/>
+          <circle cx="580" cy="150" r="2" fill="#b8ef6a"/>
+        </g>
+      </g>
+    </g>
+
+    <rect width="960" height="540" fill="url(#vig)" pointer-events="none"/>
+  </svg>
+</div>
+</body>
+</html>

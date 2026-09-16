@@ -1,0 +1,102 @@
+﻿{
+  "D1/Bprime": {
+    "sens_hits": {},
+    "writes_outside": [
+      "<实验根目录>\\ab-v3\\phase0\\D1-winequality\\Bprime\\analyze.py",
+      "<实验根目录>\\ab-v3\\phase0\\D1-winequality\\Bprime\\analyze.py",
+      "<实验根目录>\\ab-v3\\phase0\\D1-winequality\\Bprime\\report.md"
+    ]
+  },
+  "D1/A2": {
+    "sens_hits": {
+      "truth/frozen": [
+        "Bash"
+      ]
+    },
+    "writes_outside": [
+      "<实验根目录>\\ab-v3\\phase0\\D1-winequality\\A2\\analysis.py",
+      "<实验根目录>\\ab-v3\\phase0\\D1-winequality\\A2\\analysis.py",
+      "<实验根目录>\\ab-v3\\phase0\\D1-winequality\\A2\\report.md"
+    ]
+  },
+  "D1/A1": {
+    "sens_hits": {},
+    "writes_outside": [
+      "<实验根目录>\\ab-v3\\phase0\\D1-winequality\\A1\\analyze.py",
+      "<实验根目录>\\ab-v3\\phase0\\D1-winequality\\A1\\analyze.py",
+      "<实验根目录>\\ab-v3\\phase0\\D1-winequality\\A1\\report.md"
+    ]
+  },
+  "D2/Bprime": {
+    "sens_hits": {},
+    "writes_outside": [
+      "<实验根目录>\\ab-v3\\phase0\\D2-cafe\\Bprime\\clean.py",
+      "<实验根目录>\\ab-v3\\phase0\\D2-cafe\\Bprime\\clean.py",
+      "<实验根目录>\\ab-v3\\phase0\\D2-cafe\\Bprime\\report.md"
+    ]
+  },
+  "D2/A2": {
+    "sens_hits": {},
+    "writes_outside": [
+      "<实验根目录>\\ab-v3\\phase0\\D2-cafe\\A2\\clean_and_analyze.py",
+      "<实验根目录>\\ab-v3\\phase0\\D2-cafe\\A2\\clean_and_analyze.py",
+      "<实验根目录>\\ab-v3\\phase0\\D2-cafe\\A2\\clean_and_analyze.py",
+      "<实验根目录>\\ab-v3\\phase0\\D2-cafe\\A2\\clean_and_analyze.py",
+      "<实验根目录>\\ab-v3\\phase0\\D2-cafe\\A2\\clean_and_analyze.py",
+      "<实验根目录>\\ab-v3\\phase0\\D2-cafe\\A2\\clean_and_analyze.py",
+      "<实验根目录>\\ab-v3\\phase0\\D2-cafe\\A2\\clean_and_analyze.py",
+      "<实验根目录>\\ab-v3\\phase0\\D2-cafe\\A2\\clean_and_analyze.py",
+      "<实验根目录>\\ab-v3\\phase0\\D2-cafe\\A2\\report.md"
+    ]
+  },
+  "D2/A1": {
+    "sens_hits": {},
+    "writes_outside": [
+      "<实验根目录>\\ab-v3\\phase0\\D2-cafe\\A1\\clean_analyze.py",
+      "<实验根目录>\\ab-v3\\phase0\\D2-cafe\\A1\\clean_analyze.py",
+      "<实验根目录>\\ab-v3\\phase0\\D2-cafe\\A1\\clean_analyze.py",
+      "<实验根目录>\\ab-v3\\phase0\\D2-cafe\\A1\\clean_analyze.py",
+      "<实验根目录>\\ab-v3\\phase0\\D2-cafe\\A1\\clean_analyze.py",
+      "<实验根目录>\\ab-v3\\phase0\\D2-cafe\\A1\\clean_analyze.py",
+      "<实验根目录>\\ab-v3\\phase0\\D2-cafe\\A1\\report.md",
+      "<实验根目录>\\ab-v3\\phase0\\D2-cafe\\A1\\report.md"
+    ]
+  },
+  "D3/Bprime": {
+    "sens_hits": {},
+    "writes_outside": [
+      "<实验根目录>\\ab-v3\\phase0\\D3-nab\\Bprime\\detect.py",
+      "<实验根目录>\\ab-v3\\phase0\\D3-nab\\Bprime\\detect.py",
+      "<实验根目录>\\ab-v3\\phase0\\D3-nab\\Bprime\\detect.py",
+      "<实验根目录>\\ab-v3\\phase0\\D3-nab\\Bprime\\detect.py",
+      "<实验根目录>\\ab-v3\\phase0\\D3-nab\\Bprime\\report.md"
+    ]
+  },
+  "D3/A2": {
+    "sens_hits": {},
+    "writes_outside": [
+      "<实验根目录>\\ab-v3\\phase0\\D3-nab\\A2\\detect_anomalies.py",
+      "<实验根目录>\\ab-v3\\phase0\\D3-nab\\A2\\explore.py",
+      "<实验根目录>\\ab-v3\\phase0\\D3-nab\\A2\\detect_anomalies.py",
+      "<实验根目录>\\ab-v3\\phase0\\D3-nab\\A2\\diagnose.py",
+      "<实验根目录>\\ab-v3\\phase0\\D3-nab\\A2\\detect_anomalies.py",
+      "<实验根目录>\\ab-v3\\phase0\\D3-nab\\A2\\detect_anomalies.py",
+      "<实验根目录>\\ab-v3\\phase0\\D3-nab\\A2\\detect_anomalies.py",
+      "<实验根目录>\\ab-v3\\phase0\\D3-nab\\A2\\verify.py",
+      "<实验根目录>\\ab-v3\\phase0\\D3-nab\\A2\\report.md",
+      "<实验根目录>\\ab-v3\\phase0\\D3-nab\\A2\\detect_anomalies.py",
+      "<实验根目录>\\ab-v3\\phase0\\D3-nab\\A2\\report.md"
+    ]
+  },
+  "D3/A1": {
+    "sens_hits": {},
+    "writes_outside": [
+      "<实验根目录>\\ab-v3\\phase0\\D3-nab\\A1\\detect_anomalies.py",
+      "<实验根目录>\\ab-v3\\phase0\\D3-nab\\A1\\detect_anomalies.py",
+      "<实验根目录>\\ab-v3\\phase0\\D3-nab\\A1\\detect_anomalies.py",
+      "<实验根目录>\\ab-v3\\phase0\\D3-nab\\A1\\detect_anomalies.py",
+      "<实验根目录>\\ab-v3\\phase0\\D3-nab\\A1\\report.md",
+      "<实验根目录>\\ab-v3\\phase0\\D3-nab\\A1\\report.md"
+    ]
+  }
+}

@@ -1,0 +1,287 @@
+﻿{
+ "url": "file:///<实验根目录>/ab-v4/G1-calculator/A2plus/index.html",
+ "buttons": {
+  "count": 18,
+  "invisible": []
+ },
+ "click_results": [
+  {
+   "id": "basic_add",
+   "via": "clicks",
+   "expected_main": "10",
+   "expected_top": "7+3 =",
+   "got_main": "10",
+   "got_top": "7+3 =",
+   "pass": true
+  },
+  {
+   "id": "precedence",
+   "via": "clicks",
+   "expected_main": "14",
+   "expected_top": "2+3×4 =",
+   "got_main": "14",
+   "got_top": "2+3×4 =",
+   "pass": true
+  },
+  {
+   "id": "float_add",
+   "via": "clicks",
+   "expected_main": "0.3",
+   "expected_top": "0.1+0.2 =",
+   "got_main": "0.3",
+   "got_top": "0.1+0.2 =",
+   "pass": true
+  },
+  {
+   "id": "basic_div",
+   "via": "clicks",
+   "expected_main": "2",
+   "expected_top": "8÷4 =",
+   "got_main": "2",
+   "got_top": "8÷4 =",
+   "pass": true
+  },
+  {
+   "id": "div_zero",
+   "via": "clicks",
+   "expected_main": "错误",
+   "expected_top": "5÷0 =",
+   "got_main": "错误",
+   "got_top": "5÷0 =",
+   "pass": true
+  },
+  {
+   "id": "decimal_mul",
+   "via": "clicks",
+   "expected_main": "7",
+   "expected_top": "3.5×2 =",
+   "got_main": "7",
+   "got_top": "3.5×2 =",
+   "pass": true
+  },
+  {
+   "id": "leading_dot",
+   "via": "clicks",
+   "expected_main": "1.5",
+   "expected_top": "0.5+1 =",
+   "got_main": "1.5",
+   "got_top": "0.5+1 =",
+   "pass": true
+  },
+  {
+   "id": "chain",
+   "via": "clicks",
+   "expected_main": "19",
+   "expected_top": "12+3.5×2 =",
+   "got_main": "19",
+   "got_top": "12+3.5×2 =",
+   "pass": true
+  },
+  {
+   "id": "left_assoc_sub",
+   "via": "clicks",
+   "expected_main": "2",
+   "expected_top": "9−4−3 =",
+   "got_main": "2",
+   "got_top": "9−4−3 =",
+   "pass": true
+  },
+  {
+   "id": "left_assoc_div",
+   "via": "clicks",
+   "expected_main": "15",
+   "expected_top": "20÷4×3 =",
+   "got_main": "15",
+   "got_top": "20÷4×3 =",
+   "pass": true
+  },
+  {
+   "id": "backspace_digit",
+   "via": "clicks",
+   "expected_main": "12",
+   "expected_top": "12",
+   "got_main": "12",
+   "got_top": "12",
+   "pass": true
+  },
+  {
+   "id": "backspace_op",
+   "via": "clicks",
+   "expected_main": "8",
+   "expected_top": "8",
+   "got_main": "8",
+   "got_top": "8",
+   "pass": true
+  },
+  {
+   "id": "clear_mid",
+   "via": "clicks",
+   "expected_main": "10",
+   "expected_top": "5+5 =",
+   "got_main": "10",
+   "got_top": "5+5 =",
+   "pass": true
+  },
+  {
+   "id": "dot_ignore",
+   "via": "clicks",
+   "expected_main": "2.5",
+   "expected_top": "1.5+1 =",
+   "got_main": "2.5",
+   "got_top": "1.5+1 =",
+   "pass": true
+  },
+  {
+   "id": "leading_zero",
+   "via": "clicks",
+   "expected_main": "10",
+   "expected_top": "5+5 =",
+   "got_main": "10",
+   "got_top": "5+5 =",
+   "pass": true
+  },
+  {
+   "id": "float_mul",
+   "via": "clicks",
+   "expected_main": "89.1",
+   "expected_top": "9.9×9 =",
+   "got_main": "89.1",
+   "got_top": "9.9×9 =",
+   "pass": true
+  },
+  {
+   "id": "third",
+   "via": "clicks",
+   "expected_main": "0.333333333333",
+   "expected_top": "1÷3 =",
+   "got_main": "0.333333333333",
+   "got_top": "1÷3 =",
+   "pass": true
+  },
+  {
+   "id": "op_after_result",
+   "via": "clicks",
+   "expected_main": "20",
+   "expected_top": "10×2 =",
+   "got_main": "20",
+   "got_top": "10×2 =",
+   "pass": true
+  },
+  {
+   "id": "trailing_op_eq",
+   "via": "clicks",
+   "expected_main": "5",
+   "expected_top": "5 =",
+   "got_main": "5",
+   "got_top": "5 =",
+   "pass": true
+  },
+  {
+   "id": "replace_op",
+   "via": "clicks",
+   "expected_main": "10",
+   "expected_top": "5×2 =",
+   "got_main": "10",
+   "got_top": "5×2 =",
+   "pass": true
+  },
+  {
+   "id": "negative_result",
+   "via": "clicks",
+   "expected_main": "−2",
+   "expected_top": "3−5 =",
+   "got_main": "−2",
+   "got_top": "3−5 =",
+   "pass": true
+  },
+  {
+   "id": "error_recover",
+   "via": "clicks",
+   "expected_main": "10",
+   "expected_top": "6+4 =",
+   "got_main": "10",
+   "got_top": "6+4 =",
+   "pass": true
+  },
+  {
+   "id": "equals_empty",
+   "via": "clicks",
+   "expected_main": "0",
+   "expected_top": "",
+   "got_main": "0",
+   "got_top": "",
+   "pass": true
+  },
+  {
+   "id": "backspace_after_result",
+   "via": "clicks",
+   "expected_main": "1",
+   "expected_top": "1",
+   "got_main": "1",
+   "got_top": "1",
+   "pass": true
+  },
+  {
+   "id": "chained_decimal",
+   "via": "clicks",
+   "expected_main": "0.999999999999",
+   "expected_top": "0.333333333333×3 =",
+   "got_main": "0.999999999999",
+   "got_top": "0.333333333333×3 =",
+   "pass": true
+  },
+  {
+   "id": "two_thirds",
+   "via": "clicks",
+   "expected_main": "0.666666666666",
+   "expected_top": "0.333333333333+1÷3 =",
+   "got_main": "0.666666666666",
+   "got_top": "0.333333333333+1÷3 =",
+   "pass": true
+  }
+ ],
+ "keyboard_results": [
+  {
+   "id": "chain(=)",
+   "expected_main": "19",
+   "got_main": "19",
+   "got_top": "12+3.5×2 =",
+   "pass": true
+  },
+  {
+   "id": "precedence(Enter)",
+   "expected_main": "14",
+   "got_main": "14",
+   "got_top": "2+3×4 =",
+   "pass": true
+  },
+  {
+   "id": "float_add(=)",
+   "expected_main": "0.3",
+   "got_main": "0.3",
+   "got_top": "0.1+0.2 =",
+   "pass": true
+  }
+ ],
+ "keyboard_click_consistent": true,
+ "pressed_feedback": {
+  "on": true,
+  "offAfter300ms": true
+ },
+ "console": {
+  "errors": 0,
+  "warnings": 0,
+  "consoleErrors": [],
+  "pageExceptions": [],
+  "windowOnerror": []
+ },
+ "screenshots": {
+  "initial": "<实验根目录>\\ab-v4\\G1-calculator\\A2plus\\evidence\\screenshots\\1-initial.png",
+  "expression": "<实验根目录>\\ab-v4\\G1-calculator\\A2plus\\evidence\\screenshots\\2-expression.png",
+  "result": "<实验根目录>\\ab-v4\\G1-calculator\\A2plus\\evidence\\screenshots\\3-result.png",
+  "error": "<实验根目录>\\ab-v4\\G1-calculator\\A2plus\\evidence\\screenshots\\4-error.png",
+  "keyboard": "<实验根目录>\\ab-v4\\G1-calculator\\A2plus\\evidence\\screenshots\\5-keyboard.png"
+ },
+ "verdict": "PASS",
+ "generated": "2026-09-13T07:49:34.022Z"
+}

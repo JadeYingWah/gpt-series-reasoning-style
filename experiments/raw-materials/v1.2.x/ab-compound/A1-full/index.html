@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FinView · 个人财务仪表盘</title>
+<style>
+  /* ===== 设计系统 ===== */
+  :root {
+    /* 色彩 - 经过WCAG AA对比度验证 */
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --bg-card: #ffffff;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --accent: #2563eb;
+    --accent-light: #dbeafe;
+    --success: #059669;
+    --success-light: #d1fae5;
+    --danger: #dc2626;
+    --danger-light: #fee2e2;
+    --warning: #d97706;
+    --warning-light: #fef3c7;
+    --border: #e2e8f0;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    color: var(--text-primary);
+    min-height: 100vh;
+    padding: 32px 24px;
+    line-height: 1.6;
+  }
+
+  .container { max-width: 1200px; margin: 0 auto; }
+
+  /* ===== 顶部导航 ===== */
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand-logo {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--accent), #7c3aed);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: 800; font-size: 18px;
+  }
+  .brand-name { font-size: 20px; font-weight: 700; }
+  .brand-sub { font-size: 12px; color: var(--text-muted); }
+  .topbar-actions { display: flex; gap: 12px; align-items: center; }
+  .btn {
+    padding: 10px 18px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: #1d4ed8; }
+  .btn-secondary { background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: #f8fafc; }
+
+  /* ===== 概览卡片 ===== */
+  .overview-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+  .stat-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .stat-value { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+  .stat-trend {
+    font-size: 12px;
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .trend-badge {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .trend-up { background: var(--success-light); color: var(--success); }
+  .trend-down { background: var(--danger-light); color: var(--danger); }
+
+  /* ===== 主内容区 ===== */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .panel {
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+  }
+  .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .panel-title { font-size: 16px; font-weight: 600; }
+  .panel-tabs { display: flex; gap: 4px; }
+  .tab {
+    padding: 6px 12px;
+    font-size: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+  }
+  .tab.active { background: var(--accent-light); color: var(--accent); font-weight: 600; }
+
+  /* ===== 柱状图 ===== */
+  .chart-area { height: 240px; display: flex; align-items: flex-end; gap: 24px; padding: 0 8px; }
+  .chart-column { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end; }
+  .chart-bars { display: flex; gap: 4px; align-items: flex-end; height: 180px; }
+  .chart-bar {
+    width: 28px;
+    border-radius: 4px 4px 0 0;
+    transition: height 0.4s ease;
+    position: relative;
+  }
+  .chart-bar:hover::after {
+    content: attr(data-value);
+    position: absolute;
+    top: -24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-primary);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+  .bar-income { background: linear-gradient(180deg, #10b981, #059669); }
+  .bar-expense { background: linear-gradient(180deg, #f87171, #dc2626); }
+  .chart-label { font-size: 12px; color: var(--text-muted); margin-top: 8px; }
+  .chart-legend { display: flex; gap: 16px; margin-top: 12px; justify-content: center; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+
+  /* ===== 支出分类 ===== */
+  .category-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .category-item:last-child { border-bottom: none; }
+  .category-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .category-info { flex: 1; }
+  .category-name { font-size: 14px; font-weight: 500; }
+  .category-bar-bg {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-top: 4px;
+    overflow: hidden;
+  }
+  .category-bar-fill { height: 100%; border-radius: 2px; transition: width 0.4s; }
+  .category-amount { font-size: 14px; font-weight: 600; text-align: right; }
+  .category-percent { font-size: 11px; color: var(--text-muted); }
+
+  /* ===== 交易列表 ===== */
+  .tx-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .tx-item:last-child { border-bottom: none; }
+  .tx-icon {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    background: #f1f5f9;
+  }
+  .tx-info { flex: 1; }
+  .tx-name { font-size: 14px; font-weight: 600; }
+  .tx-meta { font-size: 12px; color: var(--text-muted); }
+  .tx-amount { font-size: 15px; font-weight: 600; }
+  .tx-income { color: var(--success); }
+  .tx-expense { color: var(--text-primary); }
+
+  /* ===== 预算进度 ===== */
+  .budget-item { margin-bottom: 16px; }
+  .budget-header { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+  .budget-name { font-weight: 500; }
+  .budget-amount { color: var(--text-secondary); }
+  .progress-bg { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 4px; transition: width 0.4s; }
+  .progress-safe { background: var(--success); }
+  .progress-warning { background: var(--warning); }
+  .progress-danger { background: var(--danger); }
+
+  /* ===== 响应式 ===== */
+  @media (max-width: 900px) {
+    .overview-grid { grid-template-columns: repeat(2, 1fr); }
+    .main-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 500px) {
+    .overview-grid { grid-template-columns: 1fr; }
+    body { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- 顶部导航 -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-logo">F</div>
+      <div>
+        <div class="brand-name">FinView</div>
+        <div class="brand-sub">个人财务仪表盘</div>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-secondary" onclick="exportData()">导出数据</button>
+      <button class="btn btn-primary">添加交易</button>
+    </div>
+  </div>
+
+  <!-- 概览卡片 -->
+  <div class="overview-grid">
+    <div class="stat-card">
+      <div class="stat-label">💰 本月收入</div>
+      <div class="stat-value">¥15,000</div>
+      <div class="stat-trend"><span class="trend-badge trend-up">↑ 12%</span><span style="color:var(--text-muted)">较上月</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">💸 本月支出</div>
+      <div class="stat-value">¥8,500</div>
+      <div class="stat-trend"><span class="trend-badge trend-down">↑ 5%</span><span style="color:var(--text-muted)">较上月</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">📊 本月结余</div>
+      <div class="stat-value" style="color:var(--success)">¥6,500</div>
+      <div class="stat-trend"><span style="color:var(--text-muted)">储蓄率 43.3%</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">🎯 预算使用</div>
+      <div class="stat-value">94%</div>
+      <div class="stat-trend"><span style="color:var(--warning)">剩余 ¥500</span></div>
+    </div>
+  </div>
+
+  <!-- 主内容区 -->
+  <div class="main-grid">
+    <!-- 收支趋势 -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">月度收支趋势</div>
+        <div class="panel-tabs">
+          <div class="tab active">月度</div>
+          <div class="tab">季度</div>
+          <div class="tab">年度</div>
+        </div>
+      </div>
+      <div class="chart-area" id="trendChart"></div>
+      <div class="chart-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#059669"></div>收入</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#dc2626"></div>支出</div>
+      </div>
+    </div>
+
+    <!-- 支出分类 -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">支出分类</div>
+      </div>
+      <div id="categoryList"></div>
+    </div>
+  </div>
+
+  <!-- 底部：预算 + 交易 -->
+  <div class="main-grid">
+    <!-- 预算进度 -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">预算执行</div>
+      </div>
+      <div id="budgetList"></div>
+    </div>
+
+    <!-- 最近交易 -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">最近交易</div>
+        <div class="tab active" style="cursor:pointer">查看全部</div>
+      </div>
+      <div id="transactionList"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ===== 数据层 =====
+const monthlyData = [
+  { month: '1月', income: 12000, expense: 7000 },
+  { month: '2月', income: 13000, expense: 7500 },
+  { month: '3月', income: 15000, expense: 8500 },
+];
+
+const categories = [
+  { name: '餐饮', icon: '🍜', amount: 2300, budget: 2000, color: '#d97706' },
+  { name: '购物', icon: '🛒', amount: 2000, budget: 2500, color: '#2563eb' },
+  { name: '居住', icon: '🏠', amount: 1500, budget: 1500, color: '#dc2626' },
+  { name: '娱乐', icon: '🎬', amount: 1200, budget: 1000, color: '#7c3aed' },
+  { name: '交通', icon: '🚇', amount: 800, budget: 1000, color: '#059669' },
+  { name: '其他', icon: '📦', amount: 700, budget: 1000, color: '#6b7280' },
+];
+
+const transactions = [
+  { icon: '🍜', name: '午餐 - 兰州拉面', desc: '餐饮 · 今天 12:30', amount: -35, category: '餐饮' },
+  { icon: '💰', name: '工资收入', desc: '收入 · 昨天 09:00', amount: 15000, category: '收入' },
+  { icon: '🚇', name: '地铁充值', desc: '交通 · 2天前', amount: -100, category: '交通' },
+  { icon: '🛒', name: '永辉超市', desc: '购物 · 3天前', amount: -256, category: '购物' },
+  { icon: '🎬', name: '电影票 - 沙丘3', desc: '娱乐 · 4天前', amount: -80, category: '娱乐' },
+  { icon: '🏠', name: '房租', desc: '居住 · 5天前', amount: -1500, category: '居住' },
+];
+
+// ===== 渲染：趋势图 =====
+function renderTrendChart() {
+  const chart = document.getElementById('trendChart');
+  const maxVal = Math.max(...monthlyData.flatMap(d => [d.income, d.expense]));
+  chart.innerHTML = '';
+  monthlyData.forEach(d => {
+    const col = document.createElement('div');
+    col.className = 'chart-column';
+    col.innerHTML = `
+      <div class="chart-bars">
+        <div class="chart-bar bar-income" style="height:${(d.income/maxVal)*100}%" data-value="¥${d.income.toLocaleString()}"></div>
+        <div class="chart-bar bar-expense" style="height:${(d.expense/maxVal)*100}%" data-value="¥${d.expense.toLocaleString()}"></div>
+      </div>
+      <div class="chart-label">${d.month}</div>
+    `;
+    chart.appendChild(col);
+  });
+}
+
+// ===== 渲染：支出分类 =====
+function renderCategories() {
+  const list = document.getElementById('categoryList');
+  const totalExpense = categories.reduce((s, c) => s + c.amount, 0);
+  list.innerHTML = '';
+  categories.forEach(c => {
+    const percent = Math.round(c.amount / totalExpense * 100);
+    const item = document.createElement('div');
+    item.className = 'category-item';
+    item.innerHTML = `
+      <div class="category-icon" style="background:${c.color}15">${c.icon}</div>
+      <div class="category-info">
+        <div class="category-name">${c.name}</div>
+        <div class="category-bar-bg">
+          <div class="category-bar-fill" style="width:${percent}%;background:${c.color}"></div>
+        </div>
+      </div>
+      <div style="text-align:right">
+        <div class="category-amount">¥${c.amount.toLocaleString()}</div>
+        <div class="category-percent">${percent}%</div>
+      </div>
+    `;
+    list.appendChild(item);
+  });
+}
+
+// ===== 渲染：预算进度 =====
+function renderBudgets() {
+  const list = document.getElementById('budgetList');
+  list.innerHTML = '';
+  categories.forEach(c => {
+    const percent = Math.round(c.amount / c.budget * 100);
+    const status = percent > 100 ? 'danger' : percent > 80 ? 'warning' : 'safe';
+    const item = document.createElement('div');
+    item.className = 'budget-item';
+    item.innerHTML = `
+      <div class="budget-header">
+        <span class="budget-name">${c.icon} ${c.name}</span>
+        <span class="budget-amount">¥${c.amount} / ¥${c.budget}</span>
+      </div>
+      <div class="progress-bg">
+        <div class="progress-fill progress-${status}" style="width:${Math.min(percent, 100)}%"></div>
+      </div>
+    `;
+    list.appendChild(item);
+  });
+}
+
+// ===== 渲染：交易列表 =====
+function renderTransactions() {
+  const list = document.getElementById('transactionList');
+  list.innerHTML = '';
+  transactions.forEach(t => {
+    const isIncome = t.amount > 0;
+    const item = document.createElement('div');
+    item.className = 'tx-item';
+    item.innerHTML = `
+      <div class="tx-icon">${t.icon}</div>
+      <div class="tx-info">
+        <div class="tx-name">${t.name}</div>
+        <div class="tx-meta">${t.desc}</div>
+      </div>
+      <div class="tx-amount ${isIncome ? 'tx-income' : 'tx-expense'}">
+        ${isIncome ? '+' : ''}¥${Math.abs(t.amount).toLocaleString()}
+      </div>
+    `;
+    list.appendChild(item);
+  });
+}
+
+// ===== 数据导出 =====
+function exportData() {
+  const data = { monthlyData, categories, transactions, exportTime: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `finview-export-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ===== 数据验证（控制台） =====
+function validateData() {
+  const totalExpense = categories.reduce((s, c) => s + c.amount, 0);
+  const currentMonth = monthlyData[monthlyData.length - 1];
+  console.log('=== 数据验证 ===');
+  console.log('分类支出合计:', totalExpense, '| 月度支出:', currentMonth.expense, '| 一致:', totalExpense === currentMonth.expense);
+  console.log('月度结余:', currentMonth.income - currentMonth.expense);
+  console.log('储蓄率:', ((currentMonth.income - currentMonth.expense) / currentMonth.income * 100).toFixed(1), '%');
+  console.log('交易笔数:', transactions.length);
+  const txExpense = transactions.filter(t => t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0);
+  console.log('交易支出合计:', txExpense, '(最近交易，非全月)');
+}
+
+// ===== 初始化 =====
+renderTrendChart();
+renderCategories();
+renderBudgets();
+renderTransactions();
+validateData();
+console.log('FinView 财务仪表盘加载完成 ✓');
+</script>
+</body>
+</html>

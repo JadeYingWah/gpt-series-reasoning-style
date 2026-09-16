@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>极简番茄钟</title>
+  <style>
+    :root {
+      --bg: #101418;
+      --panel: #1a2129;
+      --line: #2c3640;
+      --text: #e8eef4;
+      --muted: #8a97a6;
+      --accent: #e85d4c;
+      --accent-hover: #f06d5c;
+      --ok: #3dbf8a;
+      --warn: #e0b04a;
+      --danger: #e07070;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background:
+        radial-gradient(900px 600px at 50% 0%, #1c2530 0%, transparent 60%),
+        var(--bg);
+      color: var(--text);
+    }
+
+    .app {
+      width: min(400px, calc(100vw - 28px));
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 28px 28px 22px;
+      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.35);
+      text-align: center;
+    }
+
+    .label {
+      margin: 0;
+      font-size: 0.78rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    #time {
+      margin: 10px 0 6px;
+      font-size: clamp(3.4rem, 14vw, 4.6rem);
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.04em;
+      line-height: 1;
+    }
+
+    #time.is-done { color: var(--ok); }
+
+    #status {
+      min-height: 1.35em;
+      margin: 0 0 18px;
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    #status.is-done {
+      color: var(--ok);
+      font-weight: 600;
+    }
+
+    #status.is-running { color: var(--warn); }
+    #status.is-paused { color: var(--muted); }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    button {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: #24303a;
+      color: var(--text);
+      border-radius: 10px;
+      padding: 10px 16px;
+      min-width: 86px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button:hover:not(:disabled) { background: #2d3b48; }
+    button:active:not(:disabled) { transform: translateY(1px); }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    button.primary {
+      background: var(--accent);
+      border-color: #b84334;
+      color: #fff;
+    }
+
+    button.primary:hover:not(:disabled) { background: var(--accent-hover); }
+
+    .config {
+      border-top: 1px solid var(--line);
+      padding-top: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .config label { user-select: none; }
+
+    #minutes {
+      width: 68px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #12191f;
+      color: var(--text);
+      font-size: 1rem;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    #minutes:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: 1px;
+    }
+
+    #config-msg {
+      width: 100%;
+      min-height: 1.2em;
+      margin-top: 4px;
+      font-size: 0.8rem;
+      color: var(--danger);
+    }
+
+    .hint {
+      margin: 14px 0 0;
+      font-size: 0.72rem;
+      color: #5d6b7a;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <main class="app" role="main" aria-label="番茄钟">
+    <p class="label">Pomodoro</p>
+    <div id="time" aria-live="polite">25:00</div>
+    <div id="status" aria-live="polite">就绪</div>
+
+    <div class="controls">
+      <button id="btn-start" class="primary" type="button">开始</button>
+      <button id="btn-pause" type="button" disabled>暂停</button>
+      <button id="btn-reset" type="button">重置</button>
+    </div>
+
+    <div class="config">
+      <label for="minutes">时长（分钟）</label>
+      <input id="minutes" type="number" min="1" max="60" step="1" value="25" />
+      <button id="btn-apply" type="button">应用</button>
+      <div id="config-msg" aria-live="polite"></div>
+    </div>
+
+    <p class="hint">单文件 · 无 CDN / 无框架 · 到时显示「时间到」· Web Audio 短 beep</p>
+  </main>
+
+  <script>
+"use strict";
+
+/**
+ * 极简番茄钟 — 纯逻辑层（无 DOM / 无计时器副作用）
+ * 可被 Node 抽取执行核对。
+ */
+var Pomodoro = (function () {
+  var DEFAULT_MINUTES = 25;
+  var MIN_MINUTES = 1;
+  var MAX_MINUTES = 60;
+
+  function clampMinutes(raw) {
+    var n = Number(raw);
+    if (!isFinite(n) || Math.floor(n) !== n) {
+      return { ok: false, error: "请输入 1–60 的正整数" };
+    }
+    if (n < MIN_MINUTES || n > MAX_MINUTES) {
+      return { ok: false, error: "时长范围：1–60 分钟" };
+    }
+    return { ok: true, value: n };
+  }
+
+  /**
+   * 状态机：ready → running → paused → running → finished
+   * tick 仅在 running 且未 finished 时生效。
+   */
+  function createTimer(initialMinutes) {
+    var start = clampMinutes(initialMinutes);
+    if (!start.ok) throw new RangeError(start.error);
+
+    var totalSeconds = start.value * 60;
+    var remaining = totalSeconds;
+    var phase = "ready"; // ready | running | paused | finished
+    var listeners = [];
+
+    function snapshot() {
+      return {
+        remaining: remaining,
+        totalSeconds: totalSeconds,
+        phase: phase,
+        running: phase === "running",
+        finished: phase === "finished",
+        minutes: totalSeconds / 60
+      };
+    }
+
+    function emit() {
+      var s = snapshot();
+      for (var i = 0; i < listeners.length; i++) listeners[i](s);
+    }
+
+    return {
+      getState: snapshot,
+
+      onChange: function (fn) {
+        listeners.push(fn);
+        return function unsubscribe() {
+          listeners = listeners.filter(function (l) { return l !== fn; });
+        };
+      },
+
+      start: function () {
+        if (phase === "finished" || phase === "running") return snapshot();
+        phase = "running";
+        emit();
+        return snapshot();
+      },
+
+      pause: function () {
+        if (phase !== "running") return snapshot();
+        phase = "paused";
+        emit();
+        return snapshot();
+      },
+
+      reset: function () {
+        remaining = totalSeconds;
+        phase = "ready";
+        emit();
+        return snapshot();
+      },
+
+      /** 推进 1 秒；到 0 时进入 finished */
+      tick: function () {
+        if (phase !== "running") return snapshot();
+        remaining -= 1;
+        if (remaining <= 0) {
+          remaining = 0;
+          phase = "finished";
+        }
+        emit();
+        return snapshot();
+      },
+
+      /** 应用新时长：重置到就绪态 */
+      setMinutes: function (raw) {
+        var result = clampMinutes(raw);
+        if (!result.ok) throw new RangeError(result.error);
+        totalSeconds = result.value * 60;
+        remaining = totalSeconds;
+        phase = "ready";
+        emit();
+        return snapshot();
+      }
+    };
+  }
+
+  function formatClock(seconds) {
+    var s = Math.max(0, Math.floor(Number(seconds) || 0));
+    var m = Math.floor(s / 60);
+    var r = s % 60;
+    return (m < 10 ? "0" : "") + m + ":" + (r < 10 ? "0" : "") + r;
+  }
+
+  return {
+    DEFAULT_MINUTES: DEFAULT_MINUTES,
+    MIN_MINUTES: MIN_MINUTES,
+    MAX_MINUTES: MAX_MINUTES,
+    clampMinutes: clampMinutes,
+    createTimer: createTimer,
+    formatClock: formatClock
+  };
+})();
+
+/* ---------- DOM 绑定（仅浏览器） ---------- */
+(function bootstrap() {
+  if (typeof document === "undefined") return;
+
+  var elTime = document.getElementById("time");
+  var elStatus = document.getElementById("status");
+  var btnStart = document.getElementById("btn-start");
+  var btnPause = document.getElementById("btn-pause");
+  var btnReset = document.getElementById("btn-reset");
+  var inputMinutes = document.getElementById("minutes");
+  var btnApply = document.getElementById("btn-apply");
+  var elConfigMsg = document.getElementById("config-msg");
+
+  var timer = Pomodoro.createTimer(Pomodoro.DEFAULT_MINUTES);
+  var intervalId = null;
+  var audioCtx = null;
+
+  function ensureAudio() {
+    if (audioCtx) return audioCtx;
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    try {
+      audioCtx = new AC();
+    } catch (e) {
+      return null;
+    }
+    return audioCtx;
+  }
+
+  function beep() {
+    try {
+      var ctx = ensureAudio();
+      if (!ctx) return;
+      if (ctx.state === "suspended" && ctx.resume) ctx.resume();
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      var t = ctx.currentTime;
+      osc.type = "sine";
+      osc.frequency.value = 880;
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(0.12, t + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.4);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.45);
+    } catch (e) {
+      /* 静音环境 / 自动播放策略：忽略，状态文案仍可见 */
+    }
+  }
+
+  function stopInterval() {
+    if (intervalId !== null) {
+      clearInterval(intervalId);
+      intervalId = null;
+    }
+  }
+
+  function startInterval() {
+    stopInterval();
+    intervalId = setInterval(function () {
+      var before = timer.getState();
+      var after = timer.tick();
+      if (after.finished && !before.finished) {
+        stopInterval();
+        beep();
+      }
+    }, 1000);
+  }
+
+  function render(state) {
+    elTime.textContent = Pomodoro.formatClock(state.remaining);
+    elTime.classList.toggle("is-done", state.finished);
+
+    var text;
+    var cls = "";
+    if (state.finished) {
+      text = "时间到";
+      cls = "is-done";
+    } else if (state.running) {
+      text = "进行中";
+      cls = "is-running";
+    } else if (state.phase === "paused") {
+      text = "已暂停";
+      cls = "is-paused";
+    } else {
+      text = "就绪";
+    }
+    elStatus.textContent = text;
+    elStatus.className = cls;
+
+    btnStart.disabled = state.running || state.finished;
+    btnPause.disabled = !state.running;
+  }
+
+  timer.onChange(render);
+  render(timer.getState());
+
+  btnStart.addEventListener("click", function () {
+    ensureAudio(); /* 用户手势内预热 AudioContext */
+    timer.start();
+    startInterval();
+  });
+
+  btnPause.addEventListener("click", function () {
+    timer.pause();
+    stopInterval();
+  });
+
+  btnReset.addEventListener("click", function () {
+    timer.reset();
+    stopInterval();
+    render(timer.getState());
+  });
+
+  btnApply.addEventListener("click", function () {
+    var check = Pomodoro.clampMinutes(inputMinutes.value);
+    if (!check.ok) {
+      elConfigMsg.textContent = check.error;
+      return;
+    }
+    elConfigMsg.textContent = "";
+    stopInterval();
+    timer.setMinutes(check.value);
+  });
+
+  inputMinutes.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") btnApply.click();
+  });
+})();
+  </script>
+</body>
+</html>

@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>番茄钟</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: #1a1e27;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --accent: #f97316;
+      --accent-soft: rgba(249, 115, 22, 0.15);
+      --ok: #22c55e;
+      --danger: #ef4444;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at top, #1c2230, var(--bg));
+      color: var(--text);
+    }
+    .card {
+      width: min(420px, calc(100vw - 32px));
+      background: var(--panel);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 20px;
+      padding: 28px 24px 24px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+      text-align: center;
+    }
+    h1 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+    #status {
+      min-height: 1.4em;
+      font-size: 0.95rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    #status.done { color: var(--danger); font-weight: 600; }
+    #time {
+      font-variant-numeric: tabular-nums;
+      font-size: clamp(3.5rem, 12vw, 4.5rem);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      line-height: 1.1;
+      margin: 8px 0 22px;
+    }
+    .controls {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 22px;
+    }
+    button {
+      appearance: none;
+      border: none;
+      border-radius: 999px;
+      padding: 12px 22px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.08);
+      transition: background 0.15s ease, transform 0.05s ease;
+    }
+    button:hover { background: rgba(255, 255, 255, 0.14); }
+    button:active { transform: scale(0.98); }
+    button.primary {
+      background: var(--accent);
+      color: #1a0b00;
+      min-width: 110px;
+    }
+    button.primary:hover { background: #fb923c; }
+    button.danger { background: rgba(239, 68, 68, 0.18); color: #fecaca; }
+    button.danger:hover { background: rgba(239, 68, 68, 0.28); }
+    .config {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .config input {
+      width: 72px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(0, 0, 0, 0.25);
+      color: var(--text);
+      font-size: 1rem;
+      text-align: center;
+    }
+    .config input:focus {
+      outline: 2px solid var(--accent-soft);
+      border-color: var(--accent);
+    }
+    .hint {
+      margin-top: 14px;
+      font-size: 0.78rem;
+      color: var(--muted);
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>番茄钟</h1>
+    <div id="status" aria-live="polite">就绪</div>
+    <div id="time" aria-label="剩余时间">25:00</div>
+    <div class="controls">
+      <button id="startPauseBtn" class="primary" type="button">开始</button>
+      <button id="resetBtn" class="danger" type="button">重置</button>
+    </div>
+    <label class="config">
+      时长（分钟）
+      <input id="minutesInput" type="number" min="1" max="60" step="1" value="25" />
+    </label>
+    <p class="hint">1–60 正整数。修改后点「重置」生效。结束时有提示音（Web Audio）。</p>
+  </main>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var DEFAULT_MINUTES = 25;
+      var MIN_MINUTES = 1;
+      var MAX_MINUTES = 60;
+      var TICK_MS = 250;
+
+      var timeEl = document.getElementById("time");
+      var statusEl = document.getElementById("status");
+      var startPauseBtn = document.getElementById("startPauseBtn");
+      var resetBtn = document.getElementById("resetBtn");
+      var minutesInput = document.getElementById("minutesInput");
+
+      var state = {
+        durationSeconds: DEFAULT_MINUTES * 60,
+        remainingMs: DEFAULT_MINUTES * 60 * 1000,
+        running: false,
+        finished: false,
+        endAt: null,
+        timerId: null
+      };
+
+      function clampMinutes(n) {
+        if (!Number.isFinite(n)) return null;
+        if (!Number.isInteger(n)) return null;
+        if (n < MIN_MINUTES || n > MAX_MINUTES) return null;
+        return n;
+      }
+
+      function formatClock(totalSeconds) {
+        var s = Math.max(0, Math.ceil(totalSeconds));
+        var m = Math.floor(s / 60);
+        var r = s % 60;
+        return (m < 10 ? "0" : "") + m + ":" + (r < 10 ? "0" : "") + r;
+      }
+
+      function setStatus(text, isDone) {
+        statusEl.textContent = text;
+        if (isDone) statusEl.classList.add("done");
+        else statusEl.classList.remove("done");
+      }
+
+      function render() {
+        var seconds = state.remainingMs / 1000;
+        timeEl.textContent = formatClock(seconds);
+      }
+
+      function stopTicker() {
+        if (state.timerId !== null) {
+          clearInterval(state.timerId);
+          state.timerId = null;
+        }
+      }
+
+      function beep() {
+        try {
+          var Ctx = window.AudioContext || window.webkitAudioContext;
+          if (!Ctx) return;
+          var ctx = new Ctx();
+          var osc = ctx.createOscillator();
+          var gain = ctx.createGain();
+          osc.type = "sine";
+          osc.frequency.value = 880;
+          gain.gain.value = 0.0001;
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          var now = ctx.currentTime;
+          gain.gain.exponentialRampToValueAtTime(0.2, now + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
+          osc.start(now);
+          osc.stop(now + 0.65);
+          osc.onended = function () {
+            try { ctx.close(); } catch (e) { /* ignore */ }
+          };
+        } catch (e) {
+          /* audio unavailable; visual status still shows 时间到 */
+        }
+      }
+
+      function finish() {
+        stopTicker();
+        state.running = false;
+        state.finished = true;
+        state.remainingMs = 0;
+        state.endAt = null;
+        startPauseBtn.textContent = "开始";
+        setStatus("时间到", true);
+        render();
+        beep();
+      }
+
+      function tick() {
+        if (!state.running || state.endAt === null) return;
+        state.remainingMs = Math.max(0, state.endAt - Date.now());
+        render();
+        if (state.remainingMs <= 0) finish();
+      }
+
+      function start() {
+        if (state.running) return;
+        if (state.finished || state.remainingMs <= 0) {
+          state.remainingMs = state.durationSeconds * 1000;
+          state.finished = false;
+        }
+        state.running = true;
+        state.endAt = Date.now() + state.remainingMs;
+        startPauseBtn.textContent = "暂停";
+        setStatus("进行中", false);
+        stopTicker();
+        state.timerId = setInterval(tick, TICK_MS);
+        tick();
+      }
+
+      function pause() {
+        if (!state.running) return;
+        stopTicker();
+        state.remainingMs = Math.max(0, state.endAt - Date.now());
+        state.endAt = null;
+        state.running = false;
+        startPauseBtn.textContent = "开始";
+        setStatus("已暂停", false);
+        render();
+      }
+
+      function reset() {
+        stopTicker();
+        var mins = clampMinutes(parseInt(minutesInput.value, 10));
+        if (mins === null) {
+          mins = DEFAULT_MINUTES;
+          minutesInput.value = String(DEFAULT_MINUTES);
+        }
+        state.durationSeconds = mins * 60;
+        state.remainingMs = state.durationSeconds * 1000;
+        state.running = false;
+        state.finished = false;
+        state.endAt = null;
+        startPauseBtn.textContent = "开始";
+        setStatus("就绪", false);
+        render();
+      }
+
+      startPauseBtn.addEventListener("click", function () {
+        if (state.running) pause();
+        else start();
+      });
+      resetBtn.addEventListener("click", reset);
+      minutesInput.addEventListener("change", function () {
+        var raw = parseInt(minutesInput.value, 10);
+        var mins = clampMinutes(raw);
+        if (mins === null) {
+          if (!Number.isFinite(raw) || raw < MIN_MINUTES) mins = MIN_MINUTES;
+          else if (raw > MAX_MINUTES) mins = MAX_MINUTES;
+          else mins = DEFAULT_MINUTES;
+          minutesInput.value = String(mins);
+        }
+        if (!state.running) reset();
+      });
+
+      /* pure helpers exposed for source/Node review */
+      window.PomodoroLogic = {
+        clampMinutes: clampMinutes,
+        formatClock: formatClock,
+        DEFAULT_MINUTES: DEFAULT_MINUTES,
+        MIN_MINUTES: MIN_MINUTES,
+        MAX_MINUTES: MAX_MINUTES
+      };
+
+      reset();
+    })();
+  </script>
+</body>
+</html>

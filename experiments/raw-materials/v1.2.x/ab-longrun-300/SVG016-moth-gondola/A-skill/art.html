@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Moth Gondola · 月夜贡多拉</title>
+<!--
+  SVG016 · moth piloting gondola, advancing to the right
+  Direction: moonlit Venice canal night — ivory moth on black gondola
+  Motion model: world scrolls LEFT (relative wind) ⇒ gondola advances RIGHT
+  Parallax: far sky/palazzo 0.22x · mid facade/lamps 0.50x · near poles/ripple 1.0x
+  Moth relative motion: wings + antennae + legs + abdomen independent of hull
+-->
+<style>
+  :root {
+    --night:     #0a0e1a;
+    --dusk:      #1a2340;
+    --stone:     #3d4560;
+    --stone-lt:  #6b7394;
+    --ivory:     #f2e8d5;
+    --moth-body: #c9a86c;
+    --moth-dark: #6b4a28;
+    --moth-wing: #e8d5a8;
+    --moth-spot: #8b3a3a;
+    --gondola:   #0d0d12;
+    --gondola-hi:#2a2a38;
+    --gold:      #d4a84b;
+    --amber:     #f0b040;
+    --canal:     #0c1828;
+    --water-hi:  #1e3a58;
+    --moon:      #f5f0e0;
+    --moon-glow: #c8d8f0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--night);
+    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  }
+
+  .stage {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  svg.scene {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ── reduced motion ─────────────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    .scroll-far,
+    .scroll-mid,
+    .scroll-near,
+    .wing-l,
+    .wing-r,
+    .antenna-l,
+    .antenna-r,
+    .leg-front,
+    .leg-mid,
+    .leg-rear,
+    .abdomen-sway,
+    .moth-bob,
+    .hull-bob,
+    .oar-stroke,
+    .oar-blade,
+    .water-ripple,
+    .lantern-flicker,
+    .moon-halo,
+    .reflection-wobble {
+      animation: none !important;
+    }
+  }
+
+  /* ── parallax scroll groups (duplicated tiles inside SVG) ── */
+  .scroll-far  { animation: scrollX 32s linear infinite; }
+  .scroll-mid  { animation: scrollX 16s linear infinite; }
+  .scroll-near { animation: scrollX 8s  linear infinite; }
+
+  @keyframes scrollX {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-1200px); }
+  }
+
+  /* ── gondola hull gentle bob (relative to water, not world) ── */
+  .hull-bob {
+    animation: hullBob 2.6s ease-in-out infinite;
+    transform-origin: 600px 420px;
+  }
+  @keyframes hullBob {
+    0%, 100% { transform: translateY(0) rotate(-0.4deg); }
+    50%      { transform: translateY(4px) rotate(0.6deg); }
+  }
+
+  /* ── moth body micro-bob on hull ── */
+  .moth-bob {
+    animation: mothBob 2.1s ease-in-out infinite;
+    transform-origin: 600px 340px;
+  }
+  @keyframes mothBob {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-3px); }
+  }
+
+  /* ── independent wing flap (asymmetric periods) ── */
+  .wing-l {
+    transform-origin: 590px 320px;
+    transform-box: fill-box;
+    animation: wingFlapL 0.72s ease-in-out infinite;
+  }
+  .wing-r {
+    transform-origin: 610px 320px;
+    transform-box: fill-box;
+    animation: wingFlapR 0.72s ease-in-out infinite;
+  }
+  @keyframes wingFlapL {
+    0%, 100% { transform: rotate(-6deg) scaleY(1); }
+    40%      { transform: rotate(28deg) scaleY(0.55); }
+    70%      { transform: rotate(10deg) scaleY(0.85); }
+  }
+  @keyframes wingFlapR {
+    0%, 100% { transform: rotate(4deg) scaleY(1); }
+    35%      { transform: rotate(-26deg) scaleY(0.55); }
+    65%      { transform: rotate(-8deg) scaleY(0.85); }
+  }
+
+  /* ── independent antenna twitch ── */
+  .antenna-l {
+    transform-origin: 618px 300px;
+    transform-box: fill-box;
+    animation: antTwitchL 1.4s ease-in-out infinite;
+  }
+  .antenna-r {
+    transform-origin: 622px 300px;
+    transform-box: fill-box;
+    animation: antTwitchR 1.7s ease-in-out infinite;
+  }
+  @keyframes antTwitchL {
+    0%, 100% { transform: rotate(-3deg); }
+    30%      { transform: rotate(8deg); }
+    60%      { transform: rotate(-6deg); }
+  }
+  @keyframes antTwitchR {
+    0%, 100% { transform: rotate(2deg); }
+    40%      { transform: rotate(-9deg); }
+    75%      { transform: rotate(5deg); }
+  }
+
+  /* ── independent legs (grip / adjust) ── */
+  .leg-front {
+    transform-origin: 608px 350px;
+    transform-box: fill-box;
+    animation: legFront 1.9s ease-in-out infinite;
+  }
+  .leg-mid {
+    transform-origin: 598px 352px;
+    transform-box: fill-box;
+    animation: legMid 2.3s ease-in-out infinite;
+  }
+  .leg-rear {
+    transform-origin: 588px 350px;
+    transform-box: fill-box;
+    animation: legRear 2.05s ease-in-out infinite;
+  }
+  @keyframes legFront {
+    0%, 100% { transform: rotate(0deg); }
+    50%      { transform: rotate(6deg) translateY(1px); }
+  }
+  @keyframes legMid {
+    0%, 100% { transform: rotate(0deg); }
+    45%      { transform: rotate(-5deg); }
+  }
+  @keyframes legRear {
+    0%, 100% { transform: rotate(0deg); }
+    55%      { transform: rotate(4deg) translateY(-1px); }
+  }
+
+  /* ── abdomen sway (not locked to hull) ── */
+  .abdomen-sway {
+    transform-origin: 585px 345px;
+    transform-box: fill-box;
+    animation: abdomenSway 2.8s ease-in-out infinite;
+  }
+  @keyframes abdomenSway {
+    0%, 100% { transform: rotate(-4deg); }
+    50%      { transform: rotate(7deg); }
+  }
+
+  /* ── oar stroke (gondolier motion) ── */
+  .oar-stroke {
+    transform-origin: 680px 400px;
+    transform-box: fill-box;
+    animation: oarStroke 3.2s ease-in-out infinite;
+  }
+  @keyframes oarStroke {
+    0%   { transform: rotate(-8deg); }
+    25%  { transform: rotate(12deg); }
+    50%  { transform: rotate(18deg); }
+    75%  { transform: rotate(2deg); }
+    100% { transform: rotate(-8deg); }
+  }
+  .oar-blade {
+    transform-origin: center;
+    transform-box: fill-box;
+    animation: oarBlade 3.2s ease-in-out infinite;
+  }
+  @keyframes oarBlade {
+    0%, 100% { transform: rotate(0deg); }
+    25%      { transform: rotate(-15deg); }
+    50%      { transform: rotate(-5deg); }
+    75%      { transform: rotate(8deg); }
+  }
+
+  /* ── water & lanterns ── */
+  .water-ripple {
+    animation: ripple 4s ease-in-out infinite;
+  }
+  @keyframes ripple {
+    0%, 100% { opacity: 0.25; transform: scaleX(1); }
+    50%      { opacity: 0.5;  transform: scaleX(1.04); }
+  }
+  .lantern-flicker {
+    animation: flicker 1.8s ease-in-out infinite;
+  }
+  @keyframes flicker {
+    0%, 100% { opacity: 1; }
+    40%      { opacity: 0.7; }
+    60%      { opacity: 0.95; }
+  }
+  .moon-halo {
+    animation: halo 6s ease-in-out infinite;
+  }
+  @keyframes halo {
+    0%, 100% { opacity: 0.35; }
+    50%      { opacity: 0.55; }
+  }
+  .reflection-wobble {
+    animation: reflWob 3.5s ease-in-out infinite;
+  }
+  @keyframes reflWob {
+    0%, 100% { opacity: 0.2; transform: scaleY(1); }
+    50%      { opacity: 0.35; transform: scaleY(1.08); }
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+<svg class="scene" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Moth piloting a gondola on a moonlit canal, advancing right">
+
+  <!-- ═══════════════ FAR SKY / PALAZZI (0.22×) ═══════════════ -->
+  <defs>
+    <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#050810"/>
+      <stop offset="55%" stop-color="#0f1830"/>
+      <stop offset="100%" stop-color="#1a2848"/>
+    </linearGradient>
+    <radialGradient id="moonGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"  stop-color="#f5f0e0" stop-opacity="0.9"/>
+      <stop offset="40%" stop-color="#c8d8f0" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#c8d8f0" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="waterGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#0c1828"/>
+      <stop offset="100%" stop-color="#061018"/>
+    </linearGradient>
+    <linearGradient id="hullGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#2a2a38"/>
+      <stop offset="50%" stop-color="#0d0d12"/>
+      <stop offset="100%" stop-color="#050508"/>
+    </linearGradient>
+    <linearGradient id="wingGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"  stop-color="#f2e8d5"/>
+      <stop offset="50%" stop-color="#e8d5a8"/>
+      <stop offset="100%" stop-color="#c9a86c"/>
+    </linearGradient>
+    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="strongGlow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="12" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- static sky base (moon stays put — world reference) -->
+  <rect width="1200" height="700" fill="url(#skyGrad)"/>
+
+  <!-- moon (fixed — not scrolling) -->
+  <g transform="translate(920,110)">
+    <circle class="moon-halo" r="70" fill="url(#moonGlow)"/>
+    <circle r="28" fill="#f5f0e0"/>
+    <circle cx="-8" cy="-4" r="4" fill="#e0d8c0" opacity="0.5"/>
+    <circle cx="6" cy="8" r="3" fill="#e0d8c0" opacity="0.4"/>
+    <circle cx="2" cy="-10" r="2.5" fill="#e0d8c0" opacity="0.35"/>
+  </g>
+
+  <!-- far stars (fixed subtle) -->
+  <g fill="#f5f0e0" opacity="0.6">
+    <circle cx="120" cy="60" r="1.2"/><circle cx="280" cy="90" r="0.9"/>
+    <circle cx="450" cy="40" r="1.1"/><circle cx="600" cy="75" r="0.8"/>
+    <circle cx="750" cy="50" r="1"/><circle cx="1050" cy="80" r="1.1"/>
+    <circle cx="180" cy="140" r="0.7"/><circle cx="980" cy="40" r="0.9"/>
+  </g>
+
+  <!-- ── FAR LAYER: distant palazzi skyline (scroll 32s) ── -->
+  <g class="scroll-far">
+    <!-- tile 0 -->
+    <g>
+      <!-- palazzo A -->
+      <rect x="40" y="220" width="90" height="200" fill="#1a2340"/>
+      <rect x="50" y="240" width="18" height="28" fill="#3d4560" opacity="0.6"/>
+      <rect x="80" y="240" width="18" height="28" fill="#3d4560" opacity="0.5"/>
+      <rect x="50" y="290" width="18" height="28" fill="#3d4560" opacity="0.4"/>
+      <rect x="80" y="290" width="18" height="28" fill="#3d4560" opacity="0.55"/>
+      <rect x="50" y="340" width="18" height="28" fill="#3d4560" opacity="0.45"/>
+      <rect x="80" y="340" width="18" height="28" fill="#3d4560" opacity="0.35"/>
+      <polygon points="40,220 85,180 130,220" fill="#141c32"/>
+      <!-- palazzo B -->
+      <rect x="180" y="250" width="70" height="170" fill="#1e2a4a"/>
+      <rect x="192" y="270" width="14" height="22" fill="#3d4560" opacity="0.5"/>
+      <rect x="220" y="270" width="14" height="22" fill="#3d4560" opacity="0.4"/>
+      <rect x="192" y="310" width="14" height="22" fill="#3d4560" opacity="0.55"/>
+      <rect x="220" y="310" width="14" height="22" fill="#3d4560" opacity="0.35"/>
+      <!-- campanile -->
+      <rect x="320" y="160" width="36" height="260" fill="#162038"/>
+      <polygon points="320,160 338,120 356,160" fill="#101828"/>
+      <rect x="328" y="175" width="20" height="16" fill="#3d4560" opacity="0.5"/>
+      <!-- palazzo C -->
+      <rect x="420" y="230" width="110" height="190" fill="#1a2848"/>
+      <rect x="435" y="250" width="20" height="30" fill="#3d4560" opacity="0.45"/>
+      <rect x="470" y="250" width="20" height="30" fill="#3d4560" opacity="0.55"/>
+      <rect x="435" y="300" width="20" height="30" fill="#3d4560" opacity="0.4"/>
+      <rect x="470" y="300" width="20" height="30" fill="#3d4560" opacity="0.5"/>
+      <rect x="435" y="350" width="20" height="30" fill="#3d4560" opacity="0.35"/>
+      <rect x="470" y="350" width="20" height="30" fill="#3d4560" opacity="0.45"/>
+      <!-- distant bridge arch silhouette -->
+      <path d="M580 420 Q640 340 700 420 L700 420 L580 420 Z" fill="#141c32" opacity="0.7"/>
+      <!-- palazzo D -->
+      <rect x="740" y="240" width="80" height="180" fill="#1e2a4a"/>
+      <rect x="752" y="260" width="16" height="24" fill="#3d4560" opacity="0.5"/>
+      <rect x="784" y="260" width="16" height="24" fill="#3d4560" opacity="0.4"/>
+      <rect x="752" y="305" width="16" height="24" fill="#3d4560" opacity="0.45"/>
+      <rect x="784" y="305" width="16" height="24" fill="#3d4560" opacity="0.35"/>
+      <!-- palazzo E -->
+      <rect x="880" y="210" width="100" height="210" fill="#162038"/>
+      <rect x="895" y="230" width="22" height="32" fill="#3d4560" opacity="0.55"/>
+      <rect x="935" y="230" width="22" height="32" fill="#3d4560" opacity="0.4"/>
+      <rect x="895" y="280" width="22" height="32" fill="#3d4560" opacity="0.45"/>
+      <rect x="935" y="280" width="22" height="32" fill="#3d4560" opacity="0.5"/>
+      <rect x="895" y="330" width="22" height="32" fill="#3d4560" opacity="0.35"/>
+      <rect x="935" y="330" width="22" height="32" fill="#3d4560" opacity="0.4"/>
+      <polygon points="880,210 930,165 980,210" fill="#101828"/>
+      <!-- palazzo F -->
+      <rect x="1040" y="255" width="75" height="165" fill="#1a2340"/>
+      <rect x="1052" y="275" width="14" height="22" fill="#3d4560" opacity="0.4"/>
+      <rect x="1080" y="275" width="14" height="22" fill="#3d4560" opacity="0.5"/>
+      <rect x="1052" y="315" width="14" height="22" fill="#3d4560" opacity="0.35"/>
+      <rect x="1080" y="315" width="14" height="22" fill="#3d4560" opacity="0.45"/>
+    </g>
+    <!-- tile 1 (duplicate at +1200 for seamless loop) -->
+    <g transform="translate(1200,0)">
+      <rect x="40" y="220" width="90" height="200" fill="#1a2340"/>
+      <rect x="50" y="240" width="18" height="28" fill="#3d4560" opacity="0.6"/>
+      <rect x="80" y="240" width="18" height="28" fill="#3d4560" opacity="0.5"/>
+      <rect x="50" y="290" width="18" height="28" fill="#3d4560" opacity="0.4"/>
+      <rect x="80" y="290" width="18" height="28" fill="#3d4560" opacity="0.55"/>
+      <rect x="50" y="340" width="18" height="28" fill="#3d4560" opacity="0.45"/>
+      <rect x="80" y="340" width="18" height="28" fill="#3d4560" opacity="0.35"/>
+      <polygon points="40,220 85,180 130,220" fill="#141c32"/>
+      <rect x="180" y="250" width="70" height="170" fill="#1e2a4a"/>
+      <rect x="192" y="270" width="14" height="22" fill="#3d4560" opacity="0.5"/>
+      <rect x="220" y="270" width="14" height="22" fill="#3d4560" opacity="0.4"/>
+      <rect x="192" y="310" width="14" height="22" fill="#3d4560" opacity="0.55"/>
+      <rect x="220" y="310" width="14" height="22" fill="#3d4560" opacity="0.35"/>
+      <rect x="320" y="160" width="36" height="260" fill="#162038"/>
+      <polygon points="320,160 338,120 356,160" fill="#101828"/>
+      <rect x="328" y="175" width="20" height="16" fill="#3d4560" opacity="0.5"/>
+      <rect x="420" y="230" width="110" height="190" fill="#1a2848"/>
+      <rect x="435" y="250" width="20" height="30" fill="#3d4560" opacity="0.45"/>
+      <rect x="470" y="250" width="20" height="30" fill="#3d4560" opacity="0.55"/>
+      <rect x="435" y="300" width="20" height="30" fill="#3d4560" opacity="0.4"/>
+      <rect x="470" y="300" width="20" height="30" fill="#3d4560" opacity="0.5"/>
+      <rect x="435" y="350" width="20" height="30" fill="#3d4560" opacity="0.35"/>
+      <rect x="470" y="350" width="20" height="30" fill="#3d4560" opacity="0.45"/>
+      <path d="M580 420 Q640 340 700 420 L700 420 L580 420 Z" fill="#141c32" opacity="0.7"/>
+      <rect x="740" y="240" width="80" height="180" fill="#1e2a4a"/>
+      <rect x="752" y="260" width="16" height="24" fill="#3d4560" opacity="0.5"/>
+      <rect x="784" y="260" width="16" height="24" fill="#3d4560" opacity="0.4"/>
+      <rect x="752" y="305" width="16" height="24" fill="#3d4560" opacity="0.45"/>
+      <rect x="784" y="305" width="16" height="24" fill="#3d4560" opacity="0.35"/>
+      <rect x="880" y="210" width="100" height="210" fill="#162038"/>
+      <rect x="895" y="230" width="22" height="32" fill="#3d4560" opacity="0.55"/>
+      <rect x="935" y="230" width="22" height="32" fill="#3d4560" opacity="0.4"/>
+      <rect x="895" y="280" width="22" height="32" fill="#3d4560" opacity="0.45"/>
+      <rect x="935" y="280" width="22" height="32" fill="#3d4560" opacity="0.5"/>
+      <rect x="895" y="330" width="22" height="32" fill="#3d4560" opacity="0.35"/>
+      <rect x="935" y="330" width="22" height="32" fill="#3d4560" opacity="0.4"/>
+      <polygon points="880,210 930,165 980,210" fill="#101828"/>
+      <rect x="1040" y="255" width="75" height="165" fill="#1a2340"/>
+      <rect x="1052" y="275" width="14" height="22" fill="#3d4560" opacity="0.4"/>
+      <rect x="1080" y="275" width="14" height="22" fill="#3d4560" opacity="0.5"/>
+      <rect x="1052" y="315" width="14" height="22" fill="#3d4560" opacity="0.35"/>
+      <rect x="1080" y="315" width="14" height="22" fill="#3d4560" opacity="0.45"/>
+    </g>
+  </g>
+
+  <!-- ═══════════════ MID FACADE / LAMPS (0.50×) ═══════════════ -->
+  <g class="scroll-mid">
+    <!-- tile 0 -->
+    <g>
+      <!-- near facade A -->
+      <rect x="0" y="280" width="140" height="160" fill="#2a3048"/>
+      <rect x="10" y="300" width="28" height="40" fill="#4a5270" opacity="0.7"/>
+      <rect x="50" y="300" width="28" height="40" fill="#4a5270" opacity="0.55"/>
+      <rect x="90" y="300" width="28" height="40" fill="#4a5270" opacity="0.65"/>
+      <rect x="10" y="360" width="28" height="40" fill="#4a5270" opacity="0.5"/>
+      <rect x="50" y="360" width="28" height="40" fill="#4a5270" opacity="0.6"/>
+      <rect x="90" y="360" width="28" height="40" fill="#4a5270" opacity="0.45"/>
+      <!-- lantern on facade A -->
+      <g transform="translate(70,275)" class="lantern-flicker">
+        <rect x="-2" y="0" width="4" height="12" fill="#3d4560"/>
+        <rect x="-8" y="12" width="16" height="20" rx="2" fill="#1a2340" stroke="#d4a84b" stroke-width="1.5"/>
+        <ellipse cx="0" cy="22" rx="5" ry="7" fill="#f0b040" filter="url(#softGlow)"/>
+      </g>
+      <!-- steps to water -->
+      <rect x="130" y="420" width="20" height="12" fill="#3d4560"/>
+      <rect x="120" y="432" width="30" height="10" fill="#2a3048"/>
+
+      <!-- bridge span -->
+      <path d="M200 440 Q280 340 360 440" fill="none" stroke="#4a5270" stroke-width="14"/>
+      <path d="M200 440 Q280 350 360 440" fill="none" stroke="#2a3048" stroke-width="8"/>
+      <rect x="195" y="430" width="12" height="20" fill="#3d4560"/>
+      <rect x="353" y="430" width="12" height="20" fill="#3d4560"/>
+      <!-- lantern on bridge -->
+      <g transform="translate(280,345)" class="lantern-flicker" style="animation-delay:0.4s">
+        <rect x="-1.5" y="0" width="3" height="10" fill="#3d4560"/>
+        <rect x="-6" y="10" width="12" height="16" rx="2" fill="#1a2340" stroke="#d4a84b" stroke-width="1.2"/>
+        <ellipse cx="0" cy="18" rx="4" ry="5.5" fill="#f0b040" filter="url(#softGlow)"/>
+      </g>
+
+      <!-- facade B -->
+      <rect x="400" y="270" width="160" height="170" fill="#252c42"/>
+      <rect x="415" y="295" width="32" height="44" fill="#4a5270" opacity="0.6"/>
+      <rect x="465" y="295" width="32" height="44" fill="#4a5270" opacity="0.5"/>
+      <rect x="515" y="295" width="32" height="44" fill="#4a5270" opacity="0.7"/>
+      <rect x="415" y="360" width="32" height="44" fill="#4a5270" opacity="0.45"/>
+      <rect x="465" y="360" width="32" height="44" fill="#4a5270" opacity="0.55"/>
+      <rect x="515" y="360" width="32" height="44" fill="#4a5270" opacity="0.5"/>
+      <!-- arched doorway -->
+      <path d="M460 440 L460 400 Q480 380 500 400 L500 440 Z" fill="#0a0e1a"/>
+      <!-- lantern B -->
+      <g transform="translate(480,265)" class="lantern-flicker" style="animation-delay:0.8s">
+        <rect x="-2" y="0" width="4" height="12" fill="#3d4560"/>
+        <rect x="-8" y="12" width="16" height="20" rx="2" fill="#1a2340" stroke="#d4a84b" stroke-width="1.5"/>
+        <ellipse cx="0" cy="22" rx="5" ry="7" fill="#f0b040" filter="url(#softGlow)"/>
+      </g>
+
+      <!-- mooring post -->
+      <rect x="620" y="360" width="10" height="90" fill="#3d4560"/>
+      <ellipse cx="625" cy="358" rx="8" ry="5" fill="#4a5270"/>
+
+      <!-- facade C with balcony -->
+      <rect x="720" y="290" width="130" height="150" fill="#2a3048"/>
+      <rect x="730" y="310" width="24" height="36" fill="#4a5270" opacity="0.55"/>
+      <rect x="770" y="310" width="24" height="36" fill="#4a5270" opacity="0.45"/>
+      <rect x="810" y="310" width="24" height="36" fill="#4a5270" opacity="0.6"/>
+      <rect x="720" y="365" width="130" height="6" fill="#3d4560"/>
+      <rect x="730" y="371" width="4" height="14" fill="#3d4560"/>
+      <rect x="755" y="371" width="4" height="14" fill="#3d4560"/>
+      <rect x="780" y="371" width="4" height="14" fill="#3d4560"/>
+      <rect x="805" y="371" width="4" height="14" fill="#3d4560"/>
+      <rect x="830" y="371" width="4" height="14" fill="#3d4560"/>
+
+      <!-- facade D -->
+      <rect x="920" y="275" width="150" height="165" fill="#252c42"/>
+      <rect x="935" y="300" width="30" height="42" fill="#4a5270" opacity="0.6"/>
+      <rect x="985" y="300" width="30" height="42" fill="#4a5270" opacity="0.5"/>
+      <rect x="1035" y="300" width="20" height="42" fill="#4a5270" opacity="0.45"/>
+      <rect x="935" y="360" width="30" height="42" fill="#4a5270" opacity="0.5"/>
+      <rect x="985" y="360" width="30" height="42" fill="#4a5270" opacity="0.55"/>
+      <g transform="translate(1000,270)" class="lantern-flicker" style="animation-delay:1.1s">
+        <rect x="-2" y="0" width="4" height="12" fill="#3d4560"/>
+        <rect x="-8" y="12" width="16" height="20" rx="2" fill="#1a2340" stroke="#d4a84b" stroke-width="1.5"/>
+        <ellipse cx="0" cy="22" rx="5" ry="7" fill="#f0b040" filter="url(#softGlow)"/>
+      </g>
+
+      <!-- window light glows (some lit) -->
+      <rect x="415" y="295" width="32" height="44" fill="#f0b040" opacity="0.15"/>
+      <rect x="515" y="360" width="32" height="44" fill="#f0b040" opacity="0.12"/>
+      <rect x="730" y="310" width="24" height="36" fill="#f0b040" opacity="0.18"/>
+    </g>
+    <!-- tile 1 -->
+    <g transform="translate(1200,0)">
+      <rect x="0" y="280" width="140" height="160" fill="#2a3048"/>
+      <rect x="10" y="300" width="28" height="40" fill="#4a5270" opacity="0.7"/>
+      <rect x="50" y="300" width="28" height="40" fill="#4a5270" opacity="0.55"/>
+      <rect x="90" y="300" width="28" height="40" fill="#4a5270" opacity="0.65"/>
+      <rect x="10" y="360" width="28" height="40" fill="#4a5270" opacity="0.5"/>
+      <rect x="50" y="360" width="28" height="40" fill="#4a5270" opacity="0.6"/>
+      <rect x="90" y="360" width="28" height="40" fill="#4a5270" opacity="0.45"/>
+      <g transform="translate(70,275)" class="lantern-flicker">
+        <rect x="-2" y="0" width="4" height="12" fill="#3d4560"/>
+        <rect x="-8" y="12" width="16" height="20" rx="2" fill="#1a2340" stroke="#d4a84b" stroke-width="1.5"/>
+        <ellipse cx="0" cy="22" rx="5" ry="7" fill="#f0b040" filter="url(#softGlow)"/>
+      </g>
+      <rect x="130" y="420" width="20" height="12" fill="#3d4560"/>
+      <rect x="120" y="432" width="30" height="10" fill="#2a3048"/>
+      <path d="M200 440 Q280 340 360 440" fill="none" stroke="#4a5270" stroke-width="14"/>
+      <path d="M200 440 Q280 350 360 440" fill="none" stroke="#2a3048" stroke-width="8"/>
+      <rect x="195" y="430" width="12" height="20" fill="#3d4560"/>
+      <rect x="353" y="430" width="12" height="20" fill="#3d4560"/>
+      <g transform="translate(280,345)" class="lantern-flicker" style="animation-delay:0.4s">
+        <rect x="-1.5" y="0" width="3" height="10" fill="#3d4560"/>
+        <rect x="-6" y="10" width="12" height="16" rx="2" fill="#1a2340" stroke="#d4a84b" stroke-width="1.2"/>
+        <ellipse cx="0" cy="18" rx="4" ry="5.5" fill="#f0b040" filter="url(#softGlow)"/>
+      </g>
+      <rect x="400" y="270" width="160" height="170" fill="#252c42"/>
+      <rect x="415" y="295" width="32" height="44" fill="#4a5270" opacity="0.6"/>
+      <rect x="465" y="295" width="32" height="44" fill="#4a5270" opacity="0.5"/>
+      <rect x="515" y="295" width="32" height="44" fill="#4a5270" opacity="0.7"/>
+      <rect x="415" y="360" width="32" height="44" fill="#4a5270" opacity="0.45"/>
+      <rect x="465" y="360" width="32" height="44" fill="#4a5270" opacity="0.55"/>
+      <rect x="515" y="360" width="32" height="44" fill="#4a5270" opacity="0.5"/>
+      <path d="M460 440 L460 400 Q480 380 500 400 L500 440 Z" fill="#0a0e1a"/>
+      <g transform="translate(480,265)" class="lantern-flicker" style="animation-delay:0.8s">
+        <rect x="-2" y="0" width="4" height="12" fill="#3d4560"/>
+        <rect x="-8" y="12" width="16" height="20" rx="2" fill="#1a2340" stroke="#d4a84b" stroke-width="1.5"/>
+        <ellipse cx="0" cy="22" rx="5" ry="7" fill="#f0b040" filter="url(#softGlow)"/>
+      </g>
+      <rect x="620" y="360" width="10" height="90" fill="#3d4560"/>
+      <ellipse cx="625" cy="358" rx="8" ry="5" fill="#4a5270"/>
+      <rect x="720" y="290" width="130" height="150" fill="#2a3048"/>
+      <rect x="730" y="310" width="24" height="36" fill="#4a5270" opacity="0.55"/>
+      <rect x="770" y="310" width="24" height="36" fill="#4a5270" opacity="0.45"/>
+      <rect x="810" y="310" width="24" height="36" fill="#4a5270" opacity="0.6"/>
+      <rect x="720" y="365" width="130" height="6" fill="#3d4560"/>
+      <rect x="730" y="371" width="4" height="14" fill="#3d4560"/>
+      <rect x="755" y="371" width="4" height="14" fill="#3d4560"/>
+      <rect x="780" y="371" width="4" height="14" fill="#3d4560"/>
+      <rect x="805" y="371" width="4" height="14" fill="#3d4560"/>
+      <rect x="830" y="371" width="4" height="14" fill="#3d4560"/>
+      <rect x="920" y="275" width="150" height="165" fill="#252c42"/>
+      <rect x="935" y="300" width="30" height="42" fill="#4a5270" opacity="0.6"/>
+      <rect x="985" y="300" width="30" height="42" fill="#4a5270" opacity="0.5"/>
+      <rect x="1035" y="300" width="20" height="42" fill="#4a5270" opacity="0.45"/>
+      <rect x="935" y="360" width="30" height="42" fill="#4a5270" opacity="0.5"/>
+      <rect x="985" y="360" width="30" height="42" fill="#4a5270" opacity="0.55"/>
+      <g transform="translate(1000,270)" class="lantern-flicker" style="animation-delay:1.1s">
+        <rect x="-2" y="0" width="4" height="12" fill="#3d4560"/>
+        <rect x="-8" y="12" width="16" height="20" rx="2" fill="#1a2340" stroke="#d4a84b" stroke-width="1.5"/>
+        <ellipse cx="0" cy="22" rx="5" ry="7" fill="#f0b040" filter="url(#softGlow)"/>
+      </g>
+      <rect x="415" y="295" width="32" height="44" fill="#f0b040" opacity="0.15"/>
+      <rect x="515" y="360" width="32" height="44" fill="#f0b040" opacity="0.12"/>
+      <rect x="730" y="310" width="24" height="36" fill="#f0b040" opacity="0.18"/>
+    </g>
+  </g>
+
+  <!-- ═══════════════ WATER SURFACE (static base) ═══════════════ -->
+  <rect x="0" y="440" width="1200" height="260" fill="url(#waterGrad)"/>
+  <!-- subtle static water bands -->
+  <rect x="0" y="440" width="1200" height="8" fill="#1e3a58" opacity="0.15"/>
+  <rect x="0" y="480" width="1200" height="4" fill="#1e3a58" opacity="0.1"/>
+  <rect x="0" y="530" width="1200" height="6" fill="#1e3a58" opacity="0.08"/>
+
+  <!-- moon reflection on water (fixed) -->
+  <g class="reflection-wobble" transform="translate(920,480)">
+    <ellipse cx="0" cy="0" rx="18" ry="40" fill="#c8d8f0" opacity="0.25"/>
+    <ellipse cx="2" cy="30" rx="12" ry="25" fill="#c8d8f0" opacity="0.15"/>
+    <ellipse cx="-1" cy="55" rx="8" ry="15" fill="#c8d8f0" opacity="0.1"/>
+  </g>
+
+  <!-- ═══════════════ NEAR POLES / RIPPLES (1.0×) ═══════════════ -->
+  <g class="scroll-near">
+    <!-- tile 0 -->
+    <g>
+      <!-- briccola (mooring poles) -->
+      <g>
+        <rect x="80" y="380" width="14" height="140" rx="2" fill="#4a3828"/>
+        <rect x="80" y="380" width="6" height="140" fill="#5c4838" opacity="0.5"/>
+        <ellipse cx="87" cy="378" rx="10" ry="6" fill="#3d2e20"/>
+        <rect x="110" y="400" width="12" height="120" rx="2" fill="#3d2e20"/>
+        <ellipse cx="116" cy="398" rx="8" ry="5" fill="#2e2218"/>
+      </g>
+      <!-- ripples near poles -->
+      <ellipse cx="87" cy="520" rx="30" ry="4" fill="#1e3a58" class="water-ripple" opacity="0.3"/>
+      <ellipse cx="116" cy="530" rx="22" ry="3" fill="#1e3a58" class="water-ripple" style="animation-delay:0.5s" opacity="0.25"/>
+
+      <!-- another briccola -->
+      <g transform="translate(380,0)">
+        <rect x="0" y="390" width="16" height="150" rx="2" fill="#4a3828"/>
+        <rect x="0" y="390" width="7" height="150" fill="#5c4838" opacity="0.5"/>
+        <ellipse cx="8" cy="388" rx="11" ry="6" fill="#3d2e20"/>
+        <rect x="28" y="410" width="12" height="130" rx="2" fill="#3d2e20"/>
+        <ellipse cx="34" cy="408" rx="8" ry="5" fill="#2e2218"/>
+        <ellipse cx="8" cy="540" rx="28" ry="4" fill="#1e3a58" class="water-ripple" style="animation-delay:0.8s" opacity="0.28"/>
+      </g>
+
+      <!-- gondola-shaped empty boat far ahead (context) -->
+      <g transform="translate(900,430)" opacity="0.5">
+        <path d="M-40 10 Q0 22 50 10 Q55 8 50 4 Q0 14 -40 4 Q-45 6 -40 10 Z" fill="#0a0e1a"/>
+        <path d="M-40 10 L-50 0 L-45 10" fill="#1a2340"/>
+        <path d="M50 10 L58 2 L55 10" fill="#1a2340"/>
+      </g>
+
+      <!-- foreground pole (closer, thicker) -->
+      <g transform="translate(1100,0)">
+        <rect x="0" y="340" width="20" height="200" rx="3" fill="#3d2e20"/>
+        <rect x="0" y="340" width="8" height="200" fill="#5c4838" opacity="0.4"/>
+        <ellipse cx="10" cy="338" rx="14" ry="8" fill="#2e2218"/>
+        <ellipse cx="10" cy="540" rx="36" ry="5" fill="#1e3a58" class="water-ripple" style="animation-delay:1.2s" opacity="0.3"/>
+      </g>
+    </g>
+    <!-- tile 1 -->
+    <g transform="translate(1200,0)">
+      <g>
+        <rect x="80" y="380" width="14" height="140" rx="2" fill="#4a3828"/>
+        <rect x="80" y="380" width="6" height="140" fill="#5c4838" opacity="0.5"/>
+        <ellipse cx="87" cy="378" rx="10" ry="6" fill="#3d2e20"/>
+        <rect x="110" y="400" width="12" height="120" rx="2" fill="#3d2e20"/>
+        <ellipse cx="116" cy="398" rx="8" ry="5" fill="#2e2218"/>
+      </g>
+      <ellipse cx="87" cy="520" rx="30" ry="4" fill="#1e3a58" class="water-ripple" opacity="0.3"/>
+      <ellipse cx="116" cy="530" rx="22" ry="3" fill="#1e3a58" class="water-ripple" style="animation-delay:0.5s" opacity="0.25"/>
+      <g transform="translate(380,0)">
+        <rect x="0" y="390" width="16" height="150" rx="2" fill="#4a3828"/>
+        <rect x="0" y="390" width="7" height="150" fill="#5c4838" opacity="0.5"/>
+        <ellipse cx="8" cy="388" rx="11" ry="6" fill="#3d2e20"/>
+        <rect x="28" y="410" width="12" height="130" rx="2" fill="#3d2e20"/>
+        <ellipse cx="34" cy="408" rx="8" ry="5" fill="#2e2218"/>
+        <ellipse cx="8" cy="540" rx="28" ry="4" fill="#1e3a58" class="water-ripple" style="animation-delay:0.8s" opacity="0.28"/>
+      </g>
+      <g transform="translate(900,430)" opacity="0.5">
+        <path d="M-40 10 Q0 22 50 10 Q55 8 50 4 Q0 14 -40 4 Q-45 6 -40 10 Z" fill="#0a0e1a"/>
+        <path d="M-40 10 L-50 0 L-45 10" fill="#1a2340"/>
+        <path d="M50 10 L58 2 L55 10" fill="#1a2340"/>
+      </g>
+      <g transform="translate(1100,0)">
+        <rect x="0" y="340" width="20" height="200" rx="3" fill="#3d2e20"/>
+        <rect x="0" y="340" width="8" height="200" fill="#5c4838" opacity="0.4"/>
+        <ellipse cx="10" cy="338" rx="14" ry="8" fill="#2e2218"/>
+        <ellipse cx="10" cy="540" rx="36" ry="5" fill="#1e3a58" class="water-ripple" style="animation-delay:1.2s" opacity="0.3"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- ═══════════════ GONDOLA + MOTH (hero, faces RIGHT) ═══════════════ -->
+  <g class="hull-bob">
+
+    <!-- wake trail behind hull (left side = rear) -->
+    <g opacity="0.4">
+      <ellipse cx="480" cy="455" rx="50" ry="5" fill="#1e3a58" class="water-ripple"/>
+      <ellipse cx="430" cy="460" rx="40" ry="4" fill="#1e3a58" class="water-ripple" style="animation-delay:0.3s"/>
+      <ellipse cx="390" cy="465" rx="28" ry="3" fill="#1e3a58" class="water-ripple" style="animation-delay:0.6s"/>
+    </g>
+
+    <!-- oar (held by moth, stroke independent) -->
+    <g class="oar-stroke">
+      <!-- oar shaft from moth hand to water on LEFT-REAR (pushing water left = advance right) -->
+      <line x1="640" y1="360" x2="480" y2="500" stroke="#5c4838" stroke-width="5" stroke-linecap="round"/>
+      <line x1="640" y1="360" x2="480" y2="500" stroke="#4a3828" stroke-width="3" stroke-linecap="round"/>
+      <!-- oar blade in water -->
+      <g class="oar-blade" transform="translate(475,500)">
+        <ellipse cx="0" cy="0" rx="18" ry="8" fill="#3d2e20" transform="rotate(40)"/>
+        <ellipse cx="0" cy="0" rx="12" ry="4" fill="#5c4838" transform="rotate(40)" opacity="0.6"/>
+      </g>
+      <!-- forcola (oar lock) -->
+      <path d="M655 385 Q665 375 670 390 Q660 395 655 385 Z" fill="#2a2a38"/>
+    </g>
+
+    <!-- ═══ GONDOLA HULL (classic Venetian, prow to the RIGHT) ═══ -->
+    <!-- main hull body -->
+    <path d="
+      M 420 420
+      Q 430 440 460 448
+      L 700 448
+      Q 760 445 790 430
+      Q 810 420 820 405
+      L 800 400
+      Q 780 420 740 425
+      L 470 425
+      Q 440 422 420 420
+      Z
+    " fill="url(#hullGrad)"/>
+    <!-- hull side highlight -->
+    <path d="
+      M 430 422
+      Q 450 435 480 440
+      L 690 440
+      Q 740 436 770 425
+    " fill="none" stroke="#2a2a38" stroke-width="1.5" opacity="0.6"/>
+
+    <!-- ferro di prua (iron prow ornament — points RIGHT) -->
+    <g transform="translate(810,400)">
+      <!-- main comb pointing right/up -->
+      <path d="M0 10 L55 -5 L50 0 L52 6 L45 8 L48 14 L40 14 L42 20 L35 18 L36 24 L28 20 L20 15 L10 12 L0 12 Z" fill="#c0c4d0"/>
+      <path d="M0 10 L55 -5 L50 0 L20 8 Z" fill="#e0e4f0" opacity="0.7"/>
+      <!-- ferro base -->
+      <path d="M-5 8 L8 5 L10 18 L-2 16 Z" fill="#8a8e9a"/>
+    </g>
+
+    <!-- stern decoration (left side) -->
+    <g transform="translate(420,415)">
+      <path d="M0 5 Q-15 -5 -20 5 Q-15 12 0 10 Z" fill="#2a2a38"/>
+      <path d="M-5 8 Q-18 0 -15 8" fill="none" stroke="#d4a84b" stroke-width="1.5"/>
+    </g>
+
+    <!-- passenger seat / trasto -->
+    <rect x="520" y="408" width="70" height="12" rx="3" fill="#1a1a28"/>
+    <rect x="525" y="405" width="60" height="5" rx="2" fill="#2a2a38"/>
+    <!-- gold trim line -->
+    <line x1="470" y1="430" x2="760" y2="430" stroke="#d4a84b" stroke-width="1.2" opacity="0.7"/>
+    <!-- small gold accents -->
+    <circle cx="500" cy="430" r="2" fill="#d4a84b" opacity="0.8"/>
+    <circle cx="650" cy="430" r="2" fill="#d4a84b" opacity="0.8"/>
+    <circle cx="740" cy="430" r="2" fill="#d4a84b" opacity="0.8"/>
+
+    <!-- lantern on stern (rear of gondola = left) -->
+    <g transform="translate(440,400)" class="lantern-flicker" style="animation-delay:0.2s">
+      <rect x="-1.5" y="8" width="3" height="10" fill="#3d4560"/>
+      <rect x="-7" y="-4" width="14" height="14" rx="2" fill="#1a2340" stroke="#d4a84b" stroke-width="1.3"/>
+      <ellipse cx="0" cy="3" rx="4" ry="5" fill="#f0b040" filter="url(#softGlow)"/>
+    </g>
+
+    <!-- ═══ MOTH PILOT (faces RIGHT, sits mid-hull) ═══ -->
+    <g class="moth-bob">
+
+      <!-- abdomen (independent sway — hangs rearward = left) -->
+      <g class="abdomen-sway">
+        <ellipse cx="575" cy="355" rx="18" ry="10" fill="#c9a86c" transform="rotate(15 575 355)"/>
+        <ellipse cx="560" cy="360" rx="12" ry="7" fill="#b8955a" transform="rotate(20 560 360)"/>
+        <!-- abdomen segments -->
+        <line x1="582" y1="350" x2="582" y2="360" stroke="#6b4a28" stroke-width="0.8" opacity="0.5"/>
+        <line x1="572" y1="352" x2="572" y2="362" stroke="#6b4a28" stroke-width="0.8" opacity="0.5"/>
+        <line x1="562" y1="354" x2="562" y2="364" stroke="#6b4a28" stroke-width="0.8" opacity="0.5"/>
+        <!-- tip tuft -->
+        <ellipse cx="550" cy="363" rx="5" ry="4" fill="#a07840"/>
+      </g>
+
+      <!-- thorax (fuzzy center mass) -->
+      <ellipse cx="600" cy="340" rx="22" ry="16" fill="#c9a86c"/>
+      <ellipse cx="600" cy="338" rx="18" ry="12" fill="#d4b87a"/>
+      <!-- thorax fuzz strokes -->
+      <path d="M590 330 Q595 325 600 330" fill="none" stroke="#b8955a" stroke-width="1" opacity="0.6"/>
+      <path d="M600 328 Q605 323 610 330" fill="none" stroke="#b8955a" stroke-width="1" opacity="0.6"/>
+      <path d="M588 340 Q592 336 596 340" fill="none" stroke="#b8955a" stroke-width="0.8" opacity="0.5"/>
+      <path d="M604 338 Q608 334 612 338" fill="none" stroke="#b8955a" stroke-width="0.8" opacity="0.5"/>
+
+      <!-- LEFT WING (far side, behind body — slightly darker) -->
+      <g class="wing-l">
+        <path d="
+          M 595 325
+          Q 560 290 540 300
+          Q 520 315 530 345
+          Q 545 360 575 350
+          Q 590 340 595 325
+          Z
+        " fill="#b8955a" opacity="0.85"/>
+        <!-- wing pattern -->
+        <ellipse cx="555" cy="320" rx="8" ry="5" fill="#8b3a3a" opacity="0.5"/>
+        <ellipse cx="548" cy="335" rx="5" ry="3" fill="#6b4a28" opacity="0.4"/>
+        <!-- wing veins -->
+        <path d="M595 325 Q565 310 545 315" fill="none" stroke="#6b4a28" stroke-width="0.7" opacity="0.5"/>
+        <path d="M595 325 Q570 325 540 335" fill="none" stroke="#6b4a28" stroke-width="0.7" opacity="0.5"/>
+      </g>
+
+      <!-- RIGHT WING (near side, more visible) -->
+      <g class="wing-r">
+        <path d="
+          M 605 322
+          Q 640 280 680 275
+          Q 720 278 725 310
+          Q 720 345 680 355
+          Q 640 350 615 335
+          Q 605 328 605 322
+          Z
+        " fill="url(#wingGrad)"/>
+        <!-- hindwing lobe -->
+        <path d="
+          M 610 335
+          Q 650 345 680 350
+          Q 710 348 715 330
+          Q 700 360 660 360
+          Q 625 355 610 340
+          Z
+        " fill="#d4b87a" opacity="0.9"/>
+        <!-- eyespots -->
+        <ellipse cx="670" cy="300" rx="10" ry="7" fill="#f2e8d5"/>
+        <ellipse cx="670" cy="300" rx="6" ry="4.5" fill="#8b3a3a"/>
+        <ellipse cx="670" cy="300" rx="2.5" ry="2" fill="#1a1a28"/>
+        <circle cx="671" cy="299" r="1" fill="#f2e8d5" opacity="0.8"/>
+        <!-- smaller spot -->
+        <ellipse cx="695" cy="320" rx="5" ry="3.5" fill="#8b3a3a" opacity="0.6"/>
+        <ellipse cx="695" cy="320" rx="2.5" ry="1.8" fill="#1a1a28" opacity="0.5"/>
+        <!-- wing edge scallops -->
+        <path d="M680 275 Q690 268 700 275 Q710 268 720 278" fill="none" stroke="#c9a86c" stroke-width="1.5"/>
+        <!-- wing veins -->
+        <path d="M615 325 Q650 300 700 290" fill="none" stroke="#c9a86c" stroke-width="0.8" opacity="0.6"/>
+        <path d="M615 330 Q655 320 710 315" fill="none" stroke="#c9a86c" stroke-width="0.8" opacity="0.6"/>
+        <path d="M618 338 Q655 340 700 340" fill="none" stroke="#c9a86c" stroke-width="0.7" opacity="0.5"/>
+        <path d="M620 325 Q640 310 655 295" fill="none" stroke="#c9a86c" stroke-width="0.6" opacity="0.5"/>
+      </g>
+
+      <!-- HEAD (faces RIGHT) -->
+      <ellipse cx="622" cy="328" rx="12" ry="11" fill="#d4b87a"/>
+      <ellipse cx="625" cy="328" rx="10" ry="9" fill="#e0c890"/>
+      <!-- compound eye -->
+      <ellipse cx="630" cy="326" rx="5" ry="6" fill="#2a1810"/>
+      <ellipse cx="631" cy="325" rx="3" ry="3.5" fill="#4a2818"/>
+      <ellipse cx="632" cy="324" rx="1.5" ry="1.5" fill="#8a5030" opacity="0.6"/>
+      <!-- proboscis (coiled, facing right) -->
+      <path d="M634 332 Q642 334 640 338 Q638 336 634 334" fill="none" stroke="#6b4a28" stroke-width="1.5" stroke-linecap="round"/>
+
+      <!-- LEFT ANTENNA (far, behind head) -->
+      <g class="antenna-l">
+        <path d="M618 318 Q610 300 600 285" fill="none" stroke="#8b6a3a" stroke-width="2" stroke-linecap="round"/>
+        <!-- feathery barbs -->
+        <path d="M616 312 L612 308 M614 308 L609 303 M612 304 L606 298 M610 300 L604 294 M607 296 L600 290 M605 292 L598 287" stroke="#a07840" stroke-width="1" stroke-linecap="round"/>
+        <circle cx="600" cy="285" r="2.5" fill="#c9a86c"/>
+      </g>
+
+      <!-- RIGHT ANTENNA (near, more visible) -->
+      <g class="antenna-r">
+        <path d="M624 316 Q632 295 645 278" fill="none" stroke="#8b6a3a" stroke-width="2.2" stroke-linecap="round"/>
+        <!-- feathery barbs (bipectinate — moth signature) -->
+        <path d="M626 310 L630 306 M628 306 L633 301 M630 302 L636 296 M632 298 L639 292 M634 294 L642 288 M636 290 L644 284 M638 286 L646 280" stroke="#b8955a" stroke-width="1.1" stroke-linecap="round"/>
+        <!-- opposite barbs -->
+        <path d="M626 310 L624 305 M628 306 L626 300 M630 302 L629 296 M632 298 L631 292 M634 294 L634 288" stroke="#a07840" stroke-width="1" stroke-linecap="round" opacity="0.7"/>
+        <circle cx="645" cy="278" r="3" fill="#d4b87a"/>
+        <circle cx="645" cy="278" r="1.5" fill="#f2e8d5" opacity="0.5"/>
+      </g>
+
+      <!-- LEGS (independent, gripping hull edge) -->
+      <!-- front leg -->
+      <g class="leg-front">
+        <path d="M610 348 Q618 360 625 372 Q628 378 630 382" fill="none" stroke="#8b6a3a" stroke-width="2.2" stroke-linecap="round"/>
+        <path d="M630 382 L636 386 M630 382 L632 388" fill="none" stroke="#6b4a28" stroke-width="1.2" stroke-linecap="round"/>
+      </g>
+      <!-- mid leg -->
+      <g class="leg-mid">
+        <path d="M600 350 Q602 365 605 378 Q606 384 604 390" fill="none" stroke="#8b6a3a" stroke-width="2.2" stroke-linecap="round"/>
+        <path d="M604 390 L600 395 M604 390 L608 396" fill="none" stroke="#6b4a28" stroke-width="1.2" stroke-linecap="round"/>
+      </g>
+      <!-- rear leg -->
+      <g class="leg-rear">
+        <path d="M590 348 Q585 362 580 375 Q578 382 576 388" fill="none" stroke="#8b6a3a" stroke-width="2.2" stroke-linecap="round"/>
+        <path d="M576 388 L572 393 M576 388 L580 394" fill="none" stroke="#6b4a28" stroke-width="1.2" stroke-linecap="round"/>
+      </g>
+
+      <!-- moth shadow on hull -->
+      <ellipse cx="605" cy="400" rx="28" ry="5" fill="#050508" opacity="0.35"/>
+
+    </g><!-- /moth-bob -->
+  </g><!-- /hull-bob -->
+
+  <!-- ═══════════════ FOREGROUND WATER GLINTS (static, not scrolling) ═══════════════ -->
+  <g fill="#c8d8f0" opacity="0.15">
+    <ellipse cx="200" cy="560" rx="40" ry="2"/>
+    <ellipse cx="500" cy="590" rx="55" ry="2.5"/>
+    <ellipse cx="800" cy="570" rx="35" ry="2"/>
+    <ellipse cx="1000" cy="610" rx="45" ry="2"/>
+    <ellipse cx="300" cy="630" rx="30" ry="1.5"/>
+    <ellipse cx="700" cy="650" rx="50" ry="2"/>
+  </g>
+  <!-- amber lantern glints on water -->
+  <g fill="#f0b040" opacity="0.12">
+    <ellipse cx="150" cy="500" rx="12" ry="3"/>
+    <ellipse cx="550" cy="510" rx="15" ry="3"/>
+    <ellipse cx="1050" cy="505" rx="10" ry="2.5"/>
+  </g>
+
+  <!-- subtle vignette -->
+  <defs>
+    <radialGradient id="vignette" cx="50%" cy="50%" r="70%">
+      <stop offset="60%" stop-color="transparent"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.45"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="700" fill="url(#vignette)" pointer-events="none"/>
+
+</svg>
+</div>
+</body>
+</html>

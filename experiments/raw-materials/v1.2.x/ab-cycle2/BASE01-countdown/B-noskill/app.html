@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>倒计时器</title>
+<style>
+  :root{
+    --bg1:#0f172a; --bg2:#1e293b;
+    --card:#111c33; --line:#24344f;
+    --fg:#e6edf7; --muted:#8ea3c0;
+    --accent:#38bdf8; --accent2:#22d3ee;
+    --ok:#34d399; --warn:#fbbf24; --err:#f87171;
+    --mono:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; min-height:100%;
+    display:flex; align-items:center; justify-content:center;
+    padding:24px;
+    background:radial-gradient(1200px 600px at 50% -10%,var(--bg2),var(--bg1) 60%);
+    color:var(--fg);
+    font-family:system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{
+    width:100%; max-width:480px;
+    background:linear-gradient(180deg,#16223c,var(--card));
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:28px 26px 22px;
+    box-shadow:0 24px 60px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.02) inset;
+  }
+  h1{
+    margin:0 0 2px; font-size:17px; font-weight:600; letter-spacing:.5px;
+    display:flex; align-items:center; gap:8px;
+  }
+  h1 .dot{width:8px;height:8px;border-radius:50%;background:var(--muted);transition:background .2s}
+  .hint{margin:0 0 18px; font-size:12.5px; color:var(--muted)}
+
+  .display{
+    position:relative;
+    font-family:var(--mono);
+    font-variant-numeric:tabular-nums;
+    font-size:64px; line-height:1;
+    font-weight:600;
+    text-align:center;
+    letter-spacing:2px;
+    padding:18px 6px 14px;
+    border-radius:14px;
+    background:#0a1324;
+    border:1px solid var(--line);
+    transition:color .2s, border-color .2s, box-shadow .2s, background .2s;
+  }
+  .display .unit{font-size:20px; color:var(--muted); margin-left:6px; letter-spacing:0}
+
+  .app[data-state="running"] .display{color:var(--accent); border-color:#1d4f6b; box-shadow:0 0 0 1px rgba(56,189,248,.15), 0 0 34px rgba(56,189,248,.14)}
+  .app[data-state="paused"]  .display{color:var(--warn);  border-color:#6b5620}
+  .app[data-state="finished"] .display{color:var(--err); border-color:#7a2c2c; background:#1d0f14; animation:pulse .9s ease-in-out infinite}
+
+  @keyframes pulse{
+    0%,100%{box-shadow:0 0 0 0 rgba(248,113,113,.45)}
+    50%{box-shadow:0 0 0 12px rgba(248,113,113,0)}
+  }
+  .app[data-state="running"] h1 .dot{background:var(--accent); box-shadow:0 0 10px var(--accent)}
+  .app[data-state="paused"] h1 .dot{background:var(--warn)}
+  .app[data-state="finished"] h1 .dot{background:var(--err); box-shadow:0 0 10px var(--err)}
+
+  .field{display:flex; align-items:center; gap:10px; margin:20px 0 8px}
+  .field label{font-size:13px; color:var(--muted); white-space:nowrap}
+  .field input{
+    flex:1; min-width:0;
+    font:inherit; font-size:16px;
+    color:var(--fg); background:#0a1324;
+    border:1px solid var(--line); border-radius:10px;
+    padding:10px 12px; outline:none;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  .field input:focus{border-color:var(--accent); box-shadow:0 0 0 3px rgba(56,189,248,.15)}
+  .field input:disabled{opacity:.5; cursor:not-allowed}
+  .field .suffix{font-size:13px; color:var(--muted)}
+
+  .msg{
+    min-height:18px; font-size:12.5px; line-height:1.5;
+    color:var(--muted); margin:2px 0 14px;
+  }
+  .msg[data-kind="error"]{color:var(--err)}
+  .msg[data-kind="info"]{color:var(--accent2)}
+  .msg[data-kind="ok"]{color:var(--ok)}
+
+  .actions{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px}
+  button{
+    font:inherit; font-size:14px; font-weight:600;
+    padding:11px 8px; border-radius:10px; cursor:pointer;
+    border:1px solid var(--line); background:#182742; color:var(--fg);
+    transition:transform .06s, filter .15s, opacity .15s, border-color .15s, background .15s;
+  }
+  button:hover:not(:disabled){filter:brightness(1.18)}
+  button:active:not(:disabled){transform:translateY(1px)}
+  button:disabled{opacity:.38; cursor:not-allowed}
+  button:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+  #start{border-color:#1d4f6b; background:linear-gradient(180deg,#1b3a55,#16304a); color:#d8f3ff}
+  #pause{border-color:#6b5620; background:linear-gradient(180deg,#4a3c18,#3a2f12); color:#ffe9b8}
+
+  .banner{
+    margin-top:16px; border-radius:12px; padding:12px 14px;
+    border:1px dashed var(--line); background:#0a1324;
+    font-size:13.5px; color:var(--muted); text-align:center;
+    display:none;
+  }
+  .app[data-state="finished"] .banner{
+    display:block; color:var(--err); border-color:#7a2c2c;
+    background:#1d0f14; font-weight:600; letter-spacing:.4px;
+  }
+  .foot{margin-top:14px; font-size:11.5px; color:#5f7492; text-align:center}
+</style>
+</head>
+<body>
+<main class="app" id="app" data-state="idle">
+  <h1><span class="dot"></span>倒计时器</h1>
+  <p class="hint">输入分钟数后点「开始」。支持暂停 / 继续 / 重置。</p>
+
+  <div class="display" id="display" role="timer" aria-live="off">00:00</div>
+
+  <div class="field">
+    <label for="minutes">分钟</label>
+    <input id="minutes" type="text" inputmode="decimal" autocomplete="off"
+           maxlength="10" placeholder="例如 1 或 0.5" aria-describedby="msg">
+    <span class="suffix">min</span>
+  </div>
+
+  <p class="msg" id="msg" data-kind="info" role="status" aria-live="polite">等待输入…</p>
+
+  <div class="actions">
+    <button id="start" type="button">开始</button>
+    <button id="pause" type="button" disabled>暂停</button>
+    <button id="reset" type="button">重置</button>
+  </div>
+
+  <div class="banner" id="banner" role="alert">⏰ 时间到！倒计时已结束</div>
+
+  <p class="foot">单文件 · 无外部依赖 · 刷新后回到初始状态</p>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------------- 纯逻辑（可独立测试） ---------------- */
+
+  var MIN_MINUTES = 1 / 60;   // 1 秒
+  var MAX_MINUTES = 1440;     // 24 小时
+
+  /**
+   * 解析用户输入的分钟数。
+   * @returns {{ok:boolean, ms:number, error:string}}
+   */
+  function parseMinutes(raw) {
+    if (raw === null || raw === undefined) {
+      return { ok: false, ms: 0, error: '请输入分钟数' };
+    }
+    var s = String(raw).trim();
+    if (s === '') {
+      return { ok: false, ms: 0, error: '请输入分钟数（不能为空）' };
+    }
+    if (s.length > 10) {
+      return { ok: false, ms: 0, error: '输入过长，请输入不超过 10 位数字' };
+    }
+    if (!/^\d+(\.\d+)?$/.test(s)) {
+      return { ok: false, ms: 0, error: '格式不正确，请输入正数（如 1、2.5）' };
+    }
+    var n = Number(s);
+    if (!isFinite(n)) {
+      return { ok: false, ms: 0, error: '数值无效，请输入有效数字' };
+    }
+    if (n <= 0) {
+      return { ok: false, ms: 0, error: '分钟数必须大于 0' };
+    }
+    if (n < MIN_MINUTES) {
+      return { ok: false, ms: 0, error: '太短了，至少 1 秒（约 0.0167 分钟）' };
+    }
+    if (n > MAX_MINUTES) {
+      return { ok: false, ms: 0, error: '太长了，最多支持 ' + MAX_MINUTES + ' 分钟（24 小时）' };
+    }
+    return { ok: true, ms: Math.round(n * 60000), error: '' };
+  }
+
+  /** 毫秒 -> {mm, ss, text}，向上取整到秒（剩余 0.4s 显示 00:01） */
+  function formatClock(ms) {
+    var total = Math.ceil(Math.max(0, ms) / 1000);
+    var mm = Math.floor(total / 60);
+    var ss = total % 60;
+    var text = (mm < 10 ? '0' : '') + mm + ':' + (ss < 10 ? '0' : '') + ss;
+    return { mm: mm, ss: ss, total: total, text: text };
+  }
+
+  var api = { parseMinutes: parseMinutes, formatClock: formatClock,
+              MIN_MINUTES: MIN_MINUTES, MAX_MINUTES: MAX_MINUTES };
+  if (typeof window !== 'undefined') { window.__countdown = api; }
+
+  /* ---------------- DOM 接线 ---------------- */
+  if (typeof document === 'undefined') { return; }
+
+  function init() {
+    var app = document.getElementById('app');
+    var display = document.getElementById('display');
+    var input = document.getElementById('minutes');
+    var msg = document.getElementById('msg');
+    var btnStart = document.getElementById('start');
+    var btnPause = document.getElementById('pause');
+    var btnReset = document.getElementById('reset');
+
+    if (!app || !display || !input || !msg || !btnStart || !btnPause || !btnReset) {
+      return; // 结构缺失时静默退出，绝不抛异常
+    }
+
+    var TICK_MS = 100;
+    var st = { state: 'idle', endAt: 0, remainingMs: 0, timer: null };
+    var baseTitle = document.title;
+
+    function setMsg(text, kind) {
+      msg.textContent = text;
+      msg.setAttribute('data-kind', kind || 'info');
+    }
+
+    function render() {
+      var c = formatClock(st.remainingMs);
+      display.textContent = c.text;
+      app.setAttribute('data-state', st.state);
+
+      var running = st.state === 'running';
+      var paused = st.state === 'paused';
+      var idle = st.state === 'idle';
+      var done = st.state === 'finished';
+
+      input.disabled = running;
+      btnStart.disabled = running;
+      btnPause.disabled = !running;
+      btnReset.disabled = false;
+      btnStart.textContent = paused ? '继续' : (done ? '重新开始' : '开始');
+
+      if (done) { document.title = '⏰ 时间到！'; }
+      else if (running) { document.title = c.text + ' · 倒计时中'; }
+      else { document.title = baseTitle; }
+
+      // 空闲 / 结束时展示输入预览，给出即时反馈
+      if (idle || done) {
+        var p = parseMinutes(input.value);
+        if (p.ok && idle) {
+          display.textContent = formatClock(p.ms).text;
+        }
+      }
+
+      if (running) { setMsg('倒计时进行中…剩余 ' + c.text, 'ok'); }
+      else if (paused) { setMsg('已暂停，剩余 ' + c.text + '，点「继续」恢复', 'info'); }
+    }
+
+    function stopTimer() {
+      if (st.timer !== null) { clearInterval(st.timer); st.timer = null; }
+    }
+
+    function finish() {
+      stopTimer();
+      st.state = 'finished';
+      st.remainingMs = 0;
+      render();
+      setMsg('时间到！倒计时已结束，可点「重新开始」或「重置」', 'error');
+      beep();
+    }
+
+    function tick() {
+      st.remainingMs = st.endAt - Date.now();
+      if (st.remainingMs <= 0) { finish(); return; }
+      render();
+    }
+
+    function beep() {
+      try {
+        var Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) { return; }
+        var ctx = new Ctx();
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = 880;
+        gain.gain.value = 0.08;
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.35);
+        osc.onended = function () { try { ctx.close(); } catch (e) {} };
+      } catch (e) { /* 音频不可用时静默降级 */ }
+    }
+
+    function onStart() {
+      if (st.state === 'running') { return; }
+      if (st.state === 'paused') {
+        st.endAt = Date.now() + st.remainingMs;
+        st.state = 'running';
+        st.timer = setInterval(tick, TICK_MS);
+        render();
+        return;
+      }
+      var p = parseMinutes(input.value);
+      if (!p.ok) {
+        setMsg('⚠ ' + p.error, 'error');
+        st.state = 'idle';
+        st.remainingMs = 0;
+        render();
+        setMsg('⚠ ' + p.error, 'error');
+        try { input.focus(); } catch (e) {}
+        return;
+      }
+      st.remainingMs = p.ms;
+      st.endAt = Date.now() + p.ms;
+      st.state = 'running';
+      st.timer = setInterval(tick, TICK_MS);
+      render();
+    }
+
+    function onPause() {
+      if (st.state !== 'running') { return; }
+      st.remainingMs = Math.max(0, st.endAt - Date.now());
+      stopTimer();
+      st.state = 'paused';
+      render();
+    }
+
+    function onReset() {
+      stopTimer();
+      st.state = 'idle';
+      st.remainingMs = 0;
+      input.value = '';
+      input.disabled = false;
+      document.title = baseTitle;
+      render();
+      setMsg('已重置，请重新输入分钟数', 'info');
+      try { input.focus(); } catch (e) {}
+    }
+
+    btnStart.addEventListener('click', onStart);
+    btnPause.addEventListener('click', onPause);
+    btnReset.addEventListener('click', onReset);
+
+    input.addEventListener('input', function () {
+      if (st.state === 'running' || st.state === 'paused') { return; }
+      var p = parseMinutes(input.value);
+      if (input.value.trim() === '') { setMsg('等待输入…', 'info'); }
+      else if (p.ok) { setMsg('将倒计时 ' + formatClock(p.ms).text + '，点「开始」启动', 'info'); }
+      else { setMsg('⚠ ' + p.error, 'error'); }
+      render();
+    });
+
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); onStart(); }
+    });
+
+    window.addEventListener('beforeunload', stopTimer);
+
+    render();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>

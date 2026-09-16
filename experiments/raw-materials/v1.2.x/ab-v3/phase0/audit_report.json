@@ -1,0 +1,160 @@
+﻿{
+  "D1-winequality/Bprime": {
+    "n_reads": 2,
+    "n_writes": 3,
+    "n_bash": 18,
+    "n_websearch": 0,
+    "reads": [
+      "<实验根目录>\\ab-v3\\datasets\\winequality-red.csv",
+      "<实验根目录>\\ab-v3\\phase0\\D1-winequality\\Bprime\\PROMPT.md"
+    ],
+    "writes": [
+      "<实验根目录>\\ab-v3\\phase0\\D1-winequality\\Bprime\\analyze.py",
+      "<实验根目录>\\ab-v3\\phase0\\D1-winequality\\Bprime\\report.md"
+    ],
+    "websearch_queries": [],
+    "violations": []
+  },
+  "D1-winequality/A2": {
+    "n_reads": 3,
+    "n_writes": 3,
+    "n_bash": 18,
+    "n_websearch": 0,
+    "reads": [
+      "<实验根目录>\\ab-v3\\phase0\\D1-winequality\\A2\\PROMPT.md",
+      "<实验根目录>\\ab-v3\\skill-snapshot-v1.2.1\\SKILL.md",
+      "<实验根目录>\\ab-v3\\skill-snapshot-v1.2.1\\VERSION"
+    ],
+    "writes": [
+      "<实验根目录>\\ab-v3\\phase0\\D1-winequality\\A2\\analysis.py",
+      "<实验根目录>\\ab-v3\\phase0\\D1-winequality\\A2\\report.md"
+    ],
+    "websearch_queries": [],
+    "violations": []
+  },
+  "D1-winequality/A1": {
+    "n_reads": 3,
+    "n_writes": 3,
+    "n_bash": 14,
+    "n_websearch": 0,
+    "reads": [
+      "<实验根目录>\\ab-v3\\phase0\\D1-winequality\\A1\\PROMPT.md",
+      "<实验根目录>\\ab-v3\\skill-snapshot-v1.2.1\\SKILL.md",
+      "<实验根目录>\\ab-v3\\skill-snapshot-v1.2.1\\VERSION"
+    ],
+    "writes": [
+      "<实验根目录>\\ab-v3\\phase0\\D1-winequality\\A1\\analyze.py",
+      "<实验根目录>\\ab-v3\\phase0\\D1-winequality\\A1\\report.md"
+    ],
+    "websearch_queries": [],
+    "violations": []
+  },
+  "D2-cafe/Bprime": {
+    "n_reads": 1,
+    "n_writes": 3,
+    "n_bash": 10,
+    "n_websearch": 0,
+    "reads": [
+      "<实验根目录>\\ab-v3\\phase0\\D2-cafe\\Bprime\\PROMPT.md"
+    ],
+    "writes": [
+      "<实验根目录>\\ab-v3\\phase0\\D2-cafe\\Bprime\\clean.py",
+      "<实验根目录>\\ab-v3\\phase0\\D2-cafe\\Bprime\\report.md"
+    ],
+    "websearch_queries": [],
+    "violations": []
+  },
+  "D2-cafe/A2": {
+    "n_reads": 4,
+    "n_writes": 9,
+    "n_bash": 12,
+    "n_websearch": 0,
+    "reads": [
+      "<实验根目录>\\ab-v3\\datasets\\cafe_sales_dirty.csv",
+      "<实验根目录>\\ab-v3\\phase0\\D2-cafe\\A2\\PROMPT.md",
+      "<实验根目录>\\ab-v3\\skill-snapshot-v1.2.1\\SKILL.md",
+      "<实验根目录>\\ab-v3\\skill-snapshot-v1.2.1\\VERSION"
+    ],
+    "writes": [
+      "<实验根目录>\\ab-v3\\phase0\\D2-cafe\\A2\\clean_and_analyze.py",
+      "<实验根目录>\\ab-v3\\phase0\\D2-cafe\\A2\\report.md"
+    ],
+    "websearch_queries": [],
+    "violations": []
+  },
+  "D2-cafe/A1": {
+    "n_reads": 3,
+    "n_writes": 8,
+    "n_bash": 12,
+    "n_websearch": 0,
+    "reads": [
+      "<实验根目录>\\ab-v3\\phase0\\D2-cafe\\A1\\PROMPT.md",
+      "<实验根目录>\\ab-v3\\skill-snapshot-v1.2.1\\SKILL.md",
+      "<实验根目录>\\ab-v3\\skill-snapshot-v1.2.1\\VERSION"
+    ],
+    "writes": [
+      "<实验根目录>\\ab-v3\\phase0\\D2-cafe\\A1\\clean_analyze.py",
+      "<实验根目录>\\ab-v3\\phase0\\D2-cafe\\A1\\report.md"
+    ],
+    "websearch_queries": [],
+    "violations": []
+  },
+  "D3-nab/Bprime": {
+    "n_reads": 1,
+    "n_writes": 5,
+    "n_bash": 26,
+    "n_websearch": 0,
+    "reads": [
+      "<实验根目录>\\ab-v3\\phase0\\D3-nab\\Bprime\\PROMPT.md"
+    ],
+    "writes": [
+      "<实验根目录>\\ab-v3\\phase0\\D3-nab\\Bprime\\detect.py",
+      "<实验根目录>\\ab-v3\\phase0\\D3-nab\\Bprime\\report.md"
+    ],
+    "websearch_queries": [],
+    "violations": []
+  },
+  "D3-nab/A2": {
+    "n_reads": 3,
+    "n_writes": 11,
+    "n_bash": 28,
+    "n_websearch": 2,
+    "reads": [
+      "<实验根目录>\\ab-v3\\phase0\\D3-nab\\A2\\PROMPT.md",
+      "<实验根目录>\\ab-v3\\skill-snapshot-v1.2.1\\SKILL.md",
+      "<实验根目录>\\ab-v3\\skill-snapshot-v1.2.1\\VERSION"
+    ],
+    "writes": [
+      "<实验根目录>\\ab-v3\\phase0\\D3-nab\\A2\\detect_anomalies.py",
+      "<实验根目录>\\ab-v3\\phase0\\D3-nab\\A2\\diagnose.py",
+      "<实验根目录>\\ab-v3\\phase0\\D3-nab\\A2\\explore.py",
+      "<实验根目录>\\ab-v3\\phase0\\D3-nab\\A2\\report.md",
+      "<实验根目录>\\ab-v3\\phase0\\D3-nab\\A2\\verify.py"
+    ],
+    "websearch_queries": [
+      "NAB Numenta machine_temperature_system_failure anomaly detection labeled anomalies method",
+      ""
+    ],
+    "violations": []
+  },
+  "D3-nab/A1": {
+    "n_reads": 3,
+    "n_writes": 6,
+    "n_bash": 32,
+    "n_websearch": 2,
+    "reads": [
+      "<实验根目录>\\ab-v3\\phase0\\D3-nab\\A1\\PROMPT.md",
+      "<实验根目录>\\ab-v3\\skill-snapshot-v1.2.1\\SKILL.md",
+      "<实验根目录>\\ab-v3\\skill-snapshot-v1.2.1\\VERSION"
+    ],
+    "writes": [
+      "<实验根目录>\\ab-v3\\phase0\\D3-nab\\A1\\detect_anomalies.py",
+      "<实验根目录>\\ab-v3\\phase0\\D3-nab\\A1\\report.md"
+    ],
+    "websearch_queries": [
+      "NAB Numenta machine temperature system failure dataset anomaly detection methods rolling median MAD threshold",
+      ""
+    ],
+    "violations": []
+  }
+}

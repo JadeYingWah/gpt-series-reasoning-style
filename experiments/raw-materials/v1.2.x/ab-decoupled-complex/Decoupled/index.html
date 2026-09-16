@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>财务仪表盘</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,sans-serif;background:#0f172a;color:#e2e8f0}
+.wrap{max-width:1100px;margin:0 auto;padding:24px}
+h1{font-size:22px;margin-bottom:20px;color:#f8fafc}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+.stat{background:#1e293b;border-radius:10px;padding:18px;border:1px solid #334155}
+.stat .lbl{font-size:13px;color:#94a3b8;margin-bottom:6px}
+.stat .val{font-size:26px;font-weight:700}
+.stat.in .val{color:#34d399}
+.stat.out .val{color:#f87171}
+.stat.save .val{color:#60a5fa}
+.panel{background:#1e293b;border-radius:10px;padding:18px;margin-bottom:20px;border:1px solid #334155}
+.panel h2{font-size:15px;margin-bottom:14px;color:#f1f5f9}
+canvas{width:100%;height:280px}
+.item{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #334155}
+.item:last-child{border-bottom:none}
+.item .n{font-weight:500}
+.item .d{font-size:12px;color:#64748b}
+.item .a{font-weight:600}
+.item .a.in{color:#34d399}
+.item .a.out{color:#f87171}
+@media(max-width:640px){.stats{grid-template-columns:1fr}.wrap{padding:14px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>财务仪表盘</h1>
+<div class="stats">
+<div class="stat in"><div class="lbl">收入</div><div class="val" id="in">¥0</div></div>
+<div class="stat out"><div class="lbl">支出</div><div class="val" id="out">¥0</div></div>
+<div class="stat save"><div class="lbl">结余</div><div class="val" id="save">¥0</div></div>
+</div>
+<div class="panel"><h2>月度趋势</h2><canvas id="chart"></canvas></div>
+<div class="panel"><h2>交易记录</h2><div id="list"></div></div>
+</div>
+<script>
+const D={in:12800,out:7200,save:5600,
+trend:[{m:'4月',i:12000,o:6800},{m:'5月',i:13500,o:7100},{m:'6月',i:12800,o:7500},{m:'7月',i:14000,o:7300},{m:'8月',i:13200,o:7200},{m:'9月',i:12800,o:7200}],
+tx:[{n:'工资',d:'09-01',a:12800,t:'in'},{n:'房租',d:'09-02',a:-2800,t:'out'},{n:'餐饮',d:'09-05',a:-920,t:'out'},{n:'交通',d:'09-07',a:-380,t:'out'},{n:'理财收益',d:'09-10',a:650,t:'in'},{n:'购物',d:'09-12',a:-560,t:'out'}]};
+document.getElementById('in').textContent='¥'+D.in.toLocaleString();
+document.getElementById('out').textContent='¥'+D.out.toLocaleString();
+document.getElementById('save').textContent='¥'+D.save.toLocaleString();
+const list=document.getElementById('list');
+D.tx.forEach(t=>{const d=document.createElement('div');d.className='item';d.innerHTML=`<div><div class="n">${t.n}</div><div class="d">${t.d}</div></div><div class="a ${t.t}">${t.a>0?'+':''}¥${Math.abs(t.a)}</div>`;list.appendChild(d)});
+const cv=document.getElementById('chart'),cx=cv.getContext('2d');
+cv.width=cv.offsetWidth;cv.height=280;
+const pad={t:20,r:20,b:35,l:55},W=cv.width-pad.l-pad.r,H=cv.height-pad.t-pad.b;
+const mx=Math.max(...D.trend.map(d=>Math.max(d.i,d.o)))*1.1;
+function draw(){cx.clearRect(0,0,cv.width,cv.height);
+const sx=W/(D.trend.length-1);
+cx.strokeStyle='#334155';cx.lineWidth=1;
+for(let i=0;i<=4;i++){const y=pad.t+(H/4)*i;cx.beginPath();cx.moveTo(pad.l,y);cx.lineTo(cv.width-pad.r,y);cx.stroke();
+cx.fillStyle='#64748b';cx.font='11px sans-serif';cx.textAlign='right';cx.fillText(Math.round(mx-(mx/4)*i),pad.l-6,y+4)}
+function line(key,col){cx.strokeStyle=col;cx.lineWidth=2;cx.beginPath();
+D.trend.forEach((d,i)=>{const x=pad.l+sx*i,y=pad.t+H-(d[key]/mx)*H;i?cx.lineTo(x,y):cx.moveTo(x,y)});cx.stroke();
+D.trend.forEach((d,i)=>{const x=pad.l+sx*i,y=pad.t+H-(d[key]/mx)*H;cx.fillStyle=col;cx.beginPath();cx.arc(x,y,3,0,7);cx.fill()})}
+line('i','#34d399');line('o','#f87171');
+D.trend.forEach((d,i)=>{const x=pad.l+sx*i;cx.fillStyle='#94a3b8';cx.font='11px sans-serif';cx.textAlign='center';cx.fillText(d.m,x,cv.height-12)});
+cx.fillStyle='#34d399';cx.fillRect(cv.width-120,6,10,10);cx.fillStyle='#cbd5e1';cx.fillText('收入',cv.width-106,15);
+cx.fillStyle='#f87171';cx.fillRect(cv.width-65,6,10,10);cx.fillStyle='#cbd5e1';cx.fillText('支出',cv.width-51,15)}
+draw();window.addEventListener('resize',()=>{cv.width=cv.offsetWidth;draw()});
+</script>
+</body>
+</html>

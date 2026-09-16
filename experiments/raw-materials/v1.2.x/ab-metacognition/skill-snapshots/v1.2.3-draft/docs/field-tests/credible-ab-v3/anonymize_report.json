@@ -1,0 +1,78 @@
+{
+  "D1-winequality/Bprime -> submission-03": {
+    "files": [
+      "analyze.py",
+      "report.md"
+    ],
+    "residual_flags": [
+      "analyze.py: ['Bprime']"
+    ]
+  },
+  "D1-winequality/A2 -> submission-01": {
+    "files": [
+      "analysis.py",
+      "report.md"
+    ],
+    "residual_flags": []
+  },
+  "D1-winequality/A1 -> submission-02": {
+    "files": [
+      "analyze.py",
+      "report.md"
+    ],
+    "residual_flags": []
+  },
+  "D2-cafe/Bprime -> submission-03": {
+    "files": [
+      "_results.txt",
+      "clean.py",
+      "report.md"
+    ],
+    "residual_flags": [
+      "clean.py: ['Bprime']"
+    ]
+  },
+  "D2-cafe/A2 -> submission-02": {
+    "files": [
+      "clean_and_analyze.py",
+      "report.md"
+    ],
+    "residual_flags": []
+  },
+  "D2-cafe/A1 -> submission-01": {
+    "files": [
+      "clean_analyze.py",
+      "report.md"
+    ],
+    "residual_flags": []
+  },
+  "D3-nab/Bprime -> submission-01": {
+    "files": [
+      "anomalies.csv",
+      "detect.py",
+      "report.md"
+    ],
+    "residual_flags": [
+      "detect.py: ['Bprime']"
+    ]
+  },
+  "D3-nab/A2 -> submission-03": {
+    "files": [
+      "detect_anomalies.py",
+      "diagnose.py",
+      "explore.py",
+      "report.md",
+      "verify.py"
+    ],
+    "residual_flags": []
+  },
+  "D3-nab/A1 -> submission-02": {
+    "files": [
+      "anomaly_intervals.json",
+      "anomaly_overview.svg",
+      "detect_anomalies.py",
+      "report.md"
+    ],
+    "residual_flags": []
+  }
+}

@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>倒计时器</title>
+<style>
+  :root{
+    --bg:#0e1116;
+    --panel:#161b22;
+    --panel-2:#1c232c;
+    --line:#2a3340;
+    --text:#e6edf3;
+    --dim:#8b97a6;
+    --accent:#4da3ff;
+    --accent-2:#2f7fd6;
+    --ok:#3fb950;
+    --warn:#d29922;
+    --err:#f85149;
+    --ring:565.487;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    background:radial-gradient(1200px 600px at 50% -10%,#1b2530 0%,var(--bg) 60%);
+    color:var(--text);
+    font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif;
+    display:flex;align-items:center;justify-content:center;
+    padding:24px;
+  }
+  .app{
+    width:100%;max-width:420px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:24px;
+    box-shadow:0 24px 60px rgba(0,0,0,.45);
+  }
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+  h1{font-size:16px;margin:0;font-weight:600;letter-spacing:.5px}
+  .status{
+    font-size:12px;padding:4px 10px;border-radius:999px;
+    border:1px solid var(--line);background:var(--panel-2);color:var(--dim);
+    transition:color .15s,border-color .15s,background .15s;
+  }
+  body[data-state="running"] .status{color:var(--ok);border-color:#1f4d29;background:#12251a}
+  body[data-state="paused"]  .status{color:var(--warn);border-color:#4d3d15;background:#241f12}
+  body[data-state="finished"] .status{color:var(--err);border-color:#5c2622;background:#2a1715}
+
+  .dial{position:relative;width:220px;height:220px;margin:6px auto 18px}
+  .dial svg{transform:rotate(-90deg);display:block}
+  .track{fill:none;stroke:#222b36;stroke-width:12}
+  .bar{fill:none;stroke:var(--accent);stroke-width:12;stroke-linecap:round;
+       stroke-dasharray:var(--ring);stroke-dashoffset:0;
+       transition:stroke-dashoffset .12s linear,stroke .2s}
+  body[data-state="paused"] .bar{stroke:var(--warn)}
+  body[data-state="finished"] .bar{stroke:var(--err)}
+  .readout{
+    position:absolute;inset:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:4px;
+  }
+  .time{
+    font-variant-numeric:tabular-nums;
+    font-feature-settings:"tnum";
+    font-size:44px;font-weight:600;letter-spacing:1px;
+    font-family:ui-monospace,SFMono-Regular,Consolas,"Courier New",monospace;
+  }
+  .hint{font-size:12px;color:var(--dim)}
+  body[data-state="finished"] .time{color:var(--err)}
+  body.flash .dial{animation:flash .5s ease-in-out 4}
+  @keyframes flash{
+    0%,100%{filter:none}
+    50%{filter:drop-shadow(0 0 18px rgba(248,81,73,.85))}
+  }
+
+  .banner{
+    display:none;align-items:center;gap:8px;
+    margin:-4px 0 16px;padding:10px 12px;border-radius:10px;
+    background:#2a1715;border:1px solid #5c2622;color:#ffb4ae;font-size:14px;
+  }
+  .banner.show{display:flex}
+
+  .field{display:flex;gap:8px;align-items:flex-start}
+  label{font-size:13px;color:var(--dim);display:block;margin-bottom:6px}
+  input[type="text"]{
+    flex:1;min-width:0;
+    background:#0d1218;border:1px solid var(--line);border-radius:10px;
+    color:var(--text);padding:11px 12px;font-size:15px;
+    font-variant-numeric:tabular-nums;
+    outline:none;transition:border-color .15s,box-shadow .15s;
+  }
+  input[type="text"]:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(77,163,255,.18)}
+  input[type="text"][aria-invalid="true"]{border-color:var(--err);box-shadow:0 0 0 3px rgba(248,81,73,.16)}
+  .unit{color:var(--dim);font-size:14px;padding-top:12px}
+
+  .msg{min-height:20px;font-size:13px;color:var(--err);margin:8px 0 4px}
+  .msg.info{color:var(--dim)}
+
+  .row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px}
+  button{
+    font:inherit;font-weight:600;font-size:14px;
+    padding:11px 8px;border-radius:10px;cursor:pointer;
+    border:1px solid var(--line);background:var(--panel-2);color:var(--text);
+    transition:transform .06s,background .15s,border-color .15s,opacity .15s;
+  }
+  button:hover:not(:disabled){background:#232c37}
+  button:active:not(:disabled){transform:translateY(1px)}
+  button:disabled{opacity:.42;cursor:not-allowed}
+  button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  #startBtn{background:var(--accent);border-color:var(--accent);color:#06121f}
+  #startBtn:hover:not(:disabled){background:#63b1ff}
+  .foot{margin-top:14px;font-size:12px;color:var(--dim);line-height:1.6}
+  code{background:#0d1218;border:1px solid var(--line);border-radius:5px;padding:1px 5px;font-size:11px}
+</style>
+</head>
+<body data-state="idle">
+<main class="app">
+  <header>
+    <h1>倒计时器</h1>
+    <span class="status" id="status" role="status" aria-live="polite">待机</span>
+  </header>
+
+  <div class="dial">
+    <svg width="220" height="220" viewBox="0 0 220 220" aria-hidden="true">
+      <circle class="track" cx="110" cy="110" r="90"></circle>
+      <circle class="bar" id="bar" cx="110" cy="110" r="90"></circle>
+    </svg>
+    <div class="readout">
+      <div class="time" id="display">00:00</div>
+      <div class="hint" id="hint">输入分钟数后开始</div>
+    </div>
+  </div>
+
+  <div class="banner" id="banner" role="alert">
+    <strong>时间到！</strong><span>倒计时已归零。</span>
+  </div>
+
+  <label for="minutes">倒计时时长</label>
+  <div class="field">
+    <input type="text" id="minutes" inputmode="decimal" placeholder="例如 5" autocomplete="off" spellcheck="false">
+    <span class="unit">分钟</span>
+  </div>
+  <div class="msg" id="msg" aria-live="polite"></div>
+
+  <div class="row">
+    <button id="startBtn" type="button">开始</button>
+    <button id="pauseBtn" type="button" disabled>暂停</button>
+    <button id="resetBtn" type="button">重置</button>
+  </div>
+
+  <p class="foot">允许 0 &lt; 分钟数 ≤ 1440，可含小数（如 <code>2.5</code>）。刷新页面即回到初始状态。</p>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  var MAX_MIN = 1440;
+
+  var el = {
+    input: document.getElementById('minutes'),
+    startBtn: document.getElementById('startBtn'),
+    pauseBtn: document.getElementById('pauseBtn'),
+    resetBtn: document.getElementById('resetBtn'),
+    display: document.getElementById('display'),
+    hint: document.getElementById('hint'),
+    status: document.getElementById('status'),
+    msg: document.getElementById('msg'),
+    bar: document.getElementById('bar'),
+    banner: document.getElementById('banner'),
+    body: document.body
+  };
+
+  // state: idle | running | paused | finished
+  var state = 'idle';
+  var totalMs = 0;
+  var remainingMs = 0;
+  var endAt = 0;
+  var ticker = null;
+  var lastRenderedSec = -1;
+  var flashTimer = null;
+
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+
+  function formatMs(ms) {
+    var totalSec = Math.ceil(Math.max(0, ms) / 1000);
+    var h = Math.floor(totalSec / 3600);
+    var m = Math.floor((totalSec % 3600) / 60);
+    var s = totalSec % 60;
+    return h > 0 ? pad(h) + ':' + pad(m) + ':' + pad(s) : pad(m) + ':' + pad(s);
+  }
+
+  function parseMinutes(raw) {
+    var s = String(raw == null ? '' : raw).trim();
+    if (s === '') return { ok: false, err: '请输入分钟数（不能为空）' };
+    // 超长文本先拦截，避免对超长串做数值解析
+    if (s.length > 12) return { ok: false, err: '输入过长，请输入 0 到 1440 之间的数字' };
+    if (!/^[0-9]+(\.[0-9]+)?$/.test(s)) return { ok: false, err: '只能输入数字，例如 5 或 2.5（不支持字母、负号、空格）' };
+    var n = Number(s);
+    if (!isFinite(n)) return { ok: false, err: '数字无效，请输入 0 到 1440 之间的数字' };
+    if (n <= 0) return { ok: false, err: '分钟数必须大于 0' };
+    if (n > MAX_MIN) return { ok: false, err: '分钟数不能超过 1440（即 24 小时）' };
+    return { ok: true, ms: Math.round(n * 60000) };
+  }
+
+  function setMsg(text, kind) {
+    el.msg.textContent = text || '';
+    el.msg.className = 'msg' + (kind === 'info' ? ' info' : '');
+  }
+
+  function setInvalid(on) {
+    if (on) el.input.setAttribute('aria-invalid', 'true');
+    else el.input.removeAttribute('aria-invalid');
+  }
+
+  function render() {
+    var sec = Math.ceil(Math.max(0, remainingMs) / 1000);
+    if (sec !== lastRenderedSec) {
+      lastRenderedSec = sec;
+      el.display.textContent = formatMs(remainingMs);
+    }
+    var frac = totalMs > 0 ? Math.max(0, Math.min(1, remainingMs / totalMs)) : 0;
+    var C = 565.487;
+    el.bar.setAttribute('stroke-dashoffset', String(C * (1 - frac)));
+
+    var map = { idle: '待机', running: '运行中', paused: '已暂停', finished: '时间到' };
+    el.status.textContent = map[state];
+    el.body.setAttribute('data-state', state);
+
+    el.startBtn.disabled = (state === 'running');
+    el.startBtn.textContent = (state === 'paused') ? '继续' : '开始';
+    el.pauseBtn.disabled = (state !== 'running');
+    el.banner.classList.toggle('show', state === 'finished');
+
+    if (state === 'idle') el.hint.textContent = '输入分钟数后开始';
+    else if (state === 'running') el.hint.textContent = '倒计时进行中';
+    else if (state === 'paused') el.hint.textContent = '已暂停，可继续或重置';
+    else el.hint.textContent = '归零';
+  }
+
+  function stopTicker() {
+    if (ticker !== null) { clearInterval(ticker); ticker = null; }
+  }
+
+  function beep() {
+    try {
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      var ctx = new Ctx();
+      var t = ctx.currentTime;
+      for (var i = 0; i < 3; i++) {
+        var osc = ctx.createOscillator();
+        var g = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = 880;
+        g.gain.setValueAtTime(0.0001, t + i * 0.28);
+        g.gain.exponentialRampToValueAtTime(0.18, t + i * 0.28 + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.28 + 0.22);
+        osc.connect(g); g.connect(ctx.destination);
+        osc.start(t + i * 0.28); osc.stop(t + i * 0.28 + 0.24);
+      }
+      setTimeout(function () { try { ctx.close(); } catch (e) {} }, 1400);
+    } catch (e) { /* 音频不可用时静默降级 */ }
+  }
+
+  function finish() {
+    stopTicker();
+    remainingMs = 0;
+    state = 'finished';
+    render();
+    setMsg('倒计时结束：时间已归零。', 'info');
+    if (flashTimer) clearTimeout(flashTimer);
+    el.body.classList.remove('flash');
+    void el.body.offsetWidth; // 重启动画
+    el.body.classList.add('flash');
+    flashTimer = setTimeout(function () { el.body.classList.remove('flash'); }, 2200);
+    beep();
+  }
+
+  function tick() {
+    try {
+      var left = endAt - Date.now();
+      if (left <= 0) { finish(); return; }
+      remainingMs = left;
+      render();
+    } catch (e) {
+      // 兜底：任何渲染异常都不允许冒泡为未捕获异常
+      stopTicker();
+      state = 'paused';
+      render();
+      setMsg('运行时出现异常，已暂停：' + (e && e.message ? e.message : e));
+    }
+  }
+
+  function start() {
+    if (state === 'running') return;
+
+    if (state === 'paused') {
+      endAt = Date.now() + remainingMs;
+      state = 'running';
+      stopTicker();
+      ticker = setInterval(tick, 100);
+      setMsg('');
+      setInvalid(false);
+      render();
+      return;
+    }
+
+    var parsed = parseMinutes(el.input.value);
+    if (!parsed.ok) {
+      setMsg(parsed.err);
+      setInvalid(true);
+      return;
+    }
+
+    setInvalid(false);
+    setMsg('');
+    totalMs = parsed.ms;
+    remainingMs = parsed.ms;
+    lastRenderedSec = -1;
+    endAt = Date.now() + remainingMs;
+    state = 'running';
+    stopTicker();
+    ticker = setInterval(tick, 100);
+    render();
+  }
+
+  function pause() {
+    if (state !== 'running') return;
+    var left = endAt - Date.now();
+    remainingMs = left > 0 ? left : 0;
+    stopTicker();
+    if (remainingMs <= 0) { finish(); return; }
+    state = 'paused';
+    render();
+  }
+
+  function reset() {
+    stopTicker();
+    if (flashTimer) { clearTimeout(flashTimer); flashTimer = null; }
+    el.body.classList.remove('flash');
+    state = 'idle';
+    totalMs = 0;
+    remainingMs = 0;
+    lastRenderedSec = -1;
+    setMsg('');
+    setInvalid(false);
+    render();
+  }
+
+  el.startBtn.addEventListener('click', start);
+  el.pauseBtn.addEventListener('click', pause);
+  el.resetBtn.addEventListener('click', reset);
+  el.input.addEventListener('input', function () {
+    if (el.input.getAttribute('aria-invalid') === 'true') { setInvalid(false); setMsg(''); }
+  });
+  el.input.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { start(); }
+  });
+
+  // 暴露最小诊断接口，便于自动化验证读取真实内部状态（不参与交互逻辑）
+  window.__countdown = {
+    getState: function () {
+      return { state: state, totalMs: totalMs, remainingMs: remainingMs,
+               display: el.display.textContent, statusText: el.status.textContent,
+               msg: el.msg.textContent, hasTicker: ticker !== null };
+    }
+  };
+
+  render();
+})();
+</script>
+</body>
+</html>

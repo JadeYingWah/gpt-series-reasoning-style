@@ -1,0 +1,17 @@
+﻿{
+  "fileUrl": "file:///<实验根目录>/ab-cycle2/Q01-dashboard-filter/A-skill/_mutant.html",
+  "ranAt": "2026-09-12T06:27:30.624Z",
+  "total": 1,
+  "passed": 0,
+  "failed": 1,
+  "shots": [],
+  "cdpExceptionsTotal": 0,
+  "results": [
+    {
+      "id": "FATAL",
+      "name": "验收脚本异常",
+      "pass": false,
+      "detail": "Error: waitFor 超时\n    at tick (file:///<实验根目录>/ab-cycle2/Q01-dashboard-filter/A-skill/evidence/browser-check.mjs:75:42)"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+browser FOUND  C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe
+browser missing C:/Program Files/Microsoft/Edge/Application/msedge.exe
+browser FOUND  C:/Program Files/Google/Chrome/Application/chrome.exe
+browser missing C:/Program Files (x86)/Google/Chrome/Application/chrome.exe
+module jsdom -> NOT FOUND
+module playwright -> NOT FOUND
+module puppeteer -> NOT FOUND

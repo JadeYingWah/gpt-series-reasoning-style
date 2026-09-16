@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>极简番茄钟</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #1a1d24;
+    --text: #e8eaed;
+    --muted: #9aa0a6;
+    --accent: #5b8def;
+    --danger: #e06c75;
+    --ok: #98c379;
+    --border: #2a2e36;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  }
+  .app {
+    width: min(420px, 92vw);
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px 28px 28px;
+    text-align: center;
+  }
+  h1 {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+  #display {
+    font-variant-numeric: tabular-nums;
+    font-size: clamp(56px, 14vw, 72px);
+    font-weight: 300;
+    line-height: 1;
+    margin-bottom: 12px;
+    letter-spacing: 0.04em;
+  }
+  #status {
+    min-height: 24px;
+    font-size: 15px;
+    color: var(--muted);
+    margin-bottom: 28px;
+  }
+  #status.done { color: var(--danger); font-weight: 600; }
+  #status.running { color: var(--ok); }
+  .controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 28px;
+  }
+  button {
+    font: inherit;
+    font-size: 14px;
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: #22262e;
+    color: var(--text);
+    cursor: pointer;
+    min-width: 88px;
+  }
+  button:hover:not(:disabled) { background: #2a2f39; }
+  button:disabled { opacity: 0.45; cursor: not-allowed; }
+  button.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  button.primary:hover:not(:disabled) { filter: brightness(1.08); }
+  .config {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .config label { display: flex; align-items: center; gap: 8px; }
+  #minutes {
+    width: 72px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: #12151a;
+    color: var(--text);
+    font: inherit;
+    font-size: 14px;
+    text-align: center;
+  }
+  #minutes:disabled { opacity: 0.45; }
+  #configHint {
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--muted);
+    min-height: 16px;
+  }
+  #configHint.error { color: var(--danger); }
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>极简番茄钟</h1>
+  <div id="display" aria-live="polite">25:00</div>
+  <div id="status" aria-live="polite">未开始</div>
+  <div class="controls">
+    <button id="startBtn" class="primary" type="button">开始</button>
+    <button id="pauseBtn" type="button" disabled>暂停</button>
+    <button id="resetBtn" type="button">重置</button>
+  </div>
+  <div class="config">
+    <label for="minutes">时长（分钟）</label>
+    <input id="minutes" type="number" min="1" max="60" step="1" value="25" disabled>
+    <button id="applyBtn" type="button" disabled>应用</button>
+  </div>
+  <div id="configHint">可配置 1–60 的正整数分钟；运行中不可修改</div>
+</div>
+<script>
+(function () {
+  'use strict';
+
+  var DEFAULT_MINUTES = 25;
+  var MIN_MINUTES = 1;
+  var MAX_MINUTES = 60;
+  var TICK_MS = 1000;
+
+  var state = {
+    totalSeconds: DEFAULT_MINUTES * 60,
+    remainingSeconds: DEFAULT_MINUTES * 60,
+    running: false,
+    finished: false,
+    timerId: null
+  };
+
+  var displayEl = document.getElementById('display');
+  var statusEl = document.getElementById('status');
+  var startBtn = document.getElementById('startBtn');
+  var pauseBtn = document.getElementById('pauseBtn');
+  var resetBtn = document.getElementById('resetBtn');
+  var minutesInput = document.getElementById('minutes');
+  var applyBtn = document.getElementById('applyBtn');
+  var configHint = document.getElementById('configHint');
+
+  function pad2(n) {
+    return (n < 10 ? '0' : '') + n;
+  }
+
+  function formatTime(totalSec) {
+    if (totalSec < 0) totalSec = 0;
+    var m = Math.floor(totalSec / 60);
+    var s = totalSec % 60;
+    return pad2(m) + ':' + pad2(s);
+  }
+
+  function setStatus(text, kind) {
+    statusEl.textContent = text;
+    statusEl.className = kind || '';
+  }
+
+  function render() {
+    displayEl.textContent = formatTime(state.remainingSeconds);
+    startBtn.disabled = state.running || state.finished;
+    pauseBtn.disabled = !state.running;
+    minutesInput.disabled = state.running;
+    applyBtn.disabled = state.running;
+  }
+
+  function clearTimer() {
+    if (state.timerId !== null) {
+      clearInterval(state.timerId);
+      state.timerId = null;
+    }
+  }
+
+  function stopClock() {
+    state.running = false;
+    clearTimer();
+  }
+
+  function tryBeep() {
+    // Optional: Web Audio beep; silent if AudioContext unavailable or blocked.
+    try {
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      var ctx = new Ctx();
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = 880;
+      gain.gain.value = 0.04;
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.35);
+      osc.onended = function () {
+        try { ctx.close(); } catch (e) { /* ignore */ }
+      };
+    } catch (e) {
+      // Audio blocked or unavailable — UI still shows 时间到.
+    }
+  }
+
+  function finish() {
+    stopClock();
+    state.finished = true;
+    state.remainingSeconds = 0;
+    render();
+    setStatus('时间到', 'done');
+    tryBeep();
+  }
+
+  function tick() {
+    if (!state.running) return;
+    if (state.remainingSeconds <= 0) {
+      finish();
+      return;
+    }
+    state.remainingSeconds -= 1;
+    if (state.remainingSeconds <= 0) {
+      render();
+      finish();
+      return;
+    }
+    render();
+  }
+
+  function start() {
+    if (state.running || state.finished) return;
+    if (state.remainingSeconds <= 0) return;
+    state.running = true;
+    setStatus('运行中', 'running');
+    render();
+    state.timerId = setInterval(tick, TICK_MS);
+  }
+
+  function pause() {
+    if (!state.running) return;
+    stopClock();
+    setStatus('已暂停', '');
+    render();
+  }
+
+  function reset() {
+    stopClock();
+    state.finished = false;
+    state.remainingSeconds = state.totalSeconds;
+    setStatus('未开始', '');
+    render();
+  }
+
+  function parseMinutes(raw) {
+    var text = String(raw == null ? '' : raw).trim();
+    if (text === '') return { ok: false, msg: '请输入 1–60 的正整数分钟' };
+    if (!/^\d+$/.test(text)) return { ok: false, msg: '时长必须是正整数（1–60）' };
+    var n = parseInt(text, 10);
+    if (!isFinite(n) || n < MIN_MINUTES || n > MAX_MINUTES) {
+      return { ok: false, msg: '时长范围：1–60 分钟' };
+    }
+    return { ok: true, minutes: n };
+  }
+
+  function applyDuration() {
+    if (state.running) return;
+    var parsed = parseMinutes(minutesInput.value);
+    if (!parsed.ok) {
+      configHint.textContent = parsed.msg;
+      configHint.className = 'error';
+      return;
+    }
+    state.totalSeconds = parsed.minutes * 60;
+    state.remainingSeconds = state.totalSeconds;
+    state.finished = false;
+    stopClock();
+    configHint.textContent = '已应用：' + parsed.minutes + ' 分钟';
+    configHint.className = '';
+    setStatus('未开始', '');
+    render();
+  }
+
+  startBtn.addEventListener('click', start);
+  pauseBtn.addEventListener('click', pause);
+  resetBtn.addEventListener('click', reset);
+  applyBtn.addEventListener('click', applyDuration);
+  minutesInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      applyDuration();
+    }
+  });
+
+  // Export pure helpers for Node / source review (no DOM dependency).
+  window.PomodoroLite = {
+    formatTime: formatTime,
+    parseMinutes: parseMinutes,
+    DEFAULT_MINUTES: DEFAULT_MINUTES,
+    MIN_MINUTES: MIN_MINUTES,
+    MAX_MINUTES: MAX_MINUTES
+  };
+
+  render();
+})();
+</script>
+</body>
+</html>

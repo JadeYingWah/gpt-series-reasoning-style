@@ -1,0 +1,56 @@
+{
+  "task": "D2-cafe",
+  "source_sha256": "502f0cc5a042e036ab31927e13756b79c4c19e89e3f0c45843bf4ea10a70d332",
+  "n_rows_all": 10000,
+  "missing_pre_repair": {
+    "Total Spent": 502,
+    "Quantity": 479,
+    "Item": 969
+  },
+  "repaired_by_rule_R2": 462,
+  "n_rows_valid_total_after_R2": 9960,
+  "total_revenue_2dp": 88952.0,
+  "total_vs_qty_price_inconsistent_rows": 0,
+  "item_table_count_revenue_desc": [
+    [
+      "Salad",
+      1145,
+      17320.0
+    ],
+    [
+      "Sandwich",
+      1123,
+      13664.0
+    ],
+    [
+      "Smoothie",
+      1091,
+      13320.0
+    ],
+    [
+      "Juice",
+      1167,
+      10509.0
+    ],
+    [
+      "Cake",
+      1137,
+      10395.0
+    ],
+    [
+      "Coffee",
+      1159,
+      7062.0
+    ],
+    [
+      "Tea",
+      1085,
+      4951.5
+    ],
+    [
+      "Cookie",
+      1087,
+      3223.0
+    ]
+  ]
+}

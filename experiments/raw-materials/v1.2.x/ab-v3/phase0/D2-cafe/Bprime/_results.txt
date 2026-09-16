@@ -1,0 +1,15 @@
+total_rows=10000
+Q1_R2_fixed_rows=462
+Q1_ts_valid_after_R2=9960
+Q2_total_revenue=88952.00
+Q4_missing_before_fix: TotalSpent=502, Quantity=479, Item=969
+Q5_mismatch_rows=0
+Q3_item_table [n, revenue] desc by revenue:
+  Salad: n=1145, revenue=17320.00
+  Sandwich: n=1123, revenue=13664.00
+  Smoothie: n=1091, revenue=13320.00
+  Juice: n=1167, revenue=10509.00
+  Cake: n=1137, revenue=10395.00
+  Coffee: n=1159, revenue=7062.00
+  Tea: n=1085, revenue=4951.50
+  Cookie: n=1087, revenue=3223.00

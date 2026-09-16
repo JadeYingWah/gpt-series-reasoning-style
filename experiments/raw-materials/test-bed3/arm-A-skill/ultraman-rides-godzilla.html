@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>奥特曼骑哥斯拉 · 午夜巡游 2D动画</title>
+<style>
+  html,body{margin:0;padding:0;background:#02030a;min-height:100vh;display:grid;place-items:center;}
+  svg{display:block;width:min(96vw,1280px);height:auto;border-radius:18px;
+      box-shadow:0 30px 90px rgba(0,0,0,.75),0 0 0 1px rgba(140,170,255,.14);}
+  .anim{transform-origin:0 0;}
+
+  /* ===== 无限横向滚动（视差层） ===== */
+  @keyframes scrollX{to{transform:translateX(-1600px);}}
+  .s-clouds{animation:scrollX 80s linear infinite;}
+  .s-far{animation:scrollX 46s linear infinite;}
+  .s-mid{animation:scrollX 26s linear infinite;}
+  .s-road{animation:scrollX 9s linear infinite;}
+  .s-fg{animation:scrollX 5.5s linear infinite;}
+
+  /* ===== 哥斯拉行走循环（2.2s = 一步） ===== */
+  @keyframes bobA{0%,50%,100%{transform:translate(-6px,0);}25%,75%{transform:translate(6px,-9px);}}
+  .bobA{animation:bobA 2.2s ease-in-out infinite;}
+  @keyframes thigh{
+    0%{transform:rotate(-20deg);}20%{transform:rotate(10deg);}40%{transform:rotate(26deg);}
+    50%{transform:rotate(16deg);}65%{transform:rotate(-10deg);}82%{transform:rotate(-22deg);}
+    100%{transform:rotate(-20deg);}}
+  @keyframes shin{
+    0%{transform:rotate(8deg);}20%{transform:rotate(4deg);}40%{transform:rotate(30deg);}
+    50%{transform:rotate(55deg);}62%{transform:rotate(40deg);}74%{transform:rotate(14deg);}
+    100%{transform:rotate(8deg);}}
+  .legA .th{animation:thigh 2.2s ease-in-out infinite;}
+  .legA .sh{animation:shin 2.2s ease-in-out infinite;}
+  .legB .th{animation:thigh 2.2s ease-in-out infinite;animation-delay:-1.1s;}
+  .legB .sh{animation:shin 2.2s ease-in-out infinite;animation-delay:-1.1s;}
+  @keyframes tail1{0%,100%{transform:rotate(-9deg);}50%{transform:rotate(1deg);}}
+  @keyframes tail2{0%,100%{transform:rotate(-13deg);}50%{transform:rotate(1deg);}}
+  @keyframes tail3{0%,100%{transform:rotate(-11deg);}50%{transform:rotate(7deg);}}
+  @keyframes tail4{0%,100%{transform:rotate(-9deg);}50%{transform:rotate(13deg);}}
+  @keyframes tail5{0%,100%{transform:rotate(-8deg);}50%{transform:rotate(20deg);}}
+  .t1{animation:tail1 2.2s ease-in-out infinite;}
+  .t2{animation:tail2 2.2s ease-in-out infinite;animation-delay:.12s;}
+  .t3{animation:tail3 2.2s ease-in-out infinite;animation-delay:.24s;}
+  .t4{animation:tail4 2.2s ease-in-out infinite;animation-delay:.36s;}
+  .t5{animation:tail5 2.2s ease-in-out infinite;animation-delay:.48s;}
+  @keyframes headB{0%,100%{transform:rotate(-2deg);}30%{transform:rotate(2.6deg);}
+    60%{transform:rotate(-1deg);}80%{transform:rotate(1.8deg);}}
+  .headB{animation:headB 2.2s ease-in-out infinite;animation-delay:-.2s;}
+  @keyframes jaw{0%,55%,100%{transform:rotate(0);}25%{transform:rotate(6.5deg);}}
+  .jaw{animation:jaw 2.2s ease-in-out infinite;animation-delay:-.6s;}
+  @keyframes arm{0%{transform:rotate(6deg);}30%{transform:rotate(-8deg);}60%{transform:rotate(4deg);}100%{transform:rotate(6deg);}}
+  .armA{animation:arm 2.2s ease-in-out infinite;animation-delay:-1.1s;}
+  .armB{animation:arm 2.2s ease-in-out infinite;}
+  @keyframes glowP{0%,100%{opacity:.55;}50%{opacity:1;}}
+  .glowP{animation:glowP 2.2s ease-in-out infinite;}
+  @keyframes mouthG{0%,100%{opacity:.25;}50%{opacity:.6;}}
+  .mouthGlow{animation:mouthG 2.2s ease-in-out infinite;}
+  @keyframes shadP{0%,50%,100%{transform:scale(1);}25%,75%{transform:scale(1.035);}}
+  .shadP{animation:shadP 2.2s ease-in-out infinite;}
+  @keyframes puff{0%{opacity:0;transform:scale(.3);}10%{opacity:.5;transform:scale(.65);}
+    60%,100%{opacity:0;transform:translate(0,-34px) scale(1.9);}}
+  .puff{animation:puff 2.2s ease-out infinite;}
+  .puff2{animation-delay:-1.1s;}
+
+  /* ===== 奥特曼（次级动作，相位滞后） ===== */
+  @keyframes uBob{0%,50%,100%{transform:translateY(0) rotate(-1.2deg);}
+    25%,75%{transform:translateY(-13px) rotate(1.4deg);}}
+  .uBob{animation:uBob 2.2s ease-in-out infinite;animation-delay:-.4s;}
+  @keyframes fistW{0%,100%{transform:rotate(-6deg);}50%{transform:rotate(7deg);}}
+  .uFist{animation:fistW 2.2s ease-in-out infinite;animation-delay:-.55s;}
+  @keyframes grabW{0%,100%{transform:rotate(4deg);}50%{transform:rotate(-4deg);}}
+  .uGrab{animation:grabW 2.2s ease-in-out infinite;animation-delay:-.15s;}
+  @keyframes dang{0%,100%{transform:rotate(-11deg);}50%{transform:rotate(9deg);}}
+  .uLegs{animation:dang 2.2s ease-in-out infinite;animation-delay:-.25s;}
+  @keyframes headU{0%,100%{transform:rotate(-4deg);}50%{transform:rotate(4deg);}}
+  .uHead{animation:headU 2.2s ease-in-out infinite;animation-delay:-.6s;}
+  @keyframes timerP{0%,100%{opacity:.55;}50%{opacity:1;}}
+  .uTimer{animation:timerP 1.1s ease-in-out infinite;}
+
+  /* ===== 环境点缀 ===== */
+  @keyframes tw{0%,100%{opacity:.15;}50%{opacity:1;}}
+  .tw{animation:tw 2.6s ease-in-out infinite;}
+  @keyframes blinkL{0%,100%{opacity:1;}50%{opacity:.05;}}
+  .blinkL{animation:blinkL 1.6s steps(1) infinite;}
+  @keyframes shootK{0%,100%{opacity:0;transform:translate(0,0);}2%{opacity:1;}
+    10%{opacity:0;transform:translate(-300px,132px);}}
+  .shoot{animation:shootK 9s linear infinite;}
+  @keyframes flickW{0%,42%,50%,58%,100%{opacity:.9;}46%{opacity:.25;}54%{opacity:.3;}}
+  .flickW{animation:flickW 7s linear infinite;}
+  @keyframes shakeC{0%,9%,50%,59%,100%{transform:translateY(0);}3%{transform:translateY(4px);}
+    53%{transform:translateY(4px);}}
+  .shake{animation:shakeC 2.2s linear infinite;}
+
+  .glowC{filter:drop-shadow(0 0 7px rgba(125,235,255,.85));}
+  .glowY{filter:drop-shadow(0 0 5px rgba(255,240,170,.9));}
+  .glowB{filter:drop-shadow(0 0 7px rgba(70,215,255,.9));}
+  .ttl{font:600 30px "Segoe UI",system-ui,sans-serif;letter-spacing:8px;fill:#e6eeff;opacity:.92;}
+  .ttl2{font:500 15px "Segoe UI","Microsoft YaHei",system-ui,sans-serif;letter-spacing:5px;fill:#9db4e2;opacity:.85;}
+</style>
+</head>
+<body>
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="奥特曼骑在哥斯拉背上的2D动画">
+  <title>奥特曼骑哥斯拉 · 午夜巡游</title>
+  <defs>
+    <linearGradient id="skyG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#05081c"/><stop offset=".45" stop-color="#0e1a3e"/>
+      <stop offset=".78" stop-color="#23335f"/><stop offset="1" stop-color="#33456f"/>
+    </linearGradient>
+    <linearGradient id="hazeG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff9456" stop-opacity="0"/>
+      <stop offset=".65" stop-color="#ff9456" stop-opacity=".14"/>
+      <stop offset="1" stop-color="#ff9456" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="cityG" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#ffaa6e" stop-opacity=".14"/>
+      <stop offset="1" stop-color="#ffaa6e" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="moonHalo" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#dfe8ff" stop-opacity=".32"/>
+      <stop offset="1" stop-color="#dfe8ff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="roadG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2a3046"/><stop offset="1" stop-color="#141826"/>
+    </linearGradient>
+    <linearGradient id="bodyG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#41615a"/><stop offset=".55" stop-color="#2c453f"/>
+      <stop offset="1" stop-color="#1d312c"/>
+    </linearGradient>
+    <linearGradient id="bellyG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d6c69a"/><stop offset="1" stop-color="#a8946a"/>
+    </linearGradient>
+    <linearGradient id="finG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d8e4de"/><stop offset="1" stop-color="#8fa9a1"/>
+    </linearGradient>
+    <linearGradient id="uSilverG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f2f6fa"/><stop offset="1" stop-color="#b9c4cf"/>
+    </linearGradient>
+    <radialGradient id="vigG" cx=".5" cy=".42" r=".75">
+      <stop offset="0" stop-color="#02040f" stop-opacity="0"/>
+      <stop offset=".72" stop-color="#02040f" stop-opacity="0"/>
+      <stop offset="1" stop-color="#02040f" stop-opacity=".58"/>
+    </radialGradient>
+    <pattern id="winFar" width="18" height="26" patternUnits="userSpaceOnUse">
+      <rect width="7" height="11" x="4" y="6" fill="#f6d68a" opacity=".4"/>
+    </pattern>
+    <pattern id="winMid" width="24" height="34" patternUnits="userSpaceOnUse">
+      <rect width="9" height="14" x="6" y="8" fill="#ffd98a" opacity=".55"/>
+    </pattern>
+  </defs>
+
+  <g id="cam" class="anim shake">
+    <!-- 天空 -->
+    <rect width="1600" height="900" fill="url(#skyG)"/>
+    <!-- 星星 -->
+    <g fill="#ffffff">
+      <circle class="tw" cx="90"  cy="70"  r="1.8" style="animation-delay:-.3s"/>
+      <circle class="tw" cx="210" cy="150" r="1.2" style="animation-delay:-1.1s"/>
+      <circle class="tw" cx="330" cy="60"  r="2.1" style="animation-delay:-.7s"/>
+      <circle class="tw" cx="450" cy="200" r="1.4" style="animation-delay:-1.9s"/>
+      <circle class="tw" cx="560" cy="90"  r="1.7" style="animation-delay:-.2s"/>
+      <circle class="tw" cx="640" cy="250" r="1.1" style="animation-delay:-2.2s"/>
+      <circle class="tw" cx="720" cy="60"  r="1.9" style="animation-delay:-1.4s"/>
+      <circle class="tw" cx="810" cy="170" r="1.3" style="animation-delay:-.9s"/>
+      <circle class="tw" cx="900" cy="100" r="2.0" style="animation-delay:-1.7s"/>
+      <circle class="tw" cx="990" cy="220" r="1.2" style="animation-delay:-.5s"/>
+      <circle class="tw" cx="1080" cy="70" r="1.6" style="animation-delay:-2.4s"/>
+      <circle class="tw" cx="1400" cy="330" r="1.4" style="animation-delay:-1.3s"/>
+      <circle class="tw" cx="1500" cy="240" r="1.8" style="animation-delay:-.6s"/>
+      <circle class="tw" cx="1560" cy="120" r="1.2" style="animation-delay:-2.0s"/>
+      <circle class="tw" cx="1460" cy="60"  r="1.5" style="animation-delay:-1.0s"/>
+      <circle class="tw" cx="1380" cy="150" r="1.1" style="animation-delay:-1.8s"/>
+      <circle class="tw" cx="120" cy="260" r="1.3" style="animation-delay:-.4s"/>
+      <circle class="tw" cx="40"  cy="180" r="1.6" style="animation-delay:-2.1s"/>
+      <circle class="tw" cx="760" cy="320" r="1.1" style="animation-delay:-1.5s"/>
+      <circle class="tw" cx="250" cy="330" r="1.2" style="animation-delay:-.8s"/>
+    </g>
+    <!-- 流星 -->
+    <g transform="translate(1150,70) rotate(24)"><g class="anim shoot">
+      <line x1="0" y1="0" x2="-92" y2="-36" stroke="#cfe0ff" stroke-width="2.5" stroke-linecap="round" opacity=".9"/>
+      <circle r="2.6" fill="#ffffff"/>
+    </g></g>
+    <!-- 月亮 -->
+    <circle cx="1240" cy="150" r="120" fill="url(#moonHalo)"/>
+    <circle cx="1240" cy="150" r="52" fill="#eef2ff"/>
+    <circle cx="1222" cy="138" r="9" fill="#d9def0" opacity=".8"/>
+    <circle cx="1256" cy="164" r="6" fill="#d9def0" opacity=".7"/>
+    <circle cx="1238" cy="172" r="4" fill="#d9def0" opacity=".6"/>
+    <!-- 云（慢速视差） -->
+    <g class="anim s-clouds" fill="#35426f" opacity=".55">
+      <g><ellipse cx="200" cy="150" rx="90" ry="16"/><ellipse cx="260" cy="136" rx="60" ry="12"/></g>
+      <g><ellipse cx="660" cy="110" rx="110" ry="18"/><ellipse cx="720" cy="96" rx="70" ry="13"/></g>
+      <g><ellipse cx="1080" cy="200" rx="80" ry="14"/><ellipse cx="1130" cy="188" rx="52" ry="10"/></g>
+      <g><ellipse cx="1440" cy="90" rx="95" ry="15"/><ellipse cx="1500" cy="78" rx="58" ry="11"/></g>
+      <g transform="translate(1600,0)">
+        <g><ellipse cx="200" cy="150" rx="90" ry="16"/><ellipse cx="260" cy="136" rx="60" ry="12"/></g>
+        <g><ellipse cx="660" cy="110" rx="110" ry="18"/><ellipse cx="720" cy="96" rx="70" ry="13"/></g>
+        <g><ellipse cx="1080" cy="200" rx="80" ry="14"/><ellipse cx="1130" cy="188" rx="52" ry="10"/></g>
+        <g><ellipse cx="1440" cy="90" rx="95" ry="15"/><ellipse cx="1500" cy="78" rx="58" ry="11"/></g>
+      </g>
+    </g>
+    <!-- 远景楼群 -->
+    <g class="anim s-far">
+      <g fill="#1d2a55">
+        <rect x="0" y="468" width="90" height="180"/><rect x="70" y="408" width="60" height="240"/>
+        <rect x="150" y="498" width="110" height="150"/><rect x="280" y="348" width="80" height="300"/>
+        <rect x="380" y="448" width="120" height="200"/><rect x="520" y="388" width="70" height="260"/>
+        <rect x="610" y="478" width="100" height="170"/><rect x="730" y="328" width="90" height="320"/>
+        <rect x="840" y="438" width="120" height="210"/><rect x="980" y="388" width="80" height="260"/>
+        <rect x="1080" y="468" width="110" height="180"/><rect x="1210" y="358" width="90" height="290"/>
+        <rect x="1320" y="438" width="120" height="210"/><rect x="1460" y="408" width="140" height="240"/>
+      </g>
+      <g fill="url(#winFar)">
+        <rect x="0" y="468" width="90" height="180"/><rect x="70" y="408" width="60" height="240"/>
+        <rect x="150" y="498" width="110" height="150"/><rect x="280" y="348" width="80" height="300"/>
+        <rect x="380" y="448" width="120" height="200"/><rect x="520" y="388" width="70" height="260"/>
+        <rect x="610" y="478" width="100" height="170"/><rect x="730" y="328" width="90" height="320"/>
+        <rect x="840" y="438" width="120" height="210"/><rect x="980" y="388" width="80" height="260"/>
+        <rect x="1080" y="468" width="110" height="180"/><rect x="1210" y="358" width="90" height="290"/>
+        <rect x="1320" y="438" width="120" height="210"/><rect x="1460" y="408" width="140" height="240"/>
+      </g>
+      <g fill="#1d2a55" transform="translate(1600,0)">
+        <rect x="0" y="468" width="90" height="180"/><rect x="70" y="408" width="60" height="240"/>
+        <rect x="150" y="498" width="110" height="150"/><rect x="280" y="348" width="80" height="300"/>
+        <rect x="380" y="448" width="120" height="200"/><rect x="520" y="388" width="70" height="260"/>
+        <rect x="610" y="478" width="100" height="170"/><rect x="730" y="328" width="90" height="320"/>
+        <rect x="840" y="438" width="120" height="210"/><rect x="980" y="388" width="80" height="260"/>
+        <rect x="1080" y="468" width="110" height="180"/><rect x="1210" y="358" width="90" height="290"/>
+        <rect x="1320" y="438" width="120" height="210"/><rect x="1460" y="408" width="140" height="240"/>
+      </g>
+      <g fill="url(#winFar)" transform="translate(1600,0)">
+        <rect x="0" y="468" width="90" height="180"/><rect x="70" y="408" width="60" height="240"/>
+        <rect x="150" y="498" width="110" height="150"/><rect x="280" y="348" width="80" height="300"/>
+        <rect x="380" y="448" width="120" height="200"/><rect x="520" y="388" width="70" height="260"/>
+        <rect x="610" y="478" width="100" height="170"/><rect x="730" y="328" width="90" height="320"/>
+        <rect x="840" y="438" width="120" height="210"/><rect x="980" y="388" width="80" height="260"/>
+        <rect x="1080" y="468" width="110" height="180"/><rect x="1210" y="358" width="90" height="290"/>
+        <rect x="1320" y="438" width="120" height="210"/><rect x="1460" y="408" width="140" height="240"/>
+      </g>
+    </g>
+    <!-- 地平线霞光 -->
+    <rect x="0" y="470" width="1600" height="180" fill="url(#hazeG)"/>
+    <!-- 中景楼群 -->
+    <g class="anim s-mid">
+      <g fill="#141d40">
+        <rect x="30" y="322" width="150" height="330"/><rect x="220" y="232" width="120" height="420"/>
+        <rect x="370" y="352" width="170" height="300"/><rect x="580" y="192" width="140" height="460"/>
+        <rect x="760" y="302" width="160" height="350"/><rect x="960" y="152" width="130" height="500"/>
+        <rect x="1130" y="272" width="170" height="380"/><rect x="1340" y="212" width="150" height="440"/>
+        <rect x="1530" y="352" width="120" height="300"/>
+      </g>
+      <g fill="url(#winMid)">
+        <rect x="30" y="322" width="150" height="330"/><rect x="220" y="232" width="120" height="420"/>
+        <rect x="370" y="352" width="170" height="300"/><rect x="580" y="192" width="140" height="460"/>
+        <rect x="760" y="302" width="160" height="350"/><rect x="960" y="152" width="130" height="500"/>
+        <rect x="1130" y="272" width="170" height="380"/><rect x="1340" y="212" width="150" height="440"/>
+        <rect x="1530" y="352" width="120" height="300"/>
+      </g>
+      <g stroke="#0d1430" stroke-width="4">
+        <line x1="650" y1="192" x2="650" y2="140"/><line x1="1025" y1="152" x2="1025" y2="96"/>
+      </g>
+      <circle class="blinkL" cx="650" cy="136" r="5" fill="#ff5a5a"/>
+      <circle class="blinkL" cx="1025" cy="92" r="5" fill="#ff5a5a" style="animation-delay:-.8s"/>
+      <rect class="flickW" x="606" y="300" width="9" height="14" fill="#ffe9b0"/>
+      <rect class="flickW" x="990" y="260" width="9" height="14" fill="#ffe9b0" style="animation-delay:-3s"/>
+      <g fill="#141d40" transform="translate(1600,0)">
+        <rect x="30" y="322" width="150" height="330"/><rect x="220" y="232" width="120" height="420"/>
+        <rect x="370" y="352" width="170" height="300"/><rect x="580" y="192" width="140" height="460"/>
+        <rect x="760" y="302" width="160" height="350"/><rect x="960" y="152" width="130" height="500"/>
+        <rect x="1130" y="272" width="170" height="380"/><rect x="1340" y="212" width="150" height="440"/>
+        <rect x="1530" y="352" width="120" height="300"/>
+      </g>
+      <g fill="url(#winMid)" transform="translate(1600,0)">
+        <rect x="30" y="322" width="150" height="330"/><rect x="220" y="232" width="120" height="420"/>
+        <rect x="370" y="352" width="170" height="300"/><rect x="580" y="192" width="140" height="460"/>
+        <rect x="760" y="302" width="160" height="350"/><rect x="960" y="152" width="130" height="500"/>
+        <rect x="1130" y="272" width="170" height="380"/><rect x="1340" y="212" width="150" height="440"/>
+        <rect x="1530" y="352" width="120" height="300"/>
+      </g>
+      <g stroke="#0d1430" stroke-width="4" transform="translate(1600,0)">
+        <line x1="650" y1="192" x2="650" y2="140"/><line x1="1025" y1="152" x2="1025" y2="96"/>
+      </g>
+      <circle class="blinkL" cx="2250" cy="136" r="5" fill="#ff5a5a"/>
+      <circle class="blinkL" cx="2625" cy="92" r="5" fill="#ff5a5a" style="animation-delay:-.8s"/>
+    </g>
+    <ellipse cx="800" cy="648" rx="720" ry="90" fill="url(#cityG)"/>
+    <!-- 草地 -->
+    <rect x="0" y="640" width="1600" height="68" fill="#131f16"/>
+    <g fill="#0d1710">
+      <ellipse cx="180" cy="672" rx="60" ry="12"/><ellipse cx="520" cy="688" rx="80" ry="14"/>
+      <ellipse cx="900" cy="668" rx="55" ry="11"/><ellipse cx="1260" cy="684" rx="75" ry="13"/>
+      <ellipse cx="1500" cy="666" rx="60" ry="12"/>
+    </g>
+    <!-- 公路（快速滚动） -->
+    <g class="anim s-road">
+      <rect x="0" y="704" width="1600" height="100" fill="url(#roadG)"/>
+      <rect x="0" y="704" width="1600" height="3" fill="#4a5474" opacity=".5"/>
+      <g fill="#e8d27c" opacity=".8">
+        <rect x="20" y="756" width="74" height="7" rx="3"/><rect x="180" y="756" width="74" height="7" rx="3"/>
+        <rect x="340" y="756" width="74" height="7" rx="3"/><rect x="500" y="756" width="74" height="7" rx="3"/>
+        <rect x="660" y="756" width="74" height="7" rx="3"/><rect x="820" y="756" width="74" height="7" rx="3"/>
+        <rect x="980" y="756" width="74" height="7" rx="3"/><rect x="1140" y="756" width="74" height="7" rx="3"/>
+        <rect x="1300" y="756" width="74" height="7" rx="3"/><rect x="1460" y="756" width="74" height="7" rx="3"/>
+      </g>
+      <g fill="#10141f" opacity=".7">
+        <ellipse cx="120" cy="726" rx="34" ry="5"/><ellipse cx="620" cy="784" rx="46" ry="6"/>
+        <ellipse cx="1060" cy="724" rx="30" ry="4"/><ellipse cx="1420" cy="780" rx="40" ry="6"/>
+      </g>
+      <g transform="translate(1600,0)">
+        <rect x="0" y="704" width="1600" height="100" fill="url(#roadG)"/>
+        <rect x="0" y="704" width="1600" height="3" fill="#4a5474" opacity=".5"/>
+        <g fill="#e8d27c" opacity=".8">
+          <rect x="20" y="756" width="74" height="7" rx="3"/><rect x="180" y="756" width="74" height="7" rx="3"/>
+          <rect x="340" y="756" width="74" height="7" rx="3"/><rect x="500" y="756" width="74" height="7" rx="3"/>
+          <rect x="660" y="756" width="74" height="7" rx="3"/><rect x="820" y="756" width="74" height="7" rx="3"/>
+          <rect x="980" y="756" width="74" height="7" rx="3"/><rect x="1140" y="756" width="74" height="7" rx="3"/>
+          <rect x="1300" y="756" width="74" height="7" rx="3"/><rect x="1460" y="756" width="74" height="7" rx="3"/>
+        </g>
+        <g fill="#10141f" opacity=".7">
+          <ellipse cx="120" cy="726" rx="34" ry="5"/><ellipse cx="620" cy="784" rx="46" ry="6"/>
+          <ellipse cx="1060" cy="724" rx="30" ry="4"/><ellipse cx="1420" cy="780" rx="40" ry="6"/>
+        </g>
+      </g>
+    </g>
+
+    <!-- 哥斯拉投影 -->
+    <g transform="translate(855,742)"><ellipse class="anim shadP" rx="345" ry="23" fill="#050810" opacity=".5"/></g>
+
+    <!-- ============ 哥斯拉 · 后层（随身体起伏） ============ -->
+    <g class="anim bobA">
+      <!-- 远侧手臂 -->
+      <g transform="translate(948,468)"><g class="anim armB">
+        <path d="M-8 -10 C 12 -8 28 10 30 36 C 32 52 26 66 16 72 L 0 68 C 8 56 10 44 6 34 C 0 20 -8 8 -16 2 Z"
+              fill="#1a2b26" stroke="#101c18" stroke-width="2"/>
+        <path d="M12 66 L18 82 L24 64 Z" fill="#7d938b"/>
+      </g></g>
+      <!-- 远侧腿 -->
+      <g class="legB"><g transform="translate(718,585)"><g class="anim th">
+        <path d="M-18 -2 C -28 28 -20 56 8 76 C 28 88 48 82 54 64 C 60 44 40 14 16 0 Z"
+              fill="#1c2f29" stroke="#101c18" stroke-width="2"/>
+        <g transform="translate(28,72)"><g class="anim sh">
+          <path d="M-16 -6 C -22 18 -20 38 -12 52 L 10 52 C 18 34 16 8 8 -6 Z" fill="#182720" stroke="#101c18" stroke-width="2"/>
+          <path d="M-20 44 C -26 60 -18 70 -2 71 L 36 71 C 48 70 52 62 44 56 L 22 46 Z" fill="#182720" stroke="#101c18" stroke-width="2"/>
+          <path d="M36 56 L52 64 L38 67 Z" fill="#6f857d"/><path d="M28 62 L42 70 L28 71 Z" fill="#6f857d"/>
+        </g></g>
+      </g></g></g>
+      <!-- 尾巴（5节链式波动） -->
+      <g transform="translate(665,522)"><g class="anim t1">
+        <path d="M4 -38 C -40 -32 -80 -24 -114 -12 L -114 22 C -80 28 -40 34 6 40 Z"
+              fill="url(#bodyG)" stroke="#101c18" stroke-width="2"/>
+        <path d="M-28 -32 L-18 -58 L-8 -30 Z" fill="url(#finG)"/>
+        <path d="M-72 -26 L-64 -48 L-54 -24 Z" fill="url(#finG)"/>
+        <g transform="translate(-104,-6)"><g class="anim t2">
+          <path d="M2 -26 C -36 -22 -72 -14 -104 -4 L -104 14 C -72 18 -36 22 4 28 Z"
+                fill="#2c453f" stroke="#101c18" stroke-width="2"/>
+          <path d="M-40 -22 L-32 -44 L-22 -20 Z" fill="url(#finG)"/>
+          <g transform="translate(-98,-8)"><g class="anim t3">
+            <path d="M2 -18 C -34 -14 -66 -8 -98 -2 L -98 10 C -66 12 -34 14 4 18 Z"
+                  fill="#29403a" stroke="#101c18" stroke-width="2"/>
+            <g transform="translate(-94,-4)"><g class="anim t4">
+              <path d="M2 -12 C -32 -9 -62 -4 -92 0 L -92 6 C -62 8 -32 10 4 12 Z"
+                    fill="#243a34" stroke="#101c18" stroke-width="2"/>
+              <g transform="translate(-88,-1)"><g class="anim t5">
+                <path d="M2 -7 C -38 -5 -76 -2 -112 1 L -112 4 C -76 5 -38 6 4 7 Z"
+                      fill="#1f332e" stroke="#101c18" stroke-width="2"/>
+                <path d="M-108 0 L-124 -6 L-110 6 Z" fill="#cfd8d3" opacity=".9"/>
+              </g></g>
+            </g></g>
+          </g></g>
+        </g></g>
+      </g></g>
+      <!-- 躯干 -->
+      <path d="M 656 546 C 664 492 706 442 772 420 C 826 402 892 384 952 378
+               C 1004 373 1034 392 1046 428 C 1058 466 1046 516 1008 556
+               C 968 598 884 616 806 602 C 730 589 664 578 656 546 Z"
+            fill="url(#bodyG)" stroke="#101c18" stroke-width="2.5"/>
+      <!-- 背鳍（小·中） -->
+      <path d="M 700 452 L 712 394 L 728 444 Z" fill="url(#finG)" stroke="#101c18" stroke-width="2"/>
+      <path d="M 748 430 L 764 346 L 782 358 L 798 422 Z" fill="url(#finG)" stroke="#101c18" stroke-width="2"/>
+      <path d="M 760 360 L 764 346 L 772 358 Z" fill="#86ecff" class="glowC glowP"/>
+      <path d="M 818 410 L 840 304 L 860 322 L 876 402 Z" fill="url(#finG)" stroke="#101c18" stroke-width="2"/>
+      <path d="M 834 320 L 840 304 L 850 318 Z" fill="#86ecff" class="glowC glowP" style="animation-delay:-.3s"/>
+      <!-- 腹甲 -->
+      <g fill="url(#bellyG)" stroke="#7a6a48" stroke-width="1.5">
+        <rect x="-24" y="-10" width="48" height="20" rx="10" transform="translate(768,586) rotate(18)"/>
+        <rect x="-24" y="-10" width="48" height="20" rx="10" transform="translate(836,600) rotate(8)"/>
+        <rect x="-24" y="-10" width="48" height="20" rx="10" transform="translate(902,596) rotate(-8)"/>
+        <rect x="-24" y="-10" width="48" height="20" rx="10" transform="translate(958,572) rotate(-24)"/>
+        <rect x="-24" y="-10" width="48" height="20" rx="10" transform="translate(998,540) rotate(-40)"/>
+      </g>
+      <!-- 皮肤纹理与背脊光 -->
+      <g fill="#101d19" opacity=".35">
+        <ellipse cx="760" cy="480" rx="36" ry="20"/><ellipse cx="860" cy="460" rx="30" ry="18"/>
+        <ellipse cx="940" cy="480" rx="26" ry="16"/>
+      </g>
+      <path d="M 690 512 C 740 430 830 404 950 384" fill="none" stroke="#8fe3d0" stroke-width="3" opacity=".3" stroke-linecap="round"/>
+      <path d="M 960 380 L 970 352 L 982 378 Z" fill="#22372f"/>
+      <!-- 近侧手臂 -->
+      <g transform="translate(990,450)"><g class="anim armA">
+        <path d="M-8 -10 C 12 -8 28 10 30 36 C 32 52 26 66 16 72 L 0 68 C 8 56 10 44 6 34 C 0 20 -8 8 -16 2 Z"
+              fill="#35544c" stroke="#101c18" stroke-width="2"/>
+        <path d="M14 66 L20 82 L26 64 Z" fill="#cfd8d3"/>
+        <path d="M22 62 L30 76 L32 58 Z" fill="#cfd8d3"/>
+      </g></g>
+      <!-- 近侧腿 -->
+      <g class="legA"><g transform="translate(792,588)"><g class="anim th">
+        <path d="M-18 -2 C -28 28 -20 56 8 76 C 28 88 48 82 54 64 C 60 44 40 14 16 0 Z"
+              fill="#35544c" stroke="#101c18" stroke-width="2"/>
+        <g transform="translate(28,72)"><g class="anim sh">
+          <path d="M-16 -6 C -22 18 -20 38 -12 52 L 10 52 C 18 34 16 8 8 -6 Z" fill="#2c453f" stroke="#101c18" stroke-width="2"/>
+          <path d="M-20 44 C -26 60 -18 70 -2 71 L 36 71 C 48 70 52 62 44 56 L 22 46 Z" fill="#2c453f" stroke="#101c18" stroke-width="2"/>
+          <path d="M36 56 L52 64 L38 67 Z" fill="#cfd8d3"/><path d="M28 62 L42 70 L28 71 Z" fill="#cfd8d3"/>
+        </g></g>
+      </g></g></g>
+    </g>
+
+    <!-- 落地扬尘 -->
+    <g transform="translate(838,738)"><ellipse class="anim puff" rx="30" ry="9" fill="#8a8f9e"/></g>
+    <g transform="translate(768,738)"><ellipse class="anim puff puff2" rx="30" ry="9" fill="#8a8f9e"/></g>
+
+    <!-- ============ 奥特曼（骑乘，次级动作） ============ -->
+    <g transform="translate(880,382)"><g class="anim uBob">
+      <!-- 远侧腿 -->
+      <g transform="translate(-14,3)" opacity=".92">
+        <path d="M0 -4 L30 34" stroke="#9aa6b2" stroke-width="14" stroke-linecap="round" fill="none"/>
+        <path d="M30 34 L24 70" stroke="#9aa6b2" stroke-width="12" stroke-linecap="round" fill="none"/>
+        <path d="M24 70 L36 80" stroke="#b5302a" stroke-width="13" stroke-linecap="round" fill="none"/>
+      </g>
+      <!-- 近侧腿（悬摆） -->
+      <g class="anim uLegs">
+        <path d="M2 -4 L32 34" stroke="#dfe6ec" stroke-width="15" stroke-linecap="round" fill="none"/>
+        <path d="M32 34 L26 72" stroke="#dfe6ec" stroke-width="13" stroke-linecap="round" fill="none"/>
+        <path d="M26 72 L40 82" stroke="#d93831" stroke-width="14" stroke-linecap="round" fill="none"/>
+      </g>
+      <!-- 躯干 -->
+      <path d="M2 -4 L8 -52" stroke="url(#uSilverG)" stroke-width="27" stroke-linecap="round" fill="none"/>
+      <path d="M-4 -32 L16 -46 M0 -22 L20 -36" stroke="#d93831" stroke-width="5.5" stroke-linecap="round" fill="none"/>
+      <circle cx="8" cy="-55" r="9" fill="#d93831"/>
+      <path d="M10 -58 L16 -66" stroke="#cfd7de" stroke-width="9" stroke-linecap="round" fill="none"/>
+      <!-- 头部（惯性滞后摆动） -->
+      <g transform="translate(19,-80)"><g class="anim uHead">
+        <circle r="15.5" fill="url(#uSilverG)" stroke="#8b98a4" stroke-width="1.5"/>
+        <path d="M-6 -13 L-16 -33 L5 -11 Z" fill="#c8d2da" stroke="#8b98a4" stroke-width="1"/>
+        <ellipse cx="6" cy="1" rx="9.5" ry="11.5" fill="#eef3f7"/>
+        <ellipse cx="7" cy="-2" rx="4.6" ry="2.1" fill="#fff6b8" class="glowY" transform="rotate(16 7 -2)"/>
+        <ellipse cx=".5" cy="-3" rx="2.8" ry="1.5" fill="#fff6b8" class="glowY" transform="rotate(12 .5 -3)"/>
+        <path d="M9 7 L15 7" stroke="#7c8894" stroke-width="1.6" stroke-linecap="round"/>
+      </g></g>
+      <!-- 彩色计时器 -->
+      <circle cx="12" cy="-31" r="6" fill="#37d3ff" class="glowB uTimer"/>
+      <!-- 抓鳍手臂（握住背鳍鳍面） -->
+      <g class="anim uGrab">
+        <path d="M12 -48 L32 -64 L50 -82" fill="none" stroke="#dfe6ec" stroke-width="12"
+              stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="52" cy="-84" r="7" fill="#dfe6ec" stroke="#9aa6b2" stroke-width="1"/>
+      </g>
+      <!-- 举起拳头（向外避开头部） -->
+      <g class="anim uFist">
+        <path d="M6 -52 L-22 -72 L-36 -122" fill="none" stroke="#dfe6ec" stroke-width="12"
+              stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="-33" cy="-113" r="5.5" fill="#d93831"/>
+        <circle cx="-38" cy="-127" r="8" fill="#dfe6ec" stroke="#9aa6b2" stroke-width="1"/>
+      </g>
+    </g></g>
+
+    <!-- ============ 哥斯拉 · 前层（大背鳍+头部，遮住骑手前侧） ============ -->
+    <g class="anim bobA">
+      <path d="M 886 394 L 910 268 L 932 292 L 948 384 Z" fill="url(#finG)" stroke="#101c18" stroke-width="2"/>
+      <path d="M 904 282 L 910 268 L 920 281 Z" fill="#86ecff" class="glowC glowP" style="animation-delay:-.6s"/>
+      <!-- 颈部 -->
+      <path d="M 958 340 L 1012 348 L 1018 424 L 962 424 Z" fill="#2c453f"/>
+      <!-- 头部 -->
+      <g transform="translate(1005,388)"><g class="anim headB">
+        <ellipse cx="95" cy="4" rx="34" ry="9" fill="#7fe8ff" class="mouthGlow"/>
+        <path d="M -28 -52 C -18 -76 22 -86 56 -74 C 88 -62 114 -46 142 -34 C 160 -26 168 -16 162 -8
+                 C 150 -2 118 2 90 2 L 22 6 C -2 8 -22 2 -32 -10 C -36 -24 -34 -38 -28 -52 Z"
+              fill="url(#bodyG)" stroke="#101c18" stroke-width="2.5"/>
+        <g transform="translate(26,8)"><g class="anim jaw">
+          <path d="M -2 -6 C 34 0 76 2 118 -6 C 126 4 118 16 96 18 C 62 20 24 12 -2 -6 Z"
+                fill="#2c453f" stroke="#101c18" stroke-width="2"/>
+        </g></g>
+        <g fill="#f2f4ef">
+          <path d="M 52 0 L 60 12 L 68 1 Z"/><path d="M 84 -2 L 92 10 L 100 -1 Z"/><path d="M 116 -6 L 124 6 L 130 -6 Z"/>
+        </g>
+        <ellipse cx="74" cy="-48" rx="10" ry="6.5" fill="#ffd76b" class="glowY"/>
+        <ellipse cx="77" cy="-48" rx="2.6" ry="4.5" fill="#1a1208"/>
+        <path d="M 58 -60 L 98 -52" stroke="#14231f" stroke-width="6" stroke-linecap="round"/>
+        <circle cx="150" cy="-22" r="2.5" fill="#0e1a16"/>
+      </g></g>
+    </g>
+
+    <!-- 前景楼顶剪影 -->
+    <g class="anim s-fg" fill="#05070f">
+      <rect x="40" y="800" width="220" height="100"/><rect x="300" y="820" width="160" height="80"/>
+      <rect x="520" y="790" width="240" height="110"/><rect x="800" y="830" width="180" height="70"/>
+      <rect x="1020" y="798" width="260" height="102"/><rect x="1320" y="815" width="200" height="85"/>
+      <line x1="620" y1="790" x2="620" y2="742" stroke="#05070f" stroke-width="5"/>
+      <circle class="blinkL" cx="620" cy="738" r="4" fill="#ff5a5a" style="animation-delay:-.4s"/>
+      <line x1="1160" y1="798" x2="1160" y2="756" stroke="#05070f" stroke-width="4"/>
+      <g transform="translate(1600,0)">
+        <rect x="40" y="800" width="220" height="100"/><rect x="300" y="820" width="160" height="80"/>
+        <rect x="520" y="790" width="240" height="110"/><rect x="800" y="830" width="180" height="70"/>
+        <rect x="1020" y="798" width="260" height="102"/><rect x="1320" y="815" width="200" height="85"/>
+        <line x1="620" y1="790" x2="620" y2="742" stroke="#05070f" stroke-width="5"/>
+        <circle class="blinkL" cx="2220" cy="738" r="4" fill="#ff5a5a" style="animation-delay:-.4s"/>
+        <line x1="1160" y1="798" x2="1160" y2="756" stroke="#05070f" stroke-width="4"/>
+      </g>
+    </g>
+
+    <!-- 暗角与标题 -->
+    <rect width="1600" height="900" fill="url(#vigG)"/>
+    <text x="44" y="64" class="ttl">ULTRAMAN × GODZILLA</text>
+    <text x="46" y="94" class="ttl2">午夜巡游 · MIDNIGHT RIDE · 2D ANIMATION</text>
+  </g>
+</svg>
+</body>
+</html>

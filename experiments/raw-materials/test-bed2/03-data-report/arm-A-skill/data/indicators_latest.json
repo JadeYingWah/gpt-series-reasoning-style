@@ -1,0 +1,185 @@
+{
+  "as_of": "2026-09-16",
+  "close": 1258.0,
+  "indicators_latest": {
+    "MA5": 1273.8,
+    "MA10": 1291.407,
+    "MA20": 1293.807,
+    "MA60": 1279.8299,
+    "MA120": 1302.2229,
+    "MA250": 1352.1854,
+    "DIF": -7.5453,
+    "DEA": -2.2274,
+    "MACD": -10.6358,
+    "RSI6": 17.9662,
+    "RSI12": 25.9099,
+    "RSI24": 30.4594,
+    "KDJ_K": 14.6336,
+    "KDJ_D": 23.9106,
+    "KDJ_J": -3.9202,
+    "BOLL_UPPER": 1326.4241,
+    "BOLL_MID": 1293.807,
+    "BOLL_LOWER": 1261.1899,
+    "BOLL_PCTB": -0.0489,
+    "PDI": 17.3854,
+    "MDI": 28.0708,
+    "ADX14": 14.5692,
+    "ATR14": 21.309,
+    "OBV": -1334138.0,
+    "VOL_RATIO": 1.1896
+  },
+  "signal_votes": {
+    "趋势维": {
+      "明细": {
+        "close_vs_MA20": "空头",
+        "close_vs_MA60": "空头",
+        "MA20_vs_MA60": "多头",
+        "ADX_trend_strength": "弱趋势(<=25) -DI占优"
+      },
+      "多头票数": 1,
+      "空头票数": 2
+    },
+    "均值回归维": {
+      "明细": {
+        "BOLL_位置PCTB": -0.049,
+        "RSI6": 17.97,
+        "RSI12": 25.91,
+        "KDJ_J": -3.92
+      },
+      "超卖信号": true,
+      "超买信号": false
+    },
+    "量价维": {
+      "量比(对5日均量)": 1.19,
+      "OBV_20日斜率方向": "下降"
+    }
+  },
+  "cross_check_vs_westock": [
+    {
+      "name": "MA5",
+      "mine": 1273.8,
+      "westock": 1273.8,
+      "abs_diff": 0.0,
+      "pass": true
+    },
+    {
+      "name": "MA10",
+      "mine": 1291.407,
+      "westock": 1291.407,
+      "abs_diff": 0.0,
+      "pass": true
+    },
+    {
+      "name": "MA20",
+      "mine": 1293.807,
+      "westock": 1293.807,
+      "abs_diff": 0.0,
+      "pass": true
+    },
+    {
+      "name": "MA60",
+      "mine": 1279.8299,
+      "westock": 1279.83,
+      "abs_diff": 0.0001,
+      "pass": true
+    },
+    {
+      "name": "MA120",
+      "mine": 1302.2229,
+      "westock": 1302.223,
+      "abs_diff": 0.0001,
+      "pass": true
+    },
+    {
+      "name": "MA250",
+      "mine": 1352.1854,
+      "westock": 1352.185,
+      "abs_diff": 0.0004,
+      "pass": true
+    },
+    {
+      "name": "BOLL_MID",
+      "mine": 1293.807,
+      "westock": 1293.807,
+      "abs_diff": 0.0,
+      "pass": true
+    },
+    {
+      "name": "BOLL_UPPER",
+      "mine": 1326.4241,
+      "westock": 1326.424,
+      "abs_diff": 0.0001,
+      "pass": true
+    },
+    {
+      "name": "BOLL_LOWER",
+      "mine": 1261.1899,
+      "westock": 1261.19,
+      "abs_diff": 0.0001,
+      "pass": true
+    },
+    {
+      "name": "DIF",
+      "mine": -7.5453,
+      "westock": -7.545,
+      "abs_diff": 0.0003,
+      "pass": true
+    },
+    {
+      "name": "DEA",
+      "mine": -2.2274,
+      "westock": -2.227,
+      "abs_diff": 0.0004,
+      "pass": true
+    },
+    {
+      "name": "MACD柱",
+      "mine": -10.6358,
+      "westock": -10.636,
+      "abs_diff": 0.0002,
+      "pass": true
+    },
+    {
+      "name": "KDJ_K",
+      "mine": 14.6336,
+      "westock": 14.634,
+      "abs_diff": 0.0004,
+      "pass": true
+    },
+    {
+      "name": "KDJ_D",
+      "mine": 23.9106,
+      "westock": 23.911,
+      "abs_diff": 0.0004,
+      "pass": true
+    },
+    {
+      "name": "KDJ_J",
+      "mine": -3.9202,
+      "westock": -3.92,
+      "abs_diff": 0.0002,
+      "pass": true
+    }
+  ],
+  "rsi_definitional_difference": [
+    {
+      "name": "RSI6",
+      "mine_wilder": 17.966,
+      "westock": 21.901,
+      "note": "westock 私有平滑口径, 无法对齐; 本报告采用标准 Wilder 口径"
+    },
+    {
+      "name": "RSI12",
+      "mine_wilder": 25.91,
+      "westock": 34.971,
+      "note": "westock 私有平滑口径, 无法对齐; 本报告采用标准 Wilder 口径"
+    },
+    {
+      "name": "RSI24",
+      "mine_wilder": 30.459,
+      "westock": 43.801,
+      "note": "westock 私有平滑口径, 无法对齐; 本报告采用标准 Wilder 口径"
+    }
+  ],
+  "cross_check_all_pass": true
+}

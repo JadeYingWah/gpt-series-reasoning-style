@@ -1,0 +1,49 @@
+{
+  "total_raw_rows": 10000,
+  "repaired_rows": 462,
+  "valid_rows": 9960,
+  "total_revenue": 88952.0,
+  "missing_ts": 502,
+  "missing_qty": 479,
+  "missing_item": 969,
+  "inconsistent_amount": 0,
+  "repaired_ts": 462,
+  "item_breakdown": {
+    "Coffee": {
+      "revenue": 7062.0,
+      "transactions": 1159
+    },
+    "Tea": {
+      "revenue": 4951.5,
+      "transactions": 1085
+    },
+    "Juice": {
+      "revenue": 10509.0,
+      "transactions": 1167
+    },
+    "Smoothie": {
+      "revenue": 13320.0,
+      "transactions": 1091
+    },
+    "Cake": {
+      "revenue": 10395.0,
+      "transactions": 1137
+    },
+    "Cookie": {
+      "revenue": 3223.0,
+      "transactions": 1087
+    },
+    "Sandwich": {
+      "revenue": 13664.0,
+      "transactions": 1123
+    },
+    "Salad": {
+      "revenue": 17320.0,
+      "transactions": 1145
+    }
+  },
+  "valid_ts_missing_item_revenue": 8507.5,
+  "valid_ts_missing_item_count": 966,
+  "_check_sum_item_revenue_plus_unclassified": 88952.0,
+  "_check_sum_item_count_plus_unclassified": 9960
+}

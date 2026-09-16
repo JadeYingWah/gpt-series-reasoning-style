@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>极简番茄钟</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --border: #2a2f3d;
+    --text: #e8eaf0;
+    --muted: #8b93a7;
+    --accent: #6c9eff;
+    --running: #3dd68c;
+    --paused: #f0b429;
+    --done: #ff6b7a;
+    --btn-bg: #2a2f3d;
+    --btn-bg-hover: #353b4d;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .shell {
+    width: min(400px, 92vw);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 36px 32px 32px;
+    text-align: center;
+  }
+
+  h1 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+
+  #status {
+    min-height: 1.4em;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--muted);
+  }
+  #status[data-state="running"] { color: var(--running); }
+  #status[data-state="paused"]  { color: var(--paused); }
+  #status[data-state="done"]    { color: var(--done); font-size: 1.2rem; }
+
+  #display {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+    font-size: clamp(3.25rem, 14vw, 4.25rem);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.03em;
+    margin-bottom: 28px;
+  }
+
+  .controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 22px;
+  }
+
+  button {
+    appearance: none;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    padding: 11px 20px;
+    min-width: 88px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    background: var(--btn-bg);
+    color: var(--text);
+    transition: background 0.15s ease, opacity 0.15s ease, transform 0.05s ease;
+  }
+  button:hover:not(:disabled) { background: var(--btn-bg-hover); }
+  button:active:not(:disabled) { transform: scale(0.97); }
+  button:disabled { opacity: 0.35; cursor: not-allowed; }
+  button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  #btnStart { background: var(--running); color: #0f1117; }
+  #btnStart:hover:not(:disabled) { background: #55e0a0; }
+  #btnPause { background: var(--paused); color: #0f1117; }
+  #btnPause:hover:not(:disabled) { background: #f5c45a; }
+
+  .config {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+  .config label { user-select: none; }
+
+  #minutes {
+    width: 4.25rem;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 1rem;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+  #minutes:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  #minutes:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .hint {
+    margin-top: 20px;
+    font-size: 0.75rem;
+    line-height: 1.55;
+    color: var(--muted);
+  }
+</style>
+</head>
+<body>
+<main class="shell">
+  <h1>POMODORO</h1>
+  <div id="status" data-state="idle" aria-live="polite">就绪</div>
+  <div id="display" aria-live="polite">25:00</div>
+  <div class="controls">
+    <button id="btnStart" type="button">开始</button>
+    <button id="btnPause" type="button" disabled>暂停</button>
+    <button id="btnReset" type="button">重置</button>
+  </div>
+  <div class="config">
+    <label for="minutes">时长（分钟）</label>
+    <input id="minutes" type="number" min="1" max="60" step="1" value="25" inputmode="numeric">
+  </div>
+  <p class="hint">
+    时长须为 1–60 的正整数，非法值回退 25。结束时状态变为「时间到」，并尝试播放提示音；若浏览器策略禁止或无 Web Audio，则仅保留文案提示。
+  </p>
+</main>
+
+<script>
+"use strict";
+
+/* ========== 纯逻辑层（无 DOM，可供 Node / vm 核对） ========== */
+
+/**
+ * 归一化用户输入为 1–60 的正整数分钟。
+ * @param {unknown} raw
+ * @param {number} fallbackMinutes
+ * @returns {number}
+ */
+function normalizeMinutes(raw, fallbackMinutes) {
+  var n = typeof raw === "number" ? raw : parseInt(String(raw).trim(), 10);
+  if (!isFinite(n) || !Number.isInteger(n) || n < 1 || n > 60) {
+    return fallbackMinutes;
+  }
+  return n;
+}
+
+/**
+ * 秒数 → mm:ss
+ * @param {number} totalSeconds
+ * @returns {string}
+ */
+function formatTime(totalSeconds) {
+  var s = Math.max(0, Math.floor(totalSeconds));
+  var m = Math.floor(s / 60);
+  var r = s % 60;
+  return String(m).padStart(2, "0") + ":" + String(r).padStart(2, "0");
+}
+
+/**
+ * 番茄钟状态机。
+ * 状态：idle | running | paused | done
+ *
+ * @param {number} durationMinutes
+ */
+function createTimer(durationMinutes) {
+  var durationMin = normalizeMinutes(durationMinutes, 25);
+  var status = "idle";
+  var remaining = durationMin * 60;
+
+  function snapshot() {
+    return {
+      status: status,
+      remainingSeconds: remaining,
+      durationMinutes: durationMin
+    };
+  }
+
+  return {
+    getState: function () {
+      return snapshot();
+    },
+
+    start: function () {
+      if (status === "done") {
+        // 完成后再开始：重新满时长
+        remaining = durationMin * 60;
+      }
+      if (status === "running") {
+        return snapshot();
+      }
+      status = "running";
+      return snapshot();
+    },
+
+    pause: function () {
+      if (status === "running") {
+        status = "paused";
+      }
+      return snapshot();
+    },
+
+    reset: function (minutes) {
+      if (minutes !== undefined && minutes !== null) {
+        durationMin = normalizeMinutes(minutes, durationMin);
+      }
+      status = "idle";
+      remaining = durationMin * 60;
+      return snapshot();
+    },
+
+    setDuration: function (minutes) {
+      if (status === "running" || status === "paused") {
+        return snapshot();
+      }
+      durationMin = normalizeMinutes(minutes, durationMin);
+      status = "idle";
+      remaining = durationMin * 60;
+      return snapshot();
+    },
+
+    tick: function () {
+      if (status !== "running") {
+        return snapshot();
+      }
+      if (remaining > 0) {
+        remaining -= 1;
+      }
+      if (remaining <= 0) {
+        remaining = 0;
+        status = "done";
+      }
+      return snapshot();
+    }
+  };
+}
+
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = {
+    normalizeMinutes: normalizeMinutes,
+    formatTime: formatTime,
+    createTimer: createTimer
+  };
+}
+
+/* ========== 浏览器绑定层 ========== */
+
+if (typeof document !== "undefined") {
+  (function () {
+    var DEFAULT_MINUTES = 25;
+    var STATUS_TEXT = {
+      idle: "就绪",
+      running: "计时中",
+      paused: "已暂停",
+      done: "时间到"
+    };
+
+    var displayEl = document.getElementById("display");
+    var statusEl = document.getElementById("status");
+    var btnStart = document.getElementById("btnStart");
+    var btnPause = document.getElementById("btnPause");
+    var btnReset = document.getElementById("btnReset");
+    var minutesEl = document.getElementById("minutes");
+
+    var timer = createTimer(DEFAULT_MINUTES);
+    var intervalId = null;
+
+    function render(state) {
+      displayEl.textContent = formatTime(state.remainingSeconds);
+      statusEl.textContent = STATUS_TEXT[state.status] || state.status;
+      statusEl.setAttribute("data-state", state.status);
+      btnStart.disabled = state.status === "running";
+      btnPause.disabled = state.status !== "running";
+      minutesEl.disabled = state.status === "running" || state.status === "paused";
+    }
+
+    function stopTicker() {
+      if (intervalId !== null) {
+        clearInterval(intervalId);
+        intervalId = null;
+      }
+    }
+
+    function startTicker() {
+      stopTicker();
+      intervalId = setInterval(function () {
+        var state = timer.tick();
+        render(state);
+        if (state.status === "done") {
+          stopTicker();
+          beep();
+        }
+      }, 1000);
+    }
+
+    function beep() {
+      try {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) {
+          return;
+        }
+        var ctx = new AC();
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.value = 880;
+        gain.gain.value = 0.12;
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.6);
+        osc.stop(ctx.currentTime + 0.65);
+        osc.onended = function () {
+          try {
+            ctx.close();
+          } catch (e) { /* ignore */ }
+        };
+      } catch (e) {
+        // 无 Web Audio / 被策略拦截：静默，依赖「时间到」文案
+      }
+    }
+
+    btnStart.addEventListener("click", function () {
+      var state = timer.start();
+      render(state);
+      if (state.status === "running") {
+        startTicker();
+      }
+    });
+
+    btnPause.addEventListener("click", function () {
+      var state = timer.pause();
+      render(state);
+      if (state.status === "paused") {
+        stopTicker();
+      }
+    });
+
+    btnReset.addEventListener("click", function () {
+      var mins = normalizeMinutes(minutesEl.value, DEFAULT_MINUTES);
+      minutesEl.value = String(mins);
+      var state = timer.reset(mins);
+      stopTicker();
+      render(state);
+    });
+
+    minutesEl.addEventListener("change", function () {
+      var mins = normalizeMinutes(minutesEl.value, DEFAULT_MINUTES);
+      minutesEl.value = String(mins);
+      var state = timer.setDuration(mins);
+      if (state.status !== "running" && state.status !== "paused") {
+        stopTicker();
+        render(state);
+      }
+    });
+
+    minutesEl.value = String(DEFAULT_MINUTES);
+    render(timer.getState());
+  })();
+}
+</script>
+</body>
+</html>

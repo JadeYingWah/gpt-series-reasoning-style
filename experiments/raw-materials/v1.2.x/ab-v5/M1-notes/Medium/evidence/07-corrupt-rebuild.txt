@@ -1,0 +1,14 @@
+[错误] notes.json 内容不是合法 JSON（Expecting value: line 1 column 13 (char 12)），已停止操作以保护数据。
+exit=1
+--- 损坏文件未被覆盖：
+{"broken": [
+--- 删除后自动重建：
+暂无笔记。先用 python add.py "标题" "内容" 添加一条吧。
+exit=0
+[OK] 已新增笔记 #1：重建后第一条（2026-09-13 17:53:24）
+exit=0
+usage: add.py [-h] [-t 标签] title content
+add.py: error: the following arguments are required: title, content
+exit=2
+[错误] 关键词不能为空（全空白也不行）。
+exit=1

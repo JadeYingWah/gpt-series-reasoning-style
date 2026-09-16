@@ -1,0 +1,554 @@
+﻿{
+  "steps": [
+    {
+      "step": "初始加载",
+      "state": {
+        "heads": [
+          {
+            "label": "编号",
+            "key": "id",
+            "active": "true",
+            "ariaSort": "ascending",
+            "arrow": "▲"
+          },
+          {
+            "label": "名称",
+            "key": "name",
+            "active": "false",
+            "ariaSort": null,
+            "arrow": "↕"
+          },
+          {
+            "label": "类别",
+            "key": "category",
+            "active": "false",
+            "ariaSort": null,
+            "arrow": "↕"
+          },
+          {
+            "label": "价格（元）",
+            "key": "price",
+            "active": "false",
+            "ariaSort": null,
+            "arrow": "↕"
+          },
+          {
+            "label": "库存",
+            "key": "stock",
+            "active": "false",
+            "ariaSort": null,
+            "arrow": "↕"
+          },
+          {
+            "label": "更新日期",
+            "key": "updated",
+            "active": "false",
+            "ariaSort": null,
+            "arrow": "↕"
+          }
+        ],
+        "rows": [
+          [
+            "1",
+            "机械键盘",
+            "外设",
+            "399",
+            "128",
+            "2026-01-08"
+          ],
+          [
+            "2",
+            "无线鼠标",
+            "外设",
+            "159",
+            "210",
+            "2025-11-25"
+          ],
+          [
+            "3",
+            "便携显示器",
+            "显示设备",
+            "1,099",
+            "42",
+            "2026-03-11"
+          ],
+          [
+            "4",
+            "固态硬盘 1TB",
+            "存储",
+            "649",
+            "63",
+            "2026-05-19"
+          ],
+          [
+            "5",
+            "降噪耳机",
+            "音频",
+            "899",
+            "7",
+            "2026-07-02"
+          ]
+        ],
+        "status": "共 5 条记录 · 当前排序：编号 升序 ▲"
+      }
+    },
+    {
+      "step": "点击「价格（元）」",
+      "clickAt": {
+        "x": 719,
+        "y": 173
+      },
+      "state": {
+        "heads": [
+          {
+            "label": "编号",
+            "key": "id",
+            "active": "false",
+            "ariaSort": null,
+            "arrow": "↕"
+          },
+          {
+            "label": "名称",
+            "key": "name",
+            "active": "false",
+            "ariaSort": null,
+            "arrow": "↕"
+          },
+          {
+            "label": "类别",
+            "key": "category",
+            "active": "false",
+            "ariaSort": null,
+            "arrow": "↕"
+          },
+          {
+            "label": "价格（元）",
+            "key": "price",
+            "active": "true",
+            "ariaSort": "ascending",
+            "arrow": "▲"
+          },
+          {
+            "label": "库存",
+            "key": "stock",
+            "active": "false",
+            "ariaSort": null,
+            "arrow": "↕"
+          },
+          {
+            "label": "更新日期",
+            "key": "updated",
+            "active": "false",
+            "ariaSort": null,
+            "arrow": "↕"
+          }
+        ],
+        "rows": [
+          [
+            "2",
+            "无线鼠标",
+            "外设",
+            "159",
+            "210",
+            "2025-11-25"
+          ],
+          [
+            "1",
+            "机械键盘",
+            "外设",
+            "399",
+            "128",
+            "2026-01-08"
+          ],
+          [
+            "4",
+            "固态硬盘 1TB",
+            "存储",
+            "649",
+            "63",
+            "2026-05-19"
+          ],
+          [
+            "5",
+            "降噪耳机",
+            "音频",
+            "899",
+            "7",
+            "2026-07-02"
+          ],
+          [
+            "3",
+            "便携显示器",
+            "显示设备",
+            "1,099",
+            "42",
+            "2026-03-11"
+          ]
+        ],
+        "status": "共 5 条记录 · 当前排序：价格（元） 升序 ▲"
+      }
+    },
+    {
+      "step": "再次点击「价格（元）」",
+      "clickAt": {
+        "x": 720,
+        "y": 173
+      },
+      "state": {
+        "heads": [
+          {
+            "label": "编号",
+            "key": "id",
+            "active": "false",
+            "ariaSort": null,
+            "arrow": "↕"
+          },
+          {
+            "label": "名称",
+            "key": "name",
+            "active": "false",
+            "ariaSort": null,
+            "arrow": "↕"
+          },
+          {
+            "label": "类别",
+            "key": "category",
+            "active": "false",
+            "ariaSort": null,
+            "arrow": "↕"
+          },
+          {
+            "label": "价格（元）",
+            "key": "price",
+            "active": "true",
+            "ariaSort": "descending",
+            "arrow": "▼"
+          },
+          {
+            "label": "库存",
+            "key": "stock",
+            "active": "false",
+            "ariaSort": null,
+            "arrow": "↕"
+          },
+          {
+            "label": "更新日期",
+            "key": "updated",
+            "active": "false",
+            "ariaSort": null,
+            "arrow": "↕"
+          }
+        ],
+        "rows": [
+          [
+            "3",
+            "便携显示器",
+            "显示设备",
+            "1,099",
+            "42",
+            "2026-03-11"
+          ],
+          [
+            "5",
+            "降噪耳机",
+            "音频",
+            "899",
+            "7",
+            "2026-07-02"
+          ],
+          [
+            "4",
+            "固态硬盘 1TB",
+            "存储",
+            "649",
+            "63",
+            "2026-05-19"
+          ],
+          [
+            "1",
+            "机械键盘",
+            "外设",
+            "399",
+            "128",
+            "2026-01-08"
+          ],
+          [
+            "2",
+            "无线鼠标",
+            "外设",
+            "159",
+            "210",
+            "2025-11-25"
+          ]
+        ],
+        "status": "共 5 条记录 · 当前排序：价格（元） 降序 ▼"
+      }
+    },
+    {
+      "step": "点击「名称」",
+      "clickAt": {
+        "x": 401,
+        "y": 173
+      },
+      "state": {
+        "heads": [
+          {
+            "label": "编号",
+            "key": "id",
+            "active": "false",
+            "ariaSort": null,
+            "arrow": "↕"
+          },
+          {
+            "label": "名称",
+            "key": "name",
+            "active": "true",
+            "ariaSort": "ascending",
+            "arrow": "▲"
+          },
+          {
+            "label": "类别",
+            "key": "category",
+            "active": "false",
+            "ariaSort": null,
+            "arrow": "↕"
+          },
+          {
+            "label": "价格（元）",
+            "key": "price",
+            "active": "false",
+            "ariaSort": null,
+            "arrow": "↕"
+          },
+          {
+            "label": "库存",
+            "key": "stock",
+            "active": "false",
+            "ariaSort": null,
+            "arrow": "↕"
+          },
+          {
+            "label": "更新日期",
+            "key": "updated",
+            "active": "false",
+            "ariaSort": null,
+            "arrow": "↕"
+          }
+        ],
+        "rows": [
+          [
+            "3",
+            "便携显示器",
+            "显示设备",
+            "1,099",
+            "42",
+            "2026-03-11"
+          ],
+          [
+            "4",
+            "固态硬盘 1TB",
+            "存储",
+            "649",
+            "63",
+            "2026-05-19"
+          ],
+          [
+            "1",
+            "机械键盘",
+            "外设",
+            "399",
+            "128",
+            "2026-01-08"
+          ],
+          [
+            "5",
+            "降噪耳机",
+            "音频",
+            "899",
+            "7",
+            "2026-07-02"
+          ],
+          [
+            "2",
+            "无线鼠标",
+            "外设",
+            "159",
+            "210",
+            "2025-11-25"
+          ]
+        ],
+        "status": "共 5 条记录 · 当前排序：名称 升序 ▲"
+      }
+    },
+    {
+      "step": "点击「更新日期」",
+      "clickAt": {
+        "x": 1011,
+        "y": 173
+      },
+      "state": {
+        "heads": [
+          {
+            "label": "编号",
+            "key": "id",
+            "active": "false",
+            "ariaSort": null,
+            "arrow": "↕"
+          },
+          {
+            "label": "名称",
+            "key": "name",
+            "active": "false",
+            "ariaSort": null,
+            "arrow": "↕"
+          },
+          {
+            "label": "类别",
+            "key": "category",
+            "active": "false",
+            "ariaSort": null,
+            "arrow": "↕"
+          },
+          {
+            "label": "价格（元）",
+            "key": "price",
+            "active": "false",
+            "ariaSort": null,
+            "arrow": "↕"
+          },
+          {
+            "label": "库存",
+            "key": "stock",
+            "active": "false",
+            "ariaSort": null,
+            "arrow": "↕"
+          },
+          {
+            "label": "更新日期",
+            "key": "updated",
+            "active": "true",
+            "ariaSort": "ascending",
+            "arrow": "▲"
+          }
+        ],
+        "rows": [
+          [
+            "2",
+            "无线鼠标",
+            "外设",
+            "159",
+            "210",
+            "2025-11-25"
+          ],
+          [
+            "1",
+            "机械键盘",
+            "外设",
+            "399",
+            "128",
+            "2026-01-08"
+          ],
+          [
+            "3",
+            "便携显示器",
+            "显示设备",
+            "1,099",
+            "42",
+            "2026-03-11"
+          ],
+          [
+            "4",
+            "固态硬盘 1TB",
+            "存储",
+            "649",
+            "63",
+            "2026-05-19"
+          ],
+          [
+            "5",
+            "降噪耳机",
+            "音频",
+            "899",
+            "7",
+            "2026-07-02"
+          ]
+        ],
+        "status": "共 5 条记录 · 当前排序：更新日期 升序 ▲"
+      }
+    }
+  ],
+  "verdict": "PASS",
+  "browser": {
+    "product": "Chrome/152.0.7977.84",
+    "protocolVersion": "1.3",
+    "jsVersion": "15.2.124.21"
+  },
+  "recordCount": 5,
+  "nameOrder": {
+    "page": [
+      "便携显示器",
+      "固态硬盘 1TB",
+      "机械键盘",
+      "降噪耳机",
+      "无线鼠标"
+    ],
+    "oracle": [
+      "便携显示器",
+      "固态硬盘 1TB",
+      "机械键盘",
+      "降噪耳机",
+      "无线鼠标"
+    ]
+  },
+  "checks": [
+    {
+      "name": "JSON 记录数 = 5",
+      "pass": true
+    },
+    {
+      "name": "价格升序数值递增",
+      "pass": true
+    },
+    {
+      "name": "价格降序数值递减",
+      "pass": true
+    },
+    {
+      "name": "降序 = 升序逆序",
+      "pass": true
+    },
+    {
+      "name": "价格列 aria-sort 正确",
+      "pass": true
+    },
+    {
+      "name": "切换列后旧列取消高亮",
+      "pass": true
+    },
+    {
+      "name": "中文名称列升序与中国区排序规则（ICU zh-Hans-CN）一致",
+      "pass": true
+    },
+    {
+      "name": "各步排序均为原集合的排列（无丢行/重复）",
+      "pass": true
+    },
+    {
+      "name": "日期列升序",
+      "pass": true
+    },
+    {
+      "name": "表头显示排序指示箭头",
+      "pass": true
+    },
+    {
+      "name": "状态栏随排序更新",
+      "pass": true
+    }
+  ],
+  "failed": [],
+  "log": [
+    "CDP 端点已连接: file:///<实验根目录>/ab-cycle2/VER01-snapshot/A-skill/tool.html",
+    "浏览器: Chrome/152.0.7977.84"
+  ]
+}

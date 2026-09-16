@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>计数器 · Click Counter</title>
+  <style>
+    :root {
+      --bg-1: #0b1020;
+      --bg-2: #161d33;
+      --card: rgba(255, 255, 255, 0.04);
+      --card-border: rgba(255, 255, 255, 0.10);
+      --text: #e8ecf8;
+      --muted: #94a0bd;
+      --accent-1: #6366f1;
+      --accent-2: #a855f7;
+      --glow: rgba(99, 102, 241, 0.35);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      font-family: system-ui, -apple-system, "Segoe UI", "PingFang SC",
+        "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(620px 420px at 15% 18%, rgba(99, 102, 241, 0.18), transparent 60%),
+        radial-gradient(700px 520px at 85% 82%, rgba(168, 85, 247, 0.15), transparent 60%),
+        linear-gradient(160deg, var(--bg-1), var(--bg-2));
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .card {
+      text-align: center;
+      padding: 56px 72px 48px;
+      border-radius: 28px;
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+    }
+
+    .label {
+      color: var(--muted);
+      font-size: 14px;
+      letter-spacing: 0.35em;
+      text-indent: 0.35em; /* 抵消最后一个字符的字距，保证视觉居中 */
+    }
+
+    .count {
+      display: block;
+      font-size: 96px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.15;
+      margin: 10px 0 36px;
+      background: linear-gradient(180deg, #ffffff, #b9c2ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .count.pop { animation: pop 0.28s ease; }
+
+    @keyframes pop {
+      0%   { transform: scale(1); }
+      40%  { transform: scale(1.14); }
+      100% { transform: scale(1); }
+    }
+
+    .btn {
+      appearance: none;
+      border: 0;
+      cursor: pointer;
+      font: inherit;
+      font-size: 17px;
+      font-weight: 600;
+      color: #fff;
+      padding: 14px 44px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+      box-shadow: 0 10px 30px var(--glow), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+      user-select: none;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.07);
+      box-shadow: 0 14px 36px var(--glow), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+
+    .btn:active { transform: translateY(0) scale(0.96); }
+
+    .btn:focus-visible {
+      outline: 2px solid #c7d2fe;
+      outline-offset: 3px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .count.pop { animation: none; }
+      .btn { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <p class="label">已点击次数</p>
+    <output class="count" id="count" aria-live="polite">0</output>
+    <button class="btn" id="add" type="button">点我 +1</button>
+  </main>
+
+  <script>
+    (function () {
+      var btn = document.getElementById('add');
+      var count = document.getElementById('count');
+      var n = 0;
+
+      btn.addEventListener('click', function () {
+        n += 1;
+        count.textContent = n;
+        count.classList.remove('pop');
+        void count.offsetWidth; /* 强制回流，重新触发弹跳动画 */
+        count.classList.add('pop');
+      });
+    })();
+  </script>
+</body>
+</html>

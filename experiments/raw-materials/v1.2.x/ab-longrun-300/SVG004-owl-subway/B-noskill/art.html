@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Owl Subway — Night Line</title>
+<style>
+  /* ============================================================
+     Owl × Subway — single-file scene
+     No external resources. All CSS/JS inline.
+     ============================================================ */
+  :root {
+    --ink: #0b1020;
+    --sky-a: #0d1430;
+    --sky-b: #1a2750;
+    --sky-c: #2a3a6a;
+    --far: #121a38;
+    --mid: #1a2450;
+    --near: #243060;
+    --track: #3a4678;
+    --sleeper: #4a5688;
+    --rail: #9aa8d0;
+    --train-body: #e8eef8;
+    --train-band: #3d6ef0;
+    --train-dark: #2a4a9a;
+    --glass: #7ec8ff;
+    --glass-deep: #1a3a70;
+    --owl-body: #c4a574;
+    --owl-belly: #e8d4a8;
+    --owl-feather: #8b6b3a;
+    --owl-eye: #ffe566;
+    --owl-pupil: #1a1420;
+    --beak: #f0a040;
+    --claw: #d09040;
+    --glow: #ffd86a;
+    --signal: #4ade80;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--ink);
+  }
+
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Segoe UI", system-ui, sans-serif;
+  }
+
+  .stage {
+    position: relative;
+    width: min(100vw, 1280px);
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.55);
+  }
+
+  svg.scene {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ---------- parallax layers (CSS transform driven by JS) ---------- */
+  .layer {
+    will-change: transform;
+  }
+
+  /* ---------- wheel rotation: forward = clockwise for rightward motion ---------- */
+  .wheel-spin {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: spin-cw 0.55s linear infinite;
+  }
+  @keyframes spin-cw {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  /* secondary drive gear (slightly different period for visual interest) */
+  .gear-spin {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: spin-ccw 0.38s linear infinite;
+  }
+  @keyframes spin-ccw {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(-360deg); }
+  }
+
+  /* ---------- owl relative motion (NOT locked to train translation) ---------- */
+  /* head bob + slight sway */
+  .owl-head {
+    transform-box: fill-box;
+    transform-origin: 50% 85%;
+    animation: head-bob 1.6s ease-in-out infinite;
+  }
+  @keyframes head-bob {
+    0%, 100% { transform: rotate(-4deg) translateY(0px); }
+    50%      { transform: rotate(5deg)  translateY(-3px); }
+  }
+
+  /* wing flap — independent of train body */
+  .owl-wing-l {
+    transform-box: fill-box;
+    transform-origin: 90% 30%;
+    animation: wing-flap-l 0.7s ease-in-out infinite;
+  }
+  .owl-wing-r {
+    transform-box: fill-box;
+    transform-origin: 10% 30%;
+    animation: wing-flap-r 0.7s ease-in-out infinite;
+  }
+  @keyframes wing-flap-l {
+    0%, 100% { transform: rotate(0deg) scaleY(1); }
+    40%      { transform: rotate(-18deg) scaleY(0.88); }
+    70%      { transform: rotate(6deg)  scaleY(1.04); }
+  }
+  @keyframes wing-flap-r {
+    0%, 100% { transform: rotate(0deg) scaleY(1); }
+    40%      { transform: rotate(18deg)  scaleY(0.88); }
+    70%      { transform: rotate(-6deg) scaleY(1.04); }
+  }
+
+  /* tail feathers twitch */
+  .owl-tail {
+    transform-box: fill-box;
+    transform-origin: 20% 20%;
+    animation: tail-twitch 1.1s ease-in-out infinite;
+  }
+  @keyframes tail-twitch {
+    0%, 100% { transform: rotate(0deg); }
+    50%      { transform: rotate(-8deg); }
+  }
+
+  /* body micro-bounce relative to cabin */
+  .owl-body-group {
+    animation: body-bounce 0.55s ease-in-out infinite;
+  }
+  @keyframes body-bounce {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-2px); }
+  }
+
+  /* claw grip pulse on control lever */
+  .owl-claw {
+    transform-box: fill-box;
+    transform-origin: 50% 0%;
+    animation: claw-grip 0.9s ease-in-out infinite;
+  }
+  @keyframes claw-grip {
+    0%, 100% { transform: rotate(0deg); }
+    50%      { transform: rotate(8deg); }
+  }
+
+  /* ---------- train body sway (subtle vertical bounce from suspension) ---------- */
+  .train-bounce {
+    animation: train-bounce 0.55s ease-in-out infinite;
+  }
+  @keyframes train-bounce {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-1.5px); }
+  }
+
+  /* ---------- track sleeper scroll (matches rightward travel) ---------- */
+  .sleepers {
+    animation: sleeper-scroll 0.55s linear infinite;
+  }
+  @keyframes sleeper-scroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-80px); }
+  }
+
+  /* ---------- signal light pulse ---------- */
+  .signal-glow {
+    animation: signal-pulse 2s ease-in-out infinite;
+  }
+  @keyframes signal-pulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.45; }
+  }
+
+  /* ---------- window light flicker ---------- */
+  .win-light {
+    animation: win-flicker 3.2s ease-in-out infinite;
+  }
+  .win-light:nth-child(odd) { animation-delay: -1.1s; }
+  .win-light:nth-child(3n)  { animation-delay: -2.0s; }
+  @keyframes win-flicker {
+    0%, 100% { opacity: 0.92; }
+    40%      { opacity: 0.7; }
+    60%      { opacity: 1; }
+  }
+
+  /* ---------- speed streaks ---------- */
+  .streak {
+    animation: streak-fly 0.7s linear infinite;
+  }
+  @keyframes streak-fly {
+    from { transform: translateX(0); opacity: 0; }
+    15%  { opacity: 0.85; }
+    to   { transform: translateX(-420px); opacity: 0; }
+  }
+
+  /* ---------- smoke / exhaust puffs from roof vent ---------- */
+  .puff {
+    animation: puff-rise 1.8s ease-out infinite;
+    opacity: 0;
+  }
+  .puff:nth-child(2) { animation-delay: 0.6s; }
+  .puff:nth-child(3) { animation-delay: 1.2s; }
+  @keyframes puff-rise {
+    0%   { transform: translate(0,0) scale(0.4); opacity: 0; }
+    20%  { opacity: 0.35; }
+    100% { transform: translate(-50px,-40px) scale(1.6); opacity: 0; }
+  }
+
+  /* ---------- HUD caption ---------- */
+  .hud {
+    position: absolute;
+    left: 18px;
+    bottom: 14px;
+    color: rgba(220, 230, 255, 0.75);
+    font-size: clamp(11px, 1.4vw, 14px);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    pointer-events: none;
+    user-select: none;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+  }
+  .hud strong {
+    color: var(--glow);
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+<div class="stage" aria-label="Owl driving a subway train to the right">
+  <!--
+    ============================================================
+    Geometry & motion coherence notes (also mirrored in notes.md)
+    ============================================================
+    1. Forward direction = right (+X). Train is drawn facing right;
+       nose cone, windshield rake, and headlight aim all point +X.
+    2. Wheels: CSS spin-cw (clockwise) so the contact patch at the
+       rail surface moves backward (-X) relative to the train —
+       physically consistent with rightward travel. Period 0.55s.
+    3. Drive gear under the chassis spins counter-clockwise via a
+       meshing visual (period 0.38s) — reads as a geared coupling.
+    4. Sleepers (rail ties) translate -80px over 0.55s — same period
+       as one wheel revolution, so ground scroll and wheel rotation
+       are phase-locked in perceived speed.
+    5. Owl relative motion (NOT body-locked translation):
+         a) Head: independent rotate/bob (1.6s)
+         b) Wings L/R: independent flap (0.7s)
+         c) Tail: independent twitch (1.1s)
+         d) Body micro-bounce (0.55s, same period as wheel — suspension feel)
+         e) Claw on lever: grip pulse (0.9s)
+       At least 5 independent limb/appendage DOFs vs the train body.
+    6. Parallax / depth (3 layers):
+         L0 far  : sky gradient + stars + distant skyline silhouette
+         L1 mid   : mid buildings + elevated pillars receding
+         L2 near  : track, sleepers, signal poles, foreground weeds
+       JS drives tiny horizontal offsets on L0/L1 relative to camera
+       drift; L2 sleepers use pure CSS scroll. Plus CSS speed streaks
+       as a 4th depth cue in front of the train.
+    7. Exhaust puffs drift backward (-X) and up — consistent with
+       rightward motion and roof vent placement.
+  -->
+
+  <svg class="scene" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg" role="img">
+    <defs>
+      <!-- sky gradient -->
+      <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="#080d22"/>
+        <stop offset="45%"  stop-color="#121c44"/>
+        <stop offset="78%"  stop-color="#243568"/>
+        <stop offset="100%" stop-color="#3a4a78"/>
+      </linearGradient>
+
+      <!-- moon glow -->
+      <radialGradient id="moonGlow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%"   stop-color="#fff6c8" stop-opacity="0.95"/>
+        <stop offset="35%"  stop-color="#ffe08a" stop-opacity="0.45"/>
+        <stop offset="100%" stop-color="#ffe08a" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="moonCore" cx="40%" cy="40%" r="55%">
+        <stop offset="0%"   stop-color="#fffbe8"/>
+        <stop offset="70%"  stop-color="#ffe9a0"/>
+        <stop offset="100%" stop-color="#f0d070"/>
+      </radialGradient>
+
+      <!-- train body metal -->
+      <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="#f4f7fc"/>
+        <stop offset="40%"  stop-color="#d8e0f0"/>
+        <stop offset="100%" stop-color="#a8b6d0"/>
+      </linearGradient>
+
+      <!-- band / livery -->
+      <linearGradient id="bandGrad" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%"   stop-color="#2a52c8"/>
+        <stop offset="50%"  stop-color="#4a7cf0"/>
+        <stop offset="100%" stop-color="#2a52c8"/>
+      </linearGradient>
+
+      <!-- glass -->
+      <linearGradient id="glassGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="#a8e0ff"/>
+        <stop offset="50%"  stop-color="#3a7ad0"/>
+        <stop offset="100%" stop-color="#1a3a78"/>
+      </linearGradient>
+
+      <!-- headlight -->
+      <radialGradient id="beamGrad" cx="0%" cy="50%" r="100%">
+        <stop offset="0%"   stop-color="#fff4b0" stop-opacity="0.9"/>
+        <stop offset="40%"  stop-color="#ffd86a" stop-opacity="0.35"/>
+        <stop offset="100%" stop-color="#ffd86a" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="lampGrad" cx="40%" cy="40%" r="60%">
+        <stop offset="0%"   stop-color="#fffce0"/>
+        <stop offset="60%"  stop-color="#ffd84a"/>
+        <stop offset="100%" stop-color="#d0a020"/>
+      </radialGradient>
+
+      <!-- owl body -->
+      <radialGradient id="owlBodyGrad" cx="40%" cy="35%" r="70%">
+        <stop offset="0%"   stop-color="#d4b888"/>
+        <stop offset="55%"  stop-color="#c4a574"/>
+        <stop offset="100%" stop-color="#8b6b3a"/>
+      </radialGradient>
+      <radialGradient id="owlBellyGrad" cx="50%" cy="40%" r="60%">
+        <stop offset="0%"   stop-color="#f0e0b8"/>
+        <stop offset="100%" stop-color="#d4b888"/>
+      </radialGradient>
+
+      <!-- track metal -->
+      <linearGradient id="railGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="#c8d0e8"/>
+        <stop offset="40%"  stop-color="#8a96b8"/>
+        <stop offset="100%" stop-color="#4a5680"/>
+      </linearGradient>
+
+      <!-- pillar shadow -->
+      <linearGradient id="pillarGrad" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%"   stop-color="#2a3660"/>
+        <stop offset="50%"  stop-color="#3a4878"/>
+        <stop offset="100%" stop-color="#1e2848"/>
+      </linearGradient>
+
+      <!-- clip for train interior -->
+      <clipPath id="cabClip">
+        <rect x="720" y="250" width="140" height="110" rx="14"/>
+      </clipPath>
+
+      <!-- star sparkle filter -->
+      <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="2.5" result="b"/>
+        <feMerge>
+          <feMergeNode in="b"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+    </defs>
+
+    <!-- ========== L0 FAR: sky, stars, moon, distant skyline ========== -->
+    <g id="layer-far" class="layer" data-depth="0.05">
+      <rect width="1280" height="720" fill="url(#skyGrad)"/>
+
+      <!-- stars -->
+      <g fill="#e8eeff" opacity="0.85">
+        <circle cx="80"  cy="60"  r="1.4"/>
+        <circle cx="160" cy="120" r="1.0"/>
+        <circle cx="240" cy="40"  r="1.6"/>
+        <circle cx="320" cy="90"  r="1.1"/>
+        <circle cx="410" cy="50"  r="1.3"/>
+        <circle cx="520" cy="110" r="0.9"/>
+        <circle cx="600" cy="30"  r="1.5"/>
+        <circle cx="700" cy="80"  r="1.0"/>
+        <circle cx="820" cy="45"  r="1.2"/>
+        <circle cx="900" cy="100" r="1.4"/>
+        <circle cx="980" cy="55"  r="1.0"/>
+        <circle cx="1080" cy="90" r="1.3"/>
+        <circle cx="1180" cy="40" r="1.1"/>
+        <circle cx="1220" cy="130" r="1.5"/>
+        <circle cx="50"  cy="160" r="1.0"/>
+        <circle cx="200" cy="180" r="0.8"/>
+        <circle cx="450" cy="150" r="1.2"/>
+        <circle cx="750" cy="160" r="0.9"/>
+        <circle cx="1050" cy="170" r="1.1"/>
+        <circle cx="130" cy="210" r="0.7"/>
+        <circle cx="370" cy="200" r="0.9"/>
+        <circle cx="860" cy="190" r="1.0"/>
+        <circle cx="1140" cy="200" r="0.8"/>
+      </g>
+
+      <!-- twinkle on a few stars via opacity animation -->
+      <g fill="#fff" filter="url(#softGlow)">
+        <circle cx="240" cy="40" r="2.2">
+          <animate attributeName="opacity" values="0.3;1;0.3" dur="2.4s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="900" cy="100" r="2.0">
+          <animate attributeName="opacity" values="1;0.25;1" dur="3.1s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="600" cy="30" r="2.1">
+          <animate attributeName="opacity" values="0.4;1;0.4" dur="1.9s" repeatCount="indefinite"/>
+        </circle>
+      </g>
+
+      <!-- moon -->
+      <g transform="translate(1080, 95)">
+        <circle r="70" fill="url(#moonGlow)"/>
+        <circle r="28" fill="url(#moonCore)"/>
+        <!-- craters -->
+        <circle cx="-8" cy="-6" r="5" fill="#e8d080" opacity="0.55"/>
+        <circle cx="10" cy="8" r="3.5" fill="#e8d080" opacity="0.45"/>
+        <circle cx="-2" cy="12" r="2.5" fill="#e8d080" opacity="0.4"/>
+      </g>
+
+      <!-- distant skyline silhouette -->
+      <g fill="#0e1535" opacity="0.9">
+        <rect x="0"    y="280" width="70"  height="160"/>
+        <rect x="80"   y="240" width="55"  height="200"/>
+        <rect x="150"  y="300" width="90"  height="140"/>
+        <rect x="260"  y="220" width="60"  height="220"/>
+        <rect x="340"  y="270" width="100" height="170"/>
+        <rect x="460"  y="200" width="45"  height="240"/>
+        <rect x="520"  y="260" width="80"  height="180"/>
+        <rect x="620"  y="230" width="55"  height="210"/>
+        <rect x="700"  y="280" width="110" height="160"/>
+        <rect x="830"  y="210" width="50"  height="230"/>
+        <rect x="900"  y="250" width="75"  height="190"/>
+        <rect x="1000" y="230" width="60"  height="210"/>
+        <rect x="1080" y="270" width="95"  height="170"/>
+        <rect x="1200" y="240" width="80"  height="200"/>
+        <!-- antenna spikes -->
+        <rect x="95"   y="210" width="3"  height="30"/>
+        <rect x="275"  y="190" width="3"  height="30"/>
+        <rect x="472"  y="170" width="3"  height="30"/>
+        <rect x="845"  y="180" width="3"  height="30"/>
+      </g>
+
+      <!-- lit windows on distant buildings -->
+      <g fill="#ffd86a" opacity="0.55">
+        <rect x="92"  y="260" width="6" height="8"/>
+        <rect x="108" y="280" width="6" height="8"/>
+        <rect x="92"  y="310" width="6" height="8"/>
+        <rect x="278" y="250" width="6" height="8"/>
+        <rect x="295" y="290" width="6" height="8"/>
+        <rect x="475" y="240" width="5" height="7"/>
+        <rect x="488" y="280" width="5" height="7"/>
+        <rect x="475" y="320" width="5" height="7"/>
+        <rect x="848" y="240" width="6" height="8"/>
+        <rect x="860" y="280" width="6" height="8"/>
+        <rect x="1020" y="260" width="6" height="8"/>
+        <rect x="1035" y="300" width="6" height="8"/>
+      </g>
+    </g>
+
+    <!-- ========== L1 MID: mid-rise buildings + elevated pillars ========== -->
+    <g id="layer-mid" class="layer" data-depth="0.18">
+      <!-- mid buildings -->
+      <g fill="#16204a">
+        <rect x="-20"  y="320" width="120" height="200" rx="2"/>
+        <rect x="120"  y="290" width="90"  height="230" rx="2"/>
+        <rect x="230"  y="340" width="130" height="180" rx="2"/>
+        <rect x="380"  y="300" width="80"  height="220" rx="2"/>
+        <rect x="480"  y="330" width="110" height="190" rx="2"/>
+        <rect x="610"  y="280" width="70"  height="240" rx="2"/>
+        <rect x="700"  y="320" width="140" height="200" rx="2"/>
+        <rect x="860"  y="295" width="95"  height="225" rx="2"/>
+        <rect x="975"  y="335" width="120" height="185" rx="2"/>
+        <rect x="1115" y="300" width="90"  height="220" rx="2"/>
+        <rect x="1225" y="325" width="80"  height="195" rx="2"/>
+      </g>
+      <!-- mid building windows -->
+      <g fill="#6a90d0" opacity="0.35">
+        <!-- block 1 -->
+        <rect x="10"  y="340" width="10" height="14" rx="1"/>
+        <rect x="30"  y="340" width="10" height="14" rx="1"/>
+        <rect x="50"  y="340" width="10" height="14" rx="1"/>
+        <rect x="10"  y="370" width="10" height="14" rx="1"/>
+        <rect x="30"  y="370" width="10" height="14" rx="1"/>
+        <rect x="50"  y="370" width="10" height="14" rx="1"/>
+        <rect x="10"  y="400" width="10" height="14" rx="1"/>
+        <rect x="50"  y="400" width="10" height="14" rx="1"/>
+        <!-- block 2 -->
+        <rect x="135" y="310" width="12" height="16" rx="1"/>
+        <rect x="155" y="310" width="12" height="16" rx="1"/>
+        <rect x="175" y="310" width="12" height="16" rx="1"/>
+        <rect x="135" y="345" width="12" height="16" rx="1"/>
+        <rect x="175" y="345" width="12" height="16" rx="1"/>
+        <rect x="155" y="380" width="12" height="16" rx="1"/>
+        <!-- block 3 -->
+        <rect x="250" y="360" width="14" height="18" rx="1"/>
+        <rect x="275" y="360" width="14" height="18" rx="1"/>
+        <rect x="300" y="360" width="14" height="18" rx="1"/>
+        <rect x="250" y="400" width="14" height="18" rx="1"/>
+        <rect x="300" y="400" width="14" height="18" rx="1"/>
+        <!-- block 4 -->
+        <rect x="395" y="320" width="12" height="16" rx="1"/>
+        <rect x="415" y="320" width="12" height="16" rx="1"/>
+        <rect x="435" y="320" width="12" height="16" rx="1"/>
+        <rect x="395" y="360" width="12" height="16" rx="1"/>
+        <rect x="435" y="400" width="12" height="16" rx="1"/>
+        <!-- block 5 -->
+        <rect x="500" y="350" width="14" height="18" rx="1"/>
+        <rect x="525" y="350" width="14" height="18" rx="1"/>
+        <rect x="550" y="350" width="14" height="18" rx="1"/>
+        <rect x="500" y="390" width="14" height="18" rx="1"/>
+        <rect x="550" y="430" width="14" height="18" rx="1"/>
+        <!-- block 6 -->
+        <rect x="625" y="300" width="12" height="16" rx="1"/>
+        <rect x="645" y="300" width="12" height="16" rx="1"/>
+        <rect x="625" y="340" width="12" height="16" rx="1"/>
+        <rect x="645" y="380" width="12" height="16" rx="1"/>
+        <rect x="625" y="420" width="12" height="16" rx="1"/>
+        <!-- block 7 -->
+        <rect x="720" y="340" width="14" height="18" rx="1"/>
+        <rect x="745" y="340" width="14" height="18" rx="1"/>
+        <rect x="770" y="340" width="14" height="18" rx="1"/>
+        <rect x="795" y="340" width="14" height="18" rx="1"/>
+        <rect x="720" y="380" width="14" height="18" rx="1"/>
+        <rect x="770" y="420" width="14" height="18" rx="1"/>
+        <!-- block 8 -->
+        <rect x="875" y="315" width="12" height="16" rx="1"/>
+        <rect x="895" y="315" width="12" height="16" rx="1"/>
+        <rect x="915" y="315" width="12" height="16" rx="1"/>
+        <rect x="875" y="355" width="12" height="16" rx="1"/>
+        <rect x="915" y="395" width="12" height="16" rx="1"/>
+        <!-- block 9 -->
+        <rect x="995" y="355" width="14" height="18" rx="1"/>
+        <rect x="1020" y="355" width="14" height="18" rx="1"/>
+        <rect x="1045" y="355" width="14" height="18" rx="1"/>
+        <rect x="995" y="395" width="14" height="18" rx="1"/>
+        <rect x="1045" y="435" width="14" height="18" rx="1"/>
+        <!-- block 10 -->
+        <rect x="1130" y="320" width="12" height="16" rx="1"/>
+        <rect x="1150" y="320" width="12" height="16" rx="1"/>
+        <rect x="1170" y="320" width="12" height="16" rx="1"/>
+        <rect x="1130" y="360" width="12" height="16" rx="1"/>
+        <rect x="1170" y="400" width="12" height="16" rx="1"/>
+      </g>
+
+      <!-- elevated track pillars (receding) -->
+      <g fill="url(#pillarGrad)">
+        <rect x="40"   y="480" width="36" height="200" rx="4"/>
+        <rect x="280"  y="490" width="32" height="190" rx="4"/>
+        <rect x="540"  y="485" width="34" height="195" rx="4"/>
+        <rect x="800"  y="492" width="30" height="188" rx="4"/>
+        <rect x="1040" y="486" width="32" height="194" rx="4"/>
+      </g>
+      <!-- pillar cross-beams -->
+      <g fill="#2e3c68">
+        <rect x="20"  y="475" width="80"  height="14" rx="3"/>
+        <rect x="260" y="485" width="72"  height="12" rx="3"/>
+        <rect x="520" y="480" width="74"  height="13" rx="3"/>
+        <rect x="782" y="487" width="68"  height="11" rx="3"/>
+        <rect x="1022" y="481" width="70" height="13" rx="3"/>
+      </g>
+      <!-- pillar base shadows -->
+      <g fill="#0a0e20" opacity="0.5">
+        <ellipse cx="58"  cy="680" rx="40" ry="10"/>
+        <ellipse cx="296" cy="680" rx="36" ry="9"/>
+        <ellipse cx="557" cy="680" rx="38" ry="9"/>
+        <ellipse cx="815" cy="680" rx="34" ry="8"/>
+        <ellipse cx="1056" cy="680" rx="36" ry="9"/>
+      </g>
+    </g>
+
+    <!-- ========== L2 NEAR: track bed, sleepers, rails, signals ========== -->
+    <g id="layer-near" class="layer" data-depth="0.55">
+      <!-- track bed -->
+      <rect x="0" y="520" width="1280" height="80" fill="#1a2040"/>
+      <!-- ballast texture -->
+      <g fill="#2a3460" opacity="0.7">
+        <ellipse cx="30"  cy="545" rx="8" ry="4"/>
+        <ellipse cx="90"  cy="555" rx="7" ry="3"/>
+        <ellipse cx="150" cy="540" rx="9" ry="4"/>
+        <ellipse cx="220" cy="550" rx="6" ry="3"/>
+        <ellipse cx="300" cy="545" rx="8" ry="4"/>
+        <ellipse cx="380" cy="555" rx="7" ry="3"/>
+        <ellipse cx="460" cy="542" rx="9" ry="4"/>
+        <ellipse cx="540" cy="552" rx="6" ry="3"/>
+        <ellipse cx="620" cy="546" rx="8" ry="4"/>
+        <ellipse cx="700" cy="554" rx="7" ry="3"/>
+        <ellipse cx="780" cy="541" rx="9" ry="4"/>
+        <ellipse cx="860" cy="551" rx="6" ry="3"/>
+        <ellipse cx="940" cy="547" rx="8" ry="4"/>
+        <ellipse cx="1020" cy="553" rx="7" ry="3"/>
+        <ellipse cx="1100" cy="543" rx="9" ry="4"/>
+        <ellipse cx="1180" cy="550" rx="6" ry="3"/>
+        <ellipse cx="1250" cy="546" rx="8" ry="4"/>
+      </g>
+
+      <!-- sleepers (rail ties) — scroll left to sell rightward motion -->
+      <g class="sleepers">
+        <g fill="#4a3a28">
+          <!-- period = 80px; tile enough to cover 1280 + overflow -->
+          <g id="sleeper-set">
+            <rect x="-80" y="530" width="48" height="12" rx="2" transform="skewX(-8)"/>
+            <rect x="0"   y="530" width="48" height="12" rx="2" transform="skewX(-8)"/>
+            <rect x="80"  y="530" width="48" height="12" rx="2" transform="skewX(-8)"/>
+            <rect x="160" y="530" width="48" height="12" rx="2" transform="skewX(-8)"/>
+            <rect x="240" y="530" width="48" height="12" rx="2" transform="skewX(-8)"/>
+            <rect x="320" y="530" width="48" height="12" rx="2" transform="skewX(-8)"/>
+            <rect x="400" y="530" width="48" height="12" rx="2" transform="skewX(-8)"/>
+            <rect x="480" y="530" width="48" height="12" rx="2" transform="skewX(-8)"/>
+            <rect x="560" y="530" width="48" height="12" rx="2" transform="skewX(-8)"/>
+            <rect x="640" y="530" width="48" height="12" rx="2" transform="skewX(-8)"/>
+            <rect x="720" y="530" width="48" height="12" rx="2" transform="skewX(-8)"/>
+            <rect x="800" y="530" width="48" height="12" rx="2" transform="skewX(-8)"/>
+            <rect x="880" y="530" width="48" height="12" rx="2" transform="skewX(-8)"/>
+            <rect x="960" y="530" width="48" height="12" rx="2" transform="skewX(-8)"/>
+            <rect x="1040" y="530" width="48" height="12" rx="2" transform="skewX(-8)"/>
+            <rect x="1120" y="530" width="48" height="12" rx="2" transform="skewX(-8)"/>
+            <rect x="1200" y="530" width="48" height="12" rx="2" transform="skewX(-8)"/>
+            <rect x="1280" y="530" width="48" height="12" rx="2" transform="skewX(-8)"/>
+            <rect x="1360" y="530" width="48" height="12" rx="2" transform="skewX(-8)"/>
+          </g>
+        </g>
+      </g>
+
+      <!-- rails (double rail, slight perspective) -->
+      <g>
+        <!-- far rail -->
+        <rect x="0" y="528" width="1280" height="5" fill="url(#railGrad)" rx="1"/>
+        <!-- near rail -->
+        <rect x="0" y="548" width="1280" height="6" fill="url(#railGrad)" rx="1"/>
+        <!-- rail highlight -->
+        <rect x="0" y="528" width="1280" height="1.5" fill="#d8e0f0" opacity="0.7"/>
+        <rect x="0" y="548" width="1280" height="1.5" fill="#d8e0f0" opacity="0.7"/>
+      </g>
+
+      <!-- third rail / power rail (yellow) -->
+      <rect x="0" y="560" width="1280" height="3" fill="#c8a020" opacity="0.7" rx="1"/>
+
+      <!-- signal poles (foreground, pass by) -->
+      <g class="signal-pole" transform="translate(180, 0)">
+        <rect x="-4" y="380" width="8" height="160" fill="#2a3458" rx="2"/>
+        <rect x="-18" y="360" width="36" height="50" rx="6" fill="#1a2040" stroke="#3a4870" stroke-width="2"/>
+        <!-- green lamp -->
+        <circle cx="0" cy="385" r="8" fill="#4ade80" class="signal-glow" filter="url(#softGlow)"/>
+        <!-- red lamp (off) -->
+        <circle cx="0" cy="405" r="8" fill="#4a2030" opacity="0.6"/>
+      </g>
+
+      <g class="signal-pole" transform="translate(920, 0)">
+        <rect x="-3" y="400" width="6" height="140" fill="#2a3458" rx="2"/>
+        <rect x="-14" y="382" width="28" height="40" rx="5" fill="#1a2040" stroke="#3a4870" stroke-width="1.5"/>
+        <circle cx="0" cy="395" r="6" fill="#f87171" opacity="0.9" filter="url(#softGlow)"/>
+        <circle cx="0" cy="412" r="6" fill="#2a4030" opacity="0.5"/>
+      </g>
+
+      <!-- foreground weeds / grass tufts -->
+      <g stroke="#2a4a30" stroke-width="2" fill="none" stroke-linecap="round">
+        <path d="M40,600 Q45,570 38,545"/>
+        <path d="M52,602 Q58,575 50,550"/>
+        <path d="M46,601 Q48,580 42,560"/>
+        <path d="M600,608 Q606,578 598,555"/>
+        <path d="M612,610 Q618,585 610,560"/>
+        <path d="M1100,605 Q1105,575 1098,550"/>
+        <path d="M1112,607 Q1118,580 1110,555"/>
+        <path d="M1120,606 Q1122,585 1116,565"/>
+      </g>
+    </g>
+
+    <!-- ========== SPEED STREAKS (depth cue in front of train) ========== -->
+    <g id="streaks" opacity="0.7">
+      <rect class="streak" x="900" y="300" width="120" height="2" rx="1" fill="#8ab8ff" opacity="0"/>
+      <rect class="streak" x="1000" y="340" width="90" height="1.5" rx="1" fill="#6a98e0" opacity="0" style="animation-delay:-0.2s"/>
+      <rect class="streak" x="850" y="380" width="140" height="2" rx="1" fill="#a8c8ff" opacity="0" style="animation-delay:-0.45s"/>
+      <rect class="streak" x="1100" y="320" width="70" height="1.5" rx="1" fill="#8ab8ff" opacity="0" style="animation-delay:-0.1s"/>
+      <rect class="streak" x="950" y="420" width="110" height="2" rx="1" fill="#7aa8f0" opacity="0" style="animation-delay:-0.35s"/>
+      <rect class="streak" x="1050" y="280" width="100" height="1.5" rx="1" fill="#9ac0ff" opacity="0" style="animation-delay:-0.55s"/>
+    </g>
+
+    <!-- ========== THE TRAIN + OWL ========== -->
+    <!--
+      Train placement: body spans roughly x=280..980, sitting on rails at y~540.
+      Nose faces RIGHT (+X). Cab windshield at front-right.
+      Owl sits in the front cab, visible through windshield.
+    -->
+    <g id="train-group" class="train-bounce">
+      <!-- exhaust puffs (behind roof) -->
+      <g transform="translate(360, 250)">
+        <circle class="puff" cx="0"  cy="0" r="10" fill="#8a96b0" opacity="0"/>
+        <circle class="puff" cx="-8" cy="4" r="8"  fill="#7a86a0" opacity="0"/>
+        <circle class="puff" cx="4"  cy="-2" r="7" fill="#9aa6c0" opacity="0"/>
+      </g>
+
+      <!-- ---- car body (rear) ---- -->
+      <g>
+        <!-- rear body shell -->
+        <path d="
+          M300,300
+          L900,300
+          Q960,300 980,340
+          L1000,420
+          Q1005,450 990,470
+          L320,470
+          Q290,470 288,440
+          L290,320
+          Q292,300 300,300
+          Z
+        " fill="url(#bodyGrad)" stroke="#8a98b8" stroke-width="2"/>
+
+        <!-- roof cap -->
+        <path d="
+          M310,298
+          L890,298
+          Q940,298 955,320
+          L958,330
+          L308,330
+          Q295,318 310,298
+          Z
+        " fill="#c0cce0" opacity="0.9"/>
+
+        <!-- blue livery band -->
+        <path d="
+          M295,380
+          L995,380
+          L998,410
+          L293,410
+          Z
+        " fill="url(#bandGrad)" opacity="0.95"/>
+
+        <!-- stripe highlight -->
+        <rect x="300" y="385" width="690" height="3" fill="#7aa0ff" opacity="0.6"/>
+
+        <!-- lower skirt / dark underbody -->
+        <path d="
+          M310,440
+          L980,440
+          L975,480
+          L315,480
+          Z
+        " fill="#2a3460"/>
+
+        <!-- side windows (passenger) -->
+        <g>
+          <rect x="340" y="330" width="55" height="40" rx="6" fill="url(#glassGrad)" stroke="#5a7ab0" stroke-width="1.5"/>
+          <rect x="410" y="330" width="55" height="40" rx="6" fill="url(#glassGrad)" stroke="#5a7ab0" stroke-width="1.5"/>
+          <rect x="480" y="330" width="55" height="40" rx="6" fill="url(#glassGrad)" stroke="#5a7ab0" stroke-width="1.5"/>
+          <rect x="550" y="330" width="55" height="40" rx="6" fill="url(#glassGrad)" stroke="#5a7ab0" stroke-width="1.5"/>
+          <rect x="620" y="330" width="55" height="40" rx="6" fill="url(#glassGrad)" stroke="#5a7ab0" stroke-width="1.5"/>
+          <rect x="690" y="330" width="55" height="40" rx="6" fill="url(#glassGrad)" stroke="#5a7ab0" stroke-width="1.5"/>
+          <!-- window light flicker overlays -->
+          <rect class="win-light" x="340" y="330" width="55" height="40" rx="6" fill="#a0d8ff" opacity="0.25"/>
+          <rect class="win-light" x="410" y="330" width="55" height="40" rx="6" fill="#a0d8ff" opacity="0.2"/>
+          <rect class="win-light" x="480" y="330" width="55" height="40" rx="6" fill="#a0d8ff" opacity="0.28"/>
+          <rect class="win-light" x="550" y="330" width="55" height="40" rx="6" fill="#a0d8ff" opacity="0.22"/>
+          <rect class="win-light" x="620" y="330" width="55" height="40" rx="6" fill="#a0d8ff" opacity="0.26"/>
+          <rect class="win-light" x="690" y="330" width="55" height="40" rx="6" fill="#a0d8ff" opacity="0.24"/>
+        </g>
+
+        <!-- door -->
+        <rect x="760" y="325" width="40" height="120" rx="4" fill="#b0bed8" stroke="#7a8ab0" stroke-width="1.5"/>
+        <rect x="770" y="340" width="20" height="40" rx="3" fill="url(#glassGrad)" opacity="0.8"/>
+        <rect x="780" y="325" width="2" height="120" fill="#7a8ab0"/>
+
+        <!-- car number / route badge -->
+        <rect x="340" y="418" width="70" height="20" rx="4" fill="#1a2850"/>
+        <text x="375" y="433" text-anchor="middle" fill="#7aa0ff" font-size="12" font-family="Consolas, monospace" font-weight="700">OWL-7</text>
+
+        <!-- route dot lights -->
+        <circle cx="430" cy="428" r="5" fill="#4ade80"/>
+        <circle cx="450" cy="428" r="5" fill="#4ade80" opacity="0.6"/>
+        <circle cx="470" cy="428" r="5" fill="#3a4a70"/>
+      </g>
+
+      <!-- ---- front cab (nose) ---- -->
+      <g>
+        <!-- cab shell, raked nose to the right -->
+        <path d="
+          M880,295
+          L960,295
+          Q1020,300 1055,350
+          L1075,400
+          Q1085,440 1070,470
+          L890,470
+          L880,295
+          Z
+        " fill="url(#bodyGrad)" stroke="#8a98b8" stroke-width="2"/>
+
+        <!-- cab roof fairing -->
+        <path d="M890,290 L965,290 Q1010,295 1035,330 L890,330 Z" fill="#b8c4d8"/>
+
+        <!-- front windshield (large, raked) -->
+        <path d="
+          M910,310
+          L980,310
+          Q1025,318 1050,360
+          L1058,390
+          Q1040,400 1000,400
+          L910,400
+          Z
+        " fill="url(#glassGrad)" stroke="#4a6a98" stroke-width="2.5"/>
+
+        <!-- windshield reflection sheen -->
+        <path d="M920,315 L960,315 L1000,395 L920,395 Z" fill="#c8e8ff" opacity="0.18"/>
+        <path d="M965,315 L980,315 L1015,395 L1000,395 Z" fill="#ffffff" opacity="0.12"/>
+
+        <!-- === OWL inside cab (clipped to windshield area conceptually) === -->
+        <!-- We draw the owl UNDER the glass sheen, over the glass fill -->
+        <g id="owl" transform="translate(980, 355)">
+          <!-- owl body -->
+          <g class="owl-body-group">
+            <!-- tail feathers (left side, behind body) -->
+            <g class="owl-tail">
+              <path d="M-38,10 L-58,-5 L-52,8 L-62,14 L-48,18 L-55,28 L-36,22 Z"
+                    fill="#8b6b3a" stroke="#6a5028" stroke-width="1"/>
+            </g>
+
+            <!-- main body -->
+            <ellipse cx="0" cy="8" rx="28" ry="32" fill="url(#owlBodyGrad)" stroke="#6a5028" stroke-width="1.5"/>
+
+            <!-- belly -->
+            <ellipse cx="4" cy="16" rx="16" ry="18" fill="url(#owlBellyGrad)"/>
+            <!-- belly feather marks -->
+            <g stroke="#c4a574" stroke-width="1" fill="none" opacity="0.7">
+              <path d="M-4,8 Q4,12 12,8"/>
+              <path d="M-2,16 Q4,20 10,16"/>
+              <path d="M0,24 Q4,27 8,24"/>
+            </g>
+
+            <!-- left wing -->
+            <g class="owl-wing-l">
+              <path d="M-22,-5 Q-40,5 -38,28 Q-28,30 -18,22 Q-16,8 -22,-5 Z"
+                    fill="#a08050" stroke="#6a5028" stroke-width="1.2"/>
+              <path d="M-28,8 Q-34,16 -32,24" stroke="#6a5028" stroke-width="0.8" fill="none" opacity="0.6"/>
+            </g>
+
+            <!-- right wing (slightly forward, gripping lever side) -->
+            <g class="owl-wing-r">
+              <path d="M22,-5 Q42,2 40,26 Q30,30 20,20 Q18,6 22,-5 Z"
+                    fill="#a08050" stroke="#6a5028" stroke-width="1.2"/>
+              <path d="M30,6 Q36,14 34,22" stroke="#6a5028" stroke-width="0.8" fill="none" opacity="0.6"/>
+            </g>
+
+            <!-- head group -->
+            <g class="owl-head">
+              <!-- ear tufts -->
+              <path d="M-18,-28 L-24,-48 L-10,-32 Z" fill="#8b6b3a" stroke="#6a5028" stroke-width="1"/>
+              <path d="M18,-28 L24,-48 L10,-32 Z" fill="#8b6b3a" stroke="#6a5028" stroke-width="1"/>
+              <path d="M-16,-30 L-20,-42 L-12,-32 Z" fill="#d4b888"/>
+              <path d="M16,-30 L20,-42 L12,-32 Z" fill="#d4b888"/>
+
+              <!-- head shape -->
+              <ellipse cx="0" cy="-18" rx="24" ry="22" fill="url(#owlBodyGrad)" stroke="#6a5028" stroke-width="1.5"/>
+
+              <!-- facial disc -->
+              <ellipse cx="-9" cy="-18" rx="12" ry="13" fill="#e0c898"/>
+              <ellipse cx="9"  cy="-18" rx="12" ry="13" fill="#e0c898"/>
+
+              <!-- eyes -->
+              <g>
+                <ellipse cx="-9" cy="-18" rx="9" ry="9" fill="#fff8d0" stroke="#6a5028" stroke-width="1">
+                  <animate attributeName="ry" values="9;9;1.2;9;9" keyTimes="0;0.42;0.48;0.54;1" dur="3.4s" repeatCount="indefinite"/>
+                </ellipse>
+                <ellipse cx="9" cy="-18" rx="9" ry="9" fill="#fff8d0" stroke="#6a5028" stroke-width="1">
+                  <animate attributeName="ry" values="9;9;1.2;9;9" keyTimes="0;0.42;0.48;0.54;1" dur="3.4s" repeatCount="indefinite"/>
+                </ellipse>
+                <!-- irises -->
+                <circle cx="-9" cy="-18" r="6.5" fill="#ffe566"/>
+                <circle cx="9"  cy="-18" r="6.5" fill="#ffe566"/>
+                <!-- pupils — look forward (right) as train drives right -->
+                <circle cx="-7" cy="-17" r="3.2" fill="#1a1420"/>
+                <circle cx="11" cy="-17" r="3.2" fill="#1a1420"/>
+                <!-- catchlights -->
+                <circle cx="-5.5" cy="-19" r="1.4" fill="#ffffff"/>
+                <circle cx="12.5" cy="-19" r="1.4" fill="#ffffff"/>
+              </g>
+
+              <!-- beak -->
+              <path d="M-4,-10 Q0,-2 4,-10 Q0,-8 -4,-10 Z" fill="#f0a040" stroke="#c07820" stroke-width="0.8"/>
+
+              <!-- brow feathers -->
+              <path d="M-20,-28 Q-9,-34 2,-28" stroke="#8b6b3a" stroke-width="2" fill="none"/>
+              <path d="M-2,-28 Q9,-34 20,-28" stroke="#8b6b3a" stroke-width="2" fill="none"/>
+            </g>
+
+            <!-- claw on control lever -->
+            <g class="owl-claw" transform="translate(18, 32)">
+              <path d="M0,0 L4,8 L-2,8 Z" fill="#d09040" stroke="#a07020" stroke-width="0.6"/>
+              <path d="M4,0 L8,8 L2,8 Z" fill="#d09040" stroke="#a07020" stroke-width="0.6"/>
+              <path d="M-4,0 L0,8 L-6,8 Z" fill="#d09040" stroke="#a07020" stroke-width="0.6"/>
+            </g>
+          </g>
+        </g>
+
+        <!-- control lever in cab -->
+        <g stroke="#4a5a80" stroke-width="3" fill="none">
+          <line x1="1005" y1="400" x2="1020" y2="375"/>
+          <circle cx="1022" cy="372" r="5" fill="#6a7a98" stroke="none"/>
+        </g>
+
+        <!-- windshield overlay: slight tint + frame on top of owl -->
+        <path d="
+          M910,310
+          L980,310
+          Q1025,318 1050,360
+          L1058,390
+          Q1040,400 1000,400
+          L910,400
+          Z
+        " fill="none" stroke="#3a5a88" stroke-width="3"/>
+        <!-- glass tint veil -->
+        <path d="
+          M910,310
+          L980,310
+          Q1025,318 1050,360
+          L1058,390
+          Q1040,400 1000,400
+          L910,400
+          Z
+        " fill="#7ec8ff" opacity="0.12"/>
+        <!-- diagonal reflection streak on glass -->
+        <path d="M930,312 L950,312 L1000,398 L975,398 Z" fill="#ffffff" opacity="0.15"/>
+
+        <!-- headlight beam (points right, +X) -->
+        <path d="M1060,420 L1280,390 L1280,460 L1060,435 Z" fill="url(#beamGrad)"/>
+        <!-- headlight lamp -->
+        <ellipse cx="1058" cy="428" rx="12" ry="14" fill="url(#lampGrad)" filter="url(#softGlow)"/>
+        <ellipse cx="1058" cy="428" rx="6" ry="8" fill="#fffce8"/>
+
+        <!-- front bumper / cowcatcher -->
+        <path d="
+          M1045,455
+          L1080,455
+          L1090,490
+          L1055,490
+          Z
+        " fill="#3a4a78" stroke="#2a3858" stroke-width="1.5"/>
+        <!-- bumper stripes -->
+        <path d="M1052,462 L1078,462" stroke="#f0c040" stroke-width="3"/>
+        <path d="M1054,472 L1082,472" stroke="#f0c040" stroke-width="3"/>
+
+        <!-- destination board -->
+        <rect x="920" y="280" width="90" height="22" rx="4" fill="#0a1020" stroke="#3a4a70" stroke-width="1.5"/>
+        <text x="965" y="296" text-anchor="middle" fill="#4ade80" font-size="12" font-family="Consolas, monospace" font-weight="700">NIGHT OWL</text>
+      </g>
+
+      <!-- ---- roof pantograph / antenna ---- -->
+      <g stroke="#5a6a90" stroke-width="2.5" fill="none">
+        <line x1="500" y1="298" x2="520" y2="250"/>
+        <line x1="540" y1="298" x2="520" y2="250"/>
+        <line x1="500" y1="250" x2="560" y2="250"/>
+      </g>
+      <!-- contact shoe -->
+      <rect x="495" y="244" width="70" height="6" rx="2" fill="#7a8ab0"/>
+
+      <!-- ---- bogies / wheel trucks ---- -->
+      <!-- rear bogie -->
+      <g transform="translate(420, 480)">
+        <rect x="-50" y="-10" width="120" height="28" rx="6" fill="#2a3458"/>
+        <!-- axle boxes -->
+        <rect x="-30" y="8" width="24" height="16" rx="3" fill="#3a4870"/>
+        <rect x="50"  y="8" width="24" height="16" rx="3" fill="#3a4870"/>
+
+        <!-- rear-left wheel -->
+        <g transform="translate(-18, 28)">
+          <g class="wheel-spin">
+            <circle r="22" fill="#1a2040" stroke="#5a6a90" stroke-width="3"/>
+            <circle r="16" fill="none" stroke="#4a5a80" stroke-width="2"/>
+            <!-- spokes: indicate rotation direction (CW for rightward) -->
+            <line x1="0" y1="-16" x2="0" y2="16" stroke="#6a7a98" stroke-width="2.5"/>
+            <line x1="-16" y1="0" x2="16" y2="0" stroke="#6a7a98" stroke-width="2.5"/>
+            <line x1="-11" y1="-11" x2="11" y2="11" stroke="#5a6a90" stroke-width="2"/>
+            <line x1="11" y1="-11" x2="-11" y2="11" stroke="#5a6a90" stroke-width="2"/>
+            <!-- direction tick: a notch at top that will move right when CW -->
+            <path d="M-3,-14 L3,-14 L0,-8 Z" fill="#c8d0e8"/>
+            <circle r="5" fill="#3a4870" stroke="#8a96b8" stroke-width="1.5"/>
+          </g>
+        </g>
+
+        <!-- rear-right wheel (slightly offset for depth) -->
+        <g transform="translate(48, 28)">
+          <g class="wheel-spin" style="animation-delay:-0.15s">
+            <circle r="20" fill="#141830" stroke="#4a5a80" stroke-width="2.5"/>
+            <circle r="14" fill="none" stroke="#3a4a70" stroke-width="1.5"/>
+            <line x1="0" y1="-14" x2="0" y2="14" stroke="#5a6a90" stroke-width="2"/>
+            <line x1="-14" y1="0" x2="14" y2="0" stroke="#5a6a90" stroke-width="2"/>
+            <line x1="-10" y1="-10" x2="10" y2="10" stroke="#4a5a80" stroke-width="1.5"/>
+            <line x1="10" y1="-10" x2="-10" y2="10" stroke="#4a5a80" stroke-width="1.5"/>
+            <path d="M-2.5,-12 L2.5,-12 L0,-7 Z" fill="#a8b4d0"/>
+            <circle r="4" fill="#2a3458" stroke="#6a7a98" stroke-width="1.2"/>
+          </g>
+        </g>
+      </g>
+
+      <!-- front bogie -->
+      <g transform="translate(880, 480)">
+        <rect x="-50" y="-10" width="130" height="28" rx="6" fill="#2a3458"/>
+        <rect x="-30" y="8" width="24" height="16" rx="3" fill="#3a4870"/>
+        <rect x="55"  y="8" width="24" height="16" rx="3" fill="#3a4870"/>
+
+        <!-- front-left wheel -->
+        <g transform="translate(-18, 28)">
+          <g class="wheel-spin" style="animation-delay:-0.28s">
+            <circle r="22" fill="#1a2040" stroke="#5a6a90" stroke-width="3"/>
+            <circle r="16" fill="none" stroke="#4a5a80" stroke-width="2"/>
+            <line x1="0" y1="-16" x2="0" y2="16" stroke="#6a7a98" stroke-width="2.5"/>
+            <line x1="-16" y1="0" x2="16" y2="0" stroke="#6a7a98" stroke-width="2.5"/>
+            <line x1="-11" y1="-11" x2="11" y2="11" stroke="#5a6a90" stroke-width="2"/>
+            <line x1="11" y1="-11" x2="-11" y2="11" stroke="#5a6a90" stroke-width="2"/>
+            <path d="M-3,-14 L3,-14 L0,-8 Z" fill="#c8d0e8"/>
+            <circle r="5" fill="#3a4870" stroke="#8a96b8" stroke-width="1.5"/>
+          </g>
+        </g>
+
+        <!-- front-right wheel -->
+        <g transform="translate(55, 28)">
+          <g class="wheel-spin" style="animation-delay:-0.1s">
+            <circle r="20" fill="#141830" stroke="#4a5a80" stroke-width="2.5"/>
+            <circle r="14" fill="none" stroke="#3a4a70" stroke-width="1.5"/>
+            <line x1="0" y1="-14" x2="0" y2="14" stroke="#5a6a90" stroke-width="2"/>
+            <line x1="-14" y1="0" x2="14" y2="0" stroke="#5a6a90" stroke-width="2"/>
+            <line x1="-10" y1="-10" x2="10" y2="10" stroke="#4a5a80" stroke-width="1.5"/>
+            <line x1="10" y1="-10" x2="-10" y2="10" stroke="#4a5a80" stroke-width="1.5"/>
+            <path d="M-2.5,-12 L2.5,-12 L0,-7 Z" fill="#a8b4d0"/>
+            <circle r="4" fill="#2a3458" stroke="#6a7a98" stroke-width="1.2"/>
+          </g>
+        </g>
+      </g>
+
+      <!-- drive gear between bogies (visual gear coupling) -->
+      <g transform="translate(650, 500)">
+        <g class="gear-spin">
+          <circle r="14" fill="none" stroke="#6a7a98" stroke-width="3"/>
+          <!-- gear teeth -->
+          <g fill="#6a7a98">
+            <rect x="-3" y="-18" width="6" height="6" rx="1"/>
+            <rect x="-3" y="12"  width="6" height="6" rx="1"/>
+            <rect x="-18" y="-3" width="6" height="6" rx="1"/>
+            <rect x="12"  y="-3" width="6" height="6" rx="1"/>
+            <rect x="10"  y="-14" width="6" height="6" rx="1" transform="rotate(45)"/>
+            <rect x="-16" y="-14" width="6" height="6" rx="1" transform="rotate(-45)"/>
+            <rect x="10"  y="8"   width="6" height="6" rx="1" transform="rotate(-45)"/>
+            <rect x="-16" y="8"   width="6" height="6" rx="1" transform="rotate(45)"/>
+          </g>
+          <circle r="5" fill="#3a4870"/>
+          <line x1="0" y1="-10" x2="0" y2="10" stroke="#a8b4d0" stroke-width="2"/>
+        </g>
+        <!-- connecting rods to bogies -->
+        <line x1="-200" y1="0" x2="-14" y2="0" stroke="#4a5a80" stroke-width="3"/>
+        <line x1="14" y1="0" x2="210" y2="0" stroke="#4a5a80" stroke-width="3"/>
+      </g>
+
+      <!-- coupler at rear -->
+      <g transform="translate(285, 450)">
+        <rect x="-20" y="-8" width="28" height="16" rx="3" fill="#3a4870"/>
+        <circle cx="-20" cy="0" r="6" fill="#2a3458" stroke="#5a6a90" stroke-width="1.5"/>
+      </g>
+    </g>
+
+    <!-- ========== foreground vignette ========== -->
+    <defs>
+      <radialGradient id="vignette" cx="50%" cy="45%" r="70%">
+        <stop offset="55%"  stop-color="#000000" stop-opacity="0"/>
+        <stop offset="100%" stop-color="#000000" stop-opacity="0.45"/>
+      </radialGradient>
+    </defs>
+    <rect width="1280" height="720" fill="url(#vignette)" pointer-events="none"/>
+  </svg>
+
+  <div class="hud"><strong>OWL-7</strong> · NIGHT LINE · EASTBOUND</div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /*
+    Parallax driver:
+    - Layers have data-depth attributes (0..1).
+    - A slow camera drift (sinusoidal) plus a constant "scroll sense"
+      offset each layer by depth * drift.
+    - Sleepers already CSS-scroll; this only nudges far/mid for depth.
+    - Also applies a tiny mouse parallax for interactive depth.
+  */
+
+  var far  = document.getElementById('layer-far');
+  var mid  = document.getElementById('layer-mid');
+  var near = document.getElementById('layer-near');
+  if (!far || !mid || !near) return;
+
+  var mouseX = 0, mouseY = 0;
+  var targetMX = 0, targetMY = 0;
+  var t0 = performance.now();
+
+  // Constant forward "world scroll" sense: layers drift left slowly
+  // so the train reads as moving right even beyond CSS sleeper scroll.
+  var SCROLL_SPEED = 12; // px per second baseline
+
+  window.addEventListener('pointermove', function (e) {
+    var r = document.querySelector('.stage').getBoundingClientRect();
+    targetMX = ((e.clientX - r.left) / r.width - 0.5) * 2;   // -1..1
+    targetMY = ((e.clientY - r.top) / r.height - 0.5) * 2;
+  }, { passive: true });
+
+  function frame(now) {
+    var t = (now - t0) / 1000;
+
+    // ease mouse
+    mouseX += (targetMX - mouseX) * 0.06;
+    mouseY += (targetMY - mouseY) * 0.06;
+
+    // world scroll offset (leftward = train appears to go right)
+    var scroll = -((t * SCROLL_SPEED) % 1280);
+
+    // gentle idle sway
+    var sway = Math.sin(t * 0.35) * 6;
+
+    var layers = [
+      { el: far,  depth: 0.05 },
+      { el: mid,  depth: 0.18 },
+      { el: near, depth: 0.55 }
+    ];
+
+    for (var i = 0; i < layers.length; i++) {
+      var L = layers[i];
+      var dx = scroll * L.depth + mouseX * 18 * L.depth + sway * L.depth;
+      var dy = mouseY * 10 * L.depth;
+      L.el.setAttribute('transform', 'translate(' + dx.toFixed(2) + ',' + dy.toFixed(2) + ')');
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  requestAnimationFrame(frame);
+
+  // ---------- static coherence assertions (dev aid, no console required) ----------
+  // Verify critical animated classes exist in DOM.
+  var checks = {
+    wheels: document.querySelectorAll('.wheel-spin').length,
+    owlHead: document.querySelectorAll('.owl-head').length,
+    owlWings: document.querySelectorAll('.owl-wing-l, .owl-wing-r').length,
+    owlTail: document.querySelectorAll('.owl-tail').length,
+    sleepers: document.querySelectorAll('.sleepers').length,
+    streaks: document.querySelectorAll('.streak').length
+  };
+  // expose for automated inspection
+  window.__OWL_SUBWAY_CHECKS__ = checks;
+})();
+</script>
+</body>
+</html>

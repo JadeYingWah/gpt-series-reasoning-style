@@ -1,0 +1,164 @@
+{
+  "ranAt": "2026-09-12T06:27:31.294Z",
+  "baseline": {
+    "staticCheck": true,
+    "browserTotal": 38,
+    "browserPassed": 38
+  },
+  "mutationsTotal": 10,
+  "killed": 6,
+  "survived": 4,
+  "killRate": 0.6,
+  "rows": [
+    {
+      "id": "M1",
+      "desc": "KPI 总额 +1（数字卡与数据脱钩）",
+      "killed": true,
+      "hitExpected": true,
+      "flipped": [
+        "kpi-ALL",
+        "kpi-华东",
+        "kpi-超长名地区",
+        "C3-empty-kpi-zero",
+        "C4a-empty-dataset",
+        "C4b-nasty-rows",
+        "C4d-long-text",
+        "C4e-scale"
+      ],
+      "expect": [
+        "kpi-ALL"
+      ],
+      "mutantsPassed": 30,
+      "mutantsTotal": 38
+    },
+    {
+      "id": "M2",
+      "desc": "按月聚合每笔多加 1 元（图表与数据脱钩）",
+      "killed": true,
+      "hitExpected": true,
+      "flipped": [
+        "bars-ALL",
+        "bars-华东",
+        "bars-超长名地区"
+      ],
+      "expect": [
+        "bars-ALL"
+      ],
+      "mutantsPassed": 35,
+      "mutantsTotal": 38
+    },
+    {
+      "id": "M3",
+      "desc": "空态不显示（删除 empty.classList.add('show')）",
+      "killed": true,
+      "hitExpected": true,
+      "flipped": [
+        "C3-empty-real",
+        "C4a-empty-dataset",
+        "C4b-non-array",
+        "C4c-字符串未知地区",
+        "C4c-空字符串",
+        "C4c-null",
+        "C4c-undefined",
+        "C4c-数字",
+        "C4c-对象",
+        "C4c-数组",
+        "C4c-超长字符串(5000字)",
+        "C4c-含 HTML/脚本片段"
+      ],
+      "expect": [
+        "C3-empty-real",
+        "C4a-empty-dataset"
+      ],
+      "mutantsPassed": 26,
+      "mutantsTotal": 38
+    },
+    {
+      "id": "M4",
+      "desc": "非法筛选值不设防（直接调用 v.toUpperCase()）",
+      "killed": false,
+      "hitExpected": false,
+      "flipped": [],
+      "expect": [
+        "C4c-null",
+        "C4c-undefined",
+        "C4c-数字"
+      ],
+      "mutantsPassed": 0,
+      "mutantsTotal": 1
+    },
+    {
+      "id": "M5",
+      "desc": "引入外部 CDN 脚本（破坏离线单文件）",
+      "killed": true,
+      "hitExpected": true,
+      "flipped": [
+        "static-check",
+        "C6-console"
+      ],
+      "expect": [
+        "static-check"
+      ],
+      "mutantsPassed": 37,
+      "mutantsTotal": 38
+    },
+    {
+      "id": "M6",
+      "desc": "月份轴随筛选塌缩（失去稳定轴）",
+      "killed": true,
+      "hitExpected": true,
+      "flipped": [
+        "bars-超长名地区",
+        "C2b-axis-stable"
+      ],
+      "expect": [
+        "C2b-axis-stable"
+      ],
+      "mutantsPassed": 36,
+      "mutantsTotal": 38
+    },
+    {
+      "id": "M7",
+      "desc": "筛选控件变更事件未接线（筛选失效）",
+      "killed": false,
+      "hitExpected": false,
+      "flipped": [],
+      "expect": [
+        "C2-filter-applied"
+      ],
+      "mutantsPassed": 0,
+      "mutantsTotal": 1
+    },
+    {
+      "id": "M8",
+      "desc": "柱体 tooltip 文案被移除",
+      "killed": true,
+      "hitExpected": true,
+      "flipped": [
+        "C1-tooltip"
+      ],
+      "expect": [
+        "C1-tooltip"
+      ],
+      "mutantsPassed": 37,
+      "mutantsTotal": 38
+    },
+    {
+      "id": "M9",
+      "killed": null,
+      "note": "变异锚点未命中（脚本需更新）"
+    },
+    {
+      "id": "M10",
+      "desc": "客单价改为「总销售额」（客单价算错）",
+      "killed": false,
+      "hitExpected": false,
+      "flipped": [],
+      "expect": [
+        "kpi-ALL"
+      ],
+      "mutantsPassed": 0,
+      "mutantsTotal": 1
+    }
+  ]
+}

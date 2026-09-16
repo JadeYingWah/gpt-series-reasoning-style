@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2025 年度销售数据看板</title>
+<style>
+  :root { --bg:#f5f7fa; --card:#ffffff; --text:#1f2937; --muted:#6b7280; --accent:#2563eb; --accent-soft:#dbeafe; --line:#e5e7eb; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:"Segoe UI","Microsoft YaHei",system-ui,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding:32px 24px; }
+  .board { max-width:960px; margin:0 auto; }
+  h1 { font-size:22px; margin-bottom:4px; }
+  .sub { color:var(--muted); font-size:13px; margin-bottom:20px; }
+  .filters { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+  .filters button { border:1px solid var(--line); background:var(--card); color:var(--text); padding:8px 18px; border-radius:8px; font-size:14px; cursor:pointer; transition:all .15s; }
+  .filters button:hover { border-color:var(--accent); color:var(--accent); }
+  .filters button.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .cards { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:20px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:18px 20px; }
+  .card .label { color:var(--muted); font-size:13px; margin-bottom:8px; }
+  .card .value { font-size:28px; font-weight:700; }
+  .card .hint { color:var(--muted); font-size:12px; margin-top:6px; }
+  .chart-card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:20px; }
+  .chart-title { font-size:15px; font-weight:600; margin-bottom:12px; }
+  #chart svg { width:100%; height:auto; display:block; }
+  @media (max-width:640px){ .cards{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<div class="board">
+  <h1>2025 年度销售数据看板</h1>
+  <div class="sub">数据单位：万元 · 月度销售额（演示数据）</div>
+  <div class="filters" id="filters" role="group" aria-label="季度筛选">
+    <button data-range="all" class="active" type="button">全年</button>
+    <button data-range="q1" type="button">第一季度</button>
+    <button data-range="q2" type="button">第二季度</button>
+    <button data-range="q3" type="button">第三季度</button>
+    <button data-range="q4" type="button">第四季度</button>
+  </div>
+  <div class="cards">
+    <div class="card">
+      <div class="label">销售总额</div>
+      <div class="value" id="kpi-total">2,036 万</div>
+      <div class="hint" id="kpi-total-hint">1月–12月 · 12 个月</div>
+    </div>
+    <div class="card">
+      <div class="label">月均值</div>
+      <div class="value" id="kpi-avg">169.7 万</div>
+      <div class="hint">所选范围月均销售额</div>
+    </div>
+    <div class="card">
+      <div class="label">峰值月</div>
+      <div class="value" id="kpi-peak">12月</div>
+      <div class="hint" id="kpi-peak-hint">268 万元</div>
+    </div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-title" id="chart-title">月度销售趋势（全年）</div>
+    <div id="chart"><svg viewBox="0 0 720 320" role="img" aria-label="月度销售趋势图" xmlns="http://www.w3.org/2000/svg"><line x1="56" y1="280" x2="700" y2="280" stroke="#e5e7eb" stroke-width="1"></line><text x="48" y="284" text-anchor="end" font-size="11" fill="#6b7280">0</text><line x1="56" y1="194.66666666666669" x2="700" y2="194.66666666666669" stroke="#e5e7eb" stroke-width="1"></line><text x="48" y="198.66666666666669" text-anchor="end" font-size="11" fill="#6b7280">100</text><line x1="56" y1="109.33333333333334" x2="700" y2="109.33333333333334" stroke="#e5e7eb" stroke-width="1"></line><text x="48" y="113.33333333333334" text-anchor="end" font-size="11" fill="#6b7280">200</text><line x1="56" y1="24" x2="700" y2="24" stroke="#e5e7eb" stroke-width="1"></line><text x="48" y="28" text-anchor="end" font-size="11" fill="#6b7280">300</text><polygon points="56,280 56,170.7733333333333 114.54545454545455,198.07999999999998 173.0909090909091,158.82666666666665 231.63636363636363,164.8 290.1818181818182,145.17333333333335 348.72727272727275,132.37333333333333 407.27272727272725,152.85333333333335 465.8181818181818,139.2 524.3636363636364,120.42666666666668 582.9090909090909,105.91999999999999 641.4545454545455,82.88 700,51.30666666666667 700,280" fill="#dbeafe" opacity="0.7"></polygon><polyline points="56,170.7733333333333 114.54545454545455,198.07999999999998 173.0909090909091,158.82666666666665 231.63636363636363,164.8 290.1818181818182,145.17333333333335 348.72727272727275,132.37333333333333 407.27272727272725,152.85333333333335 465.8181818181818,139.2 524.3636363636364,120.42666666666668 582.9090909090909,105.91999999999999 641.4545454545455,82.88 700,51.30666666666667" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"></polyline><circle cx="56" cy="170.7733333333333" r="4" fill="#fff" stroke="#2563eb" stroke-width="2"></circle><text x="56" y="160.7733333333333" text-anchor="middle" font-size="11" fill="#1f2937" font-weight="600">128</text><text x="56" y="304" text-anchor="middle" font-size="11" fill="#6b7280">1月</text><circle cx="114.54545454545455" cy="198.07999999999998" r="4" fill="#fff" stroke="#2563eb" stroke-width="2"></circle><text x="114.54545454545455" y="188.07999999999998" text-anchor="middle" font-size="11" fill="#1f2937" font-weight="600">96</text><text x="114.54545454545455" y="304" text-anchor="middle" font-size="11" fill="#6b7280">2月</text><circle cx="173.0909090909091" cy="158.82666666666665" r="4" fill="#fff" stroke="#2563eb" stroke-width="2"></circle><text x="173.0909090909091" y="148.82666666666665" text-anchor="middle" font-size="11" fill="#1f2937" font-weight="600">142</text><text x="173.0909090909091" y="304" text-anchor="middle" font-size="11" fill="#6b7280">3月</text><circle cx="231.63636363636363" cy="164.8" r="4" fill="#fff" stroke="#2563eb" stroke-width="2"></circle><text x="231.63636363636363" y="154.8" text-anchor="middle" font-size="11" fill="#1f2937" font-weight="600">135</text><text x="231.63636363636363" y="304" text-anchor="middle" font-size="11" fill="#6b7280">4月</text><circle cx="290.1818181818182" cy="145.17333333333335" r="4" fill="#fff" stroke="#2563eb" stroke-width="2"></circle><text x="290.1818181818182" y="135.17333333333335" text-anchor="middle" font-size="11" fill="#1f2937" font-weight="600">158</text><text x="290.1818181818182" y="304" text-anchor="middle" font-size="11" fill="#6b7280">5月</text><circle cx="348.72727272727275" cy="132.37333333333333" r="4" fill="#fff" stroke="#2563eb" stroke-width="2"></circle><text x="348.72727272727275" y="122.37333333333333" text-anchor="middle" font-size="11" fill="#1f2937" font-weight="600">173</text><text x="348.72727272727275" y="304" text-anchor="middle" font-size="11" fill="#6b7280">6月</text><circle cx="407.27272727272725" cy="152.85333333333335" r="4" fill="#fff" stroke="#2563eb" stroke-width="2"></circle><text x="407.27272727272725" y="142.85333333333335" text-anchor="middle" font-size="11" fill="#1f2937" font-weight="600">149</text><text x="407.27272727272725" y="304" text-anchor="middle" font-size="11" fill="#6b7280">7月</text><circle cx="465.8181818181818" cy="139.2" r="4" fill="#fff" stroke="#2563eb" stroke-width="2"></circle><text x="465.8181818181818" y="129.2" text-anchor="middle" font-size="11" fill="#1f2937" font-weight="600">165</text><text x="465.8181818181818" y="304" text-anchor="middle" font-size="11" fill="#6b7280">8月</text><circle cx="524.3636363636364" cy="120.42666666666668" r="4" fill="#fff" stroke="#2563eb" stroke-width="2"></circle><text x="524.3636363636364" y="110.42666666666668" text-anchor="middle" font-size="11" fill="#1f2937" font-weight="600">187</text><text x="524.3636363636364" y="304" text-anchor="middle" font-size="11" fill="#6b7280">9月</text><circle cx="582.9090909090909" cy="105.91999999999999" r="4" fill="#fff" stroke="#2563eb" stroke-width="2"></circle><text x="582.9090909090909" y="95.91999999999999" text-anchor="middle" font-size="11" fill="#1f2937" font-weight="600">204</text><text x="582.9090909090909" y="304" text-anchor="middle" font-size="11" fill="#6b7280">10月</text><circle cx="641.4545454545455" cy="82.88" r="4" fill="#fff" stroke="#2563eb" stroke-width="2"></circle><text x="641.4545454545455" y="72.88" text-anchor="middle" font-size="11" fill="#1f2937" font-weight="600">231</text><text x="641.4545454545455" y="304" text-anchor="middle" font-size="11" fill="#6b7280">11月</text><circle cx="700" cy="51.30666666666667" r="4" fill="#fff" stroke="#2563eb" stroke-width="2"></circle><text x="700" y="41.30666666666667" text-anchor="middle" font-size="11" fill="#1f2937" font-weight="600">268</text><text x="700" y="304" text-anchor="middle" font-size="11" fill="#6b7280">12月</text></svg></div>
+  </div>
+</div>
+<script>
+"use strict";
+// —— 数据：2025 年 1–12 月销售金额（万元），指标卡与图表同源于此数组 ——
+var MONTHS = ["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"];
+var SALES  = [128, 96, 142, 135, 158, 173, 149, 165, 187, 204, 231, 268];
+var QUARTERS = { all:[0,11], q1:[0,2], q2:[3,5], q3:[6,8], q4:[9,11] };
+
+function fmtInt(n){ return n.toLocaleString("zh-CN"); }
+
+function render(range){
+  var span = QUARTERS[range];
+  var labels = MONTHS.slice(span[0], span[1]+1);
+  var data = SALES.slice(span[0], span[1]+1);
+  var total = 0;
+  for (var i=0;i<data.length;i++) total += data[i];
+  var avg = total/data.length;
+  var avgRounded = Math.round(avg*10)/10;
+  var peakIdx = 0;
+  for (var j=1;j<data.length;j++){ if (data[j] > data[peakIdx]) peakIdx = j; }
+
+  document.getElementById("kpi-total").textContent = fmtInt(total) + " 万";
+  document.getElementById("kpi-total-hint").textContent = labels[0] + "–" + labels[labels.length-1] + " · " + labels.length + " 个月";
+  document.getElementById("kpi-avg").textContent = fmtInt(avgRounded) + " 万";
+  document.getElementById("kpi-peak").textContent = labels[peakIdx];
+  document.getElementById("kpi-peak-hint").textContent = fmtInt(data[peakIdx]) + " 万元";
+  document.getElementById("chart-title").textContent = range === "all"
+    ? "月度销售趋势（全年）"
+    : "月度销售趋势（" + labels[0] + "–" + labels[labels.length-1] + "）";
+
+  drawChart(labels, data);
+}
+
+function drawChart(labels, data){
+  var W=720, H=320, padL=56, padR=20, padT=24, padB=40;
+  var max = Math.max.apply(null, data);
+  // nice y 轴：目标约 4 段，刻度取 1/2/2.5/5 × 10^k
+  var rawStep = max/4;
+  var mag = Math.pow(10, Math.floor(Math.log(rawStep)/Math.LN10));
+  var f = rawStep/mag, m;
+  if (f <= 1) m = 1; else if (f <= 2) m = 2; else if (f <= 2.5) m = 2.5; else if (f <= 5) m = 5; else m = 10;
+  var step = m*mag;
+  var yMax = Math.ceil(max/step)*step;
+  var iw = W-padL-padR, ih = H-padT-padB;
+  var n = data.length;
+  function x(i){ return padL + (n===1 ? iw/2 : i*(iw/(n-1))); }
+  function y(v){ return padT + ih - v/yMax*ih; }
+
+  var s = '<svg viewBox="0 0 720 320" role="img" aria-label="月度销售趋势图" xmlns="http://www.w3.org/2000/svg">';
+  for (var v=0; v<=yMax; v+=step){
+    var yy = y(v);
+    s += '<line x1="'+padL+'" y1="'+yy+'" x2="'+(W-padR)+'" y2="'+yy+'" stroke="#e5e7eb" stroke-width="1"/>';
+    s += '<text x="'+(padL-8)+'" y="'+(yy+4)+'" text-anchor="end" font-size="11" fill="#6b7280">'+v+'</text>';
+  }
+  var pts = [];
+  for (var i2=0;i2<n;i2++) pts.push(x(i2)+","+y(data[i2]));
+  s += '<polygon points="'+padL+","+y(0)+" "+pts.join(" ")+" "+x(n-1)+","+y(0)+'" fill="#dbeafe" opacity="0.7"/>';
+  s += '<polyline points="'+pts.join(" ")+'" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
+  for (var i3=0;i3<n;i3++){
+    s += '<circle cx="'+x(i3)+'" cy="'+y(data[i3])+'" r="4" fill="#fff" stroke="#2563eb" stroke-width="2"/>';
+    s += '<text x="'+x(i3)+'" y="'+(y(data[i3])-10)+'" text-anchor="middle" font-size="11" fill="#1f2937" font-weight="600">'+data[i3]+'</text>';
+    s += '<text x="'+x(i3)+'" y="'+(H-16)+'" text-anchor="middle" font-size="11" fill="#6b7280">'+labels[i3]+'</text>';
+  }
+  s += '</svg>';
+  document.getElementById("chart").innerHTML = s;
+}
+
+document.getElementById("filters").addEventListener("click", function(e){
+  var btn = e.target.closest("button[data-range]");
+  if (!btn) return;
+  var all = document.querySelectorAll("#filters button");
+  for (var i=0;i<all.length;i++) all[i].classList.toggle("active", all[i]===btn);
+  render(btn.getAttribute("data-range"));
+});
+
+render("all");
+</script>
+
+
+</body></html>

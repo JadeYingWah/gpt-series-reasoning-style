@@ -1,0 +1,13 @@
+{
+  "method": "M1 rolling-median+MAD robust z",
+  "window": 72,
+  "threshold": 6.0,
+  "score_quantiles": {
+    "0.9": 1.66,
+    "0.99": 4.36,
+    "0.999": 10.44,
+    "0.9999": 16.0
+  },
+  "n_anom_points": 98,
+  "n_intervals": 13
+}

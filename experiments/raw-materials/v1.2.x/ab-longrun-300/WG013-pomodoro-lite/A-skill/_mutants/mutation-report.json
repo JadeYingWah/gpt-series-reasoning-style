@@ -1,0 +1,54 @@
+{
+  "killed": 5,
+  "total": 5,
+  "results": [
+    {
+      "id": "m01-off-by-one-minutes",
+      "killed": true,
+      "failCount": 6,
+      "sample": [
+        "  FAIL  rejects 0  expected=null actual=0",
+        "  FAIL  rejects 61  expected=null actual=61",
+        "  FAIL  setDuration 0 rejected  expected=false actual=true"
+      ]
+    },
+    {
+      "id": "m02-format-floor-not-ceil",
+      "killed": true,
+      "failCount": 1,
+      "sample": [
+        "  FAIL  1ms → 00:01 (ceil to second)  expected=\"00:01\" actual=\"00:00\""
+      ]
+    },
+    {
+      "id": "m03-pause-does-not-freeze",
+      "killed": true,
+      "failCount": 4,
+      "sample": [
+        "  FAIL  pause freezes remaining at pause instant (not last tick)  expected=1487000 actual=1490000",
+        "  FAIL  pause remaining is NOT the stale last-tick value",
+        "  FAIL  tick while paused does not change remaining  expected=1487000 actual=1490000"
+      ]
+    },
+    {
+      "id": "m04-done-label-wrong",
+      "killed": true,
+      "failCount": 3,
+      "sample": [
+        "  FAIL  status label 时间到  expected=\"时间到\" actual=\"完成\"",
+        "  FAIL  done → 时间到  expected=\"时间到\" actual=\"完成\"",
+        "  FAIL  HTML contains 时间到 string (via statusLabel path)"
+      ]
+    },
+    {
+      "id": "m05-tick-never-completes",
+      "killed": true,
+      "failCount": 5,
+      "sample": [
+        "  FAIL  tick at end → done  expected=\"done\" actual=\"running\"",
+        "  FAIL  status label 时间到  expected=\"时间到\" actual=\"计时中\"",
+        "  FAIL  overshoot stays done  expected=\"done\" actual=\"running\""
+      ]
+    }
+  ]
+}
