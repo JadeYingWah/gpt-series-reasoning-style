@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""简化版静态自检——针对当前极简版（6个文件）。
+"""静态自检——针对当前极简版（文件级渐进加载结构）。
 
 检查什么（机器能验的）：
 1. 版本一致性：SKILL.md 里的 version = VERSION 文件内容
-2. 文件存在：SKILL.md、VERSION、references/multi-agent.md、templates/*.md
-3. 结构完整：frontmatter、三个面（规划/执行/审查）、7条规则
-4. 跨文件引用：SKILL.md 里引用的文件都真实存在
+2. 文件存在：SKILL.md、VERSION、references/{plan,review,multi-agent}.md、templates/*.md
+3. 结构完整：frontmatter、五阶段流程、阶段2/5 的文件级渐进加载点、任务后遗忘规则
+4. 八条纪律：规则已下沉到 references/review-rules.md，逐条关键词检查
 5. 代码块配对：``` 数量是偶数
 
 Python 3.7+ 标准库。退出码：0=全过，1=有失败，2=用法错。
@@ -46,30 +46,27 @@ def main():
     else:
         check("版本文件存在", False, "SKILL.md 或 VERSION 不存在")
 
-    # 2. 文件存在
+    # 2. 文件存在（含「文件级渐进加载」的两个规则文件）
     check("SKILL.md 存在", SKILL_MD.exists())
     check("VERSION 存在", VERSION_FILE.exists())
+    PLAN = REPO_ROOT / "references" / "plan-rules.md"
+    REVIEW = REPO_ROOT / "references" / "review-rules.md"
+    check("references/plan-rules.md 存在", PLAN.exists())
+    check("references/review-rules.md 存在", REVIEW.exists())
     check("references/multi-agent.md 存在", (REPO_ROOT / "references/multi-agent.md").exists())
     check("templates/commander.md 存在", (REPO_ROOT / "templates/commander.md").exists())
     check("templates/executor.md 存在", (REPO_ROOT / "templates/executor.md").exists())
     check("templates/reviewer.md 存在", (REPO_ROOT / "templates/reviewer.md").exists())
 
-    # 3. 结构完整
+    # 3. 结构完整（五阶段 + 文件级渐进加载点 + 任务后遗忘）
     if SKILL_MD.exists():
         text = SKILL_MD.read_text(encoding="utf-8")
 
         check("有 frontmatter", text.startswith("---\n"))
-        check("有规划面", "## 规划面" in text)
-        check("有执行面", "## 执行面" in text)
-        check("有审查面1", "## 审查面1" in text)
-        check("有审查面2", "## 审查面2" in text)
-        check("有真打开看一眼", "真打开看一眼" in text)
-        check("有未验证标注", "未验证" in text)
-        check("有失败两次换路", "失败两次换路" in text)
-        check("有全绿不算证据", "全绿不算证据" in text)
-        check("有关键数字重算", "关键数字重算" in text)
-        check("有临时物隔离", "临时物隔离" in text)
-        check("有防死循环", "防死循环" in text)
+        check("有五阶段流程", "五阶段" in text)
+        check("阶段2 指向 plan-rules.md", "plan-rules.md" in text)
+        check("阶段5 指向 review-rules.md", "review-rules.md" in text)
+        check("任务后遗忘规则内容", "彻底忘记" in text)
 
         # 4. 代码块配对
         fence_count = len(re.findall(r"^```", text, re.MULTILINE))
@@ -78,6 +75,15 @@ def main():
         # 5. 行数统计
         line_count = len(text.splitlines())
         passes.append(f"  ℹ SKILL.md 共 {line_count} 行")
+
+    # 6. 八条纪律（规则已下沉到 review-rules.md）
+    if REVIEW.exists():
+        rtext = REVIEW.read_text(encoding="utf-8")
+        for kw in ("真打开看一眼", "未验证标注", "交付声明对得上", "失败两次换路",
+                   "全绿不算证据", "关键数字重算", "临时物隔离", "防死循环"):
+            check(f"纪律：{kw}", kw in rtext)
+    else:
+        check("纪律文件可读", False, "review-rules.md 不存在")
 
     # 输出结果
     print("=== selfcheck 结果 ===")
