@@ -1,8 +1,0 @@
-{
-  "method": "M3 jump(diff>Q99.9) + global extreme(Q0.05/Q99.95)",
-  "q_diff_999": 5.215,
-  "q_hi_9995": 106.294,
-  "q_lo_0005": 20.116,
-  "n_anom_points": 46,
-  "n_intervals": 11
-}

@@ -1,3 +1,0 @@
-﻿node: <用户目录>\.workbuddy\binaries\node\versions\22.22.2-2\node.exe
-node -v: v22.22.2
-PSVersion: 5.1.26100.9444

@@ -1,5 +1,0 @@
-﻿YES C:/Program Files/Google/Chrome/Application/chrome.exe
-no  C:/Program Files (x86)/Google/Chrome/Application/chrome.exe
-no  <用户目录>\AppData\Local/Google/Chrome/Application/chrome.exe
-YES C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe
-no  C:/Program Files/Microsoft/Edge/Application/msedge.exe
