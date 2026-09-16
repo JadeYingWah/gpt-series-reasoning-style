@@ -15,6 +15,14 @@
 
 </div>
 
+> **零负担，是设计出来的**：本 skill 采用独特的**遗忘机制**——五面中有三面彻底「忘记」它，规划的第一遍和
+> 整个执行阶段纪律完全退场，**不分散 agent 的注意力、不打断创作思路**；纪律只在「落计划」和「说做完了」
+> 两个时刻短暂在场。26 次 A/B 实验实测：**有用，且无负面影响**。
+>
+> **Zero interference by design** — a unique *forgetting mechanism* keeps the skill fully out of the way
+> during planning-round-1 and the entire execution face; it steps in only twice, briefly. Field-tested in
+> 26 A/B experiments: useful, with no negative side effects.
+
 > **Process-discipline layer only** — not a reasoning-capability booster and not GPT-specific —
 > the name records its origin (distilled from a long series of GPT-series model dialogues).
 >
