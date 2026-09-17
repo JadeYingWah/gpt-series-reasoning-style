@@ -1,14 +1,16 @@
 # gpt-series-reasoning-style · 说明书
 
-<p align="center">
+<div align="center">
 <img src="assets/social-preview.svg" alt="GPT-Series Reasoning Style — 交付验收纪律层" width="640">
-</p>
+</div>
 
-<p align="center">
-
-![Version](https://img.shields.io/badge/version-1.5.5-blue) ![License: MIT](https://img.shields.io/badge/license-MIT-green) ![Size](https://img.shields.io/badge/SKILL.md-900字节·14行门禁-orange) ![Runtime](https://img.shields.io/badge/按需加载-纯文本-blueviolet) ![CI](https://github.com/JadeYingWah/gpt-series-reasoning-style/actions/workflows/ci.yml/badge.svg)
-
-</p>
+<div align="center">
+<img alt="Version" src="https://img.shields.io/badge/version-1.5.5-blue">
+<img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-green">
+<img alt="Size" src="https://img.shields.io/badge/SKILL.md-900%E5%AD%97%E8%8A%82%C2%B714%E8%A1%8C%E9%97%A8%E7%A6%81-orange">
+<img alt="Runtime" src="https://img.shields.io/badge/%E6%8C%89%E9%9C%80%E5%8A%A0%E8%BD%BD-%E7%BA%AF%E6%96%87%E6%9C%AC-blueviolet">
+<img alt="CI" src="https://github.com/JadeYingWah/gpt-series-reasoning-style/actions/workflows/ci.yml/badge.svg">
+</div>
 
 > **把"Agent 说做完了"变成"Agent 证明做完了"。**
 > 交付验收与多智能体协作纪律层。纯文本、零代码运行时、不联网、不上报。
