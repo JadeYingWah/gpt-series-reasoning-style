@@ -1,0 +1,109 @@
+{
+  "url": "http://127.0.0.1:5188",
+  "mode": "mobile",
+  "state": "active-play",
+  "requestedState": "active-play",
+  "appliedState": "active-play",
+  "runId": "pass-4",
+  "seed": 42,
+  "screenshotPath": "artifacts\\pass-4\\mobile-active-play.png",
+  "gpu": {
+    "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5060 Laptop GPU (0x00002D19) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "vendor": "Google Inc. (NVIDIA)",
+    "softwareRendered": false
+  },
+  "result": {
+    "ok": true,
+    "reason": "nonblank",
+    "rect": {
+      "x": 0,
+      "y": 0,
+      "width": 390,
+      "height": 664
+    },
+    "drawingBuffer": {
+      "width": 780,
+      "height": 1328
+    },
+    "alphaPixels": 4097,
+    "variance": 254,
+    "colorBuckets": 108,
+    "metrics": {
+      "colorBuckets": 148,
+      "colorEntropyBits": 3.03,
+      "edgeDensity": 0.171,
+      "luminance": {
+        "mean": 22.1,
+        "p5": 2.2,
+        "p95": 136.4,
+        "contrast": 134.2
+      },
+      "dominantColorShare": 0.375,
+      "nonBackgroundShare": 0.625
+    },
+    "renderBudget": {
+      "tier": "mobile",
+      "note": "starting-point budget; adjust per game and document overrides",
+      "rows": [
+        {
+          "metric": "calls",
+          "actual": 34,
+          "limit": 150,
+          "ok": true
+        },
+        {
+          "metric": "triangles",
+          "actual": 3374,
+          "limit": 300000,
+          "ok": true
+        },
+        {
+          "metric": "geometries",
+          "actual": 36,
+          "limit": 200,
+          "ok": true
+        },
+        {
+          "metric": "textures",
+          "actual": 4,
+          "limit": 40,
+          "ok": true
+        }
+      ],
+      "withinBudget": true
+    },
+    "diagnostics": {
+      "frame": 195,
+      "elapsed": 0,
+      "score": 0,
+      "targetScore": 30,
+      "complete": false,
+      "status": "playing",
+      "shield": 3,
+      "wave": 1,
+      "player": {
+        "position": {
+          "x": 0,
+          "y": 0.12,
+          "z": 2
+        },
+        "speed": 0
+      },
+      "renderer": {
+        "calls": 34,
+        "triangles": 3374,
+        "geometries": 36,
+        "textures": 4
+      },
+      "canvas": {
+        "clientWidth": 390,
+        "clientHeight": 664,
+        "width": 780,
+        "height": 1328,
+        "dpr": 2
+      }
+    }
+  },
+  "consoleErrors": [],
+  "pageErrors": []
+}

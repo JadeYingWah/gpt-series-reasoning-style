@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "runId": "pass-4",
+  "captures": [
+    {
+      "mode": "desktop",
+      "state": "active-play",
+      "report": "artifacts/pass-4/desktop-active-play.json"
+    },
+    {
+      "mode": "desktop",
+      "state": "complete",
+      "report": "artifacts/pass-4/desktop-complete.json"
+    },
+    {
+      "mode": "mobile",
+      "state": "active-play",
+      "report": "artifacts/pass-4/mobile-active-play.json"
+    }
+  ],
+  "artifacts": [
+    "artifacts/design-brief.md",
+    "artifacts/core-loop-contract.md",
+    "artifacts/level-plan.md",
+    "artifacts/final-evidence.md"
+  ]
+}

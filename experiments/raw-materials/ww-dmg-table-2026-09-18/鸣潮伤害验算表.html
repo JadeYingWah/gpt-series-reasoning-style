@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>鸣潮伤害验算表 · 七乘区</title>
+<style>
+  :root {
+    --ink: #0B1220;
+    --panel: #121A2B;
+    --panel-2: #182338;
+    --line: #2A3854;
+    --text: #E8EEF7;
+    --muted: #93A4BE;
+    --accent: #39C6D4;
+    --accent-dim: #1A6E7A;
+    --gold: #E8C56A;
+    --danger: #F07178;
+    --ok: #7BC96F;
+    --mono: "SF Mono", "Cascadia Code", Consolas, "Courier New", monospace;
+    --ui: "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--ink); color: var(--text); font-family: var(--ui); }
+  body { min-height: 100vh; overflow-x: hidden; }
+  a { color: var(--accent); }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 20px 16px 48px; box-sizing: border-box; width: 100%; }
+
+  header.top {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 16px;
+    border-bottom: 1px solid var(--line); padding-bottom: 14px; margin-bottom: 18px;
+    max-width: 100%;
+  }
+  header.top h1 { font-size: 22px; font-weight: 650; margin: 0; letter-spacing: 0.02em; }
+  header.top h1 span { color: var(--accent); }
+  header.top .sub { color: var(--muted); font-size: 13px; flex: 1 1 220px; min-width: 0; word-break: break-word; }
+  header.top .badge {
+    font-size: 11px; color: var(--muted);
+    border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px;
+    max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px; align-items: start; }
+  .grid > * { min-width: 0; }
+  @media (max-width: 920px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+
+  .card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 14px 14px 16px; margin-bottom: 12px;
+    max-width: 100%;
+  }
+  .card h2 {
+    margin: 0 0 4px; font-size: 13px; font-weight: 650; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--accent);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card h2 .idx {
+    font-family: var(--mono); font-size: 11px; color: var(--muted);
+    border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; font-weight: 500;
+  }
+  .card .hint { color: var(--muted); font-size: 12px; margin: 0 0 10px; line-height: 1.45; }
+
+  .rows { display: grid; gap: 8px; }
+  .row {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 120px); gap: 8px; align-items: start;
+  }
+  .row label { font-size: 13px; color: var(--text); min-width: 0; line-height: 1.35; padding-top: 7px; }
+  .row label small { display: block; color: var(--muted); font-size: 11px; margin-top: 1px; }
+  input[type="number"], input[type="text"], select {
+    width: 100%; max-width: 100%; min-width: 0; background: var(--panel-2); color: var(--text);
+    border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px;
+    font-family: var(--mono); font-size: 13px; outline: none;
+  }
+  input:focus-visible, select:focus-visible, button:focus-visible {
+    border-color: var(--accent); box-shadow: 0 0 0 2px rgba(57,198,212,0.35);
+  }
+  input:disabled { opacity: 0.5; }
+  .presets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+  button {
+    background: var(--panel-2); color: var(--text); border: 1px solid var(--line);
+    border-radius: 6px; padding: 6px 12px; font-size: 12px; cursor: pointer;
+    font-family: var(--ui);
+  }
+  button:hover { border-color: var(--accent); color: var(--accent); }
+  button.primary { background: var(--accent-dim); border-color: var(--accent); color: #E8FBFD; }
+  button.primary:hover { background: var(--accent); color: var(--ink); }
+  button.ghost { background: transparent; }
+
+  .inline-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 12px; }
+  @media (max-width: 720px) { .inline-grid { grid-template-columns: minmax(0, 1fr); } }
+
+  .group-block {
+    border: 1px dashed var(--line); border-radius: 8px; padding: 10px; margin-bottom: 8px;
+    background: rgba(0,0,0,0.15);
+  }
+  .group-block .ghead {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
+  }
+  .group-block .ghead strong { font-size: 12px; color: var(--gold); font-weight: 600; }
+  .val-list { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .val-list input { width: 88px; display: inline-block; }
+  .chip-del {
+    background: transparent; border: 1px solid var(--line); color: var(--danger);
+    width: 28px; height: 28px; padding: 0; border-radius: 6px; line-height: 1;
+  }
+  .chip-del:hover { border-color: var(--danger); color: #fff; background: rgba(240,113,120,0.2); }
+
+  /* sticky result */
+  aside.result { position: sticky; top: 14px; }
+  .result .card { margin-bottom: 12px; }
+  .pipeline { display: flex; flex-direction: column; gap: 6px; }
+  .pipe-row {
+    display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center;
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px;
+    padding: 7px 10px; font-size: 12px;
+  }
+  .pipe-row .name { color: var(--muted); }
+  .pipe-row .name b { color: var(--text); font-weight: 600; display: block; font-size: 13px; }
+  .pipe-row .val {
+    font-family: var(--mono); font-size: 14px; color: var(--accent); font-weight: 600;
+    text-align: right;
+  }
+  .pipe-row.total { border-color: var(--accent-dim); background: rgba(57,198,212,0.06); }
+  .pipe-row.total .val { color: var(--gold); }
+
+  .dmg-grid { display: grid; gap: 8px; }
+  .dmg {
+    border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px;
+    background: var(--panel-2);
+  }
+  .dmg .lbl { font-size: 11px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
+  .dmg .num {
+    font-family: var(--mono); font-size: 26px; font-weight: 700; line-height: 1.15;
+    margin-top: 2px; word-break: break-all;
+  }
+  .dmg .num small { font-size: 12px; font-weight: 500; color: var(--muted); margin-left: 4px; }
+  .dmg.hero { border-color: var(--gold); background: rgba(232,197,106,0.07); }
+  .dmg.hero .num { color: var(--gold); font-size: 30px; }
+  .dmg.crit .num { color: var(--accent); }
+
+  .formula {
+    font-family: var(--mono); font-size: 11px; color: var(--muted); line-height: 1.55;
+    background: rgba(0,0,0,0.25); border-radius: 6px; padding: 10px; border: 1px solid var(--line);
+    word-break: break-all;
+  }
+  .status {
+    font-size: 12px; padding: 8px 10px; border-radius: 6px; margin-bottom: 10px;
+    border: 1px solid var(--line); color: var(--muted); background: var(--panel-2);
+  }
+  .status.ok { border-color: rgba(123,201,111,0.4); color: var(--ok); }
+  .status.err { border-color: rgba(240,113,120,0.5); color: var(--danger); }
+
+  footer.note {
+    margin-top: 8px; color: var(--muted); font-size: 12px; line-height: 1.5;
+    border-top: 1px solid var(--line); padding-top: 12px;
+    word-break: break-word; overflow-wrap: anywhere;
+  }
+  footer.note code { word-break: break-all; }
+  @media (max-width: 560px) {
+    .row { grid-template-columns: minmax(0, 1fr); }
+    .row input { justify-self: stretch; }
+    header.top h1 { font-size: 18px; }
+    .dmg .num, .dmg.hero .num { font-size: 22px; }
+    .wrap { padding: 12px 10px 36px; }
+    .card { padding: 12px 10px 14px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>鸣潮伤害<span>验算表</span></h1>
+    <div class="sub">七乘区 · 单角色单次伤害 · 公式对齐 WutheringWavesDmgCalc</div>
+    <div class="badge">damage_calc.py → JS 1:1</div>
+  </header>
+
+  <div class="grid">
+    <!-- ========== 输入 ========== -->
+    <main class="inputs">
+      <div class="card">
+        <h2><span class="idx">01</span> 基础乘区 · 攻击</h2>
+        <p class="hint">基础乘区 =（角色基础 + 武器基础）×（1 + 攻击%）+ 固定攻击</p>
+        <div class="inline-grid">
+          <div class="row"><label>角色基础攻击<small>白值（不含武器）</small></label>
+            <input type="number" id="base_value" value="400" step="1" /></div>
+          <div class="row"><label>武器基础攻击</label>
+            <input type="number" id="weapon_base" value="500" step="1" /></div>
+          <div class="row"><label>攻击力加成 %</label>
+            <input type="number" id="total_pct" value="60" step="0.1" /></div>
+          <div class="row"><label>固定攻击</label>
+            <input type="number" id="total_flat" value="200" step="1" /></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="idx">02</span> 加成 / 加深 / 暴击</h2>
+        <p class="hint">加成乘区 = 1 + 总伤害加成/100 · 加深乘区 = 1 + 总加深/100<br>
+          暴击率 = 5 + 加成 · 暴击乘区 =（150 + 暴伤加成）/100</p>
+        <div class="inline-grid">
+          <div class="row"><label>总伤害加成 %</label>
+            <input type="number" id="total_bonus" value="70" step="0.1" /></div>
+          <div class="row"><label>总伤害加深 %</label>
+            <input type="number" id="total_deepen" value="30" step="0.1" /></div>
+          <div class="row"><label>暴击率加成 %</label>
+            <input type="number" id="total_crit_rate" value="50" step="0.1" /></div>
+          <div class="row"><label>暴击伤害加成 %</label>
+            <input type="number" id="total_crit_dmg" value="60" step="0.1" /></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="idx">03</span> 倍率乘区</h2>
+        <p class="hint">倍率 =（基础倍率 + 倍率增加）× Π(1 + 倍率增幅/100)　单位：%</p>
+        <div class="inline-grid">
+          <div class="row"><label>基础倍率 %</label>
+            <input type="number" id="base_mult" value="150" step="0.1" /></div>
+          <div class="row"><label>倍率增加</label>
+            <input type="number" id="mult_increase" value="0" step="0.1" /></div>
+        </div>
+        <div style="margin-top:10px">
+          <div class="row" style="grid-template-columns:1fr auto; margin-bottom:8px">
+            <label>倍率增幅列表 %<small>每项独立乘 (1 + x/100)</small></label>
+            <button type="button" id="add_boost" class="ghost">+ 增幅</button>
+          </div>
+          <div class="val-list" id="boost_list"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="idx">04</span> 防御乘区</h2>
+        <p class="hint">敌方基础防御 = 792 + 8×敌人等级<br>
+          敌方最终防御 = 基础 ×(1−无视防御)×(1−减少防御)<br>
+          防御乘区 =（800 + 8×角色等级）/（敌方最终防御 + 800 + 8×角色等级）</p>
+        <div class="inline-grid">
+          <div class="row"><label>角色等级</label>
+            <input type="number" id="char_level" value="90" min="1" max="100" step="1" /></div>
+          <div class="row"><label>敌人等级</label>
+            <input type="number" id="enemy_level" value="90" min="1" max="150" step="1" /></div>
+          <div class="row"><label>无视防御 %</label>
+            <input type="number" id="total_ignore" value="0" step="0.1" /></div>
+          <div class="row"><label>忽视/减少防御 %</label>
+            <input type="number" id="total_reduce" value="0" step="0.1" /></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="idx">05</span> 抗性乘区</h2>
+        <p class="hint">最终抗性 = 基础×(1+提升/100) − 减少 − 外部减免<br>
+          ≥0：乘区 = 1 − 最终/100 · ＜0：乘区 = 1 − 最终/200（负抗收益减半）</p>
+        <div class="presets">
+          <button type="button" data-preset="world">世界抗性</button>
+          <button type="button" data-preset="tower">深塔抗性</button>
+          <button type="button" data-preset="holo">全息抗性</button>
+        </div>
+        <div class="inline-grid">
+          <div class="row"><label>基础抗性 %</label>
+            <input type="number" id="base_res" value="10" step="0.1" /></div>
+          <div class="row"><label>抗性提升 %</label>
+            <input type="number" id="res_boost" value="0" step="0.1" /></div>
+          <div class="row"><label>抗性减少 %</label>
+            <input type="number" id="res_reduce" value="0" step="0.1" /></div>
+          <div class="row"><label>外部抗性减免 %</label>
+            <input type="number" id="res_ext_reduce" value="0" step="0.1" /></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="idx">06</span> 独立乘区</h2>
+        <p class="hint">每组：组因子 = 1 + 组内合计/100 · 总乘区 = 各组因子连乘</p>
+        <div class="presets">
+          <button type="button" id="add_group" class="ghost">+ 新组</button>
+        </div>
+        <div id="indep_groups"></div>
+      </div>
+    </main>
+
+    <!-- ========== 结果 ========== -->
+    <aside class="result">
+      <div class="card">
+        <h2><span class="idx">Out</span> 乘区流水</h2>
+        <div class="status" id="status">实时计算中</div>
+        <div class="pipeline" id="pipeline"></div>
+      </div>
+
+      <div class="card">
+        <h2><span class="idx">Dmg</span> 伤害结果</h2>
+        <div class="dmg-grid">
+          <div class="dmg">
+            <div class="lbl">非暴击伤害</div>
+            <div class="num" id="dmg_no">—</div>
+          </div>
+          <div class="dmg crit">
+            <div class="lbl">暴击伤害</div>
+            <div class="num" id="dmg_crit">—</div>
+          </div>
+          <div class="dmg hero">
+            <div class="lbl">期望伤害 · 按暴击率</div>
+            <div class="num" id="dmg_exp">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="idx">Fx</span> 终式</h2>
+        <div class="formula" id="formula_box"></div>
+        <div class="presets" style="margin-top:10px; margin-bottom:0">
+          <button type="button" id="btn_reset" class="ghost">恢复示例参数</button>
+          <button type="button" id="btn_check" class="primary">跑引擎对照测试</button>
+        </div>
+        <div class="status" id="check_out" style="margin-top:10px; margin-bottom:0">尚未运行对照</div>
+      </div>
+
+      <footer class="note">
+        公式 1:1 移植自 <code>E:\Python\WutheringWavesDmgCalc\damage_calc.py</code>
+        （<code>compute_all_zones</code>）。期望伤害 = 非暴×(1−暴击率) + 暴击×暴击率，
+        为验算补充项，不改变引擎七乘区定义。
+        <br /><br />
+        <strong>* 未验证（需你本机确认）：</strong>
+        ①你双击打开后的实际观感/手感——原因是自动化只能证明渲染与数值，不能替代你的预期符合性判断（低风险：错了只是体验差些）；
+        ②你真实面板数值填入后的游戏内对账——原因是未拿你手头角色与实机伤害对照（高风险口径：数据错误时验算结果会偏，公式本身已与 Python 引擎交叉验证）。
+        <br />
+        已验：无头 Chrome 渲染截图、页内对照 21/21、与 Python 引擎 15 项数值交叉、变异测试（故意改坏防御公式断言变红）、预设/增删/重置自动点击。
+      </footer>
+    </aside>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ============================================================
+ * 引擎：与 damage_calc.py 1:1 对应
+ * ============================================================ */
+const Engine = {
+  calcBaseZone(base_value, weapon_base, total_pct, total_flat) {
+    return (base_value + weapon_base) * (1.0 + total_pct / 100.0) + total_flat;
+  },
+  calcBonusZone(total_bonus) { return 1.0 + total_bonus / 100.0; },
+  calcDeepenZone(total_deepen) { return 1.0 + total_deepen / 100.0; },
+  calcCritZone(total_crit_dmg) { return (150.0 + total_crit_dmg) / 100.0; },
+  calcCritRate(total_crit_rate) { return 5.0 + total_crit_rate; },
+  calcDefenseZone(char_level, enemy_level, total_ignore, total_reduce) {
+    total_ignore = Math.min(total_ignore, 1.0);
+    total_reduce = Math.min(total_reduce, 1.0);
+    const enemy_base_def = 792 + 8 * enemy_level;
+    const enemy_final_def = enemy_base_def * (1.0 - total_ignore) * (1.0 - total_reduce);
+    return (800 + 8 * char_level) / (enemy_final_def + 800 + 8 * char_level);
+  },
+  calcEnemyBaseDef(enemy_level) { return 792 + 8 * enemy_level; },
+  calcResistanceZone(base_res, boost_pct, reduce_pct, ext_reduce) {
+    const final_res = base_res * (1.0 + boost_pct / 100.0) - reduce_pct - ext_reduce;
+    if (final_res < 0) return 1.0 - final_res / 200.0;
+    return 1.0 - final_res / 100.0;
+  },
+  calcIndepZone(groups) {
+    let zone = 1.0;
+    const factors = [];
+    for (let i = 0; i < groups.length; i++) {
+      const total = groups[i].reduce((a, b) => a + b, 0);
+      const gf = 1.0 + total / 100.0;
+      factors.push(["group_" + i, gf]);
+      zone *= gf;
+    }
+    return { zone, factors };
+  },
+  calcMultZone(base_mult, mult_increase, mult_boosts) {
+    let zone = base_mult + mult_increase;
+    for (const bv of mult_boosts) zone *= (1.0 + bv / 100.0);
+    return zone;
+  },
+  calcFinalDamage(base_zone, bonus_zone, deepen_zone, crit_zone, def_zone, res_zone, indep_zone, mult_zone) {
+    const base_dmg = (base_zone * bonus_zone * deepen_zone *
+      def_zone * res_zone * indep_zone * mult_zone) / 100.0;
+    return { base_dmg, final_crit: base_dmg * crit_zone };
+  },
+  computeAll(o) {
+    const base_zone = this.calcBaseZone(o.base_value, o.weapon_base, o.total_pct, o.total_flat);
+    const bonus_zone = this.calcBonusZone(o.total_bonus);
+    const deepen_zone = this.calcDeepenZone(o.total_deepen);
+    const crit_rate = this.calcCritRate(o.total_crit_rate);
+    const crit_zone = this.calcCritZone(o.total_crit_dmg);
+    const def_zone = this.calcDefenseZone(o.char_level, o.enemy_level, o.total_ignore, o.total_reduce);
+    const res_zone = this.calcResistanceZone(o.base_res, o.res_boost, o.res_reduce, o.res_ext_reduce);
+    const { zone: indep_zone, factors } = this.calcIndepZone(o.indep_groups);
+    const mult_zone = this.calcMultZone(o.base_mult, o.mult_increase, o.mult_boosts);
+    const { base_dmg, final_crit } = this.calcFinalDamage(
+      base_zone, bonus_zone, deepen_zone, crit_zone, def_zone, res_zone, indep_zone, mult_zone
+    );
+    const cr = Math.min(Math.max(crit_rate, 0), 100) / 100;
+    const expected = base_dmg * (1 - cr) + final_crit * cr;
+    return {
+      base_zone, bonus_zone, deepen_zone, crit_zone, crit_rate,
+      def_zone, res_zone, indep_zone, indep_factors: factors, mult_zone,
+      final_no_crit: base_dmg, final_crit, expected,
+      enemy_base_def: this.calcEnemyBaseDef(o.enemy_level),
+    };
+  },
+};
+
+/* ============================================================
+ * 状态
+ * ============================================================ */
+const PRESETS = { world: { base: 10, boost: 30 }, tower: { base: 20, boost: 40 }, holo: { base: 10, boost: 70 } };
+const DEFAULTS = {
+  base_value: 400, weapon_base: 500, total_pct: 60, total_flat: 200,
+  total_bonus: 70, total_deepen: 30, total_crit_rate: 50, total_crit_dmg: 60,
+  base_mult: 150, mult_increase: 0,
+  char_level: 90, enemy_level: 90, total_ignore: 0, total_reduce: 0,
+  base_res: 10, res_boost: 0, res_reduce: 0, res_ext_reduce: 0,
+};
+let multBoosts = [20, 10];
+let indepGroups = [[15], [25]];
+
+const $ = (id) => document.getElementById(id);
+const num = (id) => {
+  const v = parseFloat($(id).value);
+  return Number.isFinite(v) ? v : 0;
+};
+
+/* ============================================================
+ * UI：倍率增幅 / 独立乘区
+ * ============================================================ */
+function renderBoosts() {
+  const box = $("boost_list");
+  box.innerHTML = "";
+  multBoosts.forEach((v, i) => {
+    const inp = document.createElement("input");
+    inp.type = "number"; inp.step = "0.1"; inp.value = String(v);
+    inp.setAttribute("aria-label", "倍率增幅 " + (i + 1));
+    inp.addEventListener("input", () => {
+      multBoosts[i] = parseFloat(inp.value) || 0;
+      recalc();
+    });
+    box.appendChild(inp);
+    const del = document.createElement("button");
+    del.type = "button"; del.className = "chip-del"; del.textContent = "×";
+    del.title = "删除"; del.setAttribute("aria-label", "删除增幅 " + (i + 1));
+    del.addEventListener("click", () => { multBoosts.splice(i, 1); renderBoosts(); recalc(); });
+    box.appendChild(del);
+  });
+}
+
+function renderGroups() {
+  const root = $("indep_groups");
+  root.innerHTML = "";
+  indepGroups.forEach((vals, gi) => {
+    const block = document.createElement("div");
+    block.className = "group-block";
+    const head = document.createElement("div");
+    head.className = "ghead";
+    head.innerHTML = "<strong>组 " + (gi + 1) + "</strong>";
+    const tools = document.createElement("div");
+    const addV = document.createElement("button");
+    addV.type = "button"; addV.className = "ghost"; addV.textContent = "+ 数值";
+    addV.addEventListener("click", () => { indepGroups[gi].push(0); renderGroups(); recalc(); });
+    const delG = document.createElement("button");
+    delG.type = "button"; delG.className = "chip-del"; delG.textContent = "×";
+    delG.title = "删除组"; delG.setAttribute("aria-label", "删除组 " + (gi + 1));
+    delG.addEventListener("click", () => { indepGroups.splice(gi, 1); renderGroups(); recalc(); });
+    tools.appendChild(addV); tools.appendChild(document.createTextNode(" ")); tools.appendChild(delG);
+    head.appendChild(tools);
+    block.appendChild(head);
+
+    const list = document.createElement("div");
+    list.className = "val-list";
+    vals.forEach((v, vi) => {
+      const inp = document.createElement("input");
+      inp.type = "number"; inp.step = "0.1"; inp.value = String(v);
+      inp.setAttribute("aria-label", "组" + (gi + 1) + " 数值" + (vi + 1));
+      inp.addEventListener("input", () => {
+        indepGroups[gi][vi] = parseFloat(inp.value) || 0;
+        recalc();
+      });
+      list.appendChild(inp);
+      const del = document.createElement("button");
+      del.type = "button"; del.className = "chip-del"; del.textContent = "×";
+      del.title = "删除数值"; del.setAttribute("aria-label", "删除组" + (gi + 1) + "数值" + (vi + 1));
+      del.addEventListener("click", () => {
+        indepGroups[gi].splice(vi, 1);
+        if (indepGroups[gi].length === 0) indepGroups.splice(gi, 1);
+        if (indepGroups.length === 0) indepGroups = [[]];
+        renderGroups(); recalc();
+      });
+      list.appendChild(del);
+    });
+    block.appendChild(list);
+    root.appendChild(block);
+  });
+}
+
+/* ============================================================
+ * 计算与渲染
+ * ============================================================ */
+function fmt(n, digits) {
+  if (!Number.isFinite(n)) return "—";
+  const d = digits == null ? 4 : digits;
+  return n.toLocaleString("zh-CN", { minimumFractionDigits: 0, maximumFractionDigits: d });
+}
+function fmtZone(n) {
+  if (!Number.isFinite(n)) return "—";
+  return n.toFixed(6);
+}
+
+function readInputs() {
+  return {
+    base_value: num("base_value"),
+    weapon_base: num("weapon_base"),
+    total_pct: num("total_pct"),
+    total_flat: num("total_flat"),
+    total_bonus: num("total_bonus"),
+    total_deepen: num("total_deepen"),
+    total_crit_rate: num("total_crit_rate"),
+    total_crit_dmg: num("total_crit_dmg"),
+    base_mult: num("base_mult"),
+    mult_increase: num("mult_increase"),
+    char_level: num("char_level"),
+    enemy_level: num("enemy_level"),
+    total_ignore: num("total_ignore") / 100,
+    total_reduce: num("total_reduce") / 100,
+    base_res: num("base_res"),
+    res_boost: num("res_boost"),
+    res_reduce: num("res_reduce"),
+    res_ext_reduce: num("res_ext_reduce"),
+    mult_boosts: multBoosts.slice(),
+    indep_groups: indepGroups.map(g => g.slice()),
+  };
+}
+
+function pipeRow(label, sub, value, total) {
+  return '<div class="pipe-row' + (total ? " total" : "") + '">' +
+    '<div class="name"><b>' + label + "</b>" + sub + "</div>" +
+    '<div class="val">' + value + "</div></div>";
+}
+
+function recalc() {
+  const o = readInputs();
+  const r = Engine.computeAll(o);
+  const status = $("status");
+
+  if (r.res_zone <= 0) {
+    status.className = "status err";
+    status.textContent = "抗性乘区 ≤ 0（免疫或异常），伤害为 0 或无效";
+  } else {
+    status.className = "status ok";
+    status.textContent = "实时 · 敌方基础防御 " + fmt(r.enemy_base_def, 0) +
+      " · 暴击率 " + fmt(r.crit_rate, 2) + "%";
+  }
+
+  $("pipeline").innerHTML =
+    pipeRow("基础乘区", "攻击面板", fmtZone(r.base_zone)) +
+    pipeRow("加成乘区", "1 + 加成/100", fmtZone(r.bonus_zone)) +
+    pipeRow("加深乘区", "1 + 加深/100", fmtZone(r.deepen_zone)) +
+    pipeRow("防御乘区", "等级与减防", fmtZone(r.def_zone)) +
+    pipeRow("抗性乘区", "元素抗性", fmtZone(r.res_zone)) +
+    pipeRow("独立乘区", r.indep_factors.map(f => f[1].toFixed(4)).join(" × ") || "—", fmtZone(r.indep_zone)) +
+    pipeRow("倍率乘区", "× Π(1+增幅)", fmtZone(r.mult_zone)) +
+    pipeRow("暴击乘区", "(150+暴伤)/100", fmtZone(r.crit_zone)) +
+    pipeRow("七乘区合成", "非暴 /100 后连乘", fmtZone(
+      r.base_zone * r.bonus_zone * r.deepen_zone * r.def_zone *
+      r.res_zone * r.indep_zone * r.mult_zone / 100
+    ), true);
+
+  $("dmg_no").innerHTML = fmt(r.final_no_crit, 1) + "<small>点</small>";
+  $("dmg_crit").innerHTML = fmt(r.final_crit, 1) + "<small>点</small>";
+  $("dmg_exp").innerHTML = fmt(r.expected, 1) + "<small>点</small>";
+
+  $("formula_box").textContent =
+    "非暴 = " + fmtZone(r.base_zone) + " × " + fmtZone(r.bonus_zone) +
+    " × " + fmtZone(r.deepen_zone) + " × " + fmtZone(r.def_zone) +
+    " × " + fmtZone(r.res_zone) + " × " + fmtZone(r.indep_zone) +
+    " × " + fmtZone(r.mult_zone) + " / 100 = " + r.final_no_crit.toFixed(4) +
+    "\n暴击 = 非暴 × " + fmtZone(r.crit_zone) + " = " + r.final_crit.toFixed(4) +
+    "\n期望 = 非暴×(1−" + (r.crit_rate).toFixed(2) + "%) + 暴击×" + (r.crit_rate).toFixed(2) +
+    "% = " + r.expected.toFixed(4);
+}
+
+/* ============================================================
+ * 引擎对照测试（来自 tests/test_damage_formula.py）
+ * ============================================================ */
+function almostEqual(a, b, eps) {
+  return Math.abs(a - b) <= (eps || 1e-8);
+}
+
+function runEngineChecks() {
+  const fails = [];
+  const pass = [];
+  function expect(name, cond, detail) {
+    if (cond) pass.push(name);
+    else fails.push(name + (detail ? " — " + detail : ""));
+  }
+
+  // 防御：90/90 无无视
+  {
+    const z = Engine.calcDefenseZone(90, 90, 0, 0);
+    const exp = (800 + 8 * 90) / ((792 + 8 * 90) + (800 + 8 * 90));
+    expect("防御 90/90 ≈0.5013", almostEqual(z, exp, 1e-10), "got " + z);
+    expect("防御 90/100 < 0.5", Engine.calcDefenseZone(90, 100, 0, 0) < 0.5);
+    expect("无视100% → 防御=1", almostEqual(Engine.calcDefenseZone(90, 100, 1, 0), 1, 1e-10));
+    expect("无视超100%截断", almostEqual(Engine.calcDefenseZone(90, 100, 2, 0), 1, 1e-10));
+  }
+  // 抗性
+  {
+    expect("抗性0 → 1", almostEqual(Engine.calcResistanceZone(0, 0, 0, 0), 1, 1e-10));
+    expect("负抗减半 base10 red50 → 1.20", almostEqual(Engine.calcResistanceZone(10, 0, 50, 0), 1.20, 1e-10));
+    expect("抗性100 → 0", almostEqual(Engine.calcResistanceZone(100, 0, 0, 0), 0, 1e-10));
+  }
+  // 独立
+  {
+    const a = Engine.calcIndepZone([]);
+    expect("独立空组 → 1", almostEqual(a.zone, 1, 1e-10));
+    const b = Engine.calcIndepZone([[30], [50]]);
+    expect("独立 1.3×1.5=1.95", almostEqual(b.zone, 1.95, 1e-10));
+    const c = Engine.calcIndepZone([[10], [20], [30]]);
+    expect("独立三组 1.1×1.2×1.3", almostEqual(c.zone, 1.1 * 1.2 * 1.3, 1e-8));
+  }
+  // 基础
+  {
+    expect("基础 1500", almostEqual(Engine.calcBaseZone(1000, 500, 0, 0), 1500, 1e-10));
+    expect("基础 百分比+固定", almostEqual(Engine.calcBaseZone(1000, 500, 50, 200), 2450, 1e-10));
+  }
+  // 加成/加深/暴击/倍率
+  {
+    expect("加成60 → 1.6", almostEqual(Engine.calcBonusZone(60), 1.6, 1e-10));
+    expect("加深40 → 1.4", almostEqual(Engine.calcDeepenZone(40), 1.4, 1e-10));
+    expect("暴伤基数0 → 1.5", almostEqual(Engine.calcCritZone(0), 1.5, 1e-10));
+    expect("暴击率50 → 55", almostEqual(Engine.calcCritRate(50), 55, 1e-10));
+    expect("倍率 (100+20)×1.5=180", almostEqual(Engine.calcMultZone(100, 20, [50]), 180, 1e-10));
+  }
+  // 端到端（与 tests/test_damage_formula.py::TestFullDamageFormula 一致：直接传乘区）
+  {
+    const { base_dmg, final_crit } = Engine.calcFinalDamage(
+      1000, 1.0, 1.0, 1.5, 1.0, 1.0, 1.0, 100.0
+    );
+    expect("端到端 非暴=1000", almostEqual(base_dmg, 1000, 1e-10), String(base_dmg));
+    expect("端到端 暴击=1500", almostEqual(final_crit, 1500, 1e-10), String(final_crit));
+
+    const base2 = Engine.calcBaseZone(400, 500, 60, 200);
+    const bonus = Engine.calcBonusZone(70);
+    const deepen = Engine.calcDeepenZone(30);
+    const critZ = Engine.calcCritZone(60);
+    const defZ = Engine.calcDefenseZone(90, 100, 0.2, 0);
+    const resZ = Engine.calcResistanceZone(10, 0, 0, 10);
+    const ind = Engine.calcIndepZone([[15], [25]]).zone;
+    const mult = Engine.calcMultZone(150, 30, [20, 10]);
+    const full = Engine.calcFinalDamage(base2, bonus, deepen, critZ, defZ, resZ, ind, mult);
+    const expected = (1640 * 1.7 * 1.3 * defZ * 1.0 * ind * mult) / 100.0;
+    expect("实战场景 非暴对齐", almostEqual(full.base_dmg, expected, 1e-6), full.base_dmg + " vs " + expected);
+    expect("实战场景 暴击对齐", almostEqual(full.final_crit, expected * 2.1, 1e-6));
+  }
+
+  const box = $("check_out");
+  if (fails.length === 0) {
+    box.className = "status ok";
+    box.textContent = "对照通过 " + pass.length + "/" + pass.length + " · 与 Python 单测关键断言一致";
+  } else {
+    box.className = "status err";
+    box.textContent = "失败 " + fails.length + " 项：" + fails.join("；");
+  }
+  return fails.length === 0;
+}
+
+/* ============================================================
+ * 绑定
+ * ============================================================ */
+function bindInputs() {
+  const ids = Object.keys(DEFAULTS);
+  ids.forEach(id => {
+    $(id).addEventListener("input", recalc);
+  });
+  document.querySelectorAll("[data-preset]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const p = PRESETS[btn.getAttribute("data-preset")];
+      if (!p) return;
+      $("base_res").value = String(p.base);
+      $("res_boost").value = String(p.boost);
+      $("res_reduce").value = "0";
+      $("res_ext_reduce").value = "0";
+      recalc();
+    });
+  });
+  $("add_boost").addEventListener("click", () => { multBoosts.push(0); renderBoosts(); recalc(); });
+  $("add_group").addEventListener("click", () => { indepGroups.push([0]); renderGroups(); recalc(); });
+  $("btn_reset").addEventListener("click", () => {
+    Object.keys(DEFAULTS).forEach(id => { $(id).value = String(DEFAULTS[id]); });
+    multBoosts = [20, 10];
+    indepGroups = [[15], [25]];
+    renderBoosts(); renderGroups(); recalc();
+    $("check_out").className = "status";
+    $("check_out").textContent = "已恢复示例参数";
+  });
+  $("btn_check").addEventListener("click", runEngineChecks);
+}
+
+bindInputs();
+renderBoosts();
+renderGroups();
+recalc();
+// 入场自检
+runEngineChecks();
+</script>
+</body>
+</html>

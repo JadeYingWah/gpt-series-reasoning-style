@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>星光接取 · 1.5.6实测</title>
+  <style>
+    :root {
+      --bg0: #0b1020;
+      --bg1: #152038;
+      --ink: #e8eefc;
+      --muted: #8fa3bf;
+      --accent: #f5d76e;
+      --danger: #ff6b8a;
+      --ok: #5ddea0;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: radial-gradient(ellipse at top, var(--bg1), var(--bg0));
+      color: var(--ink);
+    }
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+    }
+    .hud {
+      display: flex;
+      gap: 18px;
+      font-size: 14px;
+      color: var(--muted);
+      min-width: 480px;
+      justify-content: space-between;
+    }
+    .hud strong { color: var(--ink); font-variant-numeric: tabular-nums; }
+    .stage {
+      position: relative;
+      width: 480px;
+      height: 560px;
+      border: 1px solid #2a3a5c;
+      border-radius: 12px;
+      overflow: hidden;
+      background:
+        radial-gradient(1px 1px at 20% 30%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 70% 15%, #fff 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 40% 70%, #cfe 50%, transparent 51%),
+        radial-gradient(1px 1px at 85% 55%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 10% 80%, #9cf 50%, transparent 51%),
+        linear-gradient(180deg, #0a1428, #121a32 60%, #1a2440);
+      touch-action: none;
+      user-select: none;
+      cursor: none;
+    }
+    canvas { display: block; width: 100%; height: 100%; }
+    .overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: rgba(8, 12, 24, 0.72);
+      text-align: center;
+      padding: 24px;
+    }
+    .overlay.hidden { display: none; }
+    .overlay h2 { margin: 0; font-size: 28px; }
+    .overlay p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; max-width: 320px; }
+    .overlay .score { color: var(--accent); font-size: 36px; font-weight: 700; }
+    button {
+      margin-top: 8px;
+      border: none;
+      border-radius: 999px;
+      padding: 10px 22px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #101828;
+      background: linear-gradient(180deg, #ffe7a0, var(--accent));
+      cursor: pointer;
+    }
+    button:hover { filter: brightness(1.05); }
+    button:active { transform: translateY(1px); }
+    .tip { font-size: 12px; color: var(--muted); max-width: 480px; text-align: center; line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <h1>星光接取</h1>
+  <div class="hud" id="hud">
+    <span>分数 <strong id="score">0</strong></span>
+    <span>生命 <strong id="lives">3</strong></span>
+    <span>连击 <strong id="combo">0</strong></span>
+    <span>最佳 <strong id="best">0</strong></span>
+  </div>
+  <div class="stage" id="stage">
+    <canvas id="game" width="480" height="560"></canvas>
+    <div class="overlay" id="startOverlay">
+      <h2>星光接取</h2>
+      <p>移动光托接住下落的星光<br />漏接会扣生命 · 连续接住有加成<br />← → 或鼠标 / 触屏拖动</p>
+      <button id="startBtn" type="button">开始游戏</button>
+    </div>
+    <div class="overlay hidden" id="overOverlay">
+      <h2>游戏结束</h2>
+      <div class="score" id="finalScore">0</div>
+      <p id="overTip">再来一次？</p>
+      <button id="restartBtn" type="button">重新开始</button>
+    </div>
+  </div>
+  <p class="tip">A档方向：星光接取 · 落盘本目录 · 质量预算 ≤2 轮 · 完成档位见交付说明</p>
+
+  <script>
+    (function () {
+      "use strict";
+
+      const W = 480;
+      const H = 560;
+      const PADDLE_W = 88;
+      const PADDLE_H = 14;
+      const PADDLE_Y = H - 36;
+      const STAR_R = 10;
+      const MAX_LIVES = 3;
+
+      function clamp(v, lo, hi) {
+        return Math.max(lo, Math.min(hi, v));
+      }
+
+      function createGame() {
+        return {
+          state: "ready", // ready | playing | over
+          score: 0,
+          lives: MAX_LIVES,
+          combo: 0,
+          best: 0,
+          paddleX: W / 2,
+          stars: [],
+          spawnTimer: 0,
+          spawnEvery: 55,
+          fallSpeed: 2.4,
+          tick: 0,
+        };
+      }
+
+      function difficulty(g) {
+        const s = g.score;
+        g.fallSpeed = 2.4 + Math.min(3.2, s * 0.012);
+        g.spawnEvery = Math.max(22, 55 - Math.floor(s * 0.08));
+      }
+
+      function spawnStar(g, rng) {
+        const r = rng == null ? Math.random() : rng();
+        const kindRoll = rng == null ? Math.random() : (r * 1.7) % 1;
+        const kind = kindRoll > 0.9 ? "gold" : kindRoll > 0.75 ? "blue" : "normal";
+        g.stars.push({
+          x: STAR_R + 8 + r * (W - STAR_R * 2 - 16),
+          y: -STAR_R - 4,
+          r: kind === "gold" ? STAR_R + 2 : STAR_R,
+          kind: kind,
+          rot: r * Math.PI * 2,
+        });
+      }
+
+      function starValue(kind, combo) {
+        const base = kind === "gold" ? 3 : kind === "blue" ? 2 : 1;
+        return base + Math.min(5, Math.floor(combo / 5));
+      }
+
+      function step(g, dt, rng) {
+        if (g.state !== "playing") return { caught: [], missed: [] };
+        g.tick += dt;
+        difficulty(g);
+        g.spawnTimer += dt;
+        if (g.spawnTimer >= g.spawnEvery) {
+          g.spawnTimer = 0;
+          spawnStar(g, rng);
+        }
+        const caught = [];
+        const missed = [];
+        const speed = g.fallSpeed * (dt / 16.67);
+        for (let i = g.stars.length - 1; i >= 0; i--) {
+          const st = g.stars[i];
+          st.y += speed;
+          st.rot += 0.08;
+          const paddleTop = PADDLE_Y;
+          const paddleLeft = g.paddleX - PADDLE_W / 2;
+          const paddleRight = g.paddleX + PADDLE_W / 2;
+          const hitY = st.y + st.r >= paddleTop && st.y - st.r <= paddleTop + PADDLE_H;
+          const hitX = st.x + st.r >= paddleLeft && st.x - st.r <= paddleRight;
+          if (hitY && hitX) {
+            g.combo += 1;
+            g.score += starValue(st.kind, g.combo);
+            caught.push(st.kind);
+            g.stars.splice(i, 1);
+            continue;
+          }
+          if (st.y - st.r > H + 4) {
+            g.lives -= 1;
+            g.combo = 0;
+            missed.push(st.kind);
+            g.stars.splice(i, 1);
+            if (g.lives <= 0) {
+              g.lives = 0;
+              g.state = "over";
+              if (g.score > g.best) g.best = g.score;
+            }
+          }
+        }
+        return { caught: caught, missed: missed };
+      }
+
+      function movePaddle(g, x) {
+        g.paddleX = clamp(x, PADDLE_W / 2, W - PADDLE_W / 2);
+      }
+
+      function start(g) {
+        const best = g.best;
+        Object.assign(g, createGame());
+        g.best = best;
+        g.state = "playing";
+      }
+
+      function drawStar(ctx, x, y, r, rot, kind) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(rot);
+        ctx.beginPath();
+        for (let i = 0; i < 10; i++) {
+          const ang = (Math.PI / 5) * i - Math.PI / 2;
+          const rad = i % 2 === 0 ? r : r * 0.45;
+          const px = Math.cos(ang) * rad;
+          const py = Math.sin(ang) * rad;
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        if (kind === "gold") ctx.fillStyle = "#ffe08a";
+        else if (kind === "blue") ctx.fillStyle = "#8ecbff";
+        else ctx.fillStyle = "#fff3c4";
+        ctx.shadowColor = kind === "gold" ? "rgba(255,220,120,0.9)" : "rgba(200,230,255,0.75)";
+        ctx.shadowBlur = 12;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.restore();
+      }
+
+      function render(ctx, g) {
+        ctx.clearRect(0, 0, W, H);
+        // paddle
+        const px = g.paddleX - PADDLE_W / 2;
+        const grad = ctx.createLinearGradient(0, PADDLE_Y, 0, PADDLE_Y + PADDLE_H);
+        grad.addColorStop(0, "#9fd0ff");
+        grad.addColorStop(1, "#3d7fd4");
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        const r = 6;
+        ctx.moveTo(px + r, PADDLE_Y);
+        ctx.arcTo(px + PADDLE_W, PADDLE_Y, px + PADDLE_W, PADDLE_Y + PADDLE_H, r);
+        ctx.arcTo(px + PADDLE_W, PADDLE_Y + PADDLE_H, px, PADDLE_Y + PADDLE_H, r);
+        ctx.arcTo(px, PADDLE_Y + PADDLE_H, px, PADDLE_Y, r);
+        ctx.arcTo(px, PADDLE_Y, px + PADDLE_W, PADDLE_Y, r);
+        ctx.closePath();
+        ctx.fill();
+        for (let i = 0; i < g.stars.length; i++) {
+          const st = g.stars[i];
+          drawStar(ctx, st.x, st.y, st.r, st.rot, st.kind);
+        }
+        if (g.combo >= 5 && g.state === "playing") {
+          ctx.fillStyle = "rgba(93,222,160,0.9)";
+          ctx.font = "600 14px sans-serif";
+          ctx.fillText("连击 x" + g.combo, 16, 28);
+        }
+      }
+
+      // Export for tests (Node) and attach UI in browser
+      const Core = {
+        W: W,
+        H: H,
+        PADDLE_W: PADDLE_W,
+        PADDLE_Y: PADDLE_Y,
+        MAX_LIVES: MAX_LIVES,
+        createGame: createGame,
+        step: step,
+        movePaddle: movePaddle,
+        start: start,
+        starValue: starValue,
+        difficulty: difficulty,
+        spawnStar: spawnStar,
+        clamp: clamp,
+      };
+
+      if (typeof module !== "undefined" && module.exports) {
+        module.exports = Core;
+      }
+
+      if (typeof document !== "undefined") {
+        const canvas = document.getElementById("game");
+        const ctx = canvas.getContext("2d");
+        const scoreEl = document.getElementById("score");
+        const livesEl = document.getElementById("lives");
+        const comboEl = document.getElementById("combo");
+        const bestEl = document.getElementById("best");
+        const startOverlay = document.getElementById("startOverlay");
+        const overOverlay = document.getElementById("overOverlay");
+        const finalScore = document.getElementById("finalScore");
+        const stage = document.getElementById("stage");
+        const g = createGame();
+        let last = performance.now();
+        let keys = { left: false, right: false };
+
+        function syncHud() {
+          scoreEl.textContent = String(g.score);
+          livesEl.textContent = String(g.lives);
+          comboEl.textContent = String(g.combo);
+          bestEl.textContent = String(g.best);
+        }
+
+        function showOver() {
+          finalScore.textContent = String(g.score);
+          overOverlay.classList.remove("hidden");
+          startOverlay.classList.add("hidden");
+        }
+
+        document.getElementById("startBtn").addEventListener("click", function () {
+          start(g);
+          startOverlay.classList.add("hidden");
+          overOverlay.classList.add("hidden");
+          syncHud();
+        });
+        document.getElementById("restartBtn").addEventListener("click", function () {
+          start(g);
+          overOverlay.classList.add("hidden");
+          syncHud();
+        });
+
+        window.addEventListener("keydown", function (e) {
+          if (e.key === "ArrowLeft") keys.left = true;
+          if (e.key === "ArrowRight") keys.right = true;
+        });
+        window.addEventListener("keyup", function (e) {
+          if (e.key === "ArrowLeft") keys.left = false;
+          if (e.key === "ArrowRight") keys.right = false;
+        });
+
+        function pointerX(e) {
+          const rect = stage.getBoundingClientRect();
+          const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+          return ((clientX - rect.left) / rect.width) * W;
+        }
+        stage.addEventListener("mousemove", function (e) {
+          if (g.state === "playing") movePaddle(g, pointerX(e));
+        });
+        stage.addEventListener("touchstart", function (e) {
+          if (g.state === "playing") {
+            movePaddle(g, pointerX(e));
+            e.preventDefault();
+          }
+        }, { passive: false });
+        stage.addEventListener("touchmove", function (e) {
+          if (g.state === "playing") {
+            movePaddle(g, pointerX(e));
+            e.preventDefault();
+          }
+        }, { passive: false });
+
+        function loop(now) {
+          const dt = Math.min(34, now - last);
+          last = now;
+          if (g.state === "playing") {
+            if (keys.left) movePaddle(g, g.paddleX - 7.2);
+            if (keys.right) movePaddle(g, g.paddleX + 7.2);
+            const before = g.state;
+            step(g, dt);
+            if (before === "playing" && g.state === "over") showOver();
+            syncHud();
+          }
+          render(ctx, g);
+          requestAnimationFrame(loop);
+        }
+        syncHud();
+        render(ctx, g);
+        requestAnimationFrame(loop);
+      }
+    })();
+  </script>
+</body>
+</html>
