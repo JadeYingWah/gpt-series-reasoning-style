@@ -8,9 +8,9 @@
 
 <img src="assets/social-preview.svg" alt="GPT-Series Reasoning Style · 交付纪律层" width="100%">
 
-![Version](https://img.shields.io/badge/version-1.5.5-blue)
+![Version](https://img.shields.io/badge/version-1.5.6-blue)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
-![Size](https://img.shields.io/badge/SKILL.md-0.9KB·16行门禁-orange)
+![Size](https://img.shields.io/badge/SKILL.md-1.5KB·20行门禁-orange)
 ![Experiments](https://img.shields.io/badge/A%2FB_实验-233_次-success)
 ![Runtime](https://img.shields.io/badge/按需加载-纯文本-blueviolet)
 ![CI](https://github.com/JadeYingWah/gpt-series-reasoning-style/actions/workflows/ci.yml/badge.svg)
@@ -56,7 +56,7 @@ It is therefore **not** a model-specific add-on. What is distilled is **behavior
 
 实测中规则越多并不等于越好：把纪律硬指标化后，评分**并未提升**（与原则引导的差异落在判分误差内，判定为等效）；更极端的 v1.2.5 重版本（179 行、77 条自检）则被实验直接证伪并废弃。执行者记不住繁复步骤、模板填不满，最后流于形式应付。
 
-> **版本注**：上述"规则越多越差"的对比来自 **v1.2.x 旧版本**（v1.2.2 / v1.2.3-draft / v1.2.5）。v1.4.x 极简版起已删除硬指标化与繁复条款，现行 **1.5.5 不再适用该对比**。
+> **版本注**：上述"规则越多越差"的对比来自 **v1.2.x 旧版本**（v1.2.2 / v1.2.3-draft / v1.2.5）。v1.4.x 极简版起已删除硬指标化与繁复条款，现行 **1.5.6 不再适用该对比**。
 
 所以我们只做两件事：
 
@@ -82,7 +82,7 @@ Extensive A/B testing keeps showing one thing: **turning GPT's own behavioral tr
 
 In our tests, more rules did not mean better results: turning the discipline into hard metrics brought **no gain** (the gap versus principle-based guidance fell within scoring error and was judged equivalent), and the far heavier v1.2.5 build — 179 lines with 77 self-checks — was directly falsified and retired. Executors could not remember elaborate steps, templates were never fully filled, and compliance became theatre.
 
-> **Version note**: the "more rules, worse results" comparison comes from **older v1.2.x builds** (v1.2.2 / v1.2.3-draft / v1.2.5). Hard metrics and bulky clauses were removed in the v1.4.x minimal line, so the comparison **no longer applies to the current 1.5.5**.
+> **Version note**: the "more rules, worse results" comparison comes from **older v1.2.x builds** (v1.2.2 / v1.2.3-draft / v1.2.5). Hard metrics and bulky clauses were removed in the v1.4.x minimal line, so the comparison **no longer applies to the current 1.5.6**.
 
 So we do only two things:
 
@@ -173,7 +173,7 @@ AI agent 最贵的失败，从来不是“不会做”，而是**没验过就说
 本 skill 把隔离做到**两层物理级**：
 
 1. **执行者与审查者窗口不加载本 skill**——他们的全部行为规范来自身份文件与任务包（自包含），指挥官职权条款（五阶段、形态判断、配置确认）**物理上不在他们的上下文里**；
-2. **指挥官自己的 SKILL.md 也只是一道门禁**（900 字节 / 16 行）——纪律全文（DISCIPLINE.md）在**动手或回答的前一刻**才被放行。
+2. **指挥官自己的 SKILL.md 也只是一道门禁**（1579 字节 / 20 行）——纪律全文（DISCIPLINE.md）在**动手或回答的前一刻**才被放行。
 
 
 
@@ -188,19 +188,24 @@ AI agent 最贵的失败，从来不是“不会做”，而是**没验过就说
 装上后**无需任何特殊指令**。当 agent 接到交付型任务（写代码、算数据、做页面、多 Agent 分工），SKILL.md 的纯门禁会在**动手前一刻**放行纪律全文，然后进入**五阶段时序**：
 
 ```text
-┌─ 门禁（SKILL.md 16 行）——只有一句：动手/回答前一刻才放行 DISCIPLINE.md（纪律全文）
+┌─ 门禁（SKILL.md · 20 行纯门禁）——「前一刻」= 写交付物/施工确认/产线命令/宣布交付 中最早者
+│         创意类可有一轮不读 DISCIPLINE 的方向构想；陌生专名仍先问/搜
 │
-┌─ 阶段1 · 自由构想（无规则）——凭你自己想清楚要做什么，含体验维度（视觉/听觉/操作/入口）
-│      退出：能一句话说清楚接下来做什么
+┌─ 阶段1 · 自由构想（不读 plan/review/multi-agent，不建治理目录）——凭你自己想清楚要做什么
+│      退出：构想要点已列出，即将进入规划或实现之前
 ┌─ 阶段2 · 规则规划（读 references/plan-rules.md）——按规则落成计划，逐条回应构想清单
-│      退出：方案已确认（结构化选项卡片）＋ 风险已分级 ＋ 形态已裁定 ＋ 没有要再问的问题
+│      退出：方案已确认（结构化选项卡片）＋ 风险已分级 ＋ 形态已裁定
+│             ＋ 创意类质量预算已写明（A档不锁质量上限）＋ 没有要再问的问题
 ┌─ 阶段3 · 执行（规则完全不存在）——凭你的能力干活，心流不被打断
-│      退出：觉得可以了，没有正在调试的问题
+│      退出：无未调试问题；创意/视觉类另有「可打开完整路径」
 ┌─ 阶段4 · 直觉检查（无规则）——凭常识快速扫一遍交付物
 │      退出：没有再发现新的疑点（疑点当场确认或修掉，不带进阶段5）
-└─ 阶段5 · 纪律检查（读 references/review-rules.md）——严格过 8 条纪律
-       退出：规则全部过一遍（轻任务3条 / 重任务8条）＋ 三件套 ＋ 无未处理的“这里好像有问题”
+└─ 阶段5 · 纪律检查（读 references/review-rules.md）——1–8条 + 第9条完成档位
+       退出：规则过完（轻任务★3条+第9条 / 重任务全量+第9条）＋ 三件套
+             ＋ 完成档位 C1/C2 标明 ＋ 无未处理的“这里好像有问题”
 ```
+
+**完成档位（1.5.6）**：阶段5通过 = **C1 可验收**（须写清产品档是否拉满）；「产品做好了」= **C2**，只能来自你确认或外部 scorecard，禁止 Agent 自封。执行面无规则——纪律只在门禁时点、阶段2、阶段5出现。
 
 **任务交付之后**：彻底忘记 `plan-rules.md` / `review-rules.md` / `multi-agent.md` 的具体内容——只记“有五个阶段、到哪个阶段读哪个文件”。规则长什么样，下次需要时再读。
 
@@ -307,7 +312,7 @@ AI agent 最贵的失败，从来不是“不会做”，而是**没验过就说
 
 这一节写的是**我们自己测出来的局限**——不是谦虚，是口径。
 
-> **版本适用性**：标注「**旧版**」的条目测于 **v1.2.x 时代**。v1.4.x 极简版起已删除硬指标化与繁复条款，**这些旧版结论在现行 1.5.5 上不再适用**。
+> **版本适用性**：标注「**旧版**」的条目测于 **v1.2.x 时代**。v1.4.x 极简版起已删除硬指标化与繁复条款，**这些旧版结论在现行 1.5.6 上不再适用**。
 
 - **不提升推理能力**，也不是 GPT 专用——从 GPT 系列（含 GPT-5.6 Sol、GPT-6 Astra）提炼而来，但适用于所有具备指令遵循能力的大模型。
 - **不提升代码质量**——实验一致显示：代码本体差别不大，变好的是**交付可信度**。
@@ -400,26 +405,27 @@ cd gpt-series-reasoning-style    # 在仓库目录内启动 agent，AGENTS.md �
 
 ```bash
 cd <skills 目录>/gpt-series-reasoning-style && git pull    # 版本号见 VERSION 文件
-python scripts/selfcheck.py    # 可选：28 项静态自检，退出码 0=全过
+python scripts/selfcheck.py    # 可选：38 项静态自检，退出码 0=全过
 ```
 
-验证装好了：新开会话问 agent「**你的版本号是多少？加载证明需要哪几个文件？五阶段是什么？**」——应答 `1.5.5`，说得出门禁链路（`SKILL.md` 门禁 → 前一刻读 `DISCIPLINE.md`）与五阶段时序，并能逐字引用纪律第 1 条。
+验证装好了：新开会话问 agent「**你的版本号是多少？加载证明需要哪几个文件？五阶段是什么？**」——应答 `1.5.6`，说得出门禁链路（`SKILL.md` 门禁 → **前一刻**读 `DISCIPLINE.md`；前一刻=写交付物/施工确认/产线命令/宣布交付中最早者）与五阶段时序，并能逐字引用纪律第 1 条；提及完成档位 **C1 可验收 / C2 产品满意**（C2 须用户或外部认定）。
 
 ## 触发方式 / Usage
 
-- **自动触发**（由 `SKILL.md` 的 description 决定）：涉及数字验算、代码交付、多 Agent 协作、需要防假完成的任务；或用户说"做完了帮我查 / 看看对不对 / 验收"；或派发子任务、多个 AI 分工。
+- **自动触发**（由 `SKILL.md` 的 description 决定）：涉及数字验算、代码交付、多 Agent 协作、需要防假完成的任务；或用户说"做完了帮我查 / 看看对不对 / 验收"；或派发子任务、多个 AI 分工。约束交付是否真实，**不单独设定创意质量满意标准**（见 DISCIPLINE 完成档位）。
 - **显式点名**：`使用 gpt-series-reasoning-style 执行本次任务。`
 - **不加载**：一句话问答、纯聊天、小且可逆的改动——纪律不该出现在不需要它的地方。
+- **创意任务用法**：要抬产品上限时，**创意/实现段可不挂本 skill**，收工后再挂验收（真打开 + C1/C2）；门禁与打磨预算不在创意场里，才谈得上零压榨。
 
 ## 成本 / Cost
 
 | 项目         | 实测值                                                          |
 | ---------- | ------------------------------------------------------------ |
-| `SKILL.md` | **900 字节 / 16 行**（常驻约 0.3k token）——**纯门禁**，纪律全文在 `DISCIPLINE.md`（1805 字节/23 行，动手前一刻才读） |
-| 阶段 2 按需   | `references/plan-rules.md`（4496 字节）——仅在规则规划阶段读入        |
-| 阶段 5 按需   | `references/review-rules.md`（4224 字节）——仅在纪律检查阶段读入      |
+| `SKILL.md` | **1579 字节 / 20 行**（常驻约 0.3k token）——**纯门禁**，纪律全文在 `DISCIPLINE.md`（2923 字节/31 行，动手前一刻才读） |
+| 阶段 2 按需   | `references/plan-rules.md`（5442 字节）——仅在规则规划阶段读入        |
+| 阶段 5 按需   | `references/review-rules.md`（5041 字节）——仅在纪律检查阶段读入      |
 | 多智能体按需  | `references/multi-agent.md`（5718 字节）——仅叠加形态二三时读入       |
-| 加载路径      | 平时只读 `SKILL.md`（16 行门禁）+ `VERSION`；**动手/回答前一刻**读 `DISCIPLINE.md`（纪律全文）；阶段 2 读 plan-rules、阶段 5 读 review-rules、多智能体场景另读 `multi-agent.md`；**任务结束后规则内容全部遗忘** |
+| 加载路径      | 平时只读 `SKILL.md`（20 行门禁）+ `VERSION`；**动手/回答前一刻**读 `DISCIPLINE.md`（纪律全文）；阶段 2 读 plan-rules、阶段 5 读 review-rules、多智能体场景另读 `multi-agent.md`；**任务结束后规则内容全部遗忘** |
 | 峰值常驻文本   | 任一时刻上下文里的规则文本不超过一份（规划或审查，二者不同时在场）              |
 
 **对比 v1.2.5 重版本**：38.7 KB / 179 行 / ~12k token —— 已由实验证明是更差的选择（见「实测与证据」）。
@@ -429,23 +435,27 @@ python scripts/selfcheck.py    # 可选：28 项静态自检，退出码 0=全�
 
 | 文件                               | 角色                                                     |
 | -------------------------------- | ------------------------------------------------------ |
-| `SKILL.md`                       | **强制门禁**（16 行）。不含任何纪律内容，只在动手前一刻放行 `DISCIPLINE.md`            |
-| `DISCIPLINE.md`                  | **纪律全文**（23 行）。五阶段流程 + 任务后遗忘 + 边界 + 加载规则——门禁放行后才被读取 |
-| `references/plan-rules.md`       | **阶段 2 专用**：规划规则（含"保留阶段1构想"、形态叠加、轻量档、退出条件）         |
-| `references/review-rules.md`     | **阶段 5 专用**：8 条纪律（★ 三条为轻任务必做）+ 退出条件                 |
+| `SKILL.md`                       | **强制门禁**（20 行）。不含纪律正文；「前一刻」动作化 + 创意构想例外            |
+| `DISCIPLINE.md`                  | **纪律全文**（31 行）。五阶段 + **完成档位 C1/C2** + 任务后遗忘 + 边界 + 加载规则 |
+| `references/plan-rules.md`       | **阶段 2 专用**：规划规则（构想实质保留、形态裁定、A档不锁质量上限、创意质量预算） |
+| `references/review-rules.md`     | **阶段 5 专用**：8 条纪律（★三条轻任务必做）+ **第9条完成档位** + 退出条件    |
 | `references/multi-agent.md`      | 形态二三细则：命中信号、派发规范、六步操作、红线                             |
 | `AGENTS.md`                      | 跨运行时入口路由（Codex / Gemini CLI 等），仅指路，无规则               |
 | `templates/`                     | 指挥官 / 执行者 / 审查者三张角色卡 + 任务包七要素                        |
-| `scripts/selfcheck.py`           | 仓库一致性自检（**28 项**，纯只读，已适配文件级渐进加载结构）                  |
+| `scripts/selfcheck.py`           | 仓库一致性自检（**38 项**，纯只读，已适配文件级渐进加载结构）                  |
 | `SECURITY.md`                    | 安全模型说明                                                 |
 | `assets/social-preview.svg / .png`      | 仓库横幅图（1280×640）                                       |
 
 ## 版本 / Versioning
 
-当前版本：**1.5.5**
+当前版本：**1.5.6**
 
-- **v1.4.x 极简线**：五阶段时序、文件级渐进加载、协作形态叠加——当前主线；
+- **v1.5.6**：门禁「前一刻」动作化；阶段1禁读规则文件；A档不锁质量上限 + 创意打磨预算；完成档位 C1/C2（阶段5过完≠产品做好了）；
+- **v1.5.5**：SKILL.md 门禁化，纪律全文移入 DISCIPLINE.md（物理隔离）；
+- **v1.4.x 极简线**：五阶段时序、文件级渐进加载——主线前身；
 - **v1.2.x 重版线**：179 行、模块矩阵、self-test 冻结 77 条——**已被实验证伪**，该线已废弃。
+
+**用法原则（1.5.6）**：执行面无规则；创意段若要零压榨，验收前可不挂本 skill；大版本（≥1.6）须总指挥主动提起。
 
 ## License / 许可证
 

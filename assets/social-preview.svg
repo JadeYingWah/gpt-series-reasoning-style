@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-labelledby="banner-title banner-desc">
   <title id="banner-title">GPT-Series Reasoning Style · Delivery discipline layer</title>
-  <desc id="banner-desc">Bilingual banner: SKILL.md is a pure gate — the full discipline (DISCIPLINE.md) is released only the moment before you act. Three stages (Planning / Execution / Review) shown with a shield icon in two states: dashed with a slash means the rules are not in context while you work; solid with a check means the discipline file has been released to verify the delivery. Rule files carry their own exit conditions.</desc>
+  <desc id="banner-desc">Bilingual banner v1.5.6: SKILL.md is a pure gate — DISCIPLINE.md is released at the latest action point (write deliverable / construction confirm / production command / claim done). Execution face has no rules. Delivery grades are C1 acceptable vs C2 product-satisfied (user or external scorecard only). Three cards: Planning (rules off then on), Execution (rules off), Review (rules on including completion grade C1/C2).</desc>
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#0B1020"/>
@@ -32,8 +32,8 @@
     <text x="640" y="152" text-anchor="middle" font-size="58" font-weight="800" fill="#F1F5F9" letter-spacing="0.5">GPT-Series Reasoning Style</text>
     <text x="640" y="204" text-anchor="middle" font-size="30" font-weight="700" fill="#C4B5FD">GPT 系列推理风格</text>
 
-    <text x="640" y="262" text-anchor="middle" font-size="23" font-weight="600" fill="#E2E8F0">SKILL.md is a pure gate — discipline released the moment before you act</text>
-    <text x="640" y="298" text-anchor="middle" font-size="19" fill="#8FA3BF">SKILL.md 只是一道门禁 · 纪律全文在动手前一刻才放行 · 干活时不在场 · 交付时零妥协</text>
+    <text x="640" y="262" text-anchor="middle" font-size="23" font-weight="600" fill="#E2E8F0">SKILL.md is a pure gate — released at the latest action point · C1 / C2</text>
+    <text x="640" y="298" text-anchor="middle" font-size="19" fill="#8FA3BF">SKILL.md 只是一道门禁 · 前一刻动作化放行 · 执行面无规则 · 交付标 C1/C2</text>
 
     <!-- ===== 卡片 1 · 规划（紫） ===== -->
     <rect x="80" y="336" width="340" height="172" rx="20" fill="#131A31" stroke="#8B5CF6" stroke-width="2" stroke-opacity="0.85"/>
@@ -84,8 +84,8 @@
     <text x="986" y="412" text-anchor="middle" font-size="12" letter-spacing="1" fill="#64748B">RULES OFF</text>
     <text x="1074" y="412" text-anchor="middle" font-size="12" letter-spacing="1" fill="#FBBF24">RULES ON</text>
     <text x="1030" y="440" text-anchor="middle" font-size="21" font-weight="700" fill="#FBBF24">审查 Review</text>
-    <text x="1030" y="470" text-anchor="middle" font-size="15" fill="#8FA3BF">先直觉挑漏，再过一遍纪律</text>
-    <text x="1030" y="490" text-anchor="middle" font-size="13" fill="#64748B">Gut check first, rules second</text>
+    <text x="1030" y="470" text-anchor="middle" font-size="15" fill="#8FA3BF">先直觉挑漏，再过纪律与完成档位</text>
+    <text x="1030" y="490" text-anchor="middle" font-size="13" fill="#64748B">Gut check, then rules + C1/C2</text>
 
     <!-- ===== 图例 ===== -->
     <g transform="translate(96,586)">
@@ -103,6 +103,6 @@
       </g>
       <text x="238" y="4" font-size="13" fill="#64748B">Rules loaded from file, stage by stage · five-stage timeline</text>
     </g>
-    <text x="1200" y="590" text-anchor="end" font-size="15" fill="#64748B">v1.5.5 · MIT</text>
+    <text x="1200" y="590" text-anchor="end" font-size="15" fill="#64748B">v1.5.6 · MIT</text>
   </g>
 </svg>
