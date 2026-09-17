@@ -6,6 +6,7 @@
 **Turn "the agent says it's done" into "the agent proves it's done".**
 
 
+<img src="assets/social-preview.svg" alt="GPT-Series Reasoning Style · 交付纪律层" width="100%">
 
 ![Version](https://img.shields.io/badge/version-1.5.5-blue)
 
@@ -19,7 +20,6 @@
 
 ![CI](https://github.com/JadeYingWah/gpt-series-reasoning-style/actions/workflows/ci.yml/badge.svg)
 
-<img src="assets/social-preview.svg" alt="GPT-Series Reasoning Style · 交付纪律层" width="100%">
 
 </div>
 
