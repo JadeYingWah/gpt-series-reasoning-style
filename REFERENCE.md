@@ -9,7 +9,7 @@
 
 | 项 | 值 |
 |---|---|
-| 名称 / 版本 | `gpt-series-reasoning-style` · **1.5.1**（以 `VERSION` 文件为准） |
+| 名称 / 版本 | `gpt-series-reasoning-style` · **1.5.2**（以 `VERSION` 文件为准） |
 | 许可 | MIT |
 | 主导语言 | 中文（关键术语保留英文） |
 | 运行时形态 | **纯文本**——不改代码、不联网、不上报 |
@@ -45,7 +45,7 @@ It is therefore **not** a model-specific add-on. What is distilled is **behavior
 
 实测中规则越多并不等于越好：把纪律硬指标化后，评分**并未提升**（与原则引导的差异落在判分误差内，判定为等效）；更极端的 v1.2.5 重版本（179 行、77 条自检）则被实验直接证伪并废弃。执行者记不住繁复步骤、模板填不满，最后流于形式应付。
 
-> **版本注**：上述对比来自 **v1.2.x 旧版本**（v1.2.2 / v1.2.3-draft / v1.2.5）。v1.4.x 极简版起已删除硬指标化与繁复条款，现行 **1.5.1 不再适用该对比**。
+> **版本注**：上述对比来自 **v1.2.x 旧版本**（v1.2.2 / v1.2.3-draft / v1.2.5）。v1.4.x 极简版起已删除硬指标化与繁复条款，现行 **1.5.2 不再适用该对比**。
 
 所以我们只做两件事：
 
@@ -71,7 +71,7 @@ Extensive A/B testing keeps showing one thing: **turning GPT's own behavioral tr
 
 In our tests, more rules did not mean better results: turning the discipline into hard metrics brought **no gain** (the gap versus principle-based guidance fell within scoring error and was judged equivalent), and the far heavier v1.2.5 build — 179 lines with 77 self-checks — was directly falsified and retired. Executors could not remember elaborate steps, templates were never fully filled, and compliance became theatre.
 
-> **Version note**: the comparison above comes from **older v1.2.x builds**. Hard metrics and bulky clauses were removed in the v1.4.x minimal line, so it **no longer applies to the current 1.5.1**.
+> **Version note**: the comparison above comes from **older v1.2.x builds**. Hard metrics and bulky clauses were removed in the v1.4.x minimal line, so it **no longer applies to the current 1.5.2**.
 
 So we do only two things:
 
@@ -93,9 +93,9 @@ Users therefore **get the upside only** — more trustworthy deliveries, defects
 | 文件 | 字节 | 内容 | 何时进入上下文 |
 |---|---|---|---|
 | `SKILL.md` | 2043 | 五阶段流程表 + 各阶段指针 + 边界 + 加载说明 | **始终在场**（常驻层） |
-| `references/plan-rules.md` | 2994 | 阶段2 规划规则 | **仅阶段2** |
-| `references/review-rules.md` | 2926 | 阶段5 八条纪律 | **仅阶段5** |
-| `references/multi-agent.md` | 2273 | 形态二三细则 | **仅叠加形态二三时** |
+| `references/plan-rules.md` | 3384 | 阶段2 规划规则 | **仅阶段2** |
+| `references/review-rules.md` | 3159 | 阶段5 八条纪律 | **仅阶段5** |
+| `references/multi-agent.md` | 3166 | 形态二三细则 | **仅叠加形态二三时** |
 
 常驻层里**没有任何规则条文**——只有"有五个阶段，到哪个阶段读哪个文件"。
 
@@ -226,7 +226,7 @@ cp -r gpt-series-reasoning-style ~/.claude/skills/     # WorkBuddy 用 ~/.workbu
 cd gpt-series-reasoning-style    # 仓库目录内启动，入口路由自动生效
 ```
 
-**功能验证**：问 agent「你的版本号是多少？加载证明需要哪几个文件？」——应答 `1.5.1`，说得出五阶段时序，并能逐字引用纪律第 1 条。
+**功能验证**：问 agent「你的版本号是多少？加载证明需要哪几个文件？」——应答 `1.5.2`，说得出五阶段时序，并能逐字引用纪律第 1 条。
 
 **仓库自检**：
 
@@ -241,13 +241,13 @@ python scripts/selfcheck.py    # 24 项静态检查；退出码 0=全过 / 1=有
 | 文件 | 字节 | 角色 |
 |---|---|---|
 | `SKILL.md` | 2043 | **规则权威与五阶段流程表**（33 行，frontmatter 含 license/compatibility/author 合规字段）。运行时只加载它 + `VERSION` |
-| `VERSION` | 5 | 版本号（`1.5.1`） |
-| `references/plan-rules.md` | 2994 | 阶段2 规划规则（保留构想 / 形态叠加 / 风险分级 / 档位 / 退出条件） |
-| `references/review-rules.md` | 2926 | 阶段5 审查规则：**八条纪律** + 退出条件 |
-| `references/multi-agent.md` | 2273 | 形态二三细则：命中信号、派发规范、六步操作、红线 |
+| `VERSION` | 5 | 版本号（`1.5.2`） |
+| `references/plan-rules.md` | 3384 | 阶段2 规划规则（保留构想 / 形态叠加 / 风险分级 / 档位 / 退出条件） |
+| `references/review-rules.md` | 3159 | 阶段5 审查规则：**八条纪律** + 退出条件 |
+| `references/multi-agent.md` | 3166 | 形态二三细则：命中信号、派发规范、六步操作、红线 |
 | `AGENTS.md` | 2697 | 跨运行时入口路由（Codex / Gemini CLI 等），仅指路无规则 |
-| `templates/commander.md` | 1034 | 指挥官角色卡 |
-| `templates/executor.md` | 810 | 执行者角色卡 |
+| `templates/commander.md` | 1898 | 指挥官角色卡 |
+| `templates/executor.md` | 1796 | 执行者角色卡 |
 | `templates/reviewer.md` | 795 | 审查者角色卡 |
 | `scripts/selfcheck.py` | 4045 | 仓库一致性自检（24 项，纯只读，已适配文件级渐进加载结构） |
 | `README.md` | 28633 | 面向使用者的介绍（中英双语） |
@@ -289,13 +289,13 @@ python scripts/selfcheck.py    # 24 项静态检查；退出码 0=全过 / 1=有
 | 判定台可信度 | T6/T7/T8 三套通过"变异全灭 + GOLD 零误杀 + 反向自查" | P1-7 终报 | v1.2.x 历史 |
 | 自检可信度 | **24/24** 通过；3 个注入变异**全部被杀** | 2026-09-17 实测 | **现行有效** |
 
-> **现行版本（1.5.1）的评分实验尚未进行**——上表数字均为历史实验（v1.2.x / v1.4.x 时代）所得，待最新评分实验完成后更新。
+> **现行版本（1.5.2）的评分实验尚未进行**——上表数字均为历史实验（v1.2.x / v1.4.x 时代）所得，待最新评分实验完成后更新。
 
 ---
 
 ## 11. 已知边界
 
-> **版本适用性**：标〔**旧版**〕的条目测于 v1.2.x（v1.2.2 / v1.2.3-draft / v1.2.5），v1.4.x 极简版起已删除硬指标化与繁复条款，**现行 1.5.1 不再适用**；未标注者为现行版本仍需知悉的边界。
+> **版本适用性**：标〔**旧版**〕的条目测于 v1.2.x（v1.2.2 / v1.2.3-draft / v1.2.5），v1.4.x 极简版起已删除硬指标化与繁复条款，**现行 1.5.2 不再适用**；未标注者为现行版本仍需知悉的边界。
 
 - **不兜底**〔**旧版** v1.2.2 / v1.2.5〕——n=2 对照实验显示：致命缺陷率维度上带 skill 与不带 skill 未拉开可辨差距，held-out 上甚至略差。反向结果也放在仓库里。**v1.4.x 起不再适用**。防线靠证据与独立复验，不靠条款。
 - **不提升代码质量**——代码本体差别不大，变好的是**交付可信度**。
@@ -328,9 +328,9 @@ python scripts/selfcheck.py    # 24 项静态检查；退出码 0=全过 / 1=有
 
 **版本策略**：
 
-- **v1.4.x 极简线 → v1.5.1 文件级渐进加载**——五阶段时序、规则与流程物理分离、按阶段读入。**当前主线**。
+- **v1.4.x 极简线 → v1.5.2 文件级渐进加载**——五阶段时序、规则与流程物理分离、按阶段读入。**当前主线**。
 - **v1.2.x 重版线**——179 行、模块矩阵、self-test 冻结 77 条。**已被实验证伪，该线已废弃**。
 
 ---
 
-*MIT License · 本说明书对应版本 1.5.1*
+*MIT License · 本说明书对应版本 1.5.2*
