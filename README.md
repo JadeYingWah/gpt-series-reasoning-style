@@ -12,7 +12,7 @@
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 ![Size](https://img.shields.io/badge/SKILL.md-0.9KB·16行门禁-orange)
 ![Experiments](https://img.shields.io/badge/A%2FB_实验-233_次-success)
-![Runtime](https://img.shields.io/badge/按需加载-18_files-blueviolet)
+![Runtime](https://img.shields.io/badge/按需加载-纯文本-blueviolet)
 ![CI](https://github.com/JadeYingWah/gpt-series-reasoning-style/actions/workflows/ci.yml/badge.svg)
 
 
@@ -377,9 +377,10 @@ git pull    # 更新；版本号见 VERSION 文件
 
 | 项目         | 实测值                                                          |
 | ---------- | ------------------------------------------------------------ |
-| `SKILL.md` | **900 字节 / 16 行**（常驻约 0.3k token）——**纯门禁**，纪律全文在 `DISCIPLINE.md`（1480 字节/23 行，动手前一刻才读） |
-| 阶段 2 按需   | `references/plan-rules.md`（2321 字节）——仅在规则规划阶段读入        |
-| 阶段 5 按需   | `references/review-rules.md`（2547 字节）——仅在纪律检查阶段读入      |
+| `SKILL.md` | **900 字节 / 16 行**（常驻约 0.3k token）——**纯门禁**，纪律全文在 `DISCIPLINE.md`（1805 字节/23 行，动手前一刻才读） |
+| 阶段 2 按需   | `references/plan-rules.md`（4496 字节）——仅在规则规划阶段读入        |
+| 阶段 5 按需   | `references/review-rules.md`（4224 字节）——仅在纪律检查阶段读入      |
+| 多智能体按需  | `references/multi-agent.md`（5718 字节）——仅叠加形态二三时读入       |
 | 加载路径      | 平时只读 `SKILL.md`（16 行门禁）+ `VERSION`；**动手/回答前一刻**读 `DISCIPLINE.md`（纪律全文）；阶段 2 读 plan-rules、阶段 5 读 review-rules、多智能体场景另读 `multi-agent.md`；**任务结束后规则内容全部遗忘** |
 | 峰值常驻文本   | 任一时刻上下文里的规则文本不超过一份（规划或审查，二者不同时在场）              |
 
@@ -397,7 +398,7 @@ git pull    # 更新；版本号见 VERSION 文件
 | `references/multi-agent.md`      | 形态二三细则：命中信号、派发规范、六步操作、红线                             |
 | `AGENTS.md`                      | 跨运行时入口路由（Codex / Gemini CLI 等），仅指路，无规则               |
 | `templates/`                     | 指挥官 / 执行者 / 审查者三张角色卡 + 任务包七要素                        |
-| `scripts/selfcheck.py`           | 仓库一致性自检（**24 项**，纯只读，已适配文件级渐进加载结构）                  |
+| `scripts/selfcheck.py`           | 仓库一致性自检（**28 项**，纯只读，已适配文件级渐进加载结构）                  |
 | `SECURITY.md`                    | 安全模型说明                                                 |
 | `assets/social-preview.svg / .png`      | 仓库横幅图（1280×640）                                       |
 

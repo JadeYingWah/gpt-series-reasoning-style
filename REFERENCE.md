@@ -7,7 +7,7 @@
 <div align="center">
 <img alt="Version" src="https://img.shields.io/badge/version-1.5.5-blue">
 <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-green">
-<img alt="Size" src="https://img.shields.io/badge/SKILL.md-900%E5%AD%97%E8%8A%82%C2%B714%E8%A1%8C%E9%97%A8%E7%A6%81-orange">
+<img alt="Size" src="https://img.shields.io/badge/SKILL.md-900%E5%AD%97%E8%8A%82%C2%B716%E8%A1%8C%E9%97%A8%E7%A6%81-orange">
 <img alt="Runtime" src="https://img.shields.io/badge/%E6%8C%89%E9%9C%80%E5%8A%A0%E8%BD%BD-%E7%BA%AF%E6%96%87%E6%9C%AC-blueviolet">
 <img alt="CI" src="https://github.com/JadeYingWah/gpt-series-reasoning-style/actions/workflows/ci.yml/badge.svg">
 </div>
@@ -72,7 +72,7 @@ AI agent 最贵的失败，从来不是"不会做"，而是**没验过就说做�
 本 skill 把隔离做到**两层物理级**：
 
 1. **执行者与审查者窗口不加载本 skill**——他们的全部行为规范来自身份文件与任务包（自包含），指挥官职权条款（五阶段、形态判断、配置确认）物理上不在他们的上下文里；
-2. **指挥官自己的 SKILL.md 也只是一道门禁**（900 字节 / 14 行）——纪律全文（`DISCIPLINE.md`，1805 字节）在动手或回答的**前一刻**才被放行。
+2. **指挥官自己的 SKILL.md 也只是一道门禁**（900 字节 / 16 行）——纪律全文（`DISCIPLINE.md`，1805 字节 / 23 行）在动手或回答的**前一刻**才被放行。
 
 常驻上下文里只有一句门禁。规则不是提示词里的一段话，而是**独立的物理文件**，按阶段读入。
 
@@ -95,7 +95,7 @@ AI agent 最贵的失败，从来不是"不会做"，而是**没验过就说做�
 装上后无需特殊指令。接到交付型任务，SKILL.md 的门禁在动手前一刻放行 DISCIPLINE.md，然后进入：
 
 ```
-门禁（SKILL.md · 14行）——只有一句：动手/回答前一刻才放行 DISCIPLINE.md
+门禁（SKILL.md · 16行）——只有一句：动手/回答前一刻才放行 DISCIPLINE.md
 │
 ├─ 阶段1 · 自由构想（无规则）——凭你自己想清楚要做什么
 │      退出：能一句话说清接下来做什么
@@ -237,8 +237,8 @@ AI agent 最贵的失败，从来不是"不会做"，而是**没验过就说做�
 
 | 项目 | 实测值 |
 |---|---|
-| SKILL.md | 900 字节 / 14 行（常驻约 0.3k token）——纯门禁 |
-| DISCIPLINE.md | 1805 字节——动手前一刻才读 |
+| SKILL.md | 900 字节 / 16 行（常驻约 0.3k token）——纯门禁 |
+| DISCIPLINE.md | 1805 字节 / 23 行——动手前一刻才读 |
 | plan-rules.md | 4496 字节——仅阶段2 |
 | review-rules.md | 4224 字节——仅阶段5 |
 | multi-agent.md | 5718 字节——仅形态二三 |
@@ -276,16 +276,22 @@ AI agent 最贵的失败，从来不是"不会做"，而是**没验过就说做�
 
 | 文件 | 角色 |
 |---|---|
-| `SKILL.md` | 强制门禁（14行），不含纪律内容，只在动手前一刻放行 DISCIPLINE.md |
-| `DISCIPLINE.md` | 纪律全文（五阶段流程+任务后遗忘+边界+加载规则） |
+| `SKILL.md` | 强制门禁（16行），不含纪律内容，只在动手前一刻放行 DISCIPLINE.md |
+| `VERSION` | 当前版本号（1.5.5） |
+| `DISCIPLINE.md` | 纪律全文（23行：五阶段流程+任务后遗忘+边界+加载规则） |
 | `references/plan-rules.md` | 阶段2专用：规划规则 |
 | `references/review-rules.md` | 阶段5专用：8条纪律+退出条件 |
 | `references/multi-agent.md` | 形态二三细则：命中信号、派发规范、六步、红线 |
 | `templates/` | commander / executor / reviewer 三张角色卡 |
 | `scripts/selfcheck.py` | 仓库一致性自检（28项，纯只读） |
 | `AGENTS.md` | 跨运行时入口路由（Codex / Gemini CLI 等），仅指路 |
+| `docs/` | 形态三运行时按需创建（ai-members 身份档案 / plans 任务包 / 台账） |
+| `.github/workflows/ci.yml` | CI：推送/PR 时自动跑 selfcheck |
 | `SECURITY.md` | 安全模型说明 |
+| `CHANGELOG.md` | 版本变更记录 |
+| `README.md` / `REFERENCE.md` | 面向使用者的介绍 / 本完整说明书 |
 | `assets/social-preview.svg` / `.png` | 仓库横幅（1280×640） |
+| `LICENSE` | MIT |
 
 ---
 
