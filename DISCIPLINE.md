@@ -14,10 +14,10 @@
 
 ## 任务结束后
 
-整个任务交付完了、用户回复新的内容之前，**彻底忘记 plan-rules.md、review-rules.md 和 multi-agent.md 的具体内容**。你只需要记住：有五个阶段，到哪个阶段读哪个文件。规则长什么样，下次需要的时候再读。
+整个任务交付完了、用户回复新的内容之前，**彻底忘记 plan-rules.md、review-rules.md 和 multi-agent.md 的具体内容**。你只需要记住：有五个阶段，到哪个阶段读哪个文件。规则长什么样，下次需要的时候再读。 **豁免**：`docs/` 下的档案性文件（DEVELOPMENT_LOG.md 台账、项目AI身份/ai-members 身份档案、plans 任务包）**不在遗忘范围**——它们是项目记录，不是规则内容。
 
 ## 边界
 只改完成任务必须改的地方；发现会让交付物坏着交的问题顺手修掉，其余不碰。
 
 ## 加载
-本文件由 SKILL.md 的门禁在动手/回答的前一刻引导读取，读取后按本文件执行。阶段2才读 plan-rules.md，阶段5才读 review-rules.md。多智能体场景另读 multi-agent.md。
+本文件由 SKILL.md 的门禁在动手/回答的前一刻引导读取，读取后按本文件执行。阶段2才读 plan-rules.md，阶段5才读 review-rules.md。**形态三场景**：先按 multi-agent 六步建治理体系（docs/ai-members/ + docs/plans/ + 台账），再按阶段 2 推进。多智能体场景另读 multi-agent.md。
