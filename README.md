@@ -9,15 +9,10 @@
 <img src="assets/social-preview.svg" alt="GPT-Series Reasoning Style · 交付纪律层" width="100%">
 
 ![Version](https://img.shields.io/badge/version-1.5.5-blue)
-
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
-
 ![Size](https://img.shields.io/badge/SKILL.md-0.9KB·16行门禁-orange)
-
 ![Experiments](https://img.shields.io/badge/A%2FB_实验-233_次-success)
-
 ![Runtime](https://img.shields.io/badge/按需加载-18_files-blueviolet)
-
 ![CI](https://github.com/JadeYingWah/gpt-series-reasoning-style/actions/workflows/ci.yml/badge.svg)
 
 
