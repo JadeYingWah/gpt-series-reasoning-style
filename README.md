@@ -339,33 +339,71 @@ AI agent 最贵的失败，从来不是“不会做”，而是**没验过就说
 
 ## 安装 / Install
 
-两种装法，对应两类运行时（用多个就各装各的）：
+两种装法，对应两类加载方式（用多个客户端就各装各的，互不冲突）：
 
-### 目录型运行时：Claude Code / WorkBuddy 等
+- **方式一·原生 Skill（推荐）**：把文件夹放进客户端的 skills 目录，启动时按 `SKILL.md` 的 description **自动发现、按上下文触发**。
+- **方式二·AGENTS.md 项目指令**：不支持 skill 自动发现、但会读项目根 `AGENTS.md` 的客户端，`cd` 进仓库即可，由 AGENTS.md 指路加载。
+
+### 方式一：原生 Skill（自动发现）
+
+各客户端的 skills 目录（`<name>` = `gpt-series-reasoning-style`）：
+
+| 客户端 | 个人级（全局，所有项目） | 项目级（随仓库共享给团队） |
+|---|---|---|
+| Claude Code | `~/.claude/skills/` | `.claude/skills/` |
+| Cursor（2.4+） | `~/.cursor/skills/` | `.cursor/skills/` |
+| Codex CLI | `~/.codex/skills/` | `.codex/skills/`（或 `.agents/skills/`） |
+| WorkBuddy | `~/.workbuddy/skills/` | — |
+| 其他支持 SKILL.md 的客户端 | 对号入座查其文档的 skills 目录 | 同左 |
+
+> **一个位置喂两个客户端**：Cursor 会兼容加载 `.claude/skills/` 与 `~/.claude/skills/`（Codex 目录同理）。同时用 Claude Code 和 Cursor 时，装进 `~/.claude/skills/` 即可两边生效。
+
+**macOS / Linux（bash）**——以 Claude Code 个人级为例：
 
 ```bash
 git clone https://github.com/JadeYingWah/gpt-series-reasoning-style
-cp -r gpt-series-reasoning-style ~/.claude/skills/    # WorkBuddy 用 ~/.workbuddy/skills/
+mkdir -p ~/.claude/skills && cp -r gpt-series-reasoning-style ~/.claude/skills/
+# Cursor 改目标为 ~/.cursor/skills/ ；Codex 改 ~/.codex/skills/ ；WorkBuddy 改 ~/.workbuddy/skills/
 ```
 
-> **拷整个文件夹，不要只拷 `SKILL.md`**——`references/` 与 `templates/` 是按需加载的，缺了它们，多智能体场景会失效。
+**Windows（PowerShell）**：
 
-### AGENTS.md 运行时：Codex / Gemini CLI / Copilot CLI 等
+```powershell
+git clone https://github.com/JadeYingWah/gpt-series-reasoning-style
+New-Item -ItemType Directory -Force "$HOME\.claude\skills" | Out-Null
+Copy-Item -Recurse -Force gpt-series-reasoning-style "$HOME\.claude\skills\"
+# Cursor 目标 "$HOME\.cursor\skills"；Codex "$HOME\.codex\skills"；WorkBuddy "$HOME\.workbuddy\skills"
+```
+
+**项目级 / 团队共享**：把文件夹放进项目仓库的 `.claude/skills/`（或对应客户端目录）并提交——队友 clone 仓库即自动获得，无需各自安装。
+
+装完**新开一个会话**（或重启客户端）让其发现新 skill。
+
+### 方式二：AGENTS.md 项目指令（cd 型）
+
+适用于不做 skill 自动发现、但会读项目根 `AGENTS.md` 的客户端（Codex / Gemini CLI / Copilot CLI / Windsurf / Zed 等）：
 
 ```bash
 git clone https://github.com/JadeYingWah/gpt-series-reasoning-style
-cd gpt-series-reasoning-style    # 在仓库目录内启动 agent，AGENTS.md 入口路由自动生效
+cd gpt-series-reasoning-style    # 在仓库目录内启动 agent，AGENTS.md 入口指路自动生效
 ```
 
-路由只做一件事：让 agent 读 `SKILL.md`（纯门禁）——它在**动手/回答前一刻**才放行 `DISCIPLINE.md`（纪律全文），其余文件按需读取。
+这不是 skill 注册，而是 agent 把 `AGENTS.md` 当项目指令、按其指路走 `SKILL.md`（门禁）→ `DISCIPLINE.md`（五阶段）→ 按需读 references。若你的客户端只读特定文件名，可在仓库根加一个软链指向 `AGENTS.md`（如 `ln -s AGENTS.md CLAUDE.md`、`ln -s AGENTS.md GEMINI.md`；Windows 用 `mklink` 或直接复制一份）。
+
+### 安装注意
+
+- **拷整个文件夹，不要只拷 `SKILL.md`**——`DISCIPLINE.md`、`references/`、`templates/`、`scripts/` 都是按需加载的，缺了多智能体等场景会失效。
+- **目录名必须是 `gpt-series-reasoning-style`**：下载 ZIP 解压后常带 `-main` / `-master` 后缀，需改名，否则部分客户端的发现与斜杠调用会异常。
+- **零依赖、不联网、不上报**：本体全是 Markdown 纯文本；仅 `scripts/selfcheck.py` 仓库自检需要 Python 3（可选，不装 Python 不影响 skill 工作）。
 
 ### 更新与验证
 
 ```bash
-git pull    # 更新；版本号见 VERSION 文件
+cd <skills 目录>/gpt-series-reasoning-style && git pull    # 版本号见 VERSION 文件
+python scripts/selfcheck.py    # 可选：28 项静态自检，退出码 0=全过
 ```
 
-验证装好了：问 agent「**你的版本号是多少？加载证明需要哪几个文件？**」——应答 `1.5.5`，说得出五阶段时序，并能逐字引用第 1 条纪律。
+验证装好了：新开会话问 agent「**你的版本号是多少？加载证明需要哪几个文件？五阶段是什么？**」——应答 `1.5.5`，说得出门禁链路（`SKILL.md` 门禁 → 前一刻读 `DISCIPLINE.md`）与五阶段时序，并能逐字引用纪律第 1 条。
 
 ## 触发方式 / Usage
 

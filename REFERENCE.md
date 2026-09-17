@@ -297,20 +297,49 @@ AI agent 最贵的失败，从来不是"不会做"，而是**没验过就说做�
 
 ## 17. 安装与自检
 
+两类装法：**原生 Skill**（放进客户端 skills 目录，自动发现、按上下文触发，推荐）与 **AGENTS.md 项目指令**（`cd` 进仓库，由入口指路加载）。
+
+**原生 Skill 目录**（`<name>` = `gpt-series-reasoning-style`）：
+
+| 客户端 | 个人级（全局） | 项目级（随仓库共享） |
+|---|---|---|
+| Claude Code | `~/.claude/skills/` | `.claude/skills/` |
+| Cursor（2.4+） | `~/.cursor/skills/`（也兼容读 `.claude/skills/`、`.codex/skills/`） | `.cursor/skills/` |
+| Codex CLI | `~/.codex/skills/` | `.codex/skills/`（或 `.agents/skills/`） |
+| WorkBuddy | `~/.workbuddy/skills/` | — |
+
 ```bash
-# 目录型运行时（Claude Code / WorkBuddy 等）
+# macOS / Linux（以 Claude Code 个人级为例；Cursor/Codex/WorkBuddy 换目标目录）
 git clone https://github.com/JadeYingWah/gpt-series-reasoning-style
-cp -r gpt-series-reasoning-style ~/.claude/skills/    # WorkBuddy 用 ~/.workbuddy/skills/
-# 拷整个文件夹，不要只拷 SKILL.md——references/ 与 templates/ 是按需加载的
-
-# AGENTS.md 型运行时（Codex / Gemini CLI / Copilot CLI 等）
-cd gpt-series-reasoning-style    # 在仓库目录内启动，入口路由自动生效
-
-# 仓库自检
-python scripts/selfcheck.py      # 退出码 0=全过 / 1=有失败
+mkdir -p ~/.claude/skills && cp -r gpt-series-reasoning-style ~/.claude/skills/
 ```
 
-验证生效：问 agent「你的版本号是多少？五阶段是什么？」——应答 **1.5.5**，说得出五阶段时序，并能逐字引用纪律第1条。
+```powershell
+# Windows PowerShell
+git clone https://github.com/JadeYingWah/gpt-series-reasoning-style
+New-Item -ItemType Directory -Force "$HOME\.claude\skills" | Out-Null
+Copy-Item -Recurse -Force gpt-series-reasoning-style "$HOME\.claude\skills\"
+```
+
+项目级 / 团队共享：放进项目仓库的 `.claude/skills/`（或对应客户端目录）并提交，队友 clone 即得。装完新开会话让客户端发现。
+
+**AGENTS.md 型**（Codex / Gemini CLI / Copilot / Windsurf / Zed 等读项目根 AGENTS.md 的客户端）：
+
+```bash
+git clone https://github.com/JadeYingWah/gpt-series-reasoning-style
+cd gpt-series-reasoning-style    # 仓库目录内启动 agent，AGENTS.md 指路：SKILL.md 门禁→前一刻读 DISCIPLINE.md
+```
+
+客户端只读特定文件名时，在仓库根加软链指向 `AGENTS.md`（`ln -s AGENTS.md CLAUDE.md`、`ln -s AGENTS.md GEMINI.md`；Windows 用 `mklink` 或复制）。
+
+**注意**：① 拷整个文件夹，不能只拷 `SKILL.md`（`DISCIPLINE.md`、`references/`、`templates/`、`scripts/` 按需加载）；② ZIP 解压常带 `-main` 后缀，目录名要改回 `gpt-series-reasoning-style`；③ 本体纯文本零依赖、不联网，仅自检脚本可选需要 Python 3。
+
+```bash
+cd <skills目录>/gpt-series-reasoning-style && git pull   # 更新，版本号见 VERSION
+python scripts/selfcheck.py      # 可选：28 项静态自检，退出码 0=全过 / 1=有失败
+```
+
+验证生效：新开会话问 agent「你的版本号是多少？加载证明需要哪几个文件？五阶段是什么？」——应答 **1.5.5**，说得出门禁链路（`SKILL.md` 门禁 → 前一刻读 `DISCIPLINE.md`）与五阶段时序，并能逐字引用纪律第 1 条。
 
 ---
 
