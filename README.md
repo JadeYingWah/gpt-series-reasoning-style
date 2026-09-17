@@ -5,16 +5,22 @@
 **把"Agent 说做完了"变成"Agent 证明做完了"。**  
 **Turn "the agent says it's done" into "the agent proves it's done".**
 
-![GPT-Series Reasoning Style — 交付验收纪律层](assets/social-preview.svg)
 
-[![Version](https://img.shields.io/badge/version-1.5.2-blue)](#版本--versioning)
-[![License: MIT](https://img.shields.io/badge/license-MIT-green)](#license--许可证)
-[![Size](https://img.shields.io/badge/SKILL.md-2.0KB·33行-orange)](#成本--cost)
-[![Experiments](https://img.shields.io/badge/A%2FB_实验-233_次-success)](#实测与证据--field-tests)
-[![Runtime](https://img.shields.io/badge/按需加载-18_files-blueviolet)](#成本--cost)
-[![CI](https://github.com/JadeYingWah/gpt-series-reasoning-style/actions/workflows/ci.yml/badge.svg)](https://github.com/JadeYingWah/gpt-series-reasoning-style/actions/workflows/ci.yml)
+
+![Version](https://img.shields.io/badge/version-1.5.3-blue)
+
+![License: MIT](https://img.shields.io/badge/license-MIT-green)
+
+![Size](https://img.shields.io/badge/SKILL.md-2.0KB·33行-orange)
+
+![Experiments](https://img.shields.io/badge/A%2FB_实验-233_次-success)
+
+![Runtime](https://img.shields.io/badge/按需加载-18_files-blueviolet)
+
+![CI](https://github.com/JadeYingWah/gpt-series-reasoning-style/actions/workflows/ci.yml/badge.svg)
 
 </div>
+
 
 ## 来源与适用范围 / Origin and Scope
 
@@ -42,7 +48,7 @@ It is therefore **not** a model-specific add-on. What is distilled is **behavior
 
 > **It does not pick its battles.** During execution the rule files are not loaded at all — the marginal cost of keeping it on is effectively zero at execution time: no thought interruption, no context tax, no workflow shoved in your face. Small and reversible tasks auto-degrade to "just do it, glance at the end" — no research, no plan approval. Across 233 A/B runs, **no task category showed the skill making things worse**; the consistent gain is in delivery trustworthiness (will it actually work, is it faked-done), not in forcing a pipeline.
 >
-> Code, writing, design, analysis, everyday Q&A — keep it on. Its only "cost" is one extra look before you ship; if you want raw speed, just say so.
+> Code, writing, design, analysis, everyday Q\&A — keep it on. Its only "cost" is one extra look before you ship; if you want raw speed, just say so.
 
 
 ## 为什么不是"把 GPT 的行为规则全搬过来" / Why Not Copy Every Rule
@@ -53,7 +59,7 @@ It is therefore **not** a model-specific add-on. What is distilled is **behavior
 
 实测中规则越多并不等于越好：把纪律硬指标化后，评分**并未提升**（与原则引导的差异落在判分误差内，判定为等效）；更极端的 v1.2.5 重版本（179 行、77 条自检）则被实验直接证伪并废弃。执行者记不住繁复步骤、模板填不满，最后流于形式应付。
 
-> **版本注**：上述"规则越多越差"的对比来自 **v1.2.x 旧版本**（v1.2.2 / v1.2.3-draft / v1.2.5）。v1.4.x 极简版起已删除硬指标化与繁复条款，现行 **1.5.2 不再适用该对比**。
+> **版本注**：上述"规则越多越差"的对比来自 **v1.2.x 旧版本**（v1.2.2 / v1.2.3-draft / v1.2.5）。v1.4.x 极简版起已删除硬指标化与繁复条款，现行 **1.5.3 不再适用该对比**。
 
 所以我们只做两件事：
 
@@ -79,7 +85,7 @@ Extensive A/B testing keeps showing one thing: **turning GPT's own behavioral tr
 
 In our tests, more rules did not mean better results: turning the discipline into hard metrics brought **no gain** (the gap versus principle-based guidance fell within scoring error and was judged equivalent), and the far heavier v1.2.5 build — 179 lines with 77 self-checks — was directly falsified and retired. Executors could not remember elaborate steps, templates were never fully filled, and compliance became theatre.
 
-> **Version note**: the "more rules, worse results" comparison comes from **older v1.2.x builds** (v1.2.2 / v1.2.3-draft / v1.2.5). Hard metrics and bulky clauses were removed in the v1.4.x minimal line, so the comparison **no longer applies to the current 1.5.2**.
+> **Version note**: the "more rules, worse results" comparison comes from **older v1.2.x builds** (v1.2.2 / v1.2.3-draft / v1.2.5). Hard metrics and bulky clauses were removed in the v1.4.x minimal line, so the comparison **no longer applies to the current 1.5.3**.
 
 So we do only two things:
 
@@ -99,6 +105,7 @@ while **avoiding the downside**:
 - no regression from rule pile-up;
 - no slide into checkbox-theatre.
 
+
 ## 首创性设计 / A First of Its Kind
 
 **中文**
@@ -107,13 +114,13 @@ while **avoiding the downside**:
 
 五个阶段依次展开：
 
-| # | 阶段 | 规则状态 | 做什么 |
-|---|---|---|---|
-| 1 | **无规则约束构想**（阶段1 · 自由构想） | 规则缺席 | 纯凭判断力想清楚要做什么 |
-| 2 | **渐进式加载规则进行规划**（阶段2 · 规则规划） | 规则载入 | 把构想落成计划，**完整保留**第一阶段的构想，不被规则覆盖 |
-| 3 | **执行**（阶段3 · 执行） | 规则退场 | 专心干活，规则完全不存在 |
-| 4 | **无规则检查**（阶段4 · 直觉检查） | 规则缺席 | 凭直觉挑刺，抓规则**没覆盖到**的问题 |
-| 5 | **渐进式加载规则进行纪律检查**（阶段5 · 纪律检查） | 规则从文件读入 | 严格逐条过纪律，规则覆盖到的必须都做到 |
+| # | 阶段                            | 规则状态    | 做什么                            |
+| - | ----------------------------- | ------- | ------------------------------ |
+| 1 | **无规则约束构想**（阶段1 · 自由构想）       | 规则缺席    | 纯凭判断力想清楚要做什么                   |
+| 2 | **渐进式加载规则进行规划**（阶段2 · 规则规划）   | 规则载入    | 把构想落成计划，**完整保留**第一阶段的构想，不被规则覆盖 |
+| 3 | **执行**（阶段3 · 执行）              | 规则退场    | 专心干活，规则完全不存在                   |
+| 4 | **无规则检查**（阶段4 · 直觉检查）         | 规则缺席    | 凭直觉挑刺，抓规则**没覆盖到**的问题           |
+| 5 | **渐进式加载规则进行纪律检查**（阶段5 · 纪律检查） | 规则从文件读入 | 严格逐条过纪律，规则覆盖到的必须都做到            |
 
 结果是两个「**零**」：
 
@@ -126,13 +133,13 @@ while **avoiding the downside**:
 
 To our knowledge, this is the first design to achieve **discipline/flow isolation across a five-stage timeline** — inside a **single skill**, via **file-level progressive loading**.
 
-| # | Stage | Rule state | What happens |
-|---|---|---|---|
-| 1 | **Unconstrained ideation** (plan-1) | absent | think it through on judgment alone |
-| 2 | **Progressive rule loading for planning** (plan-2) | loading | turn the vision into a plan, **fully preserving** the stage-1 vision rather than overwriting it |
-| 3 | **Execution** | withdrawn | focused work; rules simply do not exist |
-| 4 | **Unruled check** (review-1) | absent | intuition-driven, catching what the rules **do not** cover |
-| 5 | **Progressive rule loading for discipline check** (review-2) | reloaded | enforce every rule, one by one |
+| # | Stage                                                        | Rule state | What happens                                                                                    |
+| - | ------------------------------------------------------------ | ---------- | ----------------------------------------------------------------------------------------------- |
+| 1 | **Unconstrained ideation** (plan-1)                          | absent     | think it through on judgment alone                                                              |
+| 2 | **Progressive rule loading for planning** (plan-2)           | loading    | turn the vision into a plan, **fully preserving** the stage-1 vision rather than overwriting it |
+| 3 | **Execution**                                                | withdrawn  | focused work; rules simply do not exist                                                         |
+| 4 | **Unruled check** (review-1)                                 | absent     | intuition-driven, catching what the rules **do not** cover                                      |
+| 5 | **Progressive rule loading for discipline check** (review-2) | reloaded   | enforce every rule, one by one                                                                  |
 
 The result is two **zeros**:
 
@@ -177,7 +184,6 @@ AI agent 最贵的失败，从来不是"不会做"，而是**没验过就说做�
 
 ---
 
-
 ## 它怎么工作 / How It Works
 
 装上后**无需任何特殊指令**。当 agent 接到交付型任务（写代码、算数据、做页面、多 Agent 分工），它会自动进入**五阶段时序**——核心是"规则在需要时才被加载，不需要时根本不存在"：
@@ -203,6 +209,7 @@ AI agent 最贵的失败，从来不是"不会做"，而是**没验过就说做�
 
 - **创作时没有纪律**——阶段 1 与整个执行阶段，规则不污染思路；
 - **检查有两道**——直觉抓规则**没覆盖到**的问题，纪律确保规则**覆盖到**的都做到，互不替代。
+
 
 ### 阶段 3 / 阶段 4：两头吃，零副作用
 
@@ -257,6 +264,7 @@ AI agent 最贵的失败，从来不是"不会做"，而是**没验过就说做�
 
 ---
 
+
 ## 八条纪律 / The Rules
 
 阶段 5（纪律检查）严格过这 **8 条**（★ = 轻任务也必须做的 3 条）：
@@ -296,6 +304,7 @@ AI agent 最贵的失败，从来不是"不会做"，而是**没验过就说做�
 ---
 
 
+
 ## 实测与证据 / Field Tests
 
 **最新实测（2026-09-17）——两个对照实验，全部带磁盘证据与回访口供：**
@@ -303,7 +312,7 @@ AI agent 最贵的失败，从来不是"不会做"，而是**没验过就说做�
 | 实验 | 有skill | 无skill | 有skill和无skill谁更好 |
 |---|---|---|---|
 | **v1.5.1 · 菲比秋比复测**（陌生专名 + 从零新建 2D 游戏，创作类） | 两轮搜索查到「菲比啾比」的出处（《鸣潮》团子梗）→ 三个问题向你确认（是不是这个梗、规模、画风）→ 确认后才动手：菲比啾比做成主角（含形象、图鉴、彩蛋） | 任务里的核心词「菲比秋比」被**静默丢弃**——交付的通用钓鱼游戏（渔夫+普通鱼+限时计分）里没有这个角色、没有任何主题元素 | **有 skill 明显更好**——不认识的词被查证、经你确认、做进了产物；无 skill 则直接把任务要求丢了，你拿到的是“一个钓鱼游戏”，不是“菲比秋比钓鱼游戏” |
-| **v1.5.2 · 问答双臂**（信息型问答，同名任务双窗对照） | 先搜索核实（name 64 / description 1024 + 命名规则）→ 真读 VERSION 文件（1.5.2）→ 标明来源 | 同样双问全对——搜索核实 + 读文件 + 标来源 | **平手，双满分**——这个场景裸平台已经够好。所以我们**撤销**了“问答强制调研”条款：不为已经做对的场景加规则 |
+| **v1.5.2 · 问答双臂**（信息型问答，同名任务双窗对照） | 先搜索核实（name 64 / description 1024 + 命名规则）→ 真读 VERSION 文件（1.5.3）→ 标明来源 | 同样双问全对——搜索核实 + 读文件 + 标来源 | **平手，双满分**——这个场景裸平台已经够好。所以我们**撤销**了“问答强制调研”条款：不为已经做对的场景加规则 |
 
 > **一句话**：两个实验，一个正例一个负例——**条款只为实测出的缺口而设，不为已经做对的场景加规则。**
 
@@ -380,7 +389,7 @@ cd gpt-series-reasoning-style    # 在仓库目录内启动 agent，AGENTS.md �
 git pull    # 更新；版本号见 VERSION 文件
 ```
 
-验证装好了：问 agent「**你的版本号是多少？加载证明需要哪几个文件？**」——应答 `1.5.2`，说得出五阶段时序，并能逐字引用第 1 条纪律。
+验证装好了：问 agent「**你的版本号是多少？加载证明需要哪几个文件？**」——应答 `1.5.3`，说得出五阶段时序，并能逐字引用第 1 条纪律。
 
 ## 触发方式 / Usage
 
@@ -400,6 +409,7 @@ git pull    # 更新；版本号见 VERSION 文件
 
 **对比 v1.2.5 重版本**：38.7 KB / 179 行 / ~12k token —— 已由实验证明是更差的选择（见「实测与证据」）。
 
+
 ## 仓库结构 / What's Inside
 
 | 文件                               | 角色                                                     |
@@ -416,7 +426,7 @@ git pull    # 更新；版本号见 VERSION 文件
 
 ## 版本 / Versioning
 
-当前版本：**1.5.2**
+当前版本：**1.5.3**
 
 - **v1.4.x 极简线**：五阶段时序、文件级渐进加载、协作形态叠加——当前主线；
 - **v1.2.x 重版线**：179 行、模块矩阵、self-test 冻结 77 条——**已被实验证伪**，该线已废弃。
