@@ -1,5 +1,7 @@
 # experiments · 实验数据分支
 
+<img src="assets/social-preview.svg" alt="GPT-Series Reasoning Style · 交付纪律层" width="100%">
+
 本分支只存放 **gpt-series-reasoning-style** 的实验数据与产物。skill 本体在 [main 分支](https://github.com/JadeYingWah/gpt-series-reasoning-style)——本分支不含 skill 代码。
 
 ## 目录
