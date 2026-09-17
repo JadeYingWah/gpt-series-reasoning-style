@@ -5,7 +5,7 @@
 **把"Agent 说做完了"变成"Agent 证明做完了"。**  
 **Turn "the agent says it's done" into "the agent proves it's done".**
 
-![GPT-Series Reasoning Style — 交付验收纪律层](social-preview.svg)
+![GPT-Series Reasoning Style — 交付验收纪律层](assets/social-preview.svg)
 
 [![Version](https://img.shields.io/badge/version-1.5.1-blue)](#版本--versioning)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](#license--许可证)
@@ -411,7 +411,7 @@ git pull    # 更新；版本号见 VERSION 文件
 | `templates/`                     | 指挥官 / 执行者 / 审查者三张角色卡 + 任务包七要素                        |
 | `scripts/selfcheck.py`           | 仓库一致性自检（**24 项**，纯只读，已适配文件级渐进加载结构）                  |
 | `SECURITY.md`                    | 安全模型说明                                                 |
-| `social-preview.svg / .png`      | 仓库横幅图（1280×640）                                       |
+| `assets/social-preview.svg / .png`      | 仓库横幅图（1280×640）                                       |
 
 ## 版本 / Versioning
 

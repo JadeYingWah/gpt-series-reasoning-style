@@ -3,9 +3,9 @@
 > **交付验收与多智能体协作纪律层。**
 > A delivery-discipline layer for agent skills — Chinese-primary.
 
-<img src="social-preview.svg" alt="GPT-Series Reasoning Style — 交付验收纪律层" width="640">
+<img src="assets/social-preview.svg" alt="GPT-Series Reasoning Style — 交付验收纪律层" width="640">
 
-> 图：`social-preview.svg`（1280×640）——三张卡片（规划 / 执行 / 审查）上以**盾牌图标的两种状态**表达纪律开关：虚线盾+斜杠 = **RULES OFF**（规则退场），实线盾+勾 = **RULES ON**（规则从文件读入）；底部图例同步释义。
+> 图：`assets/social-preview.svg`（1280×640）——三张卡片（规划 / 执行 / 审查）上以**盾牌图标的两种状态**表达纪律开关：虚线盾+斜杠 = **RULES OFF**（规则退场），实线盾+勾 = **RULES ON**（规则从文件读入）；底部图例同步释义。
 
 | 项 | 值 |
 |---|---|
@@ -253,7 +253,7 @@ python scripts/selfcheck.py    # 24 项静态检查；退出码 0=全过 / 1=有
 | `README.md` | 28633 | 面向使用者的介绍（中英双语） |
 | `REFERENCE.md` | 21845 | **本说明书**（完整版） |
 | `SECURITY.md` | 2488 | 安全模型说明 |
-| `social-preview.svg` / `.png` | 7868 / 361993 | 仓库横幅（1280×640）：三阶段卡片 + RULES OFF/ON 盾牌图标 |
+| `assets/social-preview.svg` / `.png` | 7868 / 361993 | 仓库横幅（1280×640）：三阶段卡片 + RULES OFF/ON 盾牌图标 |
 | `LICENSE` | 1068 | MIT |
 | `.gitattributes` / `.gitignore` | 257 / 351 | 仓库配置 |
 
