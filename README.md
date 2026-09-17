@@ -9,7 +9,7 @@
 
 [![Version](https://img.shields.io/badge/version-1.5.0-blue)](#版本--versioning)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](#license--许可证)
-[![Size](https://img.shields.io/badge/SKILL.md-1.8KB·23行-orange)](#成本--cost)
+[![Size](https://img.shields.io/badge/SKILL.md-2.0KB·33行-orange)](#成本--cost)
 [![Experiments](https://img.shields.io/badge/A%2FB_实验-233_次-success)](#实测与证据--field-tests)
 [![Runtime](https://img.shields.io/badge/按需加载-18_files-blueviolet)](#成本--cost)
 
