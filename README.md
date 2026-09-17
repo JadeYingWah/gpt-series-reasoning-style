@@ -34,6 +34,16 @@ We kept and froze the habits these models showed at their best during planning a
 
 It is therefore **not** a model-specific add-on. What is distilled is **behavioral patterns**, not model capabilities — any instruction-following LLM can load it. "GPT-Series" in the name records its **origin**, not its **scope**.
 
+**通用性 / It is safe to keep on, in any task**
+
+> **它不挑场景。** 执行阶段规则文件根本不加载——挂着它的边际成本在执行期趋近于零：不打断思路、不占上下文、不把流程塞给你。小且可逆的任务自动降级为"直接做、做完扫一眼"，不触发调研和方案确认。233 次 A/B 实验中，**没有任何一类任务测出"带 skill 比不带更差"**；稳定的正向收益集中在交付可信度（敢不敢直接用、有没有假完成），而不是逼你走流程。
+>
+> 代码、写作、设计、分析、日常问答——都可以挂着它。它唯一的"代价"是交付前多看一眼；如果你明确要最快出活，说一声"别管验收"即可。
+
+> **It does not pick its battles.** During execution the rule files are not loaded at all — the marginal cost of keeping it on is effectively zero at execution time: no thought interruption, no context tax, no workflow shoved in your face. Small and reversible tasks auto-degrade to "just do it, glance at the end" — no research, no plan approval. Across 233 A/B runs, **no task category showed the skill making things worse**; the consistent gain is in delivery trustworthiness (will it actually work, is it faked-done), not in forcing a pipeline.
+>
+> Code, writing, design, analysis, everyday Q&A — keep it on. Its only "cost" is one extra look before you ship; if you want raw speed, just say so.
+
 
 ## 为什么不是"把 GPT 的行为规则全搬过来" / Why Not Copy Every Rule
 
