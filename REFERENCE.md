@@ -13,7 +13,7 @@
 | 许可 | MIT |
 | 主导语言 | 中文（关键术语保留英文） |
 | 运行时形态 | **纯文本**——不改代码、不联网、不上报 |
-| 加载成本 | `SKILL.md` 仅 **2043 字节 / 33 行**（约 0.5k token）；规则文件**按阶段**才读 |
+| 加载成本 | `SKILL.md` 仅 **900 字节 / 16 行门禁**（约 0.3k token）；`DISCIPLINE.md` 1480 字节/23 行（动手前一刻）；规则文件**按阶段**才读 |
 
 ---
 
@@ -92,7 +92,8 @@ Users therefore **get the upside only** — more trustworthy deliveries, defects
 
 | 文件 | 字节 | 内容 | 何时进入上下文 |
 |---|---|---|---|
-| `SKILL.md` | 2043 | 五阶段流程表 + 各阶段指针 + 边界 + 加载说明 | **始终在场**（常驻层） |
+| `SKILL.md` | 900 | **纯门禁**（16 行，不含纪律内容） | **始终在场**（常驻层） |
+| `DISCIPLINE.md` | 1480 | 五阶段流程 + 任务后遗忘 + 边界 + 加载规则（纪律全文） | **动手/回答前一刻**才被门禁放行 |
 | `references/plan-rules.md` | 3384 | 阶段2 规划规则 | **仅阶段2** |
 | `references/review-rules.md` | 3159 | 阶段5 八条纪律 | **仅阶段5** |
 | `references/multi-agent.md` | 3166 | 形态二三细则 | **仅叠加形态二三时** |
@@ -177,7 +178,7 @@ Users therefore **get the upside only** — more trustworthy deliveries, defects
 
 ### 5.4 加载证明协议
 
-被要求证明已加载时，输出：①版本号；②五阶段时序（自由构想 → 规则规划 → 执行 → 直觉检查 → 纪律检查）；③**逐字引用**纪律第 1 条；④协作形态说明；⑤实际读过的文件清单。读不到 `SKILL.md` 或 `VERSION` 时**不伪造**，停止并请求只读权限。
+被要求证明已加载时，输出：①版本号；②五阶段时序（自由构想 → 规则规划 → 执行 → 直觉检查 → 纪律检查）；③**逐字引用**纪律第 1 条；④协作形态说明；⑤实际读过的文件清单（`SKILL.md` 门禁 + `DISCIPLINE.md`）。读不到 `SKILL.md`、`DISCIPLINE.md` 或 `VERSION` 时**不伪造**，停止并请求只读权限。
 
 ### 5.5 交付物格式（"三件套"）
 
@@ -240,7 +241,7 @@ python scripts/selfcheck.py    # 24 项静态检查；退出码 0=全过 / 1=有
 
 | 文件 | 字节 | 角色 |
 |---|---|---|
-| `SKILL.md` | 2043 | **规则权威与五阶段流程表**（33 行，frontmatter 含 license/compatibility/author 合规字段）。运行时只加载它 + `VERSION` |
+| `SKILL.md` | 900 | **纯门禁**（16 行，frontmatter 含 license/compatibility/author 合规字段）——纪律全文在 `DISCIPLINE.md`。运行时只加载它 + `VERSION`；`DISCIPLINE.md` 动手前一刻才读 |
 | `VERSION` | 5 | 版本号（`1.5.4`） |
 | `references/plan-rules.md` | 3384 | 阶段2 规划规则（保留构想 / 形态叠加 / 风险分级 / 档位 / 退出条件） |
 | `references/review-rules.md` | 3159 | 阶段5 审查规则：**八条纪律** + 退出条件 |

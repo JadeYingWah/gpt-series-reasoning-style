@@ -11,7 +11,7 @@
 
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 
-![Size](https://img.shields.io/badge/SKILL.md-2.0KB·33行-orange)
+![Size](https://img.shields.io/badge/SKILL.md-0.9KB·16行门禁-orange)
 
 ![Experiments](https://img.shields.io/badge/A%2FB_实验-233_次-success)
 
@@ -382,7 +382,7 @@ git clone https://github.com/JadeYingWah/gpt-series-reasoning-style
 cd gpt-series-reasoning-style    # 在仓库目录内启动 agent，AGENTS.md 入口路由自动生效
 ```
 
-路由只做一件事：让 agent 读 `SKILL.md` + `VERSION` 完成加载，其余文件按需读取。
+路由只做一件事：让 agent 读 `SKILL.md`（纯门禁）——它在**动手/回答前一刻**才放行 `DISCIPLINE.md`（纪律全文），其余文件按需读取。
 
 ### 更新与验证
 
@@ -390,7 +390,7 @@ cd gpt-series-reasoning-style    # 在仓库目录内启动 agent，AGENTS.md �
 git pull    # 更新；版本号见 VERSION 文件
 ```
 
-验证装好了：问 agent「**你的版本号是多少？加载证明需要哪几个文件？**」——应答 `1.5.4`，说得出五阶段时序，并能逐字引用第 1 条纪律。
+验证装好了：问 agent「**你的版本号是多少？加载证明需要哪几个文件？**」——应答 `1.5.5`，说得出五阶段时序，并能逐字引用第 1 条纪律。
 
 ## 触发方式 / Usage
 
@@ -402,10 +402,10 @@ git pull    # 更新；版本号见 VERSION 文件
 
 | 项目         | 实测值                                                          |
 | ---------- | ------------------------------------------------------------ |
-| `SKILL.md` | **2011 字节 / 33 行**（常驻约 0.6k token）——只有五阶段流程表，规则不在其中 |
+| `SKILL.md` | **900 字节 / 16 行**（常驻约 0.3k token）——**纯门禁**，纪律全文在 `DISCIPLINE.md`（1480 字节/23 行，动手前一刻才读） |
 | 阶段 2 按需   | `references/plan-rules.md`（2321 字节）——仅在规则规划阶段读入        |
 | 阶段 5 按需   | `references/review-rules.md`（2547 字节）——仅在纪律检查阶段读入      |
-| 加载路径      | 平时只读 `SKILL.md` + `VERSION`；阶段 2 读 plan-rules、阶段 5 读 review-rules、多智能体场景另读 `multi-agent.md`；**任务结束后规则内容全部遗忘** |
+| 加载路径      | 平时只读 `SKILL.md`（16 行门禁）+ `VERSION`；**动手/回答前一刻**读 `DISCIPLINE.md`（纪律全文）；阶段 2 读 plan-rules、阶段 5 读 review-rules、多智能体场景另读 `multi-agent.md`；**任务结束后规则内容全部遗忘** |
 | 峰值常驻文本   | 任一时刻上下文里的规则文本不超过一份（规划或审查，二者不同时在场）              |
 
 **对比 v1.2.5 重版本**：38.7 KB / 179 行 / ~12k token —— 已由实验证明是更差的选择（见「实测与证据」）。
@@ -415,7 +415,8 @@ git pull    # 更新；版本号见 VERSION 文件
 
 | 文件                               | 角色                                                     |
 | -------------------------------- | ------------------------------------------------------ |
-| `SKILL.md`                       | **流程权威**（33 行）。只有五阶段流程 + 退出条件，不含规则条文               |
+| `SKILL.md`                       | **强制门禁**（16 行）。不含任何纪律内容，只在动手前一刻放行 `DISCIPLINE.md`            |
+| `DISCIPLINE.md`                  | **纪律全文**（23 行）。五阶段流程 + 任务后遗忘 + 边界 + 加载规则——门禁放行后才被读取 |
 | `references/plan-rules.md`       | **阶段 2 专用**：规划规则（含"保留阶段1构想"、形态叠加、轻量档、退出条件）         |
 | `references/review-rules.md`     | **阶段 5 专用**：8 条纪律（★ 三条为轻任务必做）+ 退出条件                 |
 | `references/multi-agent.md`      | 形态二三细则：命中信号、派发规范、六步操作、红线                             |
