@@ -11,7 +11,7 @@
 ![Version](https://img.shields.io/badge/version-1.5.6-blue)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 ![Size](https://img.shields.io/badge/SKILL.md-1.5KB·20行门禁-orange)
-![Experiments](https://img.shields.io/badge/A%2FB_实验-233_次-success)
+![Experiments](https://img.shields.io/badge/A%2FB%20%E4%B8%8E%E5%AE%9E%E6%B5%8B-300%2B%20%E8%87%82%E6%AC%A1-success)
 ![Runtime](https://img.shields.io/badge/按需加载-纯文本-blueviolet)
 ![CI](https://github.com/JadeYingWah/gpt-series-reasoning-style/actions/workflows/ci.yml/badge.svg)
 
@@ -310,7 +310,13 @@ AI agent 最贵的失败，从来不是“不会做”，而是**没验过就说
 <details>
 <summary><b>历史实验档案</b>（口径与旧数字，点开备查）</summary>
 
-- 历史累计：**233 轮**（= 重版本线 207 + 极简线 26；口径：一次「任务 × 臂 × 轮」计一次）——结论沉淀为现行极简结构：规则越少越好，但核心那几条不能少。
+- 历史累计口径（勿混用）：
+  - **叙事 A/B 轮次 233**（= 重版本线 207 + 极简线 26；一次「任务 × 臂 × 轮」计一次）；
+  - **experiments 分支脚本口径**：≥ **286 臂次 / 53 批**（正则覆盖臂目录，下限值；素材约 3250 文件，含 v1.2.x 与 09-17 前素材）；
+  - **2026-09-17**：8 组桌面对照/形态床（菲比/三游戏×2/4399×2/番茄钟/财务套件/三txt）；
+  - **2026-09-18**：4 场 v1.5.6 实测包（鸣潮验算表、星光接取、3D 钓鱼口供、Neon Void 证据层）。
+- 结论沉淀：规则越少越好，但核心那几条不能少；**C1/C2 把诚信完成与产品满意拆开**。
+- Harness 本机另有 ab-* 目录若干，**未全部入 experiments 分支**，不计入上述公开数字。
 - 可引用硬数字（v1.2.x 时代对照实验）：软维度提升 **+20~24**（P1-5）；反例验证执行率 **带 skill 100% vs 无 skill 33%**（P1-1）；自我校准缺口 **100% → 33%**（P1-2）。
 - 实验原始数据（约 70 MB / 3066+ 文件）在 [`experiments` 分支](https://github.com/JadeYingWah/gpt-series-reasoning-style/tree/experiments)；主仓库只含 skill 本体。
 
@@ -345,7 +351,7 @@ AI agent 最贵的失败，从来不是“不会做”，而是**没验过就说
 
 
 
-- **规则越少越好，但核心那几条不能少**——233 次实验的最终结论；
+- **规则越少越好，但核心那几条不能少**——历史 A/B（233 轮）+ 后续实测的最终结论；
 - **创作是创作，检查是检查**——忘/想交替的全部理由；
 - **证据高于声称**——全绿不算证据，断言红过才算验过；
 - **责任不随委派转移**——子智能体交回后，主 Agent 仍是 DRI。
