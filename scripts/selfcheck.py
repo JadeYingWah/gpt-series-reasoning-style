@@ -58,15 +58,16 @@ def main():
     check("templates/executor.md 存在", (REPO_ROOT / "templates/executor.md").exists())
     check("templates/reviewer.md 存在", (REPO_ROOT / "templates/reviewer.md").exists())
 
-    # 3. 结构完整（五阶段 + 文件级渐进加载点 + 任务后遗忘）
+    # 3. 结构完整（SKILL.md=纯门禁；DISCIPLINE.md 承载五阶段纪律）
+    DISCIPLINE_MD = REPO_ROOT / "DISCIPLINE.md"
+    check("DISCIPLINE.md 存在", DISCIPLINE_MD.exists())
     if SKILL_MD.exists():
         text = SKILL_MD.read_text(encoding="utf-8")
 
         check("有 frontmatter", text.startswith("---\n"))
-        check("有五阶段流程", "五阶段" in text)
-        check("阶段2 指向 plan-rules.md", "plan-rules.md" in text)
-        check("阶段5 指向 review-rules.md", "review-rules.md" in text)
-        check("任务后遗忘规则内容", "彻底忘记" in text)
+        check("SKILL.md 是纯门禁（引用 DISCIPLINE.md）", "DISCIPLINE.md" in text)
+        check("门禁含前一刻语义", "前一刻" in text)
+        check("门禁无流程内容泄漏（不含五阶段字样）", "五阶段" not in text)
 
         # 4. 代码块配对
         fence_count = len(re.findall(r"^```", text, re.MULTILINE))
@@ -75,6 +76,15 @@ def main():
         # 5. 行数统计
         line_count = len(text.splitlines())
         passes.append(f"  ℹ SKILL.md 共 {line_count} 行")
+
+    if DISCIPLINE_MD.exists():
+        dtext = DISCIPLINE_MD.read_text(encoding="utf-8")
+        check("DISCIPLINE 有五阶段流程", "五阶段" in dtext)
+        check("DISCIPLINE 阶段2 指向 plan-rules.md", "plan-rules.md" in dtext)
+        check("DISCIPLINE 阶段5 指向 review-rules.md", "review-rules.md" in dtext)
+        check("DISCIPLINE 任务后遗忘规则", "彻底忘记" in dtext)
+    else:
+        check("DISCIPLINE 内容可读", False, "DISCIPLINE.md 不存在")
 
     # 6. 八条纪律（规则已下沉到 review-rules.md）
     if REVIEW.exists():
