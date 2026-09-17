@@ -1,6 +1,6 @@
 ---
 name: gpt-series-reasoning-style
-version: 1.5.0
+version: 1.5.1
 description: 交付验收与多智能体协作纪律。Use when 涉及数字验算、代码交付、多Agent协作、需要防假完成的任务；or when user says "做完了帮我查/看看对不对/验收"、派发子任务或多个AI分工。小改/一句话问答不加载。
 license: MIT
 compatibility: "Works with any model or client supporting the Agent Skills SKILL.md convention (Claude Code, Codex, Cursor, etc.)."
@@ -19,7 +19,7 @@ metadata:
 | 1 | 自由构想 | 凭你自己去想清楚。 | 你能一句话说清楚你接下来需要做什么，不再问自己"我到底要做什么"。 |
 | 2 | 规则规划 | **去读 `references/plan-rules.md`**，按里面的规则做规划。 | 见 plan-rules.md 内的退出条件。 |
 | 3 | 执行 | 凭你的能力去做。 | 你觉得可以了，没有正在调试的bug或问题。 |
-| 4 | 直觉检查 | 凭常识重新检查你自己的答案/物品/项目，快速扫一遍交付物。 | 没有"等等，这里好像有问题"的卡住感。 |
+| 4 | 直觉检查 | 凭常识重新检查你自己的答案/物品/项目，快速扫一遍交付物。发现疑点当场确认或修掉，不带进阶段5。 | 没有再发现新的疑点。 |
 | 5 | 纪律检查 | **去读 `references/review-rules.md`**，严格过一遍。 | 见 review-rules.md 内的退出条件。 |
 
 ## 任务结束后

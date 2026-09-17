@@ -7,7 +7,7 @@
 
 ![GPT-Series Reasoning Style — 交付验收纪律层](social-preview.svg)
 
-[![Version](https://img.shields.io/badge/version-1.5.0-blue)](#版本--versioning)
+[![Version](https://img.shields.io/badge/version-1.5.1-blue)](#版本--versioning)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](#license--许可证)
 [![Size](https://img.shields.io/badge/SKILL.md-2.0KB·33行-orange)](#成本--cost)
 [![Experiments](https://img.shields.io/badge/A%2FB_实验-233_次-success)](#实测与证据--field-tests)
@@ -43,7 +43,7 @@ It is therefore **not** a model-specific add-on. What is distilled is **behavior
 
 实测中规则越多并不等于越好：把纪律硬指标化后，评分**并未提升**（与原则引导的差异落在判分误差内，判定为等效）；更极端的 v1.2.5 重版本（179 行、77 条自检）则被实验直接证伪并废弃。执行者记不住繁复步骤、模板填不满，最后流于形式应付。
 
-> **版本注**：上述"规则越多越差"的对比来自 **v1.2.x 旧版本**（v1.2.2 / v1.2.3-draft / v1.2.5）。v1.4.x 极简版起已删除硬指标化与繁复条款，现行 **1.5.0 不再适用该对比**。
+> **版本注**：上述"规则越多越差"的对比来自 **v1.2.x 旧版本**（v1.2.2 / v1.2.3-draft / v1.2.5）。v1.4.x 极简版起已删除硬指标化与繁复条款，现行 **1.5.1 不再适用该对比**。
 
 所以我们只做两件事：
 
@@ -69,7 +69,7 @@ Extensive A/B testing keeps showing one thing: **turning GPT's own behavioral tr
 
 In our tests, more rules did not mean better results: turning the discipline into hard metrics brought **no gain** (the gap versus principle-based guidance fell within scoring error and was judged equivalent), and the far heavier v1.2.5 build — 179 lines with 77 self-checks — was directly falsified and retired. Executors could not remember elaborate steps, templates were never fully filled, and compliance became theatre.
 
-> **Version note**: the "more rules, worse results" comparison comes from **older v1.2.x builds** (v1.2.2 / v1.2.3-draft / v1.2.5). Hard metrics and bulky clauses were removed in the v1.4.x minimal line, so the comparison **no longer applies to the current 1.5.0**.
+> **Version note**: the "more rules, worse results" comparison comes from **older v1.2.x builds** (v1.2.2 / v1.2.3-draft / v1.2.5). Hard metrics and bulky clauses were removed in the v1.4.x minimal line, so the comparison **no longer applies to the current 1.5.1**.
 
 So we do only two things:
 
@@ -180,7 +180,7 @@ AI agent 最贵的失败，从来不是"不会做"，而是**没验过就说做�
 ┌─ 阶段3 · 执行（规则完全不存在）——凭你的能力干活，心流不被打断
 │      退出：觉得可以了，没有正在调试的问题
 ┌─ 阶段4 · 直觉检查（无规则）——凭常识快速扫一遍交付物
-│      退出：没有"等等，这里好像有问题"的卡住感
+│      退出：没有再发现新的疑点（疑点当场确认或修掉，不带进阶段5）
 └─ 阶段5 · 纪律检查（去读 references/review-rules.md）——严格过 8 条纪律
        退出：规则全部过一遍（轻任务3条 / 重任务8条）＋ 能说出三件套 ＋ 没有未处理的"这里好像有问题"
 ```
@@ -253,11 +253,11 @@ AI agent 最贵的失败，从来不是"不会做"，而是**没验过就说做�
 
 | #  | 纪律         | 要点                                                                        |
 | -- | ---------- | ------------------------------------------------------------------------- |
-| 1★ | **真打开看一眼** | 产物在真实环境打开、真用一遍——HTML 要浏览器渲染、API 要前端调，跑脚本不算。环境不支持时：如实标"未验证：浏览器渲染"+ 给用户自验步骤 |
+| 1★ | **真打开看一眼** | 产物在真实环境打开、真用一遍——HTML 要浏览器渲染、API 要前端调，跑脚本不算。其他类型：游戏走一轮核心玩法、报告逐数字对源、SVG 真渲染放大看。环境不支持时：如实标"未验证：浏览器渲染"+ 给用户自验步骤 |
 | 2★ | **未验证标注**  | 交付只说三件：做了什么 / 怎么验的（可复现命令）/ 哪些没验。没验的逐条列原因，不许只写"部分未验证"；未验项必须用星号或加粗**醒目标出**，不许藏在段落中间                     |
 | 3  | **交付声明对得上** | 你说"做了 X"，产物里真的有 X 吗？交付前最后一次回读自己的交付声明，逐项在产物里找位置；指不到的，要么补做，要么改成"未完成 + 原因"   |
 | 4  | **失败两次换路** | 同一动作连续失败第 2 次，禁止同法第 3 次；先判断是否与已验路径等价，别死磕                                  |
-| 5  | **全绿不算证据** | 把要防的错误故意做一次，断言红才算验过；变异后照样全绿 = 变异没生效。最小菜谱：每个写入口至少打 空值/超长/非法类型/缺键           |
+| 5  | **全绿不算证据** | 把要防的错误故意做一次，断言红才算验过；变异后照样全绿 = 变异没生效。最小菜谱：空值/超长/非法类型/缺键。**非代码产物**：链接逐个点、数字对源、效果真渲染并列查证记录 |
 | 6  | **关键数字重算** | 数据/研究类交付的关键数字，独立方法重算或双源交叉；对不上以重算为准                                        |
 | 7  | **临时物隔离**  | 临时文件不进交付目录、收尾清掉；清理只动本任务自己的目录，禁全局杀进程                                       |
 | 8★ | **防死循环**   | 同一文件连读 3 次无新信息就停；同一动作连续 3 次输出相同就换思路                                       |
@@ -330,7 +330,7 @@ AI agent 最贵的失败，从来不是"不会做"，而是**没验过就说做�
 
 这一节写的是**我们自己测出来的局限**——不是谦虚，是口径。
 
-> **版本适用性**：标注「**旧版**」的条目测于 **v1.2.x 时代**（v1.2.2 / v1.2.5）。v1.4.x 极简版起已删除硬指标化与繁复条款，改为"少量特性 + 遗忘机制"，**这些旧版结论在现行 1.5.0 上不再适用**。
+> **版本适用性**：标注「**旧版**」的条目测于 **v1.2.x 时代**（v1.2.2 / v1.2.5）。v1.4.x 极简版起已删除硬指标化与繁复条款，改为"少量特性 + 遗忘机制"，**这些旧版结论在现行 1.5.1 上不再适用**。
 
 - **不提升推理能力**，也不是 GPT 专用——从 GPT 系列（含 GPT-5.6 Sol、GPT-6 Astra）提炼而来，但适用于所有具备指令遵循能力的大模型。
 - **不兜底**〔**旧版** v1.2.2 / v1.2.5〕——2026-09 的 n=2 对照实验（三个机械判定任务）显示：在**致命缺陷率**这个维度上，带 skill 的臂与不带 skill 的臂**没有拉开可辨的差距**，held-out 上甚至略差。这个反向结果我们**也放进了仓库**。**该结论测于 v1.2.x 旧版本，v1.4.x 起不再适用。** 防线靠证据与独立复验，不靠条款。
@@ -379,7 +379,7 @@ cd gpt-series-reasoning-style    # 在仓库目录内启动 agent，AGENTS.md �
 git pull    # 更新；版本号见 VERSION 文件
 ```
 
-验证装好了：问 agent「**你的版本号是多少？加载证明需要哪几个文件？**」——应答 `1.5.0`，说得出五阶段时序，并能逐字引用第 1 条纪律。
+验证装好了：问 agent「**你的版本号是多少？加载证明需要哪几个文件？**」——应答 `1.5.1`，说得出五阶段时序，并能逐字引用第 1 条纪律。
 
 ## 触发方式 / Usage
 
@@ -415,7 +415,7 @@ git pull    # 更新；版本号见 VERSION 文件
 
 ## 版本 / Versioning
 
-当前版本：**1.5.0**
+当前版本：**1.5.1**
 
 - **v1.4.x 极简线**：五阶段时序、文件级渐进加载、协作形态叠加——当前主线；
 - **v1.2.x 重版线**：179 行、模块矩阵、self-test 冻结 77 条——**已被实验证伪**，该线已废弃。
