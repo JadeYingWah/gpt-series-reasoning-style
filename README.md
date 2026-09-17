@@ -152,89 +152,67 @@ And with that: **delivery trustworthiness rises markedly** (skill-armed runs sco
 
 ## 它治的是什么病 / The Actual Problem
 
-AI agent 最贵的失败，从来不是"不会做"，而是**没验过就说做完了**：
+AI agent 最贵的失败，从来不是“不会做”，而是**没验过就说做完了**：
 
-- 测试没真跑，宣布"全部通过"；
-- HTML 没在浏览器里打开过，宣布"页面没问题"；
-- 关键数字没重算，照抄第一遍的结果。
+- 测试没真跑，宣布“全部通过”；
+- HTML 没在浏览器里打开过，宣布“页面没问题”；
+- 关键数字没重算，照抄第一遍的结果；
+- 交付说明里写着“音效已实现”——产物里连一行音频代码都没有。
 
-在**四轮独立复现、共 14 个实验臂**的对照实验里，AI **无一例外**自报"测试全过、验证有效"——而独立复查（机械判定台）仍然判出大量真实缺陷。
+在**四轮独立复现、共 14 个实验臂**的对照实验里，AI **无一例外**自报“测试全过、验证有效”——而独立复查（机械判定台）仍判出大量真实缺陷。
 
-所以真正决定价值的不是"它做得多快"，而是——
+2026-09-17 的同题双臂实测（4 个小游戏，两组各自独立完成）再现了这一切：**不带纪律的裸平台**交付后宣布“实测可玩、全链路断言全部通过”——逐文件核验发现其宣称的验证与产物对不上。同一天，带纪律的对照臂交付了**可复现的验证脚本与逐项断言记录**。
+
+所以真正决定价值的不是“它做得多快”，而是——
 
 > **你敢不敢直接用它的产出。**
 
-这个 skill 只干一件事：**把"我觉得行"变成"验过了，证据在这儿"。**
+这个 skill 只干一件事：**把“我觉得行”变成“验过了，证据在这儿”。**
 
 ## 它凭什么不一样 / One Divergence
 
-主流 skill 的默认形态是「**加载后全程在场**」：规则一直压着，挤占注意力、打断思路、烧上下文。事后审查则通常另起一个独立 agent，或在同一上下文里再跑一遍 checklist。
+主流 skill 的默认形态是「**加载后全程在场**」；而多智能体框架常把治理规则发给**每一个**参与角色——执行者手里也拿着指挥官的职权条款，角色越位由此发生。
 
-本 skill 的差异只有一个动作：**在同一段上下文内，执行阶段让模型显式脱离纪律、进入心流，只在它自判完成的那一刻，重新加载审查规则。**
+本 skill 把隔离做到**两层物理级**：
 
-```text
-忘  →  想  →  忘  →  忘  →  想
-```
+1. **执行者与审查者窗口不加载本 skill**——他们的全部行为规范来自身份文件与任务包（自包含），指挥官职权条款（五阶段、形态判断、配置确认）**物理上不在他们的上下文里**；
+2. **指挥官自己的 SKILL.md 也只是一道门禁**（900 字节 / 16 行）——纪律全文（DISCIPLINE.md）在**动手或回答的前一刻**才被放行。
 
-**你看不到 skill 常见的那些负作用，只收下它的益处。**
 
-> **为什么这样设计**：多数 skill 一旦加载便全程在场——规则持续占用注意力、打断思路、消耗上下文。本 skill 把自己拆成**规划**与**验收**两端，中间漫长的执行阶段让纪律退场；只在自判"我做完了"的那一刻重新加载审查规则。所以你可以**只收下它的益处，不必承受纪律常驻的代价**。
+
+常驻上下文里**只有一句门禁**——你看不到 skill 常见的那些负作用，只收下它的益处。
+
+> **为什么这样设计**：多数 skill 一旦加载便全程在场——规则持续占用注意力、打断思路、消耗上下文。本 skill 把自己拆成**规划**与**验收**两端，中间漫长的执行阶段让纪律退场；只在自判“我做完了”的那一刻重新加载审查规则。所以你可以**只收下它的益处，不必承受纪律常驻的代价**。
 >
-> **Why it's built this way**: most skills stay present once loaded — taxing attention, interrupting thought, burning context. This skill splits into **planning** and **acceptance**, letting the discipline step aside during the long execution phase, and reloading it only when the model declares "I'm done." You get the benefits **without paying the costs** of an ever-present discipline.
-
----
+> **Why it's built this way**: most skills stay present once loaded. This skill splits into **planning** and **acceptance**, and goes further: even the commander's own SKILL.md is a pure gate — the discipline file is released the moment before action. You get the benefits **without paying the costs** of an ever-present discipline.
 
 ## 它怎么工作 / How It Works
 
-装上后**无需任何特殊指令**。当 agent 接到交付型任务（写代码、算数据、做页面、多 Agent 分工），它会自动进入**五阶段时序**——核心是"规则在需要时才被加载，不需要时根本不存在"：
+装上后**无需任何特殊指令**。当 agent 接到交付型任务（写代码、算数据、做页面、多 Agent 分工），SKILL.md 的纯门禁会在**动手前一刻**放行纪律全文，然后进入**五阶段时序**：
 
 ```text
-┌─ 阶段1 · 自由构想（无规则）——凭你自己想清楚要做什么
+┌─ 门禁（SKILL.md 16 行）——只有一句：动手/回答前一刻才放行 DISCIPLINE.md（纪律全文）
+│
+┌─ 阶段1 · 自由构想（无规则）——凭你自己想清楚要做什么，含体验维度（视觉/听觉/操作/入口）
 │      退出：能一句话说清楚接下来做什么
-┌─ 阶段2 · 规则规划（去读 references/plan-rules.md）——按规则落成计划，**逐条回应**阶段1的构想清单（采纳/放弃+理由）
-│      退出：方案用户已确认（A档同意 / B档问完）＋ 风险已分级（轻/重）＋ 没有要再问用户的问题
+┌─ 阶段2 · 规则规划（读 references/plan-rules.md）——按规则落成计划，逐条回应构想清单
+│      退出：方案已确认（结构化选项卡片）＋ 风险已分级 ＋ 形态已裁定 ＋ 没有要再问的问题
 ┌─ 阶段3 · 执行（规则完全不存在）——凭你的能力干活，心流不被打断
 │      退出：觉得可以了，没有正在调试的问题
 ┌─ 阶段4 · 直觉检查（无规则）——凭常识快速扫一遍交付物
 │      退出：没有再发现新的疑点（疑点当场确认或修掉，不带进阶段5）
-└─ 阶段5 · 纪律检查（去读 references/review-rules.md）——严格过 8 条纪律
-       退出：规则全部过一遍（轻任务3条 / 重任务8条）＋ 能说出三件套 ＋ 没有未处理的"这里好像有问题"
+└─ 阶段5 · 纪律检查（读 references/review-rules.md）——严格过 8 条纪律
+       退出：规则全部过一遍（轻任务3条 / 重任务8条）＋ 三件套 ＋ 无未处理的“这里好像有问题”
 ```
 
-**任务交付之后**：彻底忘记 `plan-rules.md` / `review-rules.md` / `multi-agent.md` 的具体内容——只记"有五个阶段、到哪个阶段读哪个文件"。规则长什么样，下次需要时再读。
+**任务交付之后**：彻底忘记 `plan-rules.md` / `review-rules.md` / `multi-agent.md` 的具体内容——只记“有五个阶段、到哪个阶段读哪个文件”。规则长什么样，下次需要时再读。
 
-规则文件只在阶段 2 与阶段 5 被读进来，**执行期它们根本不在上下文里**。
+规则文件只在阶段 2 与阶段 5 被读进来，**执行期它们根本不在上下文里**；纪律全文（DISCIPLINE.md）也只在动手前一刻才被放行。
 
 设计意图就两句话：
 
 - **创作时没有纪律**——阶段 1 与整个执行阶段，规则不污染思路；
 - **检查有两道**——直觉抓规则**没覆盖到**的问题，纪律确保规则**覆盖到**的都做到，互不替代。
-
-
-### 阶段 3 / 阶段 4：两头吃，零副作用
-
-**阶段 3 · 执行**——既不丢失使用者原本的**创作能力**，又已获得 skill 给予的**规划能力**：阶段 2 的规划成果（方案、风险分级、验收标准）全部在手，规则文本却完全退场。两头吃，且没有任何"纪律常驻"的副作用。
-
-**阶段 4 · 直觉检查**——**不加载纪律检查规则**，使用者自己的找问题能力不被任何清单框住、不被替代；同时 skill 在前一阶段注入的**审查能力**（真验证、交付声明对得上的意识）仍在发挥作用。直觉的广度 + 纪律的敏感度，同时在线、互不挤占。
-
-**English**
-
-- **Stage 3 · Execution** — the user's original **creative ability** stays fully intact while the **planning capability** the skill granted is already in hand: the plan, the risk tier and the acceptance criteria are all there, with the rule text completely out of the way. Both worlds, zero side effects.
-- **Stage 4 · Intuition check** — the discipline rules are **not loaded**, so the user's own problem-finding instinct is neither boxed in nor replaced; meanwhile the **review capability** the skill instilled in the earlier stage (really verify, delivery claims must match) still works. The breadth of intuition and the sensitivity of discipline, online at the same time.
-
-<details>
-
-<summary><b>轻任务与重任务怎么自动分级？（规划时自过的七件事）</b></summary>
-
-1. **形态判断自己心里做**——不输出决策过程，不跟用户汇报"我选择了什么形态"，直接干活。
-2. **协作形态可叠加**——同一任务可以自己干一部分（形态一）、派子 Agent 干一部分（形态二）、协调外部模型干一部分（形态三）；默认形态一起步，哪里需要并行/独立/跨模型就叠加哪里。
-3. **轻量档**——只做分工方案、不实际派发时，不建 `docs/` 治理文件、不写任务包；方案获批准后再展开。
-4. **小且可逆 = 指令即授权**——判定：改**现有的**东西、单点修改、错了删掉即可；结果不需要用户审美判定。**从零新建完整交付物**（页面/应用/游戏/网站/长报告）不算"小"（至少 A 档确认），**好不好用户说了算的创意交付物**（游戏/UI/视觉）不算"可逆"（先确认方向）。只有不可逆、对外发布、删东西才事前确认。
-5. **按风险分级**——轻任务只做 3 条纪律（真打开看一眼 / 未验证标注 / 防死循环）；数据/代码/多 Agent 类重任务做全 8 条。
-6. **动手前先调研**——任务里出现**不认识的概念、名字或技术**，先问用户或搜索确认（自创/私有概念直接问），不按想象编造设定；重任务另查网上怎么做、有什么坑、有没有最佳实践。
-7. **最后确认档位**——跟用户确认沟通方式：**A 档**一次性确认（推荐方案列出，同意就开干）或 **B 档**逐项问答（一次一个最高影响问题）；用户没说默认 A 档。
-
-</details>
 
 ---
 
