@@ -12,6 +12,7 @@
 [![Size](https://img.shields.io/badge/SKILL.md-2.0KB·33行-orange)](#成本--cost)
 [![Experiments](https://img.shields.io/badge/A%2FB_实验-233_次-success)](#实测与证据--field-tests)
 [![Runtime](https://img.shields.io/badge/按需加载-18_files-blueviolet)](#成本--cost)
+[![CI](https://github.com/JadeYingWah/gpt-series-reasoning-style/actions/workflows/ci.yml/badge.svg)](https://github.com/JadeYingWah/gpt-series-reasoning-style/actions/workflows/ci.yml)
 
 </div>
 
