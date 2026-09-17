@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>小游戏大厅</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{background:#0d1117;font-family:"Microsoft YaHei","PingFang SC",sans-serif;color:#e6edf3;display:flex;align-items:center;justify-content:center}
+.wrap{text-align:center;padding:24px}
+h1{font-size:34px;letter-spacing:10px;margin-bottom:8px;background:linear-gradient(90deg,#3fb950,#e3b341,#38bdf8,#a371f7);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:#8b949e;font-size:14px;margin-bottom:34px}
+.grid{display:grid;grid-template-columns:repeat(2,220px);gap:20px;justify-content:center}
+.card{display:block;border-radius:14px;padding:26px 18px 20px;text-decoration:none;color:#e6edf3;border:1px solid rgba(255,255,255,.09);transition:.18s}
+.card:hover{transform:translateY(-5px);box-shadow:0 12px 30px rgba(0,0,0,.5)}
+.card .icon{height:74px;display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+.card h2{font-size:19px;letter-spacing:3px;margin-bottom:6px}
+.card p{font-size:12.5px;color:#9aa4b2;line-height:1.7}
+.c1:hover{border-color:#3fb950}.c2:hover{border-color:#38bdf8}
+.c3:hover{border-color:#e3b341}.c4:hover{border-color:#f85149}
+.foot{margin-top:30px;color:#6e7681;font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>小游戏大厅</h1>
+  <div class="sub">双击任意卡片进入游戏 · 每款都是独立文件，可直接单独打开</div>
+  <div class="grid">
+    <a class="card c1" href="贪吃蛇.html">
+      <div class="icon">
+        <svg width="90" height="60" viewBox="0 0 90 60">
+          <path d="M12 44 H34 V22 H58 V40 H76" fill="none" stroke="#3fb950" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="76" cy="40" r="8.5" fill="#3fb950"/>
+          <circle cx="79" cy="37.5" r="1.6" fill="#0d1117"/><circle cx="73" cy="37.5" r="1.6" fill="#0d1117"/>
+          <circle cx="26" cy="22" r="5.5" fill="#f85149"/>
+        </svg>
+      </div>
+      <h2>贪吃蛇</h2>
+      <p>方向键控制 · 吃苹果成长<br>金色星星限时高分</p>
+    </a>
+    <a class="card c2" href="打砖块.html">
+      <div class="icon">
+        <svg width="90" height="60" viewBox="0 0 90 60">
+          <rect x="8" y="6" width="22" height="9" rx="2.5" fill="#f85149"/>
+          <rect x="34" y="6" width="22" height="9" rx="2.5" fill="#e3b341"/>
+          <rect x="60" y="6" width="22" height="9" rx="2.5" fill="#3fb950"/>
+          <rect x="21" y="19" width="22" height="9" rx="2.5" fill="#38bdf8"/>
+          <rect x="47" y="19" width="22" height="9" rx="2.5" fill="#a371f7"/>
+          <circle cx="45" cy="40" r="5" fill="#fff"/>
+          <rect x="33" y="51" width="24" height="5.5" rx="2.7" fill="#58a6ff"/>
+        </svg>
+      </div>
+      <h2>打砖块</h2>
+      <p>鼠标 / 方向键控制挡板<br>多层关卡 双层砖要打两下</p>
+    </a>
+    <a class="card c3" href="黄金矿工.html">
+      <div class="icon">
+        <svg width="90" height="60" viewBox="0 0 90 60">
+          <line x1="45" y1="4" x2="58" y2="34" stroke="#d7b56d" stroke-width="2.5"/>
+          <path d="M54 36 a7 7 0 0 0 12 -2" fill="none" stroke="#cfd8dc" stroke-width="3.5" stroke-linecap="round"/>
+          <circle cx="66" cy="43" r="11" fill="#ffd43b" stroke="#b07d0a" stroke-width="1.5"/>
+          <circle cx="62.5" cy="39.5" r="2.2" fill="#fff" opacity=".8"/>
+          <polygon points="26,38 30,32 37,35 35,43 27,44" fill="#6e655a" stroke="#453f37" stroke-width="1.5"/>
+          <polygon points="12,48 15,44 19,46 18,51 13,51" fill="#66d9e8" stroke="#1098ad" stroke-width="1.2"/>
+        </svg>
+      </div>
+      <h2>黄金矿工</h2>
+      <p>看准时机放钩抓金块<br>钻石最值钱 石头是累赘</p>
+    </a>
+    <a class="card c4" href="飞机大战.html">
+      <div class="icon">
+        <svg width="90" height="60" viewBox="0 0 90 60">
+          <path d="M45 6 Q52 22 50 42 L40 42 Q38 22 45 6 Z" fill="#58a6ff"/>
+          <path d="M20 36 L41 26 L41 44 Z" fill="#1f6feb"/>
+          <path d="M70 36 L49 26 L49 44 Z" fill="#1f6feb"/>
+          <ellipse cx="45" cy="26" rx="3.4" ry="6.5" fill="#9ee7ff"/>
+          <path d="M42 42 L45 52 L48 42 Z" fill="#ff922b"/>
+          <circle cx="30" cy="14" r="2" fill="#f85149"/>
+          <circle cx="60" cy="10" r="2" fill="#f85149"/>
+        </svg>
+      </div>
+      <h2>飞机大战</h2>
+      <p>鼠标 / 方向键操纵战机<br>火力全自动 还能打 BOSS</p>
+    </a>
+  </div>
+  <div class="foot">纯本地单文件游戏 · 无需联网 · 最高纪录自动保存在浏览器中</div>
+</div>
+</body>
+</html>

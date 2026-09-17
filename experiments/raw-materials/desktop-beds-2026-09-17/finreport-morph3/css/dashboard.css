@@ -1,0 +1,20 @@
+/* 仪表盘页补充样式 — 不覆盖 style.css 语义 */
+#kpis .value {
+  font-size: 1.35rem;
+}
+
+.panel canvas {
+  background: #fbfcfb;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+#pie-legend {
+  margin-top: 14px;
+}
+
+#pie-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}

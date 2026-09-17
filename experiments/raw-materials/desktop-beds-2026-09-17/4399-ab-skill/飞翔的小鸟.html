@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>飞翔的小鸟 - 4399小游戏合集</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+  body {
+    background: linear-gradient(135deg, #0c1d33, #06101f);
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    font-family: "Microsoft YaHei", sans-serif; color: #cfe3f8;
+  }
+  h1 { color: #8ec9ff; margin-bottom: 8px; letter-spacing: 4px; text-shadow: 0 2px 6px rgba(0,0,0,.5); }
+  #hud { display: flex; gap: 24px; margin-bottom: 10px; font-size: 18px; }
+  #hud b { color: #ffd76e; }
+  #stage { position: relative; border-radius: 12px; overflow: hidden;
+           box-shadow: 0 8px 30px rgba(0,0,0,.6), 0 0 0 4px #24476b; }
+  canvas { display: block; }
+  #overlay {
+    position: absolute; inset: 0; background: rgba(4,12,24,.78);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; gap: 14px;
+  }
+  #overlay.hidden { display: none; }
+  #overlay .big { font-size: 40px; color: #aee0ff; font-weight: bold; }
+  #overlay .sub { font-size: 17px; line-height: 1.9; color: #bcd6ee; }
+  #overlay button {
+    padding: 12px 44px; font-size: 22px; border: none; border-radius: 30px;
+    background: linear-gradient(180deg, #7db8ff, #3d7ecf); color: #06101f;
+    font-weight: bold; cursor: pointer; font-family: inherit;
+  }
+  #overlay button:hover { filter: brightness(1.1); }
+  #tips { margin-top: 12px; font-size: 14px; color: #5f83a8; }
+</style>
+</head>
+<body>
+  <h1>🐦 飞翔的小鸟</h1>
+  <div id="hud">
+    <span>得分 <b id="score">0</b></span>
+    <span>最高分 <b id="best">0</b></span>
+  </div>
+  <div id="stage">
+    <canvas id="cv" width="480" height="640"></canvas>
+    <div id="overlay">
+      <div class="big" id="ovTitle">点一下就起飞</div>
+      <div class="sub" id="ovSub">点击画面 / 空格 / ↑ 拍翅膀<br>穿过管道缝 +1 分，撞到管道或地面结束</div>
+      <button id="btnStart">开始游戏</button>
+    </div>
+  </div>
+  <div id="tips">提示：轻点轻落，节奏比力气重要！</div>
+
+<script>
+"use strict";
+const cv = document.getElementById("cv");
+const ctx = cv.getContext("2d");
+const overlay = document.getElementById("overlay");
+const ovTitle = document.getElementById("ovTitle");
+const ovSub = document.getElementById("ovSub");
+const btnStart = document.getElementById("btnStart");
+
+const W = cv.width, H = cv.height;
+const GROUND_Y = 600;
+const GRAVITY = 1500, FLAP_V = -430, MAX_FALL = 700;
+const PIPE_W = 70, GAP_H = 165, PIPE_SPEED = 165, PIPE_EVERY = 1.55;
+
+let state = "start";    // start | playing | over
+let bird = { x: 120, y: 300, vy: 0, wing: 0, rot: 0 };
+let pipes = [];
+let score = 0, best = 0;
+let spawnT = 0, dist = 0, lastT = 0;
+
+try { best = parseInt(localStorage.getItem("flappy_best") || "0", 10) || 0; } catch (e) { best = 0; }
+document.getElementById("best").textContent = best;
+function saveBest() { try { localStorage.setItem("flappy_best", String(best)); } catch (e) {} }
+
+function reset() {
+  bird = { x: 120, y: 300, vy: 0, wing: 0, rot: 0 };
+  pipes = []; score = 0; spawnT = 0; dist = 0;
+  document.getElementById("score").textContent = 0;
+}
+function spawnPipe() {
+  const margin = 70;
+  const gapY = margin + Math.random() * (GROUND_Y - GAP_H - margin * 2);
+  pipes.push({ x: W + PIPE_W, gapY, passed: false });
+}
+function flap() {
+  if (state === "playing") { bird.vy = FLAP_V; bird.wing = 1; }
+}
+function die() {
+  state = "over";
+  if (score > best) { best = score; saveBest(); document.getElementById("best").textContent = best; }
+  ovTitle.innerHTML = "💥 掉下来了";
+  ovSub.innerHTML = "本局得分 <b style='color:#ffd76e'>" + score + "</b>　最高分 " + best + "<br>点按钮或按空格再来一局";
+  btnStart.textContent = "再来一局";
+  overlay.classList.remove("hidden");
+}
+function update(dt) {
+  bird.vy = Math.min(MAX_FALL, bird.vy + GRAVITY * dt);
+  bird.y += bird.vy * dt;
+  bird.rot = Math.max(-0.5, Math.min(1.4, bird.vy / 600));
+  bird.wing = Math.max(0, bird.wing - dt * 4);
+  dist += PIPE_SPEED * dt;
+
+  spawnT += dt;
+  if (spawnT >= PIPE_EVERY) { spawnT -= PIPE_EVERY; spawnPipe(); }
+
+  for (const p of pipes) {
+    p.x -= PIPE_SPEED * dt;
+    if (!p.passed && p.x + PIPE_W < bird.x - 16) { p.passed = true; score++; document.getElementById("score").textContent = score; }
+    // 碰撞：圆(鸟 r=15) vs 两根矩形
+    if (circleRect(bird.x, bird.y, 15, p.x, 0, PIPE_W, p.gapY) ||
+        circleRect(bird.x, bird.y, 15, p.x, p.gapY + GAP_H, PIPE_W, GROUND_Y - p.gapY - GAP_H)) return die();
+  }
+  pipes = pipes.filter(p => p.x + PIPE_W > -10);
+  if (bird.y + 15 >= GROUND_Y) { bird.y = GROUND_Y - 15; return die(); }
+  if (bird.y - 15 < 0) { bird.y = 15; bird.vy = 0; }
+}
+function circleRect(cx, cy, r, rx, ry, rw, rh) {
+  const nx = Math.max(rx, Math.min(cx, rx + rw));
+  const ny = Math.max(ry, Math.min(cy, ry + rh));
+  return (cx - nx) * (cx - nx) + (cy - ny) * (cy - ny) < r * r;
+}
+
+function draw() {
+  // 天空
+  const sky = ctx.createLinearGradient(0, 0, 0, H);
+  sky.addColorStop(0, "#4aa8e8"); sky.addColorStop(1, "#a8dcf8");
+  ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
+  // 云
+  ctx.fillStyle = "rgba(255,255,255,.85)";
+  for (let i = 0; i < 4; i++) {
+    const cx = ((i * 260 + 700 - dist * 0.25) % (W + 260)) - 130;
+    const cy = 90 + (i % 2) * 70;
+    puffCloud(cx, cy, 26 + (i % 3) * 8);
+  }
+  // 管道
+  for (const p of pipes) {
+    ctx.fillStyle = "#43a047";
+    ctx.fillRect(p.x, 0, PIPE_W, p.gapY);
+    ctx.fillRect(p.x, p.gapY + GAP_H, PIPE_W, GROUND_Y - p.gapY - GAP_H);
+    ctx.fillStyle = "#2e7d32";
+    ctx.fillRect(p.x + 6, p.gapY - 22, PIPE_W - 12, 22);
+    ctx.fillRect(p.x + 6, p.gapY + GAP_H, PIPE_W - 12, 22);
+    ctx.fillStyle = "rgba(255,255,255,.18)";
+    ctx.fillRect(p.x + 8, 0, 10, p.gapY - 22);
+    ctx.fillRect(p.x + 8, p.gapY + GAP_H + 22, 10, GROUND_Y - p.gapY - GAP_H - 22);
+  }
+  // 地面
+  ctx.fillStyle = "#d9b36c"; ctx.fillRect(0, GROUND_Y, W, H - GROUND_Y);
+  ctx.fillStyle = "#c49a4e";
+  for (let i = 0; i < W / 24 + 1; i++) {
+    const gx = (i * 24 - (dist % 24));
+    ctx.fillRect(gx, GROUND_Y, 12, 8);
+  }
+  // 鸟
+  ctx.save();
+  ctx.translate(bird.x, bird.y);
+  ctx.rotate(bird.rot);
+  ctx.fillStyle = "#ffd93b";
+  ctx.beginPath(); ctx.arc(0, 0, 15, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#f5b400";
+  const wingA = bird.wing > 0 ? -0.9 : Math.sin(performance.now() / 120) * 0.25;
+  ctx.save(); ctx.translate(-3, 2); ctx.rotate(wingA);
+  ctx.beginPath(); ctx.ellipse(-4, 0, 9, 5.5, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+  ctx.fillStyle = "#ff8c00";
+  ctx.beginPath(); ctx.moveTo(12, -2); ctx.lineTo(22, 2); ctx.lineTo(12, 5); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = "#fff";
+  ctx.beginPath(); ctx.arc(5, -5, 4.2, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#222";
+  ctx.beginPath(); ctx.arc(6.2, -5, 2, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+function puffCloud(x, y, r) {
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.arc(x + r * 0.9, y + 4, r * 0.7, 0, Math.PI * 2);
+  ctx.arc(x - r * 0.9, y + 5, r * 0.65, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function loop(t) {
+  const dt = Math.min(0.05, (t - lastT) / 1000); lastT = t;
+  if (state === "playing") update(dt);
+  draw();
+  requestAnimationFrame(loop);
+}
+
+// 输入：点击 / 空格 / ↑
+cv.parentElement.addEventListener("mousedown", e => {
+  if (state === "playing") { e.preventDefault(); flap(); }
+});
+window.addEventListener("keydown", e => {
+  if (e.code === "Space" || e.code === "ArrowUp") {
+    e.preventDefault();
+    if (state === "playing") flap();
+    else if (state === "start" || state === "over") start();
+  }
+});
+btnStart.addEventListener("click", start);
+function start() { reset(); state = "playing"; overlay.classList.add("hidden"); flap(); }
+
+requestAnimationFrame(t => { lastT = t; requestAnimationFrame(loop); });
+</script>
+</body>
+</html>

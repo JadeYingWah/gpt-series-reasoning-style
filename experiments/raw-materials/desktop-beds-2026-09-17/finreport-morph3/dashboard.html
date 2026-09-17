@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>可视化仪表盘 · 个人财务月度套件</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand">
+      <strong>个人财务月度套件</strong>
+      <span>2025 年 · 离线可用 · 数据源 data.js</span>
+    </div>
+    <nav class="nav">
+      <a href="index.html">首页</a>
+      <a href="dashboard.html" class="active">仪表盘</a>
+      <a href="report.html">月度报告</a>
+    </nav>
+  </header>
+
+  <main class="page">
+    <section class="hero">
+      <h1>可视化仪表盘</h1>
+      <p>全部图表与数字均由 <code>js/data.js</code> 驱动，Canvas 手绘，无外部依赖。</p>
+    </section>
+
+    <section class="grid-cards" id="kpis">
+      <article class="card">
+        <h3>年收入</h3>
+        <div class="value income" id="kpi-income">—</div>
+        <div class="hint">FinanceData.summary.totalIncome</div>
+      </article>
+      <article class="card">
+        <h3>年支出</h3>
+        <div class="value expense" id="kpi-expense">—</div>
+        <div class="hint">FinanceData.summary.totalExpense</div>
+      </article>
+      <article class="card">
+        <h3>净结余</h3>
+        <div class="value net" id="kpi-net">—</div>
+        <div class="hint">FinanceData.summary.totalNet</div>
+      </article>
+      <article class="card">
+        <h3>储蓄率</h3>
+        <div class="value" id="kpi-rate">—</div>
+        <div class="hint">FinanceData.summary.savingsRate</div>
+      </article>
+    </section>
+
+    <section class="panel">
+      <h2>月度收支对比</h2>
+      <p class="sub">每月收入与支出并排柱状对比（单位：元）</p>
+      <canvas id="chart-bar" width="1040" height="360" aria-label="月度收支对比柱状图"></canvas>
+      <div class="legend">
+        <span><i style="background:#0f766e"></i>收入</span>
+        <span><i style="background:#c2410c"></i>支出</span>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>月度净结余</h2>
+      <p class="sub">每月收入 − 支出的结余走势（单位：元）</p>
+      <canvas id="chart-net" width="1040" height="300" aria-label="月度净结余折线图"></canvas>
+      <div class="legend">
+        <span><i style="background:#0369a1"></i>净结余</span>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>全年支出构成</h2>
+      <p class="sub">按支出分类的年度合计占比</p>
+      <canvas id="chart-pie" width="1040" height="380" aria-label="全年支出构成环形图"></canvas>
+      <div class="legend" id="pie-legend"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    数据为模拟账本，仅作演示。修改 <code>js/data.js</code> 后刷新页面即可，仪表盘与报告会同步变化。
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

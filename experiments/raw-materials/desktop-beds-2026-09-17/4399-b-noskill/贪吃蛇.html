@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>贪吃蛇</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{background:#0d1117;display:flex;align-items:center;justify-content:center;font-family:"Microsoft YaHei","PingFang SC",sans-serif;color:#e6edf3}
+#box{position:relative}
+canvas{display:block;border-radius:12px;box-shadow:0 0 46px rgba(63,185,80,.18)}
+.overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(13,17,23,.88);border-radius:12px;text-align:center}
+h1{font-size:38px;margin-bottom:14px;color:#3fb950;text-shadow:0 0 22px rgba(63,185,80,.55);letter-spacing:6px}
+p{margin:4px 0;color:#8b949e;font-size:14px;line-height:1.9}
+.num{font-size:24px;color:#e3b341;margin:10px 0}
+button{margin-top:18px;padding:10px 40px;font-size:18px;border:none;border-radius:8px;background:#238636;color:#fff;cursor:pointer;font-family:inherit;transition:.15s}
+button:hover{background:#2ea043;transform:translateY(-1px)}
+.hidden{display:none}
+kbd{background:#21262d;border:1px solid #30363d;border-bottom-width:2px;border-radius:4px;padding:1px 7px;font-size:12px;color:#c9d1d9;margin:0 1px}
+</style>
+</head>
+<body>
+<div id="box">
+<canvas id="cv" width="640" height="520"></canvas>
+<div class="overlay" id="menu">
+  <h1>贪吃蛇</h1>
+  <p><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> 或 <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 控制方向，<kbd>空格</kbd> 暂停</p>
+  <p>吃苹果 +10 分，吃金色星星 +50 分（限时出现）</p>
+  <p>撞墙或咬到自己游戏结束，速度会越来越快！</p>
+  <button id="btnStart">开始游戏</button>
+</div>
+<div class="overlay hidden" id="over">
+  <h1 style="color:#f85149">游戏结束</h1>
+  <div class="num">本局得分：<span id="finalScore">0</span></div>
+  <p>最高纪录：<span id="bestScore" style="color:#e3b341">0</span></p>
+  <button id="btnRetry">再来一局</button>
+</div>
+</div>
+<script>
+"use strict";
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+const COLS=32,ROWS=24,CELL=20,HUD=40;
+const $=id=>document.getElementById(id);
+let snake,dir,queue,food,bonus,bonusT,score,dead,paused,started,speed,acc,last,apples;
+let best=+(localStorage.getItem('snakeBest')||0);
+$('bestScore').textContent=best;
+
+/* ---------- 音效（WebAudio 合成，无外部文件） ---------- */
+let AC=null;
+function tone(f,d,type,vol,slide){
+  try{
+    AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    if(AC.state==='suspended')AC.resume();
+    const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime;
+    o.type=type||'square';o.frequency.setValueAtTime(f,t);
+    if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,f+slide),t+d);
+    g.gain.setValueAtTime(vol||.12,t);
+    g.gain.exponentialRampToValueAtTime(.001,t+d);
+    o.connect(g).connect(AC.destination);o.start(t);o.stop(t+d);
+  }catch(e){}
+}
+const sfx={
+  eat:()=>tone(660,.07,'square',.11,140),
+  bonus:()=>{tone(880,.07,'square',.11);setTimeout(()=>tone(1108,.07,'square',.11),70);setTimeout(()=>tone(1318,.12,'square',.11),140);},
+  die:()=>tone(300,.55,'sawtooth',.16,-240)
+};
+
+function reset(){
+  snake=[{x:9,y:12},{x:8,y:12},{x:7,y:12}];
+  dir={x:1,y:0};queue=[];
+  bonus=null;bonusT=0;
+  score=0;dead=false;paused=false;speed=140;acc=0;apples=0;
+  food=null;food=freeCell();
+  last=performance.now();
+}
+function freeCell(){
+  for(;;){
+    const p={x:Math.floor(Math.random()*COLS),y:Math.floor(Math.random()*ROWS)};
+    if(!snake.some(s=>s.x===p.x&&s.y===p.y)&&!(bonus&&bonus.x===p.x&&bonus.y===p.y)&&!(food&&food.x===p.x&&food.y===p.y))return p;
+  }
+}
+function step(){
+  if(queue.length){const d=queue.shift();if(d.x!==-dir.x||d.y!==-dir.y)dir=d;}
+  const h={x:snake[0].x+dir.x,y:snake[0].y+dir.y};
+  if(h.x<0||h.x>=COLS||h.y<0||h.y>=ROWS||snake.some(s=>s.x===h.x&&s.y===h.y)){die();return;}
+  snake.unshift(h);
+  let ate=false;
+  if(h.x===food.x&&h.y===food.y){
+    ate=true;score+=10;apples++;speed=Math.max(68,speed-3);
+    food=freeCell();sfx.eat();
+    if(apples%5===0&&!bonus){bonus=freeCell();bonusT=6000;}
+  }
+  if(bonus&&h.x===bonus.x&&h.y===bonus.y){score+=50;bonus=null;sfx.bonus();}
+  if(!ate)snake.pop();
+}
+function die(){
+  dead=true;sfx.die();
+  if(score>best){best=score;localStorage.setItem('snakeBest',best);}
+  $('finalScore').textContent=score;
+  $('bestScore').textContent=best;
+  $('over').classList.remove('hidden');
+}
+function start(){
+  reset();started=true;
+  $('menu').classList.add('hidden');$('over').classList.add('hidden');
+}
+
+/* ---------- 输入 ---------- */
+const KEY={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0],
+           w:[0,-1],s:[0,1],a:[-1,0],d:[1,0],W:[0,-1],S:[0,1],A:[-1,0],D:[1,0]};
+window.addEventListener('keydown',e=>{
+  if(KEY[e.key]){
+    e.preventDefault();
+    if(!started)return;
+    if(dead){start();return;}
+    const xy=KEY[e.key];
+    if(queue.length<3)queue.push({x:xy[0],y:xy[1]});
+  }else if(e.key===' '){
+    e.preventDefault();
+    if(started&&!dead)paused=!paused;
+  }else if(e.key==='Enter'){
+    if(!started||dead)start();
+  }
+});
+$('btnStart').onclick=start;
+$('btnRetry').onclick=start;
+
+/* ---------- 绘制 ---------- */
+function rr(x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+function star(x,y,R,r,rot){
+  ctx.beginPath();
+  for(let i=0;i<10;i++){
+    const rad=(i%2?r:R),a=Math.PI/5*i-Math.PI/2+rot;
+    ctx.lineTo(x+Math.cos(a)*rad,y+Math.sin(a)*rad);
+  }
+  ctx.closePath();
+}
+function draw(){
+  ctx.clearRect(0,0,cv.width,cv.height);
+  /* HUD */
+  ctx.fillStyle='#0d1117';ctx.fillRect(0,0,cv.width,HUD);
+  ctx.textBaseline='middle';
+  ctx.textAlign='left';
+  ctx.fillStyle='#3fb950';ctx.font='bold 17px "Microsoft YaHei"';
+  ctx.fillText('得分 '+score,16,HUD/2+1);
+  ctx.fillStyle='#8b949e';ctx.font='14px "Microsoft YaHei"';
+  ctx.fillText('最高 '+best,140,HUD/2+1);
+  ctx.fillText('长度 '+snake.length,240,HUD/2+1);
+  if(bonus){ctx.fillStyle='#e3b341';ctx.fillText('星星限时 '+Math.ceil(bonusT/1000)+'s',330,HUD/2+1);}
+  /* 棋盘 */
+  ctx.fillStyle='#161b22';ctx.fillRect(0,HUD,cv.width,cv.height-HUD);
+  ctx.strokeStyle='rgba(139,148,158,.08)';ctx.lineWidth=1;
+  for(let i=1;i<COLS;i++){ctx.beginPath();ctx.moveTo(i*CELL,HUD);ctx.lineTo(i*CELL,cv.height);ctx.stroke();}
+  for(let i=1;i<ROWS;i++){ctx.beginPath();ctx.moveTo(0,HUD+i*CELL);ctx.lineTo(cv.width,HUD+i*CELL);ctx.stroke();}
+  /* 苹果 */
+  const fx=food.x*CELL+CELL/2,fy=HUD+food.y*CELL+CELL/2;
+  ctx.fillStyle='#f85149';ctx.beginPath();ctx.arc(fx,fy+1,7,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,.5)';ctx.beginPath();ctx.arc(fx-2.5,fy-1.5,2,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#3fb950';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(fx+1,fy-6);ctx.quadraticCurveTo(fx+4,fy-10,fx+7,fy-9);ctx.stroke();
+  /* 金星 */
+  if(bonus){
+    const bx=bonus.x*CELL+CELL/2,by=HUD+bonus.y*CELL+CELL/2;
+    const blink=bonusT<2000&&Math.floor(bonusT/150)%2===0;
+    if(!blink){
+      ctx.save();
+      ctx.fillStyle='#e3b341';ctx.shadowColor='#e3b341';ctx.shadowBlur=12;
+      star(bx,by,10,4.5,performance.now()/600);ctx.fill();
+      ctx.restore();
+    }
+  }
+  /* 蛇身（尾到头，渐变色） */
+  for(let i=snake.length-1;i>=0;i--){
+    const s=snake[i],t=i/Math.max(1,snake.length-1);
+    ctx.fillStyle=i===0?'#3fb950':'hsl(140,55%,'+(62-38*t)+'%)';
+    rr(s.x*CELL+1.5,HUD+s.y*CELL+1.5,CELL-3,CELL-3,6);ctx.fill();
+  }
+  /* 蛇头眼睛 */
+  const hx=snake[0].x*CELL+CELL/2,hy=HUD+snake[0].y*CELL+CELL/2;
+  const fx2=dir.x,fy2=dir.y,sx2=-dir.y,sy2=dir.x;
+  ctx.fillStyle='#0d1117';
+  ctx.beginPath();ctx.arc(hx+fx2*2.6+sx2*3.4,hy+fy2*2.6+sy2*3.4,2,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(hx+fx2*2.6-sx2*3.4,hy+fy2*2.6-sy2*3.4,2,0,Math.PI*2);ctx.fill();
+  /* 暂停提示 */
+  if(paused&&!dead){
+    ctx.fillStyle='rgba(13,17,23,.6)';ctx.fillRect(0,HUD,cv.width,cv.height-HUD);
+    ctx.fillStyle='#e6edf3';ctx.font='bold 26px "Microsoft YaHei"';ctx.textAlign='center';
+    ctx.fillText('已暂停',cv.width/2,cv.height/2-14);
+    ctx.font='14px "Microsoft YaHei"';ctx.fillStyle='#8b949e';
+    ctx.fillText('按空格继续',cv.width/2,cv.height/2+18);
+  }
+}
+
+function loop(t){
+  requestAnimationFrame(loop);
+  const dt=Math.min(50,t-last);last=t;
+  if(started&&!dead&&!paused){
+    acc+=dt;
+    while(acc>=speed){acc-=speed;step();if(dead)break;}
+    if(bonus&&!dead){bonusT-=dt;if(bonusT<=0)bonus=null;}
+  }
+  draw();
+}
+reset();started=false;
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

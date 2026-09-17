@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>打地鼠 - 4399小游戏合集</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+  body {
+    background: linear-gradient(135deg, #2d1f0f, #1a1208);
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    font-family: "Microsoft YaHei", sans-serif; color: #f0e2c8;
+  }
+  h1 { color: #ffcf70; margin-bottom: 8px; letter-spacing: 4px; text-shadow: 0 2px 6px rgba(0,0,0,.5); }
+  #hud { display: flex; gap: 24px; margin-bottom: 10px; font-size: 18px; }
+  #hud b { color: #ffd76e; }
+  #stage { position: relative; border-radius: 12px; overflow: hidden;
+           box-shadow: 0 8px 30px rgba(0,0,0,.6), 0 0 0 4px #6b4e22; }
+  canvas { display: block; cursor: none; }
+  #overlay {
+    position: absolute; inset: 0; background: rgba(20,12,2,.82);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; gap: 14px; cursor: default;
+  }
+  #overlay.hidden { display: none; }
+  #overlay .big { font-size: 40px; color: #ffd98e; font-weight: bold; }
+  #overlay .sub { font-size: 17px; line-height: 1.9; color: #e8d6b4; }
+  #overlay button {
+    padding: 12px 44px; font-size: 22px; border: none; border-radius: 30px;
+    background: linear-gradient(180deg, #ffcf70, #d99a2b); color: #2d1f0f;
+    font-weight: bold; cursor: pointer; font-family: inherit;
+  }
+  #overlay button:hover { filter: brightness(1.1); }
+  #tips { margin-top: 12px; font-size: 14px; color: #a08858; }
+</style>
+</head>
+<body>
+  <h1>🔨 打地鼠</h1>
+  <div id="hud">
+    <span>得分 <b id="score">0</b></span>
+    <span>连击 <b id="combo">0</b></span>
+    <span>时间 <b id="time">60</b>s</span>
+    <span>最高分 <b id="best">0</b></span>
+  </div>
+  <div id="stage">
+    <canvas id="cv" width="640" height="640"></canvas>
+    <div id="overlay">
+      <div class="big" id="ovTitle">锤子已就位！</div>
+      <div class="sub" id="ovSub">点击冒头的地鼠得分：普通 🐹 +10 · 金鼠 +30 · 炸弹 💣 -15<br>连击 3 次起每击额外 +5，点空会断连击 · 限时 60 秒</div>
+      <button id="btnStart">开始游戏</button>
+    </div>
+  </div>
+  <div id="tips">提示：手要快，眼要准，别敲到炸弹！</div>
+
+<script>
+"use strict";
+const cv = document.getElementById("cv");
+const ctx = cv.getContext("2d");
+const overlay = document.getElementById("overlay");
+const ovTitle = document.getElementById("ovTitle");
+const ovSub = document.getElementById("ovSub");
+const btnStart = document.getElementById("btnStart");
+
+const GAME_TIME = 60;
+// 3x3 洞位
+const holes = [];
+for (let r = 0; r < 3; r++)
+  for (let c = 0; c < 3; c++)
+    holes.push({ x: 130 + c * 190, y: 180 + r * 190 });
+
+let state = "start";
+let score = 0, best = 0, combo = 0, timeLeft = GAME_TIME;
+let moles = holes.map(() => ({ phase: "hidden", t: 0, type: null })); // type: normal|gold|bomb
+let spawnT = 0;
+let fx = []; // 命中特效
+let hammer = { x: -100, y: -100, swing: 0 };
+let lastT = 0;
+
+try { best = parseInt(localStorage.getItem("whack_best") || "0", 10) || 0; } catch (e) { best = 0; }
+document.getElementById("best").textContent = best;
+function saveBest() { try { localStorage.setItem("whack_best", String(best)); } catch (e) {} }
+
+function updateHud() {
+  document.getElementById("score").textContent = score;
+  document.getElementById("combo").textContent = combo;
+  document.getElementById("time").textContent = Math.ceil(timeLeft);
+  document.getElementById("best").textContent = best;
+}
+function reset() {
+  score = 0; combo = 0; timeLeft = GAME_TIME; spawnT = 0; fx = [];
+  moles = holes.map(() => ({ phase: "hidden", t: 0, type: null }));
+  updateHud();
+}
+function spawnInterval() { return Math.max(0.38, 0.8 - (GAME_TIME - timeLeft) * 0.007); }
+function moleLife() { return Math.max(0.65, 1.25 - (GAME_TIME - timeLeft) * 0.01); }
+function trySpawn() {
+  const hidden = moles.map((m, i) => ({ m, i })).filter(o => o.m.phase === "hidden");
+  if (!hidden.length) return;
+  const pick = hidden[Math.floor(Math.random() * hidden.length)];
+  const r = Math.random();
+  pick.m.type = r < 0.12 ? "gold" : r < 0.27 ? "bomb" : "normal";
+  pick.m.phase = "rising"; pick.m.t = 0;
+}
+
+function hitTest(mx, my) {
+  for (let i = 0; i < holes.length; i++) {
+    const dx = mx - holes[i].x, dy = my - (holes[i].y + 20);
+    if (dx * dx + dy * dy < 62 * 62) {
+      const m = moles[i];
+      if ((m.phase === "up" || m.phase === "rising") && m.type) {
+        m.phase = "sinking"; m.t = 0;
+        if (m.type === "bomb") { combo = 0; score = Math.max(0, score - 15); popFx(holes[i].x, holes[i].y - 30, "-15", "#ff6b6b"); }
+        else {
+          combo++;
+          let gain = m.type === "gold" ? 30 : 10;
+          if (combo >= 3) gain += 5;
+          score += gain;
+          popFx(holes[i].x, holes[i].y - 30, "+" + gain, m.type === "gold" ? "#ffd700" : "#9ee89e");
+        }
+        updateHud();
+        return;
+      }
+    }
+  }
+  // 点空
+  combo = 0; updateHud();
+}
+function popFx(x, y, text, color) { fx.push({ x, y, text, color, t: 0 }); }
+
+function update(dt) {
+  timeLeft -= dt;
+  if (timeLeft <= 0) { timeLeft = 0; updateHud(); return gameOver(); }
+  updateHud();
+
+  spawnT += dt;
+  const iv = spawnInterval();
+  while (spawnT >= iv) { spawnT -= iv; trySpawn(); }
+
+  for (const m of moles) {
+    if (m.phase === "rising") { m.t += dt; if (m.t >= 0.15) { m.phase = "up"; m.t = 0; } }
+    else if (m.phase === "up") { m.t += dt; if (m.t >= moleLife()) { m.phase = "sinking"; m.t = 0; } }
+    else if (m.phase === "sinking") { m.t += dt; if (m.t >= 0.15) { m.phase = "hidden"; m.t = 0; m.type = null; } }
+  }
+  for (const f of fx) f.t += dt;
+  fx = fx.filter(f => f.t < 0.8);
+  hammer.swing = Math.max(0, hammer.swing - dt * 6);
+}
+function gameOver() {
+  state = "over";
+  if (score > best) { best = score; saveBest(); }
+  updateHud();
+  const rank = score >= 500 ? "🏆 地鼠克星" : score >= 300 ? "🥇 锤王" : score >= 150 ? "🥈 熟练工" : "🥉 新手锤手";
+  ovTitle.innerHTML = "⏰ 时间到！";
+  ovSub.innerHTML = "最终得分 <b style='color:#ffd76e'>" + score + "</b>　最高分 " + best + "<br>" + rank;
+  btnStart.textContent = "再来一局";
+  overlay.classList.remove("hidden");
+}
+
+function draw() {
+  // 草地背景
+  const g = ctx.createLinearGradient(0, 0, 0, 640);
+  g.addColorStop(0, "#8fd05f"); g.addColorStop(1, "#5fae3a");
+  ctx.fillStyle = g; ctx.fillRect(0, 0, 640, 640);
+  // 草点
+  ctx.fillStyle = "rgba(255,255,255,.12)";
+  for (let i = 0; i < 40; i++) {
+    ctx.fillRect((i * 97) % 640, (i * 61) % 640, 4, 8);
+  }
+  // 洞
+  for (const h of holes) {
+    ctx.fillStyle = "#5a3d1e";
+    ctx.beginPath(); ctx.ellipse(h.x, h.y + 20, 72, 34, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#3a2712";
+    ctx.beginPath(); ctx.ellipse(h.x, h.y + 16, 62, 27, 0, 0, Math.PI * 2); ctx.fill();
+  }
+  // 地鼠
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  for (let i = 0; i < moles.length; i++) {
+    const m = moles[i];
+    if (m.phase === "hidden" || !m.type) continue;
+    let p = 1;
+    if (m.phase === "rising") p = m.t / 0.15;
+    else if (m.phase === "sinking") p = 1 - m.t / 0.15;
+    const h = holes[i];
+    ctx.save();
+    ctx.beginPath();
+    ctx.ellipse(h.x, h.y + 16, 62, 27, 0, 0, Math.PI * 2);
+    ctx.clip();
+    const y = h.y + 34 - p * 74;
+    if (m.type === "gold") {
+      ctx.fillStyle = "rgba(255,215,0,.35)";
+      ctx.beginPath(); ctx.arc(h.x, y - 6, 46, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.font = "58px serif";
+    ctx.fillText(m.type === "gold" ? "🐹" : m.type, h.x, y);
+    if (m.type === "gold") { ctx.font = "22px serif"; ctx.fillText("✨", h.x + 34, y - 24); }
+    ctx.restore();
+  }
+  // 特效文字
+  for (const f of fx) {
+    const a = 1 - f.t / 0.8;
+    ctx.globalAlpha = a;
+    ctx.font = "bold 30px 'Microsoft YaHei'";
+    ctx.fillStyle = f.color;
+    ctx.fillText(f.text, f.x, f.y - f.t * 60);
+    ctx.globalAlpha = 1;
+  }
+  // 锤子
+  if (hammer.x > -50) {
+    ctx.save();
+    ctx.translate(hammer.x + 8, hammer.y + 8);
+    ctx.rotate(-0.6 + hammer.swing * 1.1);
+    ctx.fillStyle = "#8a5a2b";
+    roundRect(-4, -6, 10, 44, 4); ctx.fill();
+    ctx.fillStyle = "#9aa3ad";
+    roundRect(-22, -22, 44, 22, 6); ctx.fill();
+    ctx.fillStyle = "#7d8790";
+    roundRect(-22, -10, 44, 10, 4); ctx.fill();
+    ctx.restore();
+  }
+}
+function roundRect(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+function loop(t) {
+  const dt = Math.min(0.05, (t - lastT) / 1000); lastT = t;
+  if (state === "playing") update(dt);
+  draw();
+  requestAnimationFrame(loop);
+}
+
+cv.addEventListener("mousemove", e => {
+  const rect = cv.getBoundingClientRect();
+  hammer.x = e.clientX - rect.left; hammer.y = e.clientY - rect.top;
+});
+cv.addEventListener("mousedown", e => {
+  if (state !== "playing") return;
+  const rect = cv.getBoundingClientRect();
+  hammer.x = e.clientX - rect.left; hammer.y = e.clientY - rect.top;
+  hammer.swing = 1;
+  hitTest(hammer.x, hammer.y);
+});
+btnStart.addEventListener("click", () => {
+  reset(); state = "playing"; overlay.classList.add("hidden");
+});
+
+updateHud();
+requestAnimationFrame(t => { lastT = t; requestAnimationFrame(loop); });
+</script>
+</body>
+</html>

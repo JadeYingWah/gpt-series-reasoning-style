@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>番茄钟</title>
+<style>
+  /* 全局样式：内联，零外部依赖 */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+    background: #1e293b;
+    color: #f1f5f9;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    user-select: none;
+  }
+
+  /* 剩余时间大字显示 */
+  #display {
+    font-size: 120px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums; /* 数字等宽，避免跳动 */
+    letter-spacing: 4px;
+    line-height: 1.2;
+  }
+
+  /* 按钮区 */
+  #controls { margin-top: 40px; display: flex; gap: 20px; }
+
+  button {
+    font-size: 20px;
+    padding: 12px 32px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #fff;
+    background: #334155;
+    transition: background 0.2s, transform 0.1s;
+  }
+  button:hover { filter: brightness(1.15); }
+  button:active { transform: scale(0.97); }
+
+  /* 三态按钮：开始=绿，暂停=橙，重置=灰红 */
+  #startBtn  { background: #16a34a; }
+  #pauseBtn  { background: #d97706; }
+  #resetBtn  { background: #64748b; }
+
+  /* 归零提醒遮罩 */
+  #overlay {
+    display: none; /* 归零时由 JS 切换为 flex */
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+  }
+  #overlay .text {
+    font-size: 90px;
+    font-weight: 700;
+    color: #f87171;
+  }
+  #overlay button { margin-top: 30px; background: #16a34a; font-size: 22px; }
+  #overlay .box { text-align: center; }
+</style>
+</head>
+<body>
+
+  <!-- 剩余时间显示 -->
+  <div id="display">25:00</div>
+
+  <!-- 三态按钮 -->
+  <div id="controls">
+    <button id="startBtn">开始</button>
+    <button id="pauseBtn">暂停</button>
+    <button id="resetBtn">重置</button>
+  </div>
+
+  <!-- 归零提醒（页面内大字，非 alert 弹窗） -->
+  <div id="overlay">
+    <div class="box">
+      <div class="text">时间到</div>
+      <button id="okBtn">知道了</button>
+    </div>
+  </div>
+
+<script>
+  // ---------- 常量与状态 ----------
+  var TOTAL_SECONDS = 25 * 60; // 总时长 25 分钟
+  var remainSeconds = TOTAL_SECONDS; // 剩余秒数
+  var timerId = null; // setInterval 句柄，null 表示未在计时
+
+  var displayEl = document.getElementById('display');
+  var overlayEl = document.getElementById('overlay');
+  var startBtn  = document.getElementById('startBtn');
+  var pauseBtn  = document.getElementById('pauseBtn');
+  var resetBtn  = document.getElementById('resetBtn');
+  var okBtn     = document.getElementById('okBtn');
+
+  // ---------- 工具函数 ----------
+  // 把秒数格式化为 "分:秒"，如 24:59
+  function format(sec) {
+    var m = Math.floor(sec / 60);
+    var s = sec % 60;
+    return (m < 10 ? '0' + m : m) + ':' + (s < 10 ? '0' + s : s);
+  }
+
+  // 刷新界面显示
+  function render() {
+    displayEl.textContent = format(remainSeconds);
+  }
+
+  // ---------- 核心：开始 / 暂停 / 重置 ----------
+  // 开始：仅在未计时时生效，避免重复 setInterval
+  function start() {
+    if (timerId !== null) return;
+    if (remainSeconds <= 0) return; // 已归零需先重置
+    timerId = setInterval(tick, 1000);
+  }
+
+  // 每秒回调：减一秒并检查归零
+  function tick() {
+    remainSeconds--;
+    render();
+    if (remainSeconds <= 0) {
+      remainSeconds = 0;
+      stopAndNotify();
+    }
+  }
+
+  // 归零处理：停止计时并显示提醒
+  function stopAndNotify() {
+    clearInterval(timerId);
+    timerId = null;
+    overlayEl.style.display = 'flex';
+  }
+
+  // 暂停：清除定时器，保留剩余时间
+  function pause() {
+    if (timerId !== null) {
+      clearInterval(timerId);
+      timerId = null;
+    }
+  }
+
+  // 重置：停止计时，回到 25:00，关闭提醒
+  function reset() {
+    pause();
+    remainSeconds = TOTAL_SECONDS;
+    overlayEl.style.display = 'none';
+    render();
+  }
+
+  // ---------- 事件绑定 ----------
+  startBtn.addEventListener('click', start);
+  pauseBtn.addEventListener('click', pause);
+  resetBtn.addEventListener('click', reset);
+  okBtn.addEventListener('click', reset); // 点"知道了"关闭提醒并重置
+
+  // 初始渲染
+  render();
+</script>
+</body>
+</html>

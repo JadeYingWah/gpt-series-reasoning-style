@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>开心水族馆</title>
+<style>
+  html,body{margin:0;padding:0;background:#04121d;height:100%;overflow:hidden;
+    font-family:"Microsoft YaHei","PingFang SC",sans-serif;
+    display:flex;align-items:center;justify-content:center;}
+  canvas{border-radius:10px;box-shadow:0 10px 40px rgba(0,0,0,.6);cursor:pointer;}
+</style>
+</head>
+<body>
+<canvas id="cv" width="960" height="640"></canvas>
+<script>
+"use strict";
+/* ================= 开心水族馆 =================
+   点击水面投食(¥5) → 鱼吃食长大 → 掉金币 → 点击金币收钱 → 买更多鱼
+   小心鲨鱼！点击鲨鱼 10 次把它赶走。
+=============================================== */
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+const W=960,H=640,HUD_H=52,BAR_H=66;
+const SAND_Y=H-BAR_H-34,WATER_TOP=HUD_H,WATER_BOT=H-BAR_H;
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const dist=(x1,y1,x2,y2)=>Math.hypot(x2-x1,y2-y1);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+let G=null; // 游戏状态
+function newGame(){
+  G={
+    running:false, over:false, time:0, money:100, earned:0,
+    fish:[], foods:[], coins:[], sharks:[], floats:[], bubbles:[],
+    feedBtn:{}, buyS:{}, buyM:{}, helpBtn:{}, helpOn:false,
+    skyTimer:0, sharkTimer:70, msg:"欢迎来到开心水族馆！点击水面投食，喂大你的鱼吧！",msgT:6,
+    startT:0
+  };
+  for(let i=0;i<3;i++) addFish(0);
+  for(let i=0;i<26;i++) G.bubbles.push({x:rnd(0,W),y:rnd(WATER_TOP,H),r:rnd(1.5,4.5),v:rnd(12,30),w:rnd(0,6.28)});
+}
+function addFish(stage){
+  const palette=[["#ff8c3a","#ffd23a"],["#3ec6ff","#a8f0ff"],["#ff6fa5","#ffc0d9"],["#8de84f","#d6ff8a"],["#b07cff","#e2c8ff"]];
+  const p=palette[Math.floor(rnd(0,palette.length))];
+  G.fish.push({x:rnd(120,W-120),y:rnd(WATER_TOP+60,WATER_BOT-60),vx:rnd(-30,30)||20,vy:rnd(-10,10),
+    stage:stage,feeds:0,hunger:rnd(20,45),starve:0,dir:1,wob:rnd(0,6.28),c1:p[0],c2:p[1],
+    coinT:rnd(6,14),dead:0,scale:1});
+}
+const STAGE_VAL=[[10,"#c9d4dd","银币"],[25,"#ffd447","金币"],[60,"#ff5fa8","宝石"]];
+const STAGE_R=[13,18,25];
+
+/* ---------- 输入 ---------- */
+function mpos(e){const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height};}
+cv.addEventListener('mousemove',e=>{const p=mpos(e);cv.style.cursor=hitUI(p)?"pointer":"default";});
+cv.addEventListener('mousedown',e=>{
+  const p=mpos(e);
+  if(!G.running){ if(inR(p,G.startBtnRect)){G.running=true;G.startT=performance.now();} return; }
+  if(G.over){ if(inR(p,G.restartRect)) newGame(); return; }
+  if(inR(p,G.buyS)&&G.money>=60){G.money-=60;addFish(0);say("买到一条小鱼苗！");}
+  else if(inR(p,G.buyM)&&G.money>=150){G.money-=150;addFish(1);say("买到一条中鱼！");}
+  else if(inR(p,G.helpBtn)){G.helpOn=!G.helpOn;}
+  else if(p.y>HUD_H+6&&p.y<SAND_Y-6){
+    if(G.helpOn){G.helpOn=false;return;}
+    // 先试点鲨鱼
+    for(const s of G.sharks){ if(!s.gone&&dist(p.x,p.y,s.x,s.y)<55){ s.hp--; s.flash=0.2;
+        if(s.hp<=0){s.flee=true;G.money+=100;G.earned+=100;say("赶走鲨鱼！奖励 ¥100");} return;} }
+    // 点金币
+    for(let i=G.coins.length-1;i>=0;i--){const c=G.coins[i];
+      if(!c.fly&&dist(p.x,p.y,c.x,c.y)<26){c.fly=true;return;}}
+    // 投食
+    if(G.money>=5){G.money-=5;G.foods.push({x:p.x,y:p.y,vy:46,life:25});}
+    else say("钱不够买鱼食了…");
+  }
+});
+function inR(p,r){return r&&p.x>=r.x&&p.x<=r.x+r.w&&p.y>=r.y&&p.y<=r.y+r.h;}
+function hitUI(p){return G&&G.running&&!G.over&&(inR(p,G.buyS)||inR(p,G.buyM)||inR(p,G.helpBtn));}
+function say(t,long){G.msg=t;G.msgT=long?8:4;}
+
+/* ---------- 更新 ---------- */
+let lastT=0;
+function loop(t){
+  const dt=Math.min(0.05,(t-lastT)/1000||0.016); lastT=t;
+  if(G.running&&!G.over) update(dt);
+  draw();
+  requestAnimationFrame(loop);
+}
+function update(dt){
+  G.time+=dt; if(G.msgT>0)G.msgT-=dt;
+  // 气泡
+  for(const b of G.bubbles){b.y-=b.v*dt;b.w+=dt*2;if(b.y<WATER_TOP){b.y=SAND_Y+6;b.x=rnd(0,W);}}
+  // 鱼
+  for(let i=G.fish.length-1;i>=0;i--){
+    const f=G.fish[i];
+    if(f.dead>0){ f.dead+=dt; f.y-=25*dt; f.scale=Math.max(0.5,f.scale-dt*0.1);
+      if(f.dead>3){G.fish.splice(i,1);say("一条鱼饿死了…记得投食！");} continue; }
+    f.wob+=dt*4;
+    f.hunger=clamp(f.hunger+3.2*dt,0,100);
+    if(f.hunger>=100){ f.starve+=dt; if(f.starve>18){f.dead=0.01;continue;} } else f.starve=0;
+    // 找食物
+    let tgt=null,best=1e9;
+    for(const fd of G.foods){const d=dist(f.x,f.y,fd.x,fd.y); if(d<best){best=d;tgt=fd;}}
+    const hungry=f.hunger>35;
+    let tx,ty,sp;
+    if(hungry&&tgt){ tx=tgt.x;ty=tgt.y;sp=55+f.stage*10; }
+    else{ if(!f.wx||dist(f.x,f.y,f.wx,f.wy)<20){f.wx=rnd(80,W-80);f.wy=rnd(WATER_TOP+50,WATER_BOT-60);} tx=f.wx;ty=f.wy;sp=26; }
+    const d=dist(f.x,f.y,tx,ty)||1;
+    f.vx=(tx-f.x)/d*sp; f.vy=(ty-f.y)/d*sp*0.7;
+    f.x+=f.vx*dt; f.y+=f.vy*dt;
+    if(Math.abs(f.vx)>2) f.dir=f.vx>0?1:-1;
+    f.x=clamp(f.x,40,W-40); f.y=clamp(f.y,WATER_TOP+30,SAND_Y-25);
+    // 吃
+    if(tgt&&dist(f.x,f.y,tgt.x,tgt.y)<STAGE_R[f.stage]+6){
+      G.foods.splice(G.foods.indexOf(tgt),1);
+      f.hunger=clamp(f.hunger-40,0,100); f.feeds++;
+      if(f.feeds>=5&&f.stage<2){f.feeds=0;f.stage++;f.scale=1.35;say(f.stage===2?"你的鱼长成大鱼啦！":"小鱼长大了一点！");}
+      setTimeout(()=>{if(f)f.scale=1;},180);
+    }
+    // 掉钱
+    f.coinT-=dt;
+    if(f.coinT<=0&&f.hunger<85){ f.coinT=[24,18,12][f.stage]*rnd(0.8,1.2);
+      const v=STAGE_VAL[f.stage];
+      G.coins.push({x:f.x,y:f.y-6,vy:-40,v:v[0],c:v[1],name:v[2],life:14,fly:false,rise:0.5});
+    }
+  }
+  // 食物
+  for(let i=G.foods.length-1;i>=0;i--){const fd=G.foods[i];
+    if(fd.y<SAND_Y-8) fd.y+=fd.vy*dt; fd.life-=dt; if(fd.life<=0)G.foods.splice(i,1);}
+  // 金币
+  for(let i=G.coins.length-1;i>=0;i--){const c=G.coins[i];
+    if(c.fly){ c.fx+= (90-c.fx)*dt*6; c.fy+=(26-c.fy)*dt*6;
+      if(dist(c.fx,c.fy,90,26)<30){G.money+=c.v;G.earned+=c.v;G.coins.splice(i,1);} continue;}
+    c.life-=dt;
+    if(c.rise>0){c.rise-=dt;c.y+=c.vy*dt;}
+    else if(c.y<SAND_Y-14){c.y+=42*dt;}
+    if(c.y>SAND_Y-14)c.y=SAND_Y-14;
+    if(c.life<=0)G.coins.splice(i,1);
+  }
+  // 鲨鱼
+  G.sharkTimer-=dt;
+  if(G.sharkTimer<=0&&G.sharks.length===0){ G.sharkTimer=55;
+    const side=Math.random()<0.5?-1:1;
+    G.sharks.push({x:side<0?-80:W+80,y:rnd(WATER_TOP+80,WATER_BOT-90),dir:side<0?1:-1,
+      hp:10,speed:58,flash:0,flee:false,gone:false,gulp:0,wob:0});
+    say("⚠ 鲨鱼来袭！快速点击它 10 次把它赶走！",true);
+  }
+  for(let i=G.sharks.length-1;i>=0;i--){const s=G.sharks[i]; s.wob+=dt*3;
+    if(s.flash>0)s.flash-=dt;
+    if(s.flee){ s.x+=s.dir*-90*dt; if(s.x<-120||s.x>W+120)G.sharks.splice(i,1); continue; }
+    let tgt=null,best=1e9;
+    for(const f of G.fish){if(f.dead)continue;const d=dist(s.x,s.y,f.x,f.y);if(d<best){best=d;tgt=f;}}
+    if(tgt){ const d=best||1; s.x+=(tgt.x-s.x)/d*s.speed*dt; s.y+=(tgt.y-s.y)/d*s.speed*dt*0.8;
+      s.dir=(tgt.x-s.x)>0?1:-1;
+      if(d<30){ G.fish.splice(G.fish.indexOf(tgt),1); s.gulp=0.35; say("鲨鱼吃掉了一条鱼！！"); } }
+    else { s.x+=s.dir*40*dt; }
+    s.y=clamp(s.y,WATER_TOP+60,WATER_BOT-80);
+    if(s.gulp>0)s.gulp-=dt;
+    if(G.fish.filter(f=>!f.dead).length===0) s.flee=true;
+  }
+  // 飘字
+  for(let i=G.floats.length-1;i>=0;i--){const f=G.floats[i];f.t+=dt;f.y-=30*dt;if(f.t>1.2)G.floats.splice(i,1);}
+  // 结束判定
+  if(G.fish.filter(f=>!f.dead).length===0&&G.money<60){
+    G.over=true;
+  }
+}
+function floatText(x,y,t,c){G.floats.push({x,y,t:0,txt:t,c:c||"#fff"});}
+
+/* ---------- 绘制 ---------- */
+function draw(){
+  // 水体
+  const g=ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,"#0e5a8a");g.addColorStop(0.5,"#0a3d61");g.addColorStop(1,"#062a44");
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  // 光柱
+  ctx.save();ctx.globalAlpha=0.06;ctx.fillStyle="#bfe8ff";
+  for(let i=0;i<4;i++){const x=120+i*230+Math.sin(G.time*0.3+i)*30;
+    ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x+90,0);ctx.lineTo(x+180,SAND_Y);ctx.lineTo(x+60,SAND_Y);ctx.closePath();ctx.fill();}
+  ctx.restore();
+  drawSand();drawWeeds();
+  // 气泡
+  ctx.strokeStyle="rgba(255,255,255,0.5)";
+  for(const b of G.bubbles){ctx.globalAlpha=0.35;ctx.beginPath();ctx.arc(b.x+Math.sin(b.w)*6,b.y,b.r,0,7);ctx.stroke();}
+  ctx.globalAlpha=1;
+  // 食物
+  for(const fd of G.foods){ ctx.globalAlpha=clamp(fd.life,0,1);
+    ctx.fillStyle="#8a5a2b";ctx.beginPath();ctx.arc(fd.x,fd.y,4.5,0,7);ctx.fill();
+    ctx.fillStyle="rgba(255,255,255,.25)";ctx.beginPath();ctx.arc(fd.x-1.4,fd.y-1.4,1.6,0,7);ctx.fill();ctx.globalAlpha=1;}
+  // 鱼
+  for(const f of G.fish) drawFish(f);
+  // 鲨鱼
+  for(const s of G.sharks) drawShark(s);
+  // 金币
+  for(const c of G.coins) drawCoin(c);
+  // 飘字
+  for(const f of G.floats){ctx.globalAlpha=clamp(1.2-f.t,0,1);ctx.font="bold 16px 'Microsoft YaHei'";
+    ctx.fillStyle=f.c;ctx.textAlign="center";ctx.fillText(f.txt,f.x,f.y);ctx.globalAlpha=1;ctx.textAlign="left";}
+  drawHUD();drawBar();
+  if(G.msgT>0&&G.running&&!G.over){ ctx.font="16px 'Microsoft YaHei'";ctx.textAlign="center";
+    ctx.fillStyle="rgba(0,0,0,.45)";const w=ctx.measureText(G.msg).width+30;
+    ctx.fillRect(W/2-w/2,HUD_H+8,w,30);ctx.fillStyle="#ffe9a8";ctx.fillText(G.msg,W/2,HUD_H+29);ctx.textAlign="left";}
+  if(!G.running) drawStart();
+  if(G.over) drawOver();
+  if(G.helpOn) drawHelp();
+}
+function drawSand(){
+  const g=ctx.createLinearGradient(0,SAND_Y,0,H);
+  g.addColorStop(0,"#d9c087");g.addColorStop(1,"#b39559");
+  ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(0,SAND_Y+10);
+  for(let x=0;x<=W;x+=60) ctx.quadraticCurveTo(x+30,SAND_Y+ (Math.sin(x)*6), x+60,SAND_Y+10);
+  ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.closePath();ctx.fill();
+  ctx.fillStyle="rgba(255,255,255,0.15)";
+  for(let i=0;i<14;i++){ctx.beginPath();ctx.ellipse((i*137+60)%W,SAND_Y+16-(i%3)*7,7,3,0,0,7);ctx.fill();}
+}
+function drawWeeds(){
+  const base=SAND_Y+22;
+  for(let i=0;i<6;i++){ const bx=70+i*160+((i*53)%40), h=60+((i*97)%50);
+    ctx.strokeStyle=i%2?"#1f7a4d":"#2a9a5f";ctx.lineWidth=7;ctx.lineCap="round";
+    for(let k=0;k<2;k++){
+      ctx.beginPath();ctx.moveTo(bx+k*14,base);
+      const sw=Math.sin(G.time*1.2+i+k)*16;
+      ctx.quadraticCurveTo(bx+k*14+sw*0.4,base-h*0.5,bx+k*14+sw,base-h);ctx.stroke();}
+  }
+}
+function drawFish(f){
+  const r=STAGE_R[f.stage]*f.scale;
+  ctx.save();ctx.translate(f.x,f.y);ctx.scale(f.dir,1);
+  if(f.dead>0)ctx.rotate(Math.PI);
+  const starving=f.hunger>=100;
+  // 尾
+  const wag=Math.sin(f.wob)*0.35;
+  ctx.save();ctx.translate(-r*0.9,0);ctx.rotate(wag);
+  ctx.fillStyle=f.c2;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(-r*1.1,-r*0.75);ctx.lineTo(-r*1.1,r*0.75);ctx.closePath();ctx.fill();ctx.restore();
+  // 身体
+  const bg=ctx.createLinearGradient(0,-r,0,r);bg.addColorStop(0,f.c2);bg.addColorStop(1,f.c1);
+  ctx.fillStyle=starving?"#9aa7ad":bg;
+  ctx.beginPath();ctx.ellipse(0,0,r,r*0.72,0,0,7);ctx.fill();
+  // 鳍
+  ctx.fillStyle=f.c1;ctx.beginPath();ctx.ellipse(-r*0.1,r*0.45,r*0.4,r*0.22,wag,0,7);ctx.fill();
+  // 条纹
+  ctx.strokeStyle="rgba(255,255,255,0.35)";ctx.lineWidth=2;
+  ctx.beginPath();ctx.arc(r*0.15,0,r*0.62,-1.1,1.1);ctx.stroke();
+  // 眼
+  ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(r*0.45,-r*0.2,r*0.18,0,7);ctx.fill();
+  ctx.fillStyle="#123";ctx.beginPath();ctx.arc(r*0.5,-r*0.2,r*0.09,0,7);ctx.fill();
+  // 嘴
+  ctx.strokeStyle="#7a3b2e";ctx.lineWidth=1.6;
+  ctx.beginPath();ctx.arc(r*0.82,r*0.12,r*0.1,0.2,1.6);ctx.stroke();
+  ctx.restore();
+  // 饥饿提示
+  if(!f.dead){
+    if(f.hunger>=100){ctx.font="15px 'Microsoft YaHei'";ctx.textAlign="center";
+      ctx.fillStyle="#ff5c5c";ctx.fillText("快饿死了！",f.x,f.y-STAGE_R[f.stage]-14);ctx.textAlign="left";}
+    else if(f.hunger>70){ctx.font="14px 'Microsoft YaHei'";ctx.textAlign="center";
+      ctx.fillStyle="#ffd23a";ctx.fillText("饿了",f.x,f.y-STAGE_R[f.stage]-12);ctx.textAlign="left";}
+  }
+}
+function drawShark(s){
+  ctx.save();ctx.translate(s.x,s.y);ctx.scale(s.dir,1);
+  if(s.flash>0){ctx.globalAlpha=0.6;}
+  const r=42;
+  // 尾
+  ctx.fillStyle="#5b707d";ctx.beginPath();ctx.moveTo(-r,0);ctx.lineTo(-r-26,-20);ctx.lineTo(-r-26,20);ctx.closePath();ctx.fill();
+  // 身体
+  const g=ctx.createLinearGradient(0,-r*0.6,0,r*0.6);g.addColorStop(0,"#8fa3b0");g.addColorStop(1,"#5b707d");
+  ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(0,0,r,r*0.5,0,0,7);ctx.fill();
+  // 背鳍
+  ctx.fillStyle="#748b99";ctx.beginPath();ctx.moveTo(-6,-r*0.42);ctx.lineTo(10,-r*0.95);ctx.lineTo(20,-r*0.4);ctx.closePath();ctx.fill();
+  // 嘴+牙
+  ctx.fillStyle="#31414c";ctx.beginPath();ctx.ellipse(r*0.62,r*0.14,r*0.34,r*0.14+s.gulp*22,0,0,7);ctx.fill();
+  ctx.fillStyle="#fff";
+  for(let i=0;i<4;i++){ctx.beginPath();ctx.moveTo(r*0.38+i*8,r*0.08);ctx.lineTo(r*0.42+i*8,r*0.2);ctx.lineTo(r*0.46+i*8,r*0.08);ctx.closePath();ctx.fill();}
+  // 眼
+  ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(r*0.5,-r*0.18,5,0,7);ctx.fill();
+  ctx.fillStyle="#111";ctx.beginPath();ctx.arc(r*0.53,-r*0.18,2.5,0,7);ctx.fill();
+  ctx.restore();ctx.globalAlpha=1;
+  // 血条
+  ctx.fillStyle="rgba(0,0,0,.4)";ctx.fillRect(s.x-30,s.y-56,60,7);
+  ctx.fillStyle="#ff5c5c";ctx.fillRect(s.x-29,s.y-55,58*clamp(s.hp/10,0,1),5);
+  ctx.font="12px 'Microsoft YaHei'";ctx.textAlign="center";ctx.fillStyle="#ffd7d7";
+  ctx.fillText("点我赶走鲨鱼！",s.x,s.y-62);ctx.textAlign="left";
+}
+function drawCoin(c){
+  let x=c.x,y=c.y;
+  if(c.fly){x=c.fx;y=c.fy;}
+  ctx.save();ctx.translate(x,y);
+  const bob=c.fly?0:Math.sin(G.time*3+x)*2;
+  ctx.translate(0,bob);
+  ctx.shadowColor="rgba(255,220,80,.8)";ctx.shadowBlur=10;
+  ctx.fillStyle=c.c;ctx.beginPath();ctx.arc(0,0,13,0,7);ctx.fill();
+  ctx.shadowBlur=0;
+  ctx.fillStyle="rgba(255,255,255,.5)";ctx.beginPath();ctx.arc(-4,-4,5,0,7);ctx.fill();
+  ctx.fillStyle="#7a5b00";ctx.font="bold 13px 'Microsoft YaHei'";ctx.textAlign="center";ctx.textBaseline="middle";
+  ctx.fillText("¥",0,1);ctx.textBaseline="alphabetic";ctx.textAlign="left";
+  ctx.restore();
+}
+function drawHUD(){
+  ctx.fillStyle="rgba(2,20,34,.9)";ctx.fillRect(0,0,W,HUD_H);
+  ctx.strokeStyle="rgba(120,200,255,.25)";ctx.beginPath();ctx.moveTo(0,HUD_H);ctx.lineTo(W,HUD_H);ctx.stroke();
+  // 金钱
+  ctx.font="bold 24px 'Microsoft YaHei'";ctx.fillStyle="#ffd447";ctx.textAlign="left";
+  ctx.fillText("💰 ¥"+G.money,16,35);
+  ctx.font="14px 'Microsoft YaHei'";ctx.fillStyle="#9fd8ff";
+  ctx.fillText("总收入 ¥"+G.earned,190,33);
+  ctx.fillText("鱼："+G.fish.filter(f=>!f.dead).length+" 条",300,33);
+  const left=Math.max(0,G.sharkTimer);
+  ctx.fillText("下一波鲨鱼："+(G.running?Math.ceil(left)+"s":"--"),380,33);
+}
+function btn(r,label,sub,ok){
+  ctx.fillStyle=ok?"#1b6fae":"#3a4a55";
+  roundRect(r.x,r.y,r.w,r.h,10);ctx.fill();
+  ctx.strokeStyle="rgba(255,255,255,.25)";ctx.lineWidth=1.5;roundRect(r.x,r.y,r.w,r.h,10);ctx.stroke();
+  ctx.textAlign="center";
+  ctx.fillStyle=ok?"#fff":"#9aa7ad";ctx.font="bold 17px 'Microsoft YaHei'";
+  ctx.fillText(label,r.x+r.w/2,r.y+25);
+  if(sub){ctx.font="13px 'Microsoft YaHei'";ctx.fillStyle=ok?"#cfeaff":"#7a8a94";ctx.fillText(sub,r.x+r.w/2,r.y+46);}
+  ctx.textAlign="left";
+}
+function roundRect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function drawBar(){
+  const y=H-BAR_H;
+  ctx.fillStyle="rgba(2,20,34,.92)";ctx.fillRect(0,y,W,BAR_H);
+  G.buyS={x:20,y:y+11,w:170,h:46}; G.buyM={x:205,y:y+11,w:170,h:46};
+  G.helpBtn={x:W-110,y:y+11,w:90,h:46};
+  btn(G.buyS,"买小鱼","小鱼苗 ¥60",G.money>=60);
+  btn(G.buyM,"买中鱼","成年鱼 ¥150",G.money>=150);
+  btn(G.helpBtn,G.helpOn?"关闭帮助":"玩法帮助","",true);
+  ctx.font="13px 'Microsoft YaHei'";ctx.fillStyle="#7fa8c9";
+  ctx.fillText("点击水面 = 投食(¥5) · 鱼吃了会长大 · 大鱼掉的钱更值钱 · 别让鱼饿死",415,y+32);
+}
+function drawStart(){
+  ctx.fillStyle="rgba(1,10,18,.72)";ctx.fillRect(0,0,W,H);
+  ctx.textAlign="center";
+  ctx.fillStyle="#ffd447";ctx.font="bold 56px 'Microsoft YaHei'";
+  ctx.fillText("开心水族馆",W/2,H/2-90);
+  ctx.font="18px 'Microsoft YaHei'";ctx.fillStyle="#cfeaff";
+  ctx.fillText("点击水面投食喂鱼 → 鱼长大掉金币 → 点金币收钱 → 买更多鱼",W/2,H/2-30);
+  ctx.fillText("小心：鲨鱼会来吃鱼，快速点击鲨鱼 10 次可以赶走它！",W/2,H/2+4);
+  G.startBtnRect={x:W/2-120,y:H/2+40,w:240,h:56};
+  ctx.fillStyle="#1b8f4d";roundRect(W/2-120,H/2+40,240,56,14);ctx.fill();
+  ctx.fillStyle="#fff";ctx.font="bold 26px 'Microsoft YaHei'";
+  ctx.fillText("开 始 游 戏",W/2,H/2+77);
+  ctx.textAlign="left";
+}
+function drawOver(){
+  ctx.fillStyle="rgba(60,0,0,.65)";ctx.fillRect(0,0,W,H);
+  ctx.textAlign="center";
+  ctx.fillStyle="#ff8f8f";ctx.font="bold 46px 'Microsoft YaHei'";
+  ctx.fillText("鱼全饿死 / 被吃光了…",W/2,H/2-70);
+  ctx.fillStyle="#fff";ctx.font="22px 'Microsoft YaHei'";
+  ctx.fillText("生存时间："+Math.floor(G.time)+" 秒 · 总收入：¥"+G.earned,W/2,H/2-16);
+  G.restartRect={x:W/2-120,y:H/2+20,w:240,h:56};
+  ctx.fillStyle="#1b6fae";roundRect(W/2-120,H/2+20,240,56,14);ctx.fill();
+  ctx.fillStyle="#fff";ctx.font="bold 24px 'Microsoft YaHei'";
+  ctx.fillText("重新开始",W/2,H/2+56);
+  ctx.textAlign="left";
+}
+function drawHelp(){
+  ctx.fillStyle="rgba(1,10,18,.85)";ctx.fillRect(0,0,W,H);
+  ctx.textAlign="center";ctx.fillStyle="#ffe9a8";ctx.font="bold 34px 'Microsoft YaHei'";
+  ctx.fillText("玩 法 帮 助",W/2,140);
+  ctx.font="19px 'Microsoft YaHei'";ctx.fillStyle="#dff2ff";
+  const lines=[
+    "1. 点击水面投鱼食，每次 ¥5",
+    "2. 鱼会游过去吃掉食物，吃饱后慢慢长大（小 → 中 → 大）",
+    "3. 鱼会定期掉钱：小鱼掉银币¥10 / 中鱼掉金币¥25 / 大鱼掉宝石¥60",
+    "4. 点击掉落的金币把它收进钱包，钱过期不候（会消失）",
+    "5. 用钱买更多鱼苗，滚雪球赚大钱",
+    "6. 鱼太久没吃东西会饿死！鲨鱼还会来吃鱼，连点它10次赶走",
+    "7. 只要手里还有 ¥60 能买鱼苗，游戏就不会结束——守住你的鱼群吧！",
+  ];
+  lines.forEach((t,i)=>ctx.fillText(t,W/2,200+i*42));
+  ctx.font="16px 'Microsoft YaHei'";ctx.fillStyle="#8fb8d8";
+  ctx.fillText("点击任意位置关闭帮助",W/2,H-60);
+  ctx.textAlign="left";
+}
+newGame();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>2048 - 4399小游戏合集</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+  body {
+    background: linear-gradient(135deg, #2b2620, #171410);
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    font-family: "Microsoft YaHei", sans-serif; color: #efe6d8;
+  }
+  h1 { color: #f2b179; margin-bottom: 8px; letter-spacing: 4px; text-shadow: 0 2px 6px rgba(0,0,0,.5); }
+  #hud { display: flex; gap: 14px; align-items: center; margin-bottom: 10px; font-size: 18px; }
+  #hud .box { background: #3a332a; border-radius: 8px; padding: 6px 16px; }
+  #hud b { color: #ffd76e; }
+  #btnNew {
+    padding: 8px 22px; font-size: 16px; border: none; border-radius: 8px;
+    background: linear-gradient(180deg, #f2b179, #d9824b); color: #171410;
+    font-weight: bold; cursor: pointer; font-family: inherit;
+  }
+  #btnNew:hover { filter: brightness(1.1); }
+  #stage { position: relative; border-radius: 12px; overflow: hidden;
+           box-shadow: 0 8px 30px rgba(0,0,0,.6), 0 0 0 4px #4a4238; }
+  canvas { display: block; background: #bbada0; }
+  #overlay {
+    position: absolute; inset: 0; background: rgba(30,24,18,.82);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; gap: 14px;
+  }
+  #overlay.hidden { display: none; }
+  #overlay .big { font-size: 38px; color: #ffd98e; font-weight: bold; }
+  #overlay .sub { font-size: 17px; line-height: 1.9; color: #e8ddc8; }
+  #overlay button {
+    padding: 12px 40px; font-size: 20px; border: none; border-radius: 30px;
+    background: linear-gradient(180deg, #f2b179, #d9824b); color: #171410;
+    font-weight: bold; cursor: pointer; font-family: inherit;
+  }
+  #overlay button:hover { filter: brightness(1.1); }
+  #tips { margin-top: 12px; font-size: 14px; color: #9a8d7a; }
+</style>
+</head>
+<body>
+  <h1>🔢 2048</h1>
+  <div id="hud">
+    <span class="box">得分 <b id="score">0</b></span>
+    <span class="box">最高分 <b id="best">0</b></span>
+    <button id="btnNew">新游戏</button>
+  </div>
+  <div id="stage">
+    <canvas id="cv" width="480" height="480"></canvas>
+    <div id="overlay" class="hidden">
+      <div class="big" id="ovTitle"></div>
+      <div class="sub" id="ovSub"></div>
+      <button id="btnOv"></button>
+    </div>
+  </div>
+  <div id="tips">方向键 / WASD 滑动，相同数字合并翻倍 · 合出 2048 获胜！</div>
+
+<script>
+"use strict";
+const cv = document.getElementById("cv");
+const ctx = cv.getContext("2d");
+const overlay = document.getElementById("overlay");
+const ovTitle = document.getElementById("ovTitle");
+const ovSub = document.getElementById("ovSub");
+const btnOv = document.getElementById("btnOv");
+
+const N = 4, PAD = 12, CELL = (480 - PAD * 5) / 4;
+const COLORS = {
+  2: "#eee4da", 4: "#ede0c8", 8: "#f2b179", 16: "#f59563", 32: "#f67c5f",
+  64: "#f65e3b", 128: "#edcf72", 256: "#edcc61", 512: "#edc850",
+  1024: "#edc53f", 2048: "#edc22e"
+};
+
+let state = "start";      // start | playing | over | win
+let grid = [];
+let score = 0, best = 0;
+let animStart = 0;
+let popCells = [];        // 新块/合并块坐标（做动画）
+let keepPlaying = false;  // 赢后继续
+
+try { best = parseInt(localStorage.getItem("g2048_best") || "0", 10) || 0; } catch (e) { best = 0; }
+document.getElementById("best").textContent = best;
+function saveBest() { try { localStorage.setItem("g2048_best", String(best)); } catch (e) {} }
+
+function emptyGrid() { return Array.from({ length: N }, () => [0, 0, 0, 0]); }
+function freeCells(g) {
+  const out = [];
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (!g[r][c]) out.push([r, c]);
+  return out;
+}
+function addRandomTile(g) {
+  const free = freeCells(g);
+  if (!free.length) return null;
+  const [r, c] = free[Math.floor(Math.random() * free.length)];
+  g[r][c] = Math.random() < 0.9 ? 2 : 4;
+  return [r, c];
+}
+function reset() {
+  grid = emptyGrid(); score = 0; keepPlaying = false;
+  const a = addRandomTile(grid), b = addRandomTile(grid);
+  popCells = [a, b].filter(Boolean);
+  animStart = performance.now();
+  updateHud();
+}
+function updateHud() {
+  document.getElementById("score").textContent = score;
+  document.getElementById("best").textContent = best;
+}
+function canMove(g) {
+  if (freeCells(g).length) return true;
+  for (let r = 0; r < N; r++)
+    for (let c = 0; c < N; c++) {
+      if (c + 1 < N && g[r][c] === g[r][c + 1]) return true;
+      if (r + 1 < N && g[r][c] === g[r + 1][c]) return true;
+    }
+  return false;
+}
+// 提取一方向上的 4 个格子（返回长度4数组，0 为空）
+function getLine(dirIdx, i) {
+  const line = [];
+  for (let j = 0; j < N; j++) {
+    if (dirIdx === 0) line.push(grid[i][j]);           // 左
+    else if (dirIdx === 1) line.push(grid[i][N - 1 - j]); // 右
+    else if (dirIdx === 2) line.push(grid[j][i]);       // 上
+    else line.push(grid[N - 1 - j][i]);                 // 下
+  }
+  return line;
+}
+function setLine(dirIdx, i, line) {
+  for (let j = 0; j < N; j++) {
+    if (dirIdx === 0) grid[i][j] = line[j];
+    else if (dirIdx === 1) grid[i][N - 1 - j] = line[j];
+    else if (dirIdx === 2) grid[j][i] = line[j];
+    else grid[N - 1 - j][i] = line[j];
+  }
+}
+function slide(line) {
+  const arr = line.filter(v => v);
+  const out = []; let gained = 0; const merged = [];
+  for (let i = 0; i < arr.length; i++) {
+    if (i + 1 < arr.length && arr[i] === arr[i + 1]) {
+      const v = arr[i] * 2;
+      out.push(v); gained += v; merged.push(out.length - 1); i++;
+    } else out.push(arr[i]);
+  }
+  while (out.length < N) out.push(0);
+  return { out, gained, merged };
+}
+function move(dirIdx) {
+  if (state !== "playing") return;
+  let movedAny = false, gained = 0;
+  const newPops = [], mergedPops = [];
+  for (let i = 0; i < N; i++) {
+    const old = getLine(dirIdx, i);
+    const { out, gained: g, merged } = slide(old);
+    gained += g;
+    if (old.some((v, j) => v !== out[j])) movedAny = true;
+    setLine(dirIdx, i, out);
+    for (const j of merged) {
+      const pos = linePos(dirIdx, i, j);
+      if (pos) mergedPops.push(pos);
+    }
+  }
+  if (movedAny) {
+    score += gained;
+    if (score > best) { best = score; saveBest(); }
+    const sp = addRandomTile(grid);
+    if (sp) newPops.push(sp);
+    popCells = newPops.concat(mergedPops);
+    animStart = performance.now();
+    updateHud();
+    // 胜利判定
+    if (!keepPlaying && grid.some(row => row.includes(2048))) {
+      state = "win";
+      ovTitle.textContent = "🎉 合成 2048！";
+      ovSub.innerHTML = "得分 <b style='color:#ffd76e'>" + score + "</b>，你已经赢了！<br>可以继续冲击更高分。";
+      btnOv.textContent = "继续挑战";
+      overlay.classList.remove("hidden");
+      return;
+    }
+  }
+  // 死局判定：即使本步没动（满格且相邻无相等），也立即结束
+  if (!canMove(grid)) {
+    state = "over";
+    ovTitle.textContent = "😵 无路可走了";
+    ovSub.innerHTML = "最终得分 <b style='color:#ffd76e'>" + score + "</b>　最高分 " + best;
+    btnOv.textContent = "再来一局";
+    overlay.classList.remove("hidden");
+  }
+}
+function linePos(dirIdx, i, j) {
+  // slide 的 out 下标 j 对应原方向位置：左/上直接 j；右/下是 N-1-j
+  if (dirIdx === 0) return [i, j];
+  if (dirIdx === 1) return [i, N - 1 - j];
+  if (dirIdx === 2) return [j, i];
+  return [N - 1 - j, i];
+}
+
+function tileColor(v) { return COLORS[v] || "#3c3a32"; }
+function fontFor(v) {
+  if (v < 100) return "52px bold sans-serif";
+  if (v < 1000) return "44px bold sans-serif";
+  return "34px bold sans-serif";
+}
+function draw() {
+  ctx.fillStyle = "#bbada0";
+  ctx.fillRect(0, 0, 480, 480);
+  const now = performance.now();
+  const animAge = now - animStart;
+  // 空格
+  for (let r = 0; r < N; r++)
+    for (let c = 0; c < N; c++) {
+      const x = PAD + c * (CELL + PAD), y = PAD + r * (CELL + PAD);
+      ctx.fillStyle = "rgba(238,228,218,.35)";
+      roundRect(x, y, CELL, CELL, 8); ctx.fill();
+    }
+  // 方块
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  for (let r = 0; r < N; r++)
+    for (let c = 0; c < N; c++) {
+      const v = grid[r][c];
+      if (!v) continue;
+      const x = PAD + c * (CELL + PAD), y = PAD + r * (CELL + PAD);
+      const isPop = popCells.some(p => p && p[0] === r && p[1] === c);
+      let scale = 1;
+      if (isPop && animAge < 180) {
+        const t = animAge / 180;
+        scale = 0.5 + 0.5 * (1 - Math.pow(1 - t, 3)); // easeOutCubic 0.5→1
+      }
+      ctx.save();
+      ctx.translate(x + CELL / 2, y + CELL / 2);
+      ctx.scale(scale, scale);
+      ctx.fillStyle = tileColor(v);
+      roundRect(-CELL / 2 + 3, -CELL / 2 + 3, CELL - 6, CELL - 6, 8); ctx.fill();
+      ctx.fillStyle = v <= 4 ? "#776e65" : "#f9f6f2";
+      ctx.font = fontFor(v);
+      ctx.fillText(String(v), 0, 4);
+      ctx.restore();
+    }
+}
+function roundRect(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+function loop() {
+  draw();
+  requestAnimationFrame(loop);
+}
+
+const KEYMAP = {
+  ArrowLeft: 0, ArrowRight: 1, ArrowUp: 2, ArrowDown: 3,
+  KeyA: 0, KeyD: 1, KeyW: 2, KeyS: 3
+};
+window.addEventListener("keydown", e => {
+  const d = KEYMAP[e.code];
+  if (d !== undefined) { e.preventDefault(); move(d); }
+});
+btnOv.addEventListener("click", () => {
+  overlay.classList.add("hidden");
+  if (state === "win") { state = "playing"; keepPlaying = true; }
+  else { reset(); state = "playing"; }
+});
+document.getElementById("btnNew").addEventListener("click", () => {
+  reset(); state = "playing"; overlay.classList.add("hidden");
+});
+
+// 开局：先放好两块并直接进入可玩状态
+reset();
+state = "playing";
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

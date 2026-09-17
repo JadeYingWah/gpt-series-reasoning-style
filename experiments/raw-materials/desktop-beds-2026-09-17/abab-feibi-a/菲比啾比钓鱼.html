@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>菲比啾比钓鱼 🎣</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 100%; height: 100%;
+    background: #1a1e2e;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+    touch-action: manipulation;
+  }
+  #wrap {
+    position: relative;
+    width: 960px; height: 600px;
+    max-width: 100vw; max-height: 100vh;
+    aspect-ratio: 960 / 600;
+  }
+  canvas {
+    width: 100%; height: 100%;
+    display: block;
+    border-radius: 12px;
+    box-shadow: 0 8px 40px rgba(0,0,0,.55);
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+<div id="wrap"><canvas id="game" width="960" height="600"></canvas></div>
+<script>
+"use strict";
+/* ============================================================
+   菲比啾比钓鱼 · 2D 休闲钓鱼游戏（同人二创，简笔团子风）
+   玩法：抛竿 → 等咬钩 → 刺鱼 → 拉扯 → 收获
+   彩蛋：双击菲比摘帽子，魔丸降临，传说鱼概率提升
+   ============================================================ */
+
+const cv = document.getElementById("game");
+const ctx = cv.getContext("2d");
+const W = cv.width, H = cv.height;
+const WATER_Y = 370;              // 水面线
+
+/* ---------------- 存档 ---------------- */
+const SAVE_KEY = "feibi_fishing_save_v1";
+let save = { coins: 0, dex: {} };  // dex[id] = {count, best}
+try {
+  const raw = localStorage.getItem(SAVE_KEY);
+  if (raw) { const s = JSON.parse(raw); if (s && typeof s === "object") save = Object.assign(save, s); }
+} catch (e) { /* 存档损坏则重开 */ }
+function persist() {
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {}
+}
+
+/* ---------------- 鱼类图鉴 ---------------- */
+// rarity: 0普通 1稀有 2传说
+const FISHES = [
+  { id:"mili",   name:"打窝米粒", rarity:0, val:4,   weight:[0.5,2],   speed:26, barH:.30, dash:0,   color:"#f5e6b8", desc:"窝料散开后的漏网之粒。" },
+  { id:"jiuubi", name:"啾比小鱼", rarity:0, val:6,   weight:[0.3,1.5], speed:32, barH:.28, dash:0,   color:"#9fd8ef", desc:"圆滚滚的小鱼，叫声有点耳熟。" },
+  { id:"tangy",  name:"汤圆鲤",   rarity:0, val:9,   weight:[0.8,3],   speed:38, barH:.26, dash:.05, color:"#fff3f3", desc:"下班到家它热好的一碗汤圆。" },
+  { id:"donkey", name:"骑驴鲈",   rarity:0, val:12,  weight:[1,4],     speed:44, barH:.24, dash:.08, color:"#c9b38a", desc:"逛动物园的时候骑驴跨龟。" },
+  { id:"hat",    name:"白帽鱼",   rarity:1, val:28,  weight:[1,3],     speed:58, barH:.20, dash:.15, color:"#f7f7fb", desc:"头顶一顶白帽，谁摘谁倒霉。" },
+  { id:"wire",   name:"拉电线鳗", rarity:1, val:38,  weight:[1.5,5],   speed:66, barH:.18, dash:.22, color:"#ffd76e", desc:"圣祈凝辉自带电能传递属性。" },
+  { id:"shengqi",name:"圣祈鲷",   rarity:1, val:48,  weight:[2,6],     speed:74, barH:.17, dash:.28, color:"#e8b7ff", desc:"被它轻轻一杖敲死的那种鱼。" },
+  { id:"flat",   name:"大扁脸鲽", rarity:1, val:60,  weight:[2,7],     speed:82, barH:.16, dash:.32, color:"#ffc2d1", desc:"想狠狠揉捏的冲动，这就是扁脸。" },
+  { id:"mowan",  name:"魔丸",     rarity:2, val:130, weight:[3,9],     speed:96, barH:.14, dash:.45, color:"#7b4d9e", desc:"帽子被摘掉的菲比，砸家电讹诈老人样样精通。" },
+  { id:"feibi",  name:"圣菲比",   rarity:2, val:233, weight:[5,12],    speed:105,barH:.13, dash:.5,  color:"#ffe08a", desc:"钓到她的那一刻，其实是她钓到了你。", special:true },
+];
+const RARITY = [
+  { name:"普通", color:"#7fd08a", p:.58 },
+  { name:"稀有", color:"#6aa9ff", p:.32 },
+  { name:"传说", color:"#ffcf4d", p:.10 },
+];
+
+/* ---------------- 音效（Web Audio 合成） ---------------- */
+let AC = null, soundOn = true;
+function ac() { if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} } return AC; }
+function tone(freq, dur, type, vol, slideTo, delay) {
+  if (!soundOn) return; const a = ac(); if (!a) return;
+  const t0 = a.currentTime + (delay || 0);
+  const o = a.createOscillator(), g = a.createGain();
+  o.type = type || "sine"; o.frequency.setValueAtTime(freq, t0);
+  if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t0 + dur);
+  g.gain.setValueAtTime(vol || .15, t0);
+  g.gain.exponentialRampToValueAtTime(.001, t0 + dur);
+  o.connect(g); g.connect(a.destination);
+  o.start(t0); o.stop(t0 + dur + .02);
+}
+const SFX = {
+  cast()   { tone(500, .3, "sine", .1, 900); },
+  splash() { tone(220, .18, "sine", .2, 90); tone(700, .1, "sine", .06, 300, .04); },
+  taste()  { tone(300, .08, "sine", .08, 240); },
+  bite()   { tone(880, .09, "square", .09); tone(1100, .09, "square", .09, null, .1); tone(1320, .12, "square", .1, null, .2); },
+  hook()   { tone(1400, .1, "triangle", .14, 1900); },
+  win()    { [523, 659, 784, 1047].forEach((f, i) => tone(f, .16, "triangle", .13, null, i * .09)); },
+  lose()   { tone(330, .25, "sawtooth", .08, 180); tone(240, .3, "sine", .09, 140, .12); },
+  // 模仿"菲比啾比"的萌叫：两段上滑音
+  feibi()  { tone(760, .16, "sine", .14, 1180); tone(860, .2, "sine", .14, 1320, .17); },
+  mowan()  { tone(180, .5, "sawtooth", .1, 90); tone(140, .6, "square", .06, 70, .1); },
+};
+
+/* ---------------- 状态机 ---------------- */
+const S = { IDLE:0, CAST:1, WAIT:2, BITE:3, REEL:4, RESULT:5 };
+let state = S.IDLE;
+let stateT = 0;                       // 当前状态已持续秒数
+let curFish = null, fishWeight = 0, fishCoins = 0;
+let isFake = false;                   // 假动作（水草捣乱）
+let mowanMode = false, mowanT = 0;    // 摘帽魔丸彩蛋
+let msg = "", msgT = 0;               // 屏幕提示
+let newDexId = null;                  // 图鉴新纪录标记
+let bubble = "", bubbleT = 0;         // 菲比说话气泡
+let hatFly = 0;                       // 帽子飞出动画 0~1
+let particles = [];                   // 通用粒子
+
+function setState(s) { state = s; stateT = 0; }
+
+function pickFish() {
+  const bonus = mowanMode ? .18 : 0;
+  let r = Math.random(), rar;
+  if (r < RARITY[2].p + bonus) rar = 2;
+  else if (r < RARITY[2].p + bonus + RARITY[1].p) rar = 1;
+  else rar = 0;
+  const pool = FISHES.filter(f => f.rarity === rar);
+  return pool[(Math.random() * pool.length) | 0];
+}
+
+function startCast() {
+  if (state !== S.IDLE) return;
+  hatFly = 0;
+  SFX.cast();
+  setState(S.CAST);
+}
+function startWait() {
+  setState(S.WAIT);
+  biteAt = 1.6 + Math.random() * 4.2;         // 1.6~5.8s 后咬钩
+  fakeAt = Math.random() < .38 ? (0.5 + Math.random() * Math.max(.2, biteAt - 1.2)) : -1;
+}
+let biteAt = 0, fakeAt = -1, biteWin = .95;
+
+function hookSuccess() {
+  curFish = pickFish();
+  fishWeight = +(curFish.weight[0] + Math.random() * (curFish.weight[1] - curFish.weight[0])).toFixed(1);
+  fishCoins = Math.round(curFish.val * (0.7 + fishWeight / curFish.weight[1] * .8));
+  reel = { progress: .32, fishY: .5, fishV: 0, barY: .55, barV: 0, hold: false, target: .5, thinkT: 0 };
+  SFX.hook();
+  setState(S.REEL);
+}
+function finishWin() {
+  save.coins += fishCoins;
+  const d = save.dex[curFish.id] || { count: 0, best: 0 };
+  const isNew = !save.dex[curFish.id];
+  d.count++; if (fishCoins > d.best) d.best = fishCoins;
+  save.dex[curFish.id] = d; persist();
+  if (isNew) newDexId = curFish.id;
+  SFX.win(); if (curFish.special) SFX.feibi();
+  msg = `钓到了 ${curFish.name}！${curFish.rarity===2?"传说！！":""} +${fishCoins} 金币`;
+  msgT = 3;
+  spawnSplash(bobber.x, WATER_Y + 20, 26);
+  for (let i = 0; i < 10; i++) spawnCoin(bobber.x, WATER_Y - 40);
+  caughtFishFly = { x0: bobber.x, y0: WATER_Y - 10 };   // 飞鱼入场
+  setState(S.RESULT);
+}
+function finishLose(reason) {
+  SFX.lose();
+  msg = reason || "鱼跑了……";
+  msgT = 3;
+  caughtFishFly = null;
+  setState(S.RESULT);
+}
+
+/* ---------------- 拉扯小游戏参数 ---------------- */
+let reel = null;
+function updateReel(dt) {
+  const r = reel, f = curFish;
+  // 鱼的 AI：随机换目标，偶尔冲刺
+  r.thinkT -= dt;
+  if (r.thinkT <= 0) {
+    r.thinkT = .25 + Math.random() * .8;
+    r.target = Math.random();
+    r.dash = Math.random() < f.dash ? .45 + Math.random() * .3 : 0;
+  }
+  r.dash = Math.max(0, (r.dash || 0) - dt * .8);
+  const sp = f.speed * (1 + 2.2 * r.dash) * (mowanMode ? .9 : 1);   // 0-1 空间每秒约 speed/100
+  const dy = r.target - r.fishY;
+  r.fishY += Math.sign(dy) * Math.min(Math.abs(dy), sp * dt / 100);
+  r.fishY += Math.sin(time * 7) * .0004;      // 微游动感
+  // 玩家捕获区：按住上升，松开下落（单位：0-1空间/秒）
+  r.barV += (r.hold ? -1.0 : 0.75) * dt;
+  r.barV *= Math.pow(.90, dt * 60);           // 阻尼
+  r.barV = Math.max(-.5, Math.min(.5, r.barV));
+  r.barY += r.barV * dt;
+  if (r.barY < f.barH / 2) { r.barY = f.barH / 2; r.barV = 0; }
+  if (r.barY > 1 - f.barH / 2) { r.barY = 1 - f.barH / 2; r.barV = 0; }
+  // 进度
+  const inZone = Math.abs(r.fishY - r.barY) < f.barH / 2;
+  r.progress += (inZone ? .10 : -.085) * dt * (inZone && r.dash ? 1.4 : 1);
+  if (r.progress >= 1) { finishWin(); return; }
+  if (r.progress <= 0) { finishLose("挣脱了……下次稳一点！"); }
+}
+
+/* ---------------- 粒子 ---------------- */
+function spawnSplash(x, y, n) {
+  for (let i = 0; i < n; i++) particles.push({
+    x, y, vx: (Math.random() - .5) * 5, vy: -Math.random() * 5 - 1,
+    g: .18, life: .6 + Math.random() * .4, t: 0, type: "drop", r: 1.5 + Math.random() * 2.5
+  });
+}
+function spawnCoin(x, y) {
+  particles.push({
+    x, y, vx: (Math.random() - .5) * 3, vy: -2 - Math.random() * 2,
+    g: .12, life: .9 + Math.random() * .4, t: 0, type: "coin", r: 6
+  });
+}
+function spawnDark(x, y) {
+  particles.push({
+    x, y, vx: (Math.random() - .5) * 1.2, vy: -.6 - Math.random(),
+    g: 0, life: 1.2, t: 0, type: "dark", r: 4 + Math.random() * 6
+  });
+}
+function updateParticles(dt) {
+  particles = particles.filter(p => {
+    p.t += dt; p.x += p.vx; p.y += p.vy; p.vy += p.g;
+    return p.t < p.life;
+  });
+}
+
+/* ---------------- 输入 ---------------- */
+let firstHello = true, lastPatT = 0;
+function resumeAudio() {
+  const a = ac();
+  if (a && a.state === "suspended") a.resume();
+}
+function onAction() {
+  switch (state) {
+    case S.IDLE: startCast(); break;
+    case S.WAIT:
+      if (isFake) { finishLose("太急了！只是水草在挠痒痒……"); }
+      else { finishLose("收竿早了，饵被啃了半截……"); }
+      break;
+    case S.BITE: hookSuccess(); break;
+    case S.REEL: reel.hold = true; break;
+  }
+}
+function onUp() { if (state === S.REEL && reel) reel.hold = false; }
+
+cv.addEventListener("pointerdown", e => {
+  resumeAudio();
+  const rect = cv.getBoundingClientRect();
+  const x = (e.clientX - rect.left) / rect.width * W;
+  const y = (e.clientY - rect.top) / rect.height * H;
+  // 按钮判定
+  if (btnSound.hit(x, y)) { soundOn = !soundOn; return; }
+  if (btnDex.hit(x, y)) { dexOpen = !dexOpen; return; }
+  if (dexOpen) { dexOpen = false; return; }
+  // 双击菲比 → 摘帽彩蛋
+  const now = performance.now();
+  if (Math.hypot(x - 150, y - 300) < 90) {
+    if (now - lastPatT < 350) {
+      if (!mowanMode && state !== S.REEL) {   // 摘帽！
+        mowanMode = true; mowanT = 0; hatFly = .001;
+        SFX.mowan(); msg = "帽子被摘掉了……魔丸降临！传说鱼出没！";
+        for (let i = 0; i < 14; i++) spawnDark(150, 250);
+      }
+      lastPatT = 0; return;
+    }
+    lastPatT = now;
+    if (state === S.IDLE && !mowanMode) { bubble = rndSay(); bubbleT = 2; SFX.feibi(); }
+    return;
+  }
+  if (mowanMode) {  // 魔丸期间点菲比 → 戴回帽子
+    if (Math.hypot(x - 150, y - 300) < 110) { mowanMode = false; msg = "帽子戴回来了，魔丸沉睡。"; SFX.feibi(); return; }
+  }
+  if (firstHello && state === S.IDLE) { firstHello = false; bubble = "菲比啾比～"; bubbleT = 2.2; SFX.feibi(); }
+  if (state === S.REEL) { reel.hold = true; return; }
+  onAction();
+});
+cv.addEventListener("pointerup", () => onUp());
+cv.addEventListener("pointerleave", () => onUp());
+window.addEventListener("keydown", e => {
+  if (e.repeat) return;
+  if (e.code === "Space" || e.code === "Enter") {
+    e.preventDefault();
+    resumeAudio();
+    if (firstHello) firstHello = false;
+    if (dexOpen) { dexOpen = false; return; }
+    if (state === S.REEL) { reel.hold = true; return; }
+    onAction();
+  }
+  if (e.code === "KeyD") dexOpen = !dexOpen;
+});
+window.addEventListener("keyup", e => { if (e.code === "Space" || e.code === "Enter") onUp(); });
+function rndSay() {
+  return ["菲比啾比～", "啾比啾比！", "今天钓点什么呢～", "菲比…啾比？", "钓鱼，也是一种祈祷。"][(Math.random() * 5) | 0];
+}
+
+/* ---------------- 按钮 ---------------- */
+class Btn {
+  constructor(x, y, w, h, draw) { this.x = x; this.y = y; this.w = w; this.h = h; this.draw = draw; }
+  hit(x, y) { return x >= this.x && x <= this.x + this.w && y >= this.y && y <= this.y + this.h; }
+  render() { this.draw(this.x, this.y, this.w, this.h); }
+}
+function pill(x, y, w, h, fill, stroke) {
+  ctx.beginPath();
+  ctx.roundRect(x, y, w, h, h / 2);
+  ctx.fillStyle = fill; ctx.fill();
+  if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 2; ctx.stroke(); }
+}
+const btnSound = new Btn(770, 16, 86, 36, (x, y, w, h) => {
+  pill(x, y, w, h, "rgba(20,26,45,.62)");
+  ctx.fillStyle = "#fff"; ctx.font = "17px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText(soundOn ? "🔊 音效开" : "🔇 静音", x + w / 2, y + h / 2 + 1);
+});
+const btnDex = new Btn(672, 16, 86, 36, (x, y, w, h) => {
+  pill(x, y, w, h, "rgba(20,26,45,.62)");
+  ctx.fillStyle = "#fff"; ctx.font = "17px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText("📖 图鉴", x + w / 2, y + h / 2 + 1);
+});
+
+/* ---------------- 图鉴界面 ---------------- */
+let dexOpen = false;
+function drawDex() {
+  ctx.fillStyle = "rgba(12,15,30,.88)"; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = "#ffe08a"; ctx.font = "bold 30px sans-serif"; ctx.textAlign = "center";
+  ctx.fillText("🐟 菲比啾比图鉴", W / 2, 64);
+  const got = Object.keys(save.dex).length;
+  ctx.fillStyle = "#aab"; ctx.font = "16px sans-serif";
+  ctx.fillText(`已收录 ${got} / ${FISHES.length} · 累计金币 ${save.coins}`, W / 2, 96);
+  const cols = 5, rows = 2, cw = 150, ch = 168, gx = (W - cols * cw - (cols - 1) * 18) / 2, gy = 130;
+  FISHES.forEach((f, i) => {
+    const c = i % cols, r = (i / cols) | 0;
+    const x = gx + c * (cw + 18), y = gy + r * (ch + 18);
+    const rec = save.dex[f.id];
+    ctx.beginPath(); ctx.roundRect(x, y, cw, ch, 14);
+    ctx.fillStyle = rec ? "rgba(255,255,255,.10)" : "rgba(255,255,255,.045)";
+    ctx.fill();
+    ctx.strokeStyle = rec ? RARITY[f.rarity].color : "rgba(255,255,255,.15)";
+    ctx.lineWidth = 2; ctx.stroke();
+    // 鱼
+    ctx.save(); ctx.translate(x + cw / 2, y + 62);
+    ctx.globalAlpha = rec ? 1 : .28;
+    drawFishShape(f.color, 1.15, !rec);
+    ctx.restore();
+    ctx.textAlign = "center";
+    if (rec) {
+      ctx.fillStyle = "#fff"; ctx.font = "bold 16px sans-serif";
+      ctx.fillText(f.name, x + cw / 2, y + 116);
+      ctx.fillStyle = "#9ab"; ctx.font = "12px sans-serif";
+      ctx.fillText(`×${rec.count} · 最佳 ${rec.best} 金币`, x + cw / 2, y + 136);
+      ctx.fillStyle = RARITY[f.rarity].color; ctx.font = "11px sans-serif";
+      ctx.fillText(RARITY[f.rarity].name + (f.id === newDexId ? " · ✨NEW!" : ""), x + cw / 2, y + 154);
+    } else {
+      ctx.fillStyle = "#889"; ctx.font = "bold 16px sans-serif";
+      ctx.fillText("？？？", x + cw / 2, y + 124);
+    }
+  });
+  ctx.fillStyle = "#889"; ctx.font = "14px sans-serif";
+  ctx.fillText("点击任意处关闭（快捷键 D）", W / 2, H - 24);
+}
+
+/* ---------------- 绘制：鱼形 ---------------- */
+function drawFishShape(color, scale, silhouette) {
+  ctx.save(); ctx.scale(scale, scale);
+  ctx.fillStyle = silhouette ? "#556" : color;
+  ctx.beginPath(); ctx.ellipse(0, 0, 34, 19, 0, 0, Math.PI * 2); ctx.fill();     // 身体
+  ctx.beginPath(); ctx.moveTo(30, 0); ctx.lineTo(52, -15); ctx.lineTo(52, 15); ctx.closePath(); ctx.fill(); // 尾
+  if (!silhouette) {
+    ctx.fillStyle = "rgba(255,255,255,.55)";
+    ctx.beginPath(); ctx.arc(-12, -4, 8, 0, Math.PI * 2); ctx.fill();            // 高光
+    ctx.fillStyle = "#222";
+    ctx.beginPath(); ctx.arc(-22, -3, 3, 0, Math.PI * 2); ctx.fill();            // 眼
+  }
+  ctx.restore();
+}
+
+/* ---------------- 绘制：菲比啾比 ---------------- */
+function drawFeibi(t) {
+  const bob = Math.sin(t * 1.6) * 4;              // 呼吸浮动
+  const x = 150, y = 298 + bob;
+  ctx.save();
+  // 影子
+  ctx.fillStyle = "rgba(0,0,0,.18)";
+  ctx.beginPath(); ctx.ellipse(x, 392, 62, 12, 0, 0, Math.PI * 2); ctx.fill();
+  // 魔丸黑气
+  if (mowanMode) {
+    if (Math.random() < .25) spawnDark(x + (Math.random() - .5) * 70, y - 30);
+    ctx.save(); ctx.globalAlpha = .5;
+    for (let i = 0; i < 3; i++) {
+      const a = t * 2 + i * 2.1;
+      ctx.fillStyle = "#3a2450";
+      ctx.beginPath(); ctx.arc(x + Math.cos(a) * 58, y - 20 + Math.sin(a * 1.3) * 30, 8, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+  }
+  // 身体
+  const bodyC = mowanMode ? ["#5d3a86", "#31204d"] : ["#ffe28a", "#f4b23e"];
+  const g = ctx.createRadialGradient(x - 18, y - 24, 8, x, y, 62);
+  g.addColorStop(0, bodyC[0]); g.addColorStop(1, bodyC[1]);
+  ctx.fillStyle = g;
+  ctx.beginPath(); ctx.arc(x, y, 56, 0, Math.PI * 2); ctx.fill();
+  // 扁脸腮红
+  ctx.fillStyle = mowanMode ? "rgba(214,84,120,.5)" : "rgba(255,140,150,.55)";
+  ctx.beginPath(); ctx.ellipse(x - 30, y + 8, 11, 7, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(x + 30, y + 8, 11, 7, 0, 0, Math.PI * 2); ctx.fill();
+  // 眼睛（魔丸红眼）
+  ctx.fillStyle = mowanMode ? "#ff4d5e" : "#2b2320";
+  ctx.beginPath(); ctx.arc(x - 18, y - 6, 4.6, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x + 18, y - 6, 4.6, 0, Math.PI * 2); ctx.fill();
+  if (mowanMode) {  // 魔丸角
+    ctx.fillStyle = "#c9a3ff";
+    ctx.beginPath(); ctx.moveTo(x - 34, y - 40); ctx.lineTo(x - 44, y - 66); ctx.lineTo(x - 22, y - 50); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(x + 34, y - 40); ctx.lineTo(x + 44, y - 66); ctx.lineTo(x + 22, y - 50); ctx.closePath(); ctx.fill();
+  }
+  // 嘴
+  ctx.strokeStyle = "#2b2320"; ctx.lineWidth = 2.4; ctx.lineCap = "round";
+  ctx.beginPath();
+  if (state === S.REEL) {  // 使劲的小嘴
+    ctx.arc(x, y + 14, 5, 0, Math.PI * 2); ctx.fillStyle = "#2b2320"; ctx.fill();
+  } else {
+    ctx.arc(x, y + 8, 12, .35, Math.PI - .35); ctx.stroke();
+  }
+  // 小短手（持竿）
+  ctx.strokeStyle = bodyC[1]; ctx.lineWidth = 9;
+  ctx.beginPath(); ctx.moveTo(x + 44, y + 12); ctx.lineTo(x + 70, y - 6); ctx.stroke();
+  // 帽子（魔丸模式下飞走）
+  if (!mowanMode || hatFly > 0) {
+    let hx = x, hy = y - 46, rot = 0, alpha = 1;
+    if (mowanMode) {  // 飞出去
+      hatFly = Math.min(1, hatFly + .02);
+      hx = x + hatFly * 190; hy = y - 46 - Math.sin(hatFly * Math.PI) * 120;
+      rot = hatFly * 5; alpha = 1 - hatFly;
+    }
+    ctx.save(); ctx.globalAlpha = alpha;
+    ctx.translate(hx, hy); ctx.rotate(rot);
+    ctx.fillStyle = "#fdfdfa";
+    ctx.beginPath(); ctx.ellipse(0, 0, 54, 13, 0, 0, Math.PI * 2); ctx.fill();     // 帽檐
+    ctx.beginPath(); ctx.arc(0, -8, 30, Math.PI, 0); ctx.fill();                    // 帽顶
+    ctx.fillStyle = "#e8e4da";
+    ctx.beginPath(); ctx.ellipse(0, 0, 54, 13, 0, 0, Math.PI * .18); ctx.fill();    // 帽檐阴影
+    ctx.fillStyle = "#d9a13c";
+    ctx.beginPath(); ctx.ellipse(0, -6, 30, 7, 0, 0, Math.PI * 2); ctx.fill();      // 帽带
+    ctx.restore();  }
+  // 说话气泡
+  if (bubbleT > 0) {
+    ctx.globalAlpha = Math.min(1, bubbleT);
+    ctx.fillStyle = "#fff";
+    ctx.beginPath(); ctx.roundRect(x + 40, y - 118, 172, 42, 12); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(x + 66, y - 76); ctx.lineTo(x + 84, y - 60); ctx.lineTo(x + 92, y - 76); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = "#443"; ctx.font = "16px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText(bubble, x + 126, y - 96);
+    ctx.globalAlpha = 1;
+  }
+  ctx.restore();
+  // 鱼竿（不随 bob 抖）
+  const rx = 150 + 70, ry = 298 - 6;
+  ctx.strokeStyle = "#8a6a48"; ctx.lineWidth = 4.5; ctx.lineCap = "round";
+  ctx.beginPath(); ctx.moveTo(rx - 8, ry + 8); ctx.quadraticCurveTo(rx + 60, ry - 62, rx + 118, ry - 58); ctx.stroke();
+  return { tipX: rx + 118, tipY: ry - 58 };
+}
+
+/* ---------------- 主渲染 ---------------- */
+let time = 0, floatBob = 0;
+let bobber = { x: 600, y: WATER_Y + 26, down: 0 };   // 浮标
+let castT = 0;
+let caughtFishFly = null;                             // 结果阶段飞鱼
+
+function render() {
+  const t = time;
+  /* 天空（黄昏） */
+  const sky = ctx.createLinearGradient(0, 0, 0, WATER_Y);
+  sky.addColorStop(0, "#6f7fd0"); sky.addColorStop(.55, "#f79ba4"); sky.addColorStop(1, "#ffd9a0");
+  ctx.fillStyle = sky; ctx.fillRect(0, 0, W, WATER_Y);
+  // 太阳
+  ctx.fillStyle = "rgba(255,244,200,.9)";
+  ctx.beginPath(); ctx.arc(760, 120, 44, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "rgba(255,244,200,.25)";
+  ctx.beginPath(); ctx.arc(760, 120, 66, 0, Math.PI * 2); ctx.fill();
+  // 云
+  cloud(180 + Math.sin(t * .08) * 20, 90, 1);
+  cloud(560 + Math.sin(t * .06 + 2) * 24, 150, .7);
+  cloud(380, 60, .5);
+  // 远山
+  ctx.fillStyle = "#8f7bb8";
+  ctx.beginPath(); ctx.moveTo(0, WATER_Y);
+  ctx.quadraticCurveTo(240, 210, 470, WATER_Y); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = "#a48cc9";
+  ctx.beginPath(); ctx.moveTo(300, WATER_Y);
+  ctx.quadraticCurveTo(640, 170, 960, WATER_Y); ctx.closePath(); ctx.fill();
+
+  /* 水面 */
+  const wa = ctx.createLinearGradient(0, WATER_Y, 0, H);
+  wa.addColorStop(0, "#67b7d7"); wa.addColorStop(1, "#2f6b8e");
+  ctx.fillStyle = wa; ctx.fillRect(0, WATER_Y, W, H - WATER_Y);
+  // 太阳倒影
+  ctx.fillStyle = "rgba(255,240,190,.18)";
+  ctx.beginPath(); ctx.ellipse(760, WATER_Y + 60, 90, 40, 0, 0, Math.PI * 2); ctx.fill();
+  // 波纹
+  ctx.strokeStyle = "rgba(255,255,255,.28)"; ctx.lineWidth = 2;
+  for (let i = 0; i < 7; i++) {
+    const y = WATER_Y + 22 + i * 30;
+    ctx.beginPath();
+    for (let x = 0; x <= W; x += 24) {
+      const yy = y + Math.sin(x * .02 + t * (1.2 + i * .14) + i * 2) * 3.5;
+      x === 0 ? ctx.moveTo(x, yy) : ctx.lineTo(x, yy);
+    }
+    ctx.stroke();
+  }
+
+  /* 岸边草地（左下） */
+  ctx.fillStyle = "#79b85a";
+  ctx.beginPath(); ctx.moveTo(0, WATER_Y - 8);
+  ctx.quadraticCurveTo(230, WATER_Y - 40, 330, H); ctx.lineTo(0, H); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = "#8fce6b";
+  ctx.beginPath(); ctx.ellipse(90, WATER_Y + 30, 130, 34, -.2, 0, Math.PI * 2); ctx.fill();
+  // 小花
+  flower(48, 470, t); flower(120, 520, t + 2); flower(36, 552, t + 4);
+
+  /* 菲比与鱼竿 */
+  const rod = drawFeibi(t);
+
+  /* 鱼线与浮标（按状态） */
+  if (state === S.CAST || state === S.WAIT || state === S.BITE || state === S.REEL) {
+    const bx = bobber.x, by = bobber.y + bobber.down;
+    ctx.strokeStyle = "rgba(255,255,255,.75)"; ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(rod.tipX, rod.tipY);
+    const sag = state === S.CAST ? Math.sin(Math.min(1, stateT / .6) * Math.PI) * 90 : 12;
+    ctx.quadraticCurveTo((rod.tipX + bx) / 2, (rod.tipY + by) / 2 + sag, bx, by - 8);
+    ctx.stroke();
+    // 浮标
+    const wig = state === S.BITE ? Math.sin(t * 40) * 4 : (isFake ? Math.sin(t * 14) * 2 : 0);
+    ctx.save(); ctx.translate(bx, by + wig);
+    if (state === S.BITE) ctx.rotate(Math.sin(t * 30) * .18);
+    ctx.fillStyle = "#e84b4b"; ctx.beginPath(); ctx.arc(0, -4, 8, Math.PI, 0); ctx.fill();
+    ctx.fillStyle = "#fff";    ctx.beginPath(); ctx.arc(0, -4, 8, 0, Math.PI); ctx.fill();
+    ctx.strokeStyle = "#333"; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.moveTo(0, -14); ctx.lineTo(0, 4); ctx.stroke();
+    ctx.restore();
+    // 涟漪
+    const rp = (t * .8) % 1;
+    ctx.strokeStyle = `rgba(255,255,255,${.5 - rp * .5})`;
+    ctx.beginPath(); ctx.ellipse(bx, by + 6, 10 + rp * 30, 4 + rp * 10, 0, 0, Math.PI * 2); ctx.stroke();
+    // 咬钩提示
+    if (state === S.BITE) {
+      ctx.fillStyle = "#ff3b3b"; ctx.font = "bold 52px sans-serif"; ctx.textAlign = "center";
+      ctx.strokeStyle = "#fff"; ctx.lineWidth = 6;
+      ctx.strokeText("！！", bx + 4, by - 58); ctx.fillText("！！", bx + 4, by - 58);
+    }
+  }
+
+  /* 结果阶段：飞鱼动画 */
+  if (state === S.RESULT && caughtFishFly) {
+    const f = caughtFishFly;
+    const p = Math.min(1, stateT / .9);
+    const x = f.x0 + (150 - f.x0) * p;
+    const y = f.y0 - Math.sin(p * Math.PI) * 180 + p * (330 - f.y0);
+    ctx.save(); ctx.translate(x, y); ctx.rotate(p * 2.4);
+    drawFishShape(curFish.color, 1.3, false);
+    ctx.restore();
+  }
+
+  /* 粒子 */
+  particles.forEach(p => {
+    if (p.type === "drop") {
+      ctx.fillStyle = `rgba(220,245,255,${1 - p.t / p.life})`;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
+    } else if (p.type === "coin") {
+      ctx.fillStyle = "#ffd34d"; ctx.strokeStyle = "#b8860b"; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = "#b8860b"; ctx.font = "bold 8px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText("¥", p.x, p.y + .5);
+    } else if (p.type === "dark") {
+      ctx.fillStyle = `rgba(60,30,90,${.6 - p.t / p.life * .6})`;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
+    }
+  });
+
+  /* 顶部 UI */
+  pill(16, 16, 190, 36, "rgba(20,26,45,.62)");
+  ctx.fillStyle = "#ffd34d"; ctx.font = "bold 18px sans-serif"; ctx.textAlign = "left"; ctx.textBaseline = "middle";
+  ctx.fillText(`💰 ${save.coins}`, 34, 35);
+  btnDex.render(); btnSound.render();
+
+  /* 魔丸倒计时 */
+  if (mowanMode) {
+    const left = Math.max(0, 30 - mowanT);
+    pill(W / 2 - 110, 16, 220, 36, "rgba(60,20,80,.75)");
+    ctx.fillStyle = "#e0a6ff"; ctx.font = "bold 16px sans-serif"; ctx.textAlign = "center";
+    ctx.fillText(`😈 魔丸降临中 ${left.toFixed(0)}s · 传说率UP`, W / 2, 35);
+  }
+
+  /* 底部提示条 */
+  const tip = tipText();
+  if (tip) {
+    ctx.font = "20px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    const tw = ctx.measureText(tip).width;
+    pill(W / 2 - tw / 2 - 22, H - 66, tw + 44, 44, "rgba(20,26,45,.66)");
+    ctx.fillStyle = "#fff";
+    ctx.fillText(tip, W / 2, H - 43);
+  }
+  /* 状态提示大字（成功/失败） */
+  if (msgT > 0 && state === S.RESULT) {
+    ctx.globalAlpha = Math.min(1, msgT);
+    ctx.font = "bold 34px sans-serif"; ctx.textAlign = "center";
+    ctx.strokeStyle = "rgba(0,0,0,.55)"; ctx.lineWidth = 8;
+    ctx.strokeText(msg, W / 2, 200);
+    ctx.fillStyle = msg.includes("钓到") ? "#ffe08a" : "#ffb0b8";
+    ctx.fillText(msg, W / 2, 200);
+    ctx.globalAlpha = 1;
+  }
+
+  /* 拉扯小游戏界面 */
+  if (state === S.REEL && reel) drawReelUI();
+
+  /* 图鉴 */
+  if (dexOpen) drawDex();
+
+  /* 开场标题闪烁 */
+  if (state === S.IDLE && !dexOpen) {
+    ctx.globalAlpha = .75 + Math.sin(t * 3) * .25;
+    ctx.font = "bold 22px sans-serif"; ctx.textAlign = "center";
+    ctx.fillStyle = "#fff";
+    ctx.fillText("点击水面 或 按 空格 抛竿", 560, WATER_Y + 130);
+    ctx.globalAlpha = 1;
+  }
+}
+
+function cloud(x, y, s) {
+  ctx.fillStyle = "rgba(255,255,255,.85)";
+  ctx.beginPath();
+  ctx.arc(x, y, 22 * s, 0, Math.PI * 2);
+  ctx.arc(x + 26 * s, y + 6 * s, 18 * s, 0, Math.PI * 2);
+  ctx.arc(x - 26 * s, y + 6 * s, 16 * s, 0, Math.PI * 2);
+  ctx.fill();
+}
+function flower(x, y, t) {
+  const sw = Math.sin(t * 1.8 + x) * 2;
+  ctx.strokeStyle = "#3f7d33"; ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.moveTo(x, y + 16); ctx.quadraticCurveTo(x + sw, y, x + sw, y - 8); ctx.stroke();
+  ctx.fillStyle = "#ff9bb0";
+  for (let i = 0; i < 5; i++) {
+    const a = i / 5 * Math.PI * 2 + t * .4;
+    ctx.beginPath(); ctx.arc(x + sw + Math.cos(a) * 5, y - 10 + Math.sin(a) * 5, 4, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.fillStyle = "#ffe08a";
+  ctx.beginPath(); ctx.arc(x + sw, y - 10, 3, 0, Math.PI * 2); ctx.fill();
+}
+function tipText() {
+  if (dexOpen) return "";
+  switch (state) {
+    case S.IDLE:    return mowanMode ? "😈 魔丸陪钓中——点这里抛竿！" : "点击 / 空格 抛竿 · 双击菲比有惊喜";
+    case S.CAST:    return "抛竿——";
+    case S.WAIT:    return "耐心等……浮标动了再刺鱼！（现在点会空竿）";
+    case S.BITE:    return "咬钩了！！！立刻点击 / 空格！";
+    case S.REEL:    return "按住 上升 · 松开 下落 —— 把鱼保持在框里！";
+    case S.RESULT:  return msg.includes("钓到") ? "漂亮！继续下一竿" : "别灰心，再抛一竿";
+  }
+  return "";
+}
+
+function drawReelUI() {
+  const r = reel, f = curFish;
+  const bx = W / 2 - 60, by = 90, bw = 120, bh = 440;
+  // 背景板
+  ctx.fillStyle = "rgba(15,20,40,.55)";
+  ctx.beginPath(); ctx.roundRect(bx - 190, by - 30, bw + 420, bh + 80, 20); ctx.fill();
+  // 鱼道
+  ctx.fillStyle = "rgba(255,255,255,.12)";
+  ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, 60); ctx.fill();
+  // 进度环（右侧显示为竖条）
+  const px = bx + bw + 90, ph = bh, pw = 26;
+  ctx.fillStyle = "rgba(255,255,255,.15)";
+  ctx.beginPath(); ctx.roundRect(px, by, pw, ph, 13); ctx.fill();
+  const gh = ph * r.progress;
+  const gc = r.progress > .66 ? "#7fd08a" : r.progress > .33 ? "#ffd34d" : "#ff6b6b";
+  ctx.fillStyle = gc;
+  ctx.beginPath(); ctx.roundRect(px, by + ph - gh, pw, gh, 13); ctx.fill();
+  ctx.strokeStyle = "rgba(255,255,255,.5)"; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.roundRect(px, by, pw, ph, 13); ctx.stroke();
+  // 捕获区
+  const zoneH = bh * f.barH;
+  const zy = by + r.barY * bh - zoneH / 2;
+  ctx.fillStyle = "rgba(127,208,138,.4)";
+  ctx.strokeStyle = "#7fd08a"; ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.roundRect(bx + 4, zy, bw - 8, zoneH, 26); ctx.fill(); ctx.stroke();
+  // 鱼
+  const fy = by + r.fishY * bh;
+  ctx.save(); ctx.translate(bx + bw / 2, fy);
+  ctx.rotate(Math.sin(time * 8) * .12);
+  drawFishShape(f.color, 1.1, false);
+  ctx.restore();
+  // 标题
+  ctx.fillStyle = "#fff"; ctx.font = "bold 24px sans-serif"; ctx.textAlign = "center";
+  ctx.fillText("收线！别让它跑了", bx + bw / 2 + 40, by - 46);
+  ctx.font = "15px sans-serif"; ctx.fillStyle = "#ccd";
+  ctx.fillText(`按住鼠标/空格提升捕获框 · 目标:${f.name}(${RARITY[f.rarity].name})`, bx + bw / 2 + 40, by - 16);
+  // 菲比用力的小表情已在场景中体现
+}
+
+/* ---------------- 主循环 ---------------- */
+let lastTs = 0;
+function loop(ts) {
+  const dt = Math.min(.05, (ts - lastTs) / 1000 || .016);
+  lastTs = ts; time += dt;
+  update(dt);
+  render();
+  requestAnimationFrame(loop);
+}
+function update(dt) {
+  stateT += dt;
+  if (bubbleT > 0) bubbleT -= dt;
+  if (msgT > 0) msgT -= dt * .5;
+  if (mowanMode) {
+    mowanT += dt;
+    if (Math.random() < .1) spawnDark(150 + (Math.random() - .5) * 60, 240);   // 魔丸黑气
+    if (mowanT >= 30) { mowanMode = false; msg = "帽子自己飞回来了，世界和平。"; msgT = 2.5; SFX.feibi(); }
+  }
+  updateParticles(dt);
+
+  switch (state) {
+    case S.CAST:
+      if (stateT >= .65) {
+        bobber.x = 590 + Math.random() * 90;
+        bobber.y = WATER_Y + 24 + Math.random() * 26;
+        SFX.splash();
+        spawnSplash(bobber.x, bobber.y, 12);
+        startWait();
+      }
+      break;
+    case S.WAIT: {
+      bobber.down = Math.sin(time * 2.2) * 1.5;
+      // 假动作
+      if (fakeAt > 0 && stateT >= fakeAt && !isFake) {
+        isFake = true; SFX.taste();
+        setTimeout(() => { isFake = false; }, 700);
+        fakeAt = -1;
+      }
+      if (isFake) bobber.down = 7 + Math.sin(time * 12) * 2;
+      if (stateT >= biteAt) { isFake = false; setState(S.BITE); SFX.bite(); bobber.down = 14; }
+      break;
+    }
+    case S.BITE:
+      bobber.down = 12 + Math.sin(time * 30) * 4;
+      if (stateT >= biteWin) finishLose("慢了半拍……鱼叼着饵溜了！");
+      break;
+    case S.REEL:
+      updateReel(dt);
+      break;
+    case S.RESULT:
+      bobber.down = Math.max(0, bobber.down - dt * 30);
+      if (stateT < .15 && caughtFishFly && Math.random() < .4) {
+        spawnSplash(caughtFishFly.x0, WATER_Y, 3);   // 鱼跃水花
+      }
+      if (stateT >= 2.1) {
+        caughtFishFly = null; newDexId = null;
+        setState(S.IDLE);
+      }
+      break;
+  }
+}
+
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

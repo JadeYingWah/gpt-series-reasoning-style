@@ -1,0 +1,12 @@
+/* 报告页补充样式 — 不覆盖 style.css 语义 */
+#kpis .value {
+  font-size: 1.35rem;
+}
+
+#analysis-body p {
+  margin: 0 0 14px;
+}
+
+#analysis-body p:last-child {
+  margin-bottom: 0;
+}

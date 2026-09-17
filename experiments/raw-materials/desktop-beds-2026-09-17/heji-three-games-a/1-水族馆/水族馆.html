@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>开心水族馆</title>
+<style>
+  html,body{margin:0;padding:0;height:100%;background:#04121f;overflow:hidden;
+    font-family:"Microsoft YaHei","PingFang SC",sans-serif;user-select:none;}
+  #wrap{position:relative;width:960px;height:640px;margin:0 auto;}
+  canvas{display:block;cursor:crosshair;}
+  #hud{position:absolute;top:0;left:0;width:100%;box-sizing:border-box;
+    padding:10px 16px;display:flex;align-items:center;gap:14px;
+    background:linear-gradient(180deg,rgba(2,20,35,.85),rgba(2,20,35,0));color:#fff;}
+  #coins{font-size:22px;font-weight:bold;color:#ffd94a;text-shadow:0 2px 4px rgba(0,0,0,.6);}
+  .btn{padding:8px 14px;border:2px solid #7fd4ff;border-radius:10px;
+    background:rgba(10,60,100,.75);color:#eaf7ff;font-size:15px;cursor:pointer;}
+  .btn:hover{background:rgba(30,110,170,.9);}
+  .btn:disabled{opacity:.4;cursor:not-allowed;}
+  #tip{position:absolute;bottom:8px;left:0;width:100%;text-align:center;color:#fff;
+    font-size:13px;font-weight:bold;text-shadow:0 1px 2px #000,0 0 6px rgba(0,0,0,.9);
+    pointer-events:none;}
+  #start{position:absolute;inset:0;background:rgba(2,14,26,.92);color:#fff;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:5;}
+  #start h1{font-size:44px;color:#5fe0ff;margin:0 0 18px;text-shadow:0 0 24px rgba(95,224,255,.5);}
+  #start p{margin:6px 0;font-size:17px;color:#cfeaff;line-height:1.7;}
+  #start button{margin-top:26px;font-size:22px;padding:12px 44px;border-radius:12px;
+    border:2px solid #5fe0ff;background:#0d5c8c;color:#fff;cursor:pointer;}
+  #start button:hover{background:#1487c9;}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="cv" width="960" height="640"></canvas>
+  <div id="hud">
+    <span id="coins">🪙 150</span>
+    <button class="btn" id="buyGuppy">买小蓝鱼 ¥100</button>
+    <button class="btn" id="buyGolden">买金鱼 ¥300</button>
+    <span id="fishCount" style="font-size:14px;color:#9fd8ff;"></span>
+  </div>
+  <div id="tip">点击水面撒鱼食 · 点击金币收钱 · 鱼饿了会头顶冒泡提示，饿太久会死</div>
+  <div id="start">
+    <h1>🐠 开心水族馆</h1>
+    <p>喂鱼 → 鱼长大 → 收金币 → 买更多鱼</p>
+    <p>· 点击水面投放鱼食（免费）</p>
+    <p>· 鱼吃饱会成长，成熟后定期产出金币</p>
+    <p>· 金币掉落后点击收集，久了会消失</p>
+    <p>· 金币够多就买新鱼，试试金鱼吧！</p>
+    <button id="go">开始游戏</button>
+  </div>
+</div>
+<script>
+"use strict";
+const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+const W = cv.width, H = cv.height;
+const WATER_TOP = 60, SAND_TOP = H - 70;
+
+// ---------- 音效（WebAudio 合成，无外部文件） ----------
+let AC = null;
+function beep(freq, dur, type, vol){
+  try{
+    if(!AC) AC = new (window.AudioContext||window.webkitAudioContext)();
+    const o = AC.createOscillator(), g = AC.createGain();
+    o.type = type||'sine'; o.frequency.value = freq;
+    g.gain.setValueAtTime(vol||0.12, AC.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, AC.currentTime+dur);
+    o.connect(g); g.connect(AC.destination);
+    o.start(); o.stop(AC.currentTime+dur);
+  }catch(e){}
+}
+
+// ---------- 全局状态 ----------
+let coins = 150, started = false, t = 0;
+const fishes = [], foods = [], coinsList = [], bubbles = [], particles = [];
+let selectedMoney = 0; // 掉落金币动画用不到，预留
+
+// ---------- 鱼 ----------
+const GUPPY = {name:'小蓝鱼', price:100, colors:['#39c2ff','#2a9fe0','#7fe3ff'], coinVal:15, coinEvery:9};
+const GOLDEN = {name:'金鱼', price:300, colors:['#ffb23e','#ff8c1a','#ffe08a'], coinVal:40, coinEvery:7};
+
+function rand(a,b){ return a + Math.random()*(b-a); }
+
+function Fish(kind, x, y){
+  this.kind = kind;
+  this.x = x!==undefined ? x : rand(100, W-100);
+  this.y = y!==undefined ? y : rand(WATER_TOP+80, SAND_TOP-60);
+  this.size = 14;               // 当前体型（半径基准）
+  this.grow = 0;                // 成长值 0~100
+  this.stage = 0;               // 0苗 1中 2成
+  this.hunger = 100;            // 饱食度
+  this.dir = Math.random()<0.5 ? 1 : -1;
+  this.vx = rand(0.4, 1.1)*this.dir;
+  this.vy = 0;
+  this.wob = Math.random()*10;  // 摆尾相位
+  this.coinTimer = 0;
+  this.target = null;
+  this.dead = false; this.deadT = 0;
+}
+Fish.prototype.update = function(dt){
+  if(this.dead){ this.deadT += dt; this.y -= 0.4; if(this.deadT>3) fishes.splice(fishes.indexOf(this),1); return; }
+  this.hunger -= dt*1.0;
+  if(this.hunger <= 0){ this.die(); return; }
+
+  // 找食物
+  if(this.hunger < 75 && foods.length){
+    let best=null, bd=1e9;
+    for(const f of foods){
+      const d = (f.x-this.x)**2 + (f.y-this.y)**2;
+      if(d < bd){ bd = d; best = f; }
+    }
+    this.target = best;
+  } else this.target = null;
+
+  if(this.target && !this.target.eaten){
+    const dx = this.target.x - this.x, dy = this.target.y - this.y;
+    const d = Math.hypot(dx,dy) || 1;
+    const sp = 1.9;
+    this.x += dx/d*sp; this.y += dy/d*sp;
+    this.dir = dx>0 ? 1 : -1;
+    if(d < this.size*0.8){
+      this.target.eaten = true; foods.splice(foods.indexOf(this.target),1);
+      this.hunger = Math.min(100, this.hunger+38);
+      this.grow += 14;
+      burst(this.x, this.y, '#bfff9a', 5);
+      beep(660, .08, 'triangle', .06);
+      if(this.grow >= 100 && this.stage < 2){
+        this.grow = 0; this.stage++;
+        if(this.stage===1) this.size = 22;
+        if(this.stage===2) this.size = 30;
+        burst(this.x, this.y, '#fff59a', 12);
+        beep(880, .15, 'sine', .1);
+      }
+    }
+  } else {
+    // 自由巡游
+    this.wob += dt*3;
+    this.x += this.vx;
+    this.y += Math.sin(this.wob)*0.3;
+    if(this.x < 60 || this.x > W-60){ this.vx *= -1; this.dir = -Math.sign(this.vx)||1; }
+    if(this.y < WATER_TOP+40) this.y += 0.5;
+    if(this.y > SAND_TOP-30) this.y -= 0.5;
+  }
+
+  // 成熟产金币
+  if(this.stage === 2){
+    this.coinTimer += dt;
+    const every = this.kind.coinEvery;
+    if(this.coinTimer >= every){
+      this.coinTimer = 0;
+      coinsList.push({x:this.x, y:this.y, vy:0.8, val:this.kind.coinVal, life:10, r:11, spin:Math.random()*6});
+      beep(1040, .1, 'sine', .07);
+    }
+  }
+};
+Fish.prototype.die = function(){
+  this.dead = true; this.deadT = 0;
+  burst(this.x, this.y, '#9aa7b5', 10);
+  beep(140, .5, 'sawtooth', .08);
+};
+Fish.prototype.draw = function(){
+  const s = this.size, d = this.dir;
+  ctx.save(); ctx.translate(this.x, this.y); ctx.scale(d, 1);
+  if(this.dead){ ctx.globalAlpha = Math.max(0, 1-this.deadT/3); ctx.rotate(Math.PI); }
+  // 尾巴
+  const wag = Math.sin(t*6 + this.wob)*0.35;
+  ctx.fillStyle = this.kind.colors[1];
+  ctx.beginPath();
+  ctx.moveTo(-s*0.7, 0);
+  ctx.lineTo(-s*1.5, -s*0.55 + wag*s*0.4);
+  ctx.lineTo(-s*1.5,  s*0.55 + wag*s*0.4);
+  ctx.closePath(); ctx.fill();
+  // 身体
+  ctx.fillStyle = this.kind.colors[0];
+  ctx.beginPath(); ctx.ellipse(0, 0, s, s*0.62, 0, 0, Math.PI*2); ctx.fill();
+  // 肚皮
+  ctx.fillStyle = this.kind.colors[2];
+  ctx.beginPath(); ctx.ellipse(s*0.1, s*0.18, s*0.72, s*0.34, 0, 0, Math.PI*2); ctx.fill();
+  // 背鳍
+  ctx.fillStyle = this.kind.colors[1];
+  ctx.beginPath();
+  ctx.moveTo(-s*0.2, -s*0.55);
+  ctx.quadraticCurveTo(s*0.1, -s*1.05, s*0.42, -s*0.5);
+  ctx.closePath(); ctx.fill();
+  // 眼睛
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.arc(s*0.52, -s*0.14, s*0.16, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#123';
+  ctx.beginPath(); ctx.arc(s*0.57, -s*0.14, s*0.08, 0, Math.PI*2); ctx.fill();
+  // 嘴
+  ctx.strokeStyle = 'rgba(20,40,60,.6)'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(s*0.82, s*0.12, s*0.12, Math.PI*0.2, Math.PI*0.8); ctx.stroke();
+  ctx.restore();
+
+  // 饥饿气泡提示
+  if(!this.dead && this.hunger < 30){
+    const a = 0.5 + Math.sin(t*5)*0.3;
+    ctx.fillStyle = 'rgba(255,120,90,'+a+')';
+    ctx.beginPath(); ctx.arc(this.x, this.y - this.size - 14, 5, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,'+a+')';
+    ctx.font = 'bold 9px sans-serif'; ctx.textAlign='center';
+    ctx.fillText('!', this.x, this.y - this.size - 10.5);
+  }
+};
+
+// ---------- 粒子 ----------
+function burst(x, y, color, n){
+  for(let i=0;i<n;i++){
+    particles.push({x, y, vx:rand(-1.6,1.6), vy:rand(-1.8,0.4),
+      life:rand(0.4,0.9), color, r:rand(1.5,3.5)});
+  }
+}
+
+// ---------- 场景装饰 ----------
+const weeds = [];
+for(let i=0;i<9;i++) weeds.push({x: rand(30, W-30), h: rand(50,110), ph: rand(0,6), seg: 4+((i%3))});
+function initBubbles(){ for(let i=0;i<26;i++) bubbles.push(newBubble(true)); }
+function newBubble(anyY){
+  return {x: rand(20, W-20), y: anyY? rand(WATER_TOP, H) : H-20,
+    r: rand(2,5.5), v: rand(0.5,1.4), wob: rand(0,6)};
+}
+initBubbles();
+
+// ---------- 输入 ----------
+cv.addEventListener('mousemove', e=>{
+  const r = cv.getBoundingClientRect();
+  mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top;
+});
+const mouse = {x:-99, y:-99};
+
+cv.addEventListener('click', e=>{
+  if(!started) return;
+  const r = cv.getBoundingClientRect();
+  const x = e.clientX - r.left, y = e.clientY - r.top;
+
+  // 先试收金币（优先级最高）
+  for(let i=coinsList.length-1;i>=0;i--){
+    const c = coinsList[i];
+    if((x-c.x)**2 + (y-c.y)**2 < (c.r+14)**2){
+      coins += c.val; coinsList.splice(i,1);
+      burst(c.x, c.y, '#ffe27a', 8);
+      document.getElementById('coins').textContent = '🪙 ' + coins;
+      beep(1320, .12, 'sine', .1);
+      return;
+    }
+  }
+  // 撒鱼食（限制同时最多 12 颗）
+  if(y > WATER_TOP+6 && foods.length < 12){
+    foods.push({x, y, vy:0, eaten:false});
+    beep(320, .06, 'square', .05);
+  }
+});
+
+function updateShopButtons(){
+  document.getElementById('buyGuppy').disabled = coins < GUPPY.price;
+  document.getElementById('buyGolden').disabled = coins < GOLDEN.price;
+  document.getElementById('fishCount').textContent =
+    '鱼: ' + fishes.length + ' 条（上限 12）';
+}
+function buyFish(kind){
+  if(coins < kind.price || fishes.length >= 12) return;
+  coins -= kind.price;
+  document.getElementById('coins').textContent = '🪙 ' + coins;
+  fishes.push(new Fish(kind));
+  burst(W/2, WATER_TOP+30, '#9ff', 10);
+  beep(780, .15, 'triangle', .1);
+  updateShopButtons();
+}
+document.getElementById('buyGuppy').onclick = ()=>buyFish(GUPPY);
+document.getElementById('buyGolden').onclick = ()=>buyFish(GOLDEN);
+document.getElementById('go').onclick = ()=>{
+  started = true;
+  document.getElementById('start').style.display = 'none';
+  fishes.push(new Fish(GUPPY, 300, 250), new Fish(GUPPY, 550, 350));
+  updateShopButtons();
+  beep(660,.1,'sine',.08); setTimeout(()=>beep(880,.15,'sine',.08), 120);
+};
+
+// ---------- 绘制场景 ----------
+function drawScene(){
+  // 水体渐变
+  const g = ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0, '#0a4d7a'); g.addColorStop(0.45, '#0c6aa8');
+  g.addColorStop(1, '#06304f');
+  ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+
+  // 光柱
+  ctx.save(); ctx.globalAlpha = 0.07; ctx.fillStyle = '#cfefff';
+  for(let i=0;i<3;i++){
+    const bx = 150 + i*300 + Math.sin(t*0.3+i)*30;
+    ctx.beginPath();
+    ctx.moveTo(bx-30, 0); ctx.lineTo(bx+30, 0);
+    ctx.lineTo(bx+120, SAND_TOP+40); ctx.lineTo(bx-60, SAND_TOP+40);
+    ctx.closePath(); ctx.fill();
+  }
+  ctx.restore();
+
+  // 沙底
+  const sg = ctx.createLinearGradient(0,SAND_TOP,0,H);
+  sg.addColorStop(0,'#d8b877'); sg.addColorStop(1,'#a8874f');
+  ctx.fillStyle = sg;
+  ctx.beginPath();
+  ctx.moveTo(0, SAND_TOP+16);
+  for(let x=0;x<=W;x+=60) ctx.quadraticCurveTo(x+30, SAND_TOP + (x/60%2?4:14), x+60, SAND_TOP+16);
+  ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.closePath(); ctx.fill();
+
+  // 水草
+  for(const w of weeds){
+    ctx.strokeStyle = '#1d7a4f'; ctx.lineWidth = 7; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(w.x, SAND_TOP+10);
+    let px = w.x, py = SAND_TOP+10;
+    for(let s=1;s<=w.seg;s++){
+      const sway = Math.sin(t*1.2 + w.ph + s*0.7) * (s*2.4);
+      const ny = SAND_TOP+10 - w.h/w.seg*s;
+      ctx.quadraticCurveTo(px+sway*0.5, (py+ny)/2, w.x+sway, ny);
+      px = w.x+sway; py = ny;
+    }
+    ctx.stroke();
+  }
+
+  // 气泡
+  ctx.strokeStyle = 'rgba(200,235,255,.5)'; ctx.lineWidth = 1.2;
+  for(const b of bubbles){
+    ctx.beginPath(); ctx.arc(b.x + Math.sin(t*2+b.wob)*4, b.y, b.r, 0, Math.PI*2); ctx.stroke();
+  }
+
+  // 水面波光
+  ctx.strokeStyle = 'rgba(190,235,255,.35)'; ctx.lineWidth = 2;
+  ctx.beginPath();
+  for(let x=0;x<=W;x+=8){
+    const y = WATER_TOP + Math.sin(x*0.04 + t*2)*3;
+    x===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+}
+
+function drawFoods(){
+  ctx.fillStyle = '#8a5a2b';
+  for(const f of foods){
+    ctx.beginPath(); ctx.arc(f.x, f.y, 4, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = 'rgba(255,220,150,.5)';
+    ctx.beginPath(); ctx.arc(f.x-1, f.y-1, 1.6, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#8a5a2b';
+  }
+}
+
+function drawCoins(){
+  for(const c of coinsList){
+    const sq = Math.abs(Math.sin(c.spin));
+    ctx.save(); ctx.translate(c.x, c.y);
+    ctx.fillStyle = '#f5c33b';
+    ctx.beginPath(); ctx.ellipse(0, 0, c.r*Math.max(0.25,sq), c.r, 0, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#b8860b'; ctx.lineWidth = 2; ctx.stroke();
+    if(c.life < 3 && Math.sin(t*10) > 0){ ctx.globalAlpha = .35; ctx.fill(); }
+    ctx.restore();
+  }
+}
+
+function drawParticles(){
+  for(const p of particles){
+    ctx.globalAlpha = Math.max(0, p.life*1.4);
+    ctx.fillStyle = p.color;
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+
+// ---------- 主循环 ----------
+let last = performance.now();
+function loop(now){
+  const dt = Math.min(0.05, (now-last)/1000); last = now;
+  if(started){
+    t += dt;
+    for(const f of fishes) f.update(dt);
+    for(const f of foods) { f.vy = Math.min(1.6, f.vy+0.05); f.y += f.vy; if(f.y > SAND_TOP+8) f.y = SAND_TOP+8; }
+    for(let i=coinsList.length-1;i>=0;i--){
+      const c = coinsList[i];
+      c.y = Math.min(SAND_TOP+18, c.y + c.vy);
+      c.spin += dt*4; c.life -= dt;
+      if(c.life <= 0) coinsList.splice(i,1);
+    }
+    for(const b of bubbles){ b.y -= b.v; if(b.y < WATER_TOP+6) Object.assign(b, newBubble(false)); }
+    for(let i=particles.length-1;i>=0;i--){
+      const p = particles[i];
+      p.x += p.vx; p.y += p.vy; p.vy += 0.03; p.life -= dt;
+      if(p.life <= 0) particles.splice(i,1);
+    }
+    updateShopButtons();
+  }
+
+  drawScene();
+  drawFoods();
+  for(const f of fishes) f.draw();
+  drawCoins();
+  drawParticles();
+
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

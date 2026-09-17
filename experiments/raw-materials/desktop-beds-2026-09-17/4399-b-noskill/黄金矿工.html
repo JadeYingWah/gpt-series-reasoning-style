@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>黄金矿工</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{background:#0d1117;display:flex;align-items:center;justify-content:center;font-family:"Microsoft YaHei","PingFang SC",sans-serif;color:#e6edf3}
+#box{position:relative}
+canvas{display:block;border-radius:12px;box-shadow:0 0 46px rgba(227,179,65,.18)}
+.overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(13,17,23,.88);border-radius:12px;text-align:center}
+h1{font-size:40px;margin-bottom:14px;color:#e3b341;text-shadow:0 0 24px rgba(227,179,65,.6);letter-spacing:8px}
+p{margin:4px 0;color:#8b949e;font-size:14px;line-height:1.9}
+.num{font-size:23px;color:#e3b341;margin:10px 0}
+button{margin-top:18px;padding:10px 40px;font-size:18px;border:none;border-radius:8px;background:#b8860b;color:#fff;cursor:pointer;font-family:inherit;transition:.15s}
+button:hover{background:#daa520;transform:translateY(-1px)}
+.hidden{display:none}
+table{border-collapse:collapse;margin:8px 0;font-size:13px;color:#c9d1d9}
+td{padding:3px 12px;text-align:left}
+.tg{color:#e3b341;font-weight:bold}.tk{color:#a3a3a3}
+</style>
+</head>
+<body>
+<div id="box">
+<canvas id="cv" width="800" height="600"></canvas>
+<div class="overlay" id="menu">
+  <h1>黄金矿工</h1>
+  <p><kbd>点击鼠标</kbd> 或 <kbd>空格</kbd> 放钩，钩住金块自动拉回</p>
+  <table>
+    <tr><td class="tg">大金块 ¥500</td><td class="tk">很重，拉得慢</td></tr>
+    <tr><td class="tg">中金块 ¥150</td><td class="tk">中等重量</td></tr>
+    <tr><td class="tg">小金块 ¥60</td><td class="tk">轻，拉得快</td></tr>
+    <tr><td class="tg">钻石 ¥600</td><td class="tk">又轻又值钱，优先抢！</td></tr>
+    <tr><td class="tk">石头 ¥15/¥30</td><td class="tk">不值钱还特别重，尽量避开</td></tr>
+  </table>
+  <p>每关 60 秒，达到目标金额即可进入下一关</p>
+  <button id="btnStart">开始挖矿</button>
+</div>
+<div class="overlay hidden" id="between">
+  <h1 style="color:#3fb950">第 <span id="doneLevel">1</span> 关完成！</h1>
+  <div class="num">当前资金 ¥<span id="nowMoney">0</span></div>
+  <p>下一关目标：总资金达到 <span style="color:#e3b341">¥<span id="nextTarget">0</span></span></p>
+  <p>金块会重新分布，钻石更多</p>
+  <button id="btnNext">进入下一关</button>
+</div>
+<div class="overlay hidden" id="over">
+  <h1 style="color:#f85149">矿工破产了…</h1>
+  <div class="num">坚持到第 <span id="finalLevel">1</span> 关 · 总资金 ¥<span id="finalMoney">0</span></div>
+  <p>目标金额差了 ¥<span id="gap">0</span>，下一把先把钻石钓上来！</p>
+  <button id="btnRetry">重新开始</button>
+</div>
+</div>
+<script>
+"use strict";
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+const W=800,H=600;
+const $=id=>document.getElementById(id);
+const PIVOT={x:400,y:92};
+const TYPES={
+  sG:{r:12,w:1.4,v:60, kind:'gold'},
+  mG:{r:17,w:2.1,v:150,kind:'gold'},
+  bG:{r:26,w:3.8,v:500,kind:'gold'},
+  rS:{r:14,w:2.6,v:15, kind:'rock'},
+  rB:{r:24,w:4.6,v:30, kind:'rock'},
+  dia:{r:11,w:1.1,v:600,kind:'dia'}
+};
+let state,level,money,time,theta,swingDir,omega,len,mode,grabbed,retractV,items,speckles,floats,lastTick;
+let best=+(localStorage.getItem('goldBest')||0);
+
+/* ---------- 音效 ---------- */
+let AC=null;
+function tone(f,d,type,vol,slide){
+  try{
+    AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    if(AC.state==='suspended')AC.resume();
+    const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime;
+    o.type=type||'square';o.frequency.setValueAtTime(f,t);
+    if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,f+slide),t+d);
+    g.gain.setValueAtTime(vol||.1,t);
+    g.gain.exponentialRampToValueAtTime(.001,t+d);
+    o.connect(g).connect(AC.destination);o.start(t);o.stop(t+d);
+  }catch(e){}
+}
+function noiseS(d,vol,freq){
+  try{
+    AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    if(AC.state==='suspended')AC.resume();
+    const n=Math.floor(AC.sampleRate*d),buf=AC.createBuffer(1,n,AC.sampleRate),dd=buf.getChannelData(0);
+    for(let i=0;i<n;i++)dd[i]=(Math.random()*2-1)*(1-i/n);
+    const s=AC.createBufferSource();s.buffer=buf;
+    const f=AC.createBiquadFilter();f.type='lowpass';f.frequency.value=freq||500;
+    const g=AC.createGain();g.gain.value=vol||.2;
+    s.connect(f).connect(g).connect(AC.destination);s.start();
+  }catch(e){}
+}
+const sfx={
+  drop:()=>tone(300,.18,'sine',.07,-160),
+  grab:g=>{if(g.kind==='rock')noiseS(.12,.16,300);else tone(g.kind==='dia'?1100:620,.07,'square',.1,g.kind==='dia'?300:120);},
+  collect:g=>{
+    if(g.kind==='rock'){noiseS(.2,.2,220);}
+    else{tone(880,.08,'square',.11);setTimeout(()=>tone(1174,.12,'square',.11),80);}
+  },
+  tick:()=>tone(1050,.05,'square',.08),
+  levelup:()=>{tone(659,.1,'square',.11);setTimeout(()=>tone(784,.1,'square',.11),100);setTimeout(()=>tone(988,.1,'square',.11),200);setTimeout(()=>tone(1318,.2,'square',.11),300);},
+  over:()=>tone(300,.8,'sawtooth',.15,-220)
+};
+
+function target(L){return 650*L+125*L*(L-1);}
+function makeItem(type,L){
+  const t=TYPES[type];
+  /* 随机外形（石头多边形顶点），只生成一次避免闪烁 */
+  const shape=[];
+  if(t.kind==='rock'){
+    const n=7;
+    for(let i=0;i<n;i++)shape.push({a:Math.PI*2*i/n,r:.75+Math.random()*.35});
+  }
+  return {type,...t,shape,x:0,y:0};
+}
+function genItems(L){
+  const counts={sG:4,mG:3+Math.floor(L/3),bG:1+Math.floor(L/3),rS:3,rB:2,dia:Math.min(4,1+Math.floor((L-1)/2))};
+  const arr=[];
+  for(const type in counts)
+    for(let i=0;i<counts[type];i++)arr.push(makeItem(type,L));
+  /* 不重叠摆放 */
+  for(const it of arr){
+    let ok=false,tries=0;
+    while(!ok&&tries++<400){
+      it.x=40+Math.random()*(W-80);
+      it.y=180+Math.random()*(H-210-it.r);
+      ok=arr.every(o=>o===it||Math.hypot(o.x-it.x,o.y-it.y)>o.r+it.r+8);
+    }
+  }
+  return arr;
+}
+function genSpeckles(){
+  speckles=[];
+  for(let i=0;i<70;i++)speckles.push({x:Math.random()*W,y:120+Math.random()*(H-120),r:.8+Math.random()*1.8,a:.06+Math.random()*.14});
+}
+function newGame(){
+  level=1;money=0;
+  startLevel();
+  $('menu').classList.add('hidden');$('over').classList.add('hidden');$('between').classList.add('hidden');
+}
+function startLevel(){
+  time=60;theta=0;swingDir=1;omega=1.6;len=70;
+  mode='swing';grabbed=null;floats=[];lastTick=61;
+  items=genItems(level);genSpeckles();
+  state='play';
+}
+function tipPos(){return {x:PIVOT.x+Math.sin(theta)*len,y:PIVOT.y+Math.cos(theta)*len};}
+
+function collect(){
+  money+=grabbed.v;
+  floats.push({x:grabbed.x,y:grabbed.y-14,txt:'+'+grabbed.v,t:1.1,
+               c:grabbed.kind==='rock'?'#9e9e9e':(grabbed.kind==='dia'?'#66d9e8':'#e3b341')});
+  sfx.collect(grabbed);
+  grabbed=null;
+}
+function update(dt){
+  /* 漂浮加分文字 */
+  for(let i=floats.length-1;i>=0;i--){
+    floats[i].y-=38*dt;floats[i].t-=dt;
+    if(floats[i].t<=0)floats.splice(i,1);
+  }
+  if(state!=='play')return;
+  /* 倒计时：只在钩子空闲摆动时判定结束（最后一钩给你拉完） */
+  if(mode==='swing'){
+    time-=dt;
+    const w=Math.ceil(time);
+    if(w!==lastTick&&w<=10&&w>0){sfx.tick();lastTick=w;}
+  }
+  if(mode==='swing'){
+    theta+=omega*swingDir*dt;
+    if(theta>1.05){theta=1.05;swingDir=-1;}
+    if(theta<-1.05){theta=-1.05;swingDir=1;}
+    if(time<=0){
+      if(money>=target(level)){
+        state='between';sfx.levelup();
+        $('doneLevel').textContent=level;
+        $('nowMoney').textContent=money;
+        $('nextTarget').textContent=target(level+1);
+        $('between').classList.remove('hidden');
+      }else{
+        state='over';sfx.over();
+        if(money>best){best=money;localStorage.setItem('goldBest',best);}
+        $('finalLevel').textContent=level;
+        $('finalMoney').textContent=money;
+        $('gap').textContent=Math.max(0,target(level)-money);
+        $('over').classList.remove('hidden');
+      }
+      return;
+    }
+  }else if(mode==='drop'){
+    len+=430*dt;
+    const tp=tipPos();
+    /* 碰到边界 → 空钩返回 */
+    if(tp.x<10||tp.x>W-10||tp.y>H-8){mode='retract';retractV=560;return;}
+    /* 碰到物品 → 抓住 */
+    for(const it of items){
+      if(Math.hypot(it.x-tp.x,it.y-tp.y)<it.r+7){
+        grabbed=it;
+        items=items.filter(o=>o!==it);
+        mode='retract';
+        retractV=Math.max(85,300/it.w);
+        sfx.grab(it);
+        return;
+      }
+    }
+  }else if(mode==='retract'){
+    len-=retractV*dt;
+    if(grabbed){
+      const tp=tipPos();
+      grabbed.x=tp.x+Math.sin(theta)*grabbed.r*.7;
+      grabbed.y=tp.y+Math.cos(theta)*grabbed.r*.7;
+    }
+    if(len<=70){
+      len=70;
+      if(grabbed)collect();
+      mode='swing';
+    }
+  }
+}
+function dropHook(){
+  if(state==='play'&&mode==='swing'){mode='drop';sfx.drop();}
+}
+
+/* ---------- 绘制 ---------- */
+function drawGold(it){
+  const g=ctx.createRadialGradient(it.x-it.r*.35,it.y-it.r*.35,it.r*.15,it.x,it.y,it.r);
+  g.addColorStop(0,'#fff3bf');g.addColorStop(.45,'#ffd43b');g.addColorStop(1,'#b07d0a');
+  ctx.fillStyle=g;
+  ctx.beginPath();ctx.arc(it.x,it.y,it.r,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='rgba(122,84,10,.8)';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.arc(it.x,it.y,it.r-1,0,Math.PI*2);ctx.stroke();
+  /* 棱面 */
+  ctx.strokeStyle='rgba(122,84,10,.35)';ctx.lineWidth=1;
+  ctx.beginPath();
+  ctx.moveTo(it.x-it.r*.5,it.y-it.r*.15);ctx.lineTo(it.x+it.r*.1,it.y+it.r*.35);
+  ctx.moveTo(it.x+it.r*.05,it.y-it.r*.6);ctx.lineTo(it.x+it.r*.45,it.y-it.r*.05);
+  ctx.stroke();
+  ctx.fillStyle='rgba(255,255,255,.75)';
+  ctx.beginPath();ctx.arc(it.x-it.r*.35,it.y-it.r*.4,it.r*.14,0,Math.PI*2);ctx.fill();
+}
+function drawRock(it){
+  ctx.fillStyle='#6e655a';
+  ctx.beginPath();
+  it.shape.forEach((s,i)=>{
+    const px=it.x+Math.cos(s.a)*it.r*s.r,py=it.y+Math.sin(s.a)*it.r*s.r;
+    i?ctx.lineTo(px,py):ctx.moveTo(px,py);
+  });
+  ctx.closePath();ctx.fill();
+  ctx.strokeStyle='#453f37';ctx.lineWidth=2;ctx.stroke();
+  ctx.fillStyle='rgba(255,255,255,.14)';
+  ctx.beginPath();ctx.arc(it.x-it.r*.3,it.y-it.r*.3,it.r*.22,0,Math.PI*2);ctx.fill();
+}
+function drawDia(it){
+  const r=it.r;
+  const g=ctx.createLinearGradient(it.x-r,it.y-r,it.x+r,it.y+r);
+  g.addColorStop(0,'#c5f6fa');g.addColorStop(.5,'#66d9e8');g.addColorStop(1,'#1098ad');
+  ctx.fillStyle=g;
+  ctx.beginPath();
+  ctx.moveTo(it.x,it.y-r*1.35);ctx.lineTo(it.x+r*.95,it.y-r*.1);
+  ctx.lineTo(it.x,it.y+r*1.35);ctx.lineTo(it.x-r*.95,it.y-r*.1);
+  ctx.closePath();ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,.7)';ctx.lineWidth=1.2;ctx.stroke();
+  /* 闪光 */
+  const tw=.5+.5*Math.sin(performance.now()/300+it.x);
+  ctx.strokeStyle='rgba(255,255,255,'+(.5*tw)+')';ctx.lineWidth=1.5;
+  ctx.beginPath();
+  ctx.moveTo(it.x-it.r*.4,it.y-r*.5);ctx.lineTo(it.x+it.r*.4,it.y-r*.5);
+  ctx.moveTo(it.x,it.y-r*.9);ctx.lineTo(it.x,it.y-r*.1);
+  ctx.stroke();
+}
+function drawMiner(){
+  const mx=336,ground=88;
+  /* 绞盘支架 */
+  ctx.strokeStyle='#7a5a33';ctx.lineWidth=6;
+  ctx.beginPath();ctx.moveTo(PIVOT.x,PIVOT.y-2);ctx.lineTo(PIVOT.x-26,ground);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(PIVOT.x,PIVOT.y-2);ctx.lineTo(PIVOT.x+26,ground);ctx.stroke();
+  /* 滑轮 */
+  ctx.fillStyle='#9aa4ad';ctx.beginPath();ctx.arc(PIVOT.x,PIVOT.y,9,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#5c666f';ctx.beginPath();ctx.arc(PIVOT.x,PIVOT.y,3.2,0,Math.PI*2);ctx.fill();
+  /* 矿工 */
+  ctx.fillStyle='#2f6fd0';ctx.fillRect(mx-13,48,26,32);            /* 工装 */
+  ctx.fillStyle='#22303f';ctx.fillRect(mx-11,80,9,8);ctx.fillRect(mx+2,80,9,8); /* 腿 */
+  ctx.fillStyle='#f2c896';ctx.beginPath();ctx.arc(mx,36,11,0,Math.PI*2);ctx.fill(); /* 头 */
+  ctx.fillStyle='#e8b007';ctx.fillRect(mx-14,25,28,6);ctx.fillRect(mx-10,17,20,9);  /* 安全帽 */
+  ctx.fillStyle='#e8b007';ctx.fillRect(mx-16,31,4,4);ctx.fillRect(mx+12,31,4,4);
+  ctx.fillStyle='#222';ctx.fillRect(mx-5,34,2.4,3.4);ctx.fillRect(mx+3,34,2.4,3.4);
+  ctx.fillStyle='#a86a3d';ctx.fillRect(mx-4,42,8,2.4);           /* 嘴 */
+  /* 手臂扳着摇杆 */
+  ctx.strokeStyle='#f2c896';ctx.lineWidth=4.5;
+  ctx.beginPath();ctx.moveTo(mx-11,56);ctx.lineTo(mx-24,66);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(mx+11,56);ctx.lineTo(mx+2,68);ctx.stroke();
+  /* 摇杆 */
+  ctx.strokeStyle='#5c666f';ctx.lineWidth=3.5;
+  ctx.beginPath();ctx.moveTo(mx+2,84);ctx.lineTo(mx+14,64);ctx.stroke();
+}
+function draw(){
+  /* 天空 */
+  const sky=ctx.createLinearGradient(0,0,0,88);
+  sky.addColorStop(0,'#1b2f52');sky.addColorStop(1,'#33507e');
+  ctx.fillStyle=sky;ctx.fillRect(0,0,W,88);
+  ctx.fillStyle='rgba(255,255,255,.5)';
+  for(let i=0;i<12;i++){
+    const sx=(i*137+40)%W,sy=(i*61)%60+8;
+    ctx.globalAlpha=.25+.4*Math.abs(Math.sin(performance.now()/900+i));
+    ctx.fillRect(sx,sy,1.6,1.6);
+  }
+  ctx.globalAlpha=1;
+  /* 地表 */
+  ctx.fillStyle='#6b4a2b';ctx.fillRect(0,88,W,14);
+  ctx.fillStyle='#57391f';ctx.fillRect(0,98,W,4);
+  /* 地下 */
+  const ug=ctx.createLinearGradient(0,102,0,H);
+  ug.addColorStop(0,'#4a3524');ug.addColorStop(1,'#2c1f14');
+  ctx.fillStyle=ug;ctx.fillRect(0,102,W,H-102);
+  for(const s of speckles){
+    ctx.fillStyle='rgba(0,0,0,'+s.a+')';
+    ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fill();
+  }
+  /* 物品 */
+  for(const it of items){
+    if(it.kind==='gold')drawGold(it);
+    else if(it.kind==='rock')drawRock(it);
+    else drawDia(it);
+  }
+  /* 抓到的物品挂在钩上 */
+  if(grabbed){
+    if(grabbed.kind==='gold')drawGold(grabbed);
+    else if(grabbed.kind==='rock')drawRock(grabbed);
+    else drawDia(grabbed);
+  }
+  drawMiner();
+  /* 绳与钩 */
+  const tp=tipPos();
+  ctx.strokeStyle='#d7b56d';ctx.lineWidth=2.6;
+  ctx.beginPath();ctx.moveTo(PIVOT.x,PIVOT.y);ctx.lineTo(tp.x,tp.y);ctx.stroke();
+  ctx.strokeStyle='#cfd8dc';ctx.lineWidth=4;ctx.lineCap='round';
+  ctx.beginPath();
+  if(grabbed){
+    /* 抓紧状态：闭合夹子 */
+    ctx.arc(tp.x-6,tp.y-2,6,Math.PI*.9,Math.PI*1.9);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(tp.x+6,tp.y-2,6,Math.PI*1.1,Math.PI*.1);
+    ctx.stroke();
+  }else{
+    /* 张开状态 */
+    ctx.arc(tp.x-5,tp.y+3,7,Math.PI*.15,Math.PI*1.15);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(tp.x+5,tp.y+3,7,Math.PI*1.85,Math.PI*.85,true);
+    ctx.stroke();
+  }
+  ctx.lineCap='butt';
+  /* HUD */
+  ctx.fillStyle='rgba(13,17,23,.78)';ctx.fillRect(0,0,W,30);
+  ctx.textBaseline='middle';
+  ctx.textAlign='left';ctx.font='bold 17px "Microsoft YaHei"';
+  ctx.fillStyle='#e3b341';ctx.fillText('资金 ¥'+money,16,16);
+  ctx.textAlign='center';
+  ctx.fillStyle='#c9d1d9';ctx.font='14px "Microsoft YaHei"';
+  ctx.fillText('第 '+level+' 关 · 目标 ¥'+target(level),W/2,16);
+  ctx.textAlign='right';
+  const danger=time<=10&&state==='play';
+  ctx.font='bold 17px "Microsoft YaHei"';
+  ctx.fillStyle=danger?(Math.floor(performance.now()/300)%2?'#f85149':'#ffb0a8'):'#e6edf3';
+  ctx.fillText('时间 '+Math.max(0,Math.ceil(time))+'s',W-16,16);
+  /* 加分漂浮 */
+  for(const f of floats){
+    ctx.globalAlpha=Math.max(0,Math.min(1,f.t));
+    ctx.fillStyle=f.c;ctx.font='bold 16px "Microsoft YaHei"';ctx.textAlign='center';
+    ctx.fillText(f.txt,f.x,f.y);
+  }
+  ctx.globalAlpha=1;
+  /* 最高纪录角标 */
+  ctx.textAlign='left';ctx.font='12px "Microsoft YaHei"';
+  ctx.fillStyle='rgba(139,148,158,.7)';
+  ctx.fillText('最高纪录 ¥'+best,16,H-14);
+}
+
+/* ---------- 输入 ---------- */
+window.addEventListener('keydown',e=>{
+  if(e.key===' '){e.preventDefault();if(state==='play')dropHook();}
+  else if(e.key==='Enter'){
+    if(state==='over'||state==='menu')newGame();
+    else if(state==='between')nextLevel();
+  }
+});
+cv.addEventListener('mousedown',()=>{
+  if(state==='play')dropHook();
+});
+cv.addEventListener('touchstart',e=>{e.preventDefault();if(state==='play')dropHook();},{passive:false});
+$('btnStart').onclick=newGame;
+$('btnRetry').onclick=newGame;
+function nextLevel(){
+  level++;
+  $('between').classList.add('hidden');
+  startLevel();
+}
+$('btnNext').onclick=nextLevel;
+
+/* 初始化 */
+level=1;money=0;items=genItems(1);genSpeckles();
+theta=0;swingDir=1;len=70;mode='swing';grabbed=null;floats=[];time=60;lastTick=61;state='menu';
+let last=performance.now();
+function loop(t){
+  requestAnimationFrame(loop);
+  const dt=Math.min(.033,(t-last)/1000);last=t;
+  update(dt);
+  draw();
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
