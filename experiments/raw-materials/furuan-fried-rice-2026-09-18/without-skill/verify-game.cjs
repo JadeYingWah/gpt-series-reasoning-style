@@ -2,16 +2,16 @@ const path = require("path");
 const { pathToFileURL } = require("url");
 const {
   chromium,
-} = require("C:/Users/yutia/AppData/Roaming/npm/node_modules/@playwright/cli/node_modules/playwright");
+} = require("C:/Users/<USERNAME>/AppData/Roaming/npm/node_modules/@playwright/cli/node_modules/playwright");
 
-const gamePath = "C:/Users/yutia/Desktop/弗糯糯炒饭/index.html";
-const outDir = "C:/Users/yutia/Desktop/弗糯糯炒饭";
+const gamePath = "C:/Users/<USERNAME>/Desktop/弗糯糯炒饭/index.html";
+const outDir = "C:/Users/<USERNAME>/Desktop/弗糯糯炒饭";
 
 (async () => {
   const browser = await chromium.launch({
     headless: true,
     executablePath:
-      "C:/Users/yutia/AppData/Local/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-win64/chrome-headless-shell.exe",
+      "C:/Users/<USERNAME>/AppData/Local/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-win64/chrome-headless-shell.exe",
   });
   const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
   const errors = [];

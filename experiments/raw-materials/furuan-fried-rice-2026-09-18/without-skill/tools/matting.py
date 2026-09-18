@@ -1,7 +1,7 @@
 from PIL import Image
 import numpy as np
 
-p = r"C:\Users\yutia\Desktop\弗糯糯炒饭\assets\funuonuo.png"
+p = r"C:\\Users\\<USERNAME>\Desktop\弗糯糯炒饭\assets\funuonuo.png"
 im = Image.open(p).convert("RGBA")
 arr = np.array(im).astype(np.int16)
 h, w = arr.shape[:2]
