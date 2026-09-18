@@ -11,10 +11,10 @@ Runtimes that recognize `AGENTS.md` initialize as follows:
 
 1. 读取 `SKILL.md` 与 `VERSION`——**加载证明只需要这两个文件**。注意 `SKILL.md` 是一道**纯门禁**，本身不含纪律。
    Read `SKILL.md` and `VERSION` — **the loading proof requires only these two files**. Note `SKILL.md` is a **pure gate** and contains no discipline itself.
-2. 建议在**你即将动手做事或回答用户的前一刻**（写交付物 / 施工确认 / 产线命令 / 宣布交付，取最早）才读取 `DISCIPLINE.md`（五阶段流程全文在此文件，**不在** `SKILL.md`）；提前读取无收益。创意类可有一轮不读 DISCIPLINE 的方向构想；陌生专名仍先问/搜。随后按 `DISCIPLINE.md` 的五阶段执行——规则文件**按阶段**读取：阶段2 读
+2. 建议在**你即将动手做事的前一刻**（写交付物 / 施工确认 / 产线命令 / 宣布交付，取最早）才读取 `DISCIPLINE.md`（五阶段流程全文在此文件，**不在** `SKILL.md`）；提前读取无收益。创意类可有一轮不读 DISCIPLINE 的方向构想；陌生专名仍先问/搜。随后按 `DISCIPLINE.md` 的五阶段执行——规则文件**按阶段**读取：阶段2 读
    `references/plan-rules.md`，阶段5 读 `references/review-rules.md`；叠加形态二三
    （子智能体 / 多智能体）时读 `references/multi-agent.md` 与 `templates/` 模板。
-   Suggested: only **the moment before you act or answer**, read `DISCIPLINE.md` (the five-stage flow lives here, **not** in `SKILL.md`); reading early has no benefit. Then follow its five stages — rule files load **by stage**: read
+   Suggested: only **the moment before you act**, read `DISCIPLINE.md` (the five-stage flow lives here, **not** in `SKILL.md`); reading early has no benefit. Then follow its five stages — rule files load **by stage**: read
    `references/plan-rules.md` at stage 2 and `references/review-rules.md` at stage 5; read
    `references/multi-agent.md` and the `templates/` only when stacking mode 2/3
    (sub-agent / multi-agent).
