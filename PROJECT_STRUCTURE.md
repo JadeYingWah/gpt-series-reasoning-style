@@ -56,6 +56,12 @@ GPT-series-reasoning-style-Local GitHub repository/
 
 ---
 
+## 一致性规则
+
+- **SVG资源必须保持一致**：主线（main）与实验分支（experiments）的所有SVG图片、logo、social-preview等，必须使用完全相同的文件，版本号对齐，不得分叉。
+
+---
+
 ## 上架平台投递记录
 
 ### 已上架/已提交
