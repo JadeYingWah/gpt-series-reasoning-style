@@ -1,6 +1,6 @@
 ---
 name: gpt-series-reasoning-style
-version: 1.5.8
+version: 1.6.0
 description: 交付验收与多智能体协作纪律（防假完成）。Use when 涉及数字验算、代码交付、多Agent协作、需要防假完成的任务；or when user says "做完了帮我查/看看对不对/验收"、派发子任务或多个AI分工。约束交付是否真实，不单独设定创意质量满意标准（见 DISCIPLINE 完成档位 C1/C2）。小改/一句话问答不加载。
 license: MIT
 compatibility: "Works with any model or client supporting the Agent Skills SKILL.md convention (Claude Code, Codex, Cursor, etc.)."
