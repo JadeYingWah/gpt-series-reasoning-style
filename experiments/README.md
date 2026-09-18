@@ -2,6 +2,20 @@
 
 本目录收录了该 skill 从 v0.1 到 v1.6.0 所有 A/B 双臂对照实验的素材、结果和结论。
 
+## 实验目的
+
+验证这个 skill 到底有没有用、有什么用、什么时候用最好。
+
+## 实验方法
+
+所有实验都是**双臂对照**：
+- A臂：带 skill（加载 gpt-series-reasoning-style）
+- B臂：裸模型（不加载任何 skill）
+- 两臂在空目录里从零开始，互不可见
+- 任务完全相同，只有"有没有 skill"这一个变量
+
+这样才能干净地归因——哪些差异是 skill 带来的，哪些是模型本来就会的。
+
 ## 实验阶段总览
 
 | 阶段 | 版本 | 任务数 | 核心发现 |
@@ -52,21 +66,40 @@
 - **竖切优先**：A档确认后立刻做最小可玩切片
 - **创作类跳过阶段2**：遇到陌生专名先搜再问，其他直接进阶段3
 
-## 实验数据位置
+## 目录结构
 
-- 	est-bed1-light-tasks/ —— 6个轻任务的实验记录
-- 	est-bed2-medium-tasks/ —— 5个中等任务的实验记录
-- 	est-bed3-creative-task/ —— 1个创意任务的实验记录
-- historical-v1.2.x/ —— v1.2.x时代的历史实验
-- aw-materials/ —— 最新实验原始素材（弗糯糯炒饭、星之接球、鹈鹕骑车等）
+```
+experiments/
+├── README.md              ← 你现在看的这个
+├── historical-v1.2.x/     ← v1.2.x时代的实验报告（已废弃但保留）
+├── test-bed1-light-tasks/ ← Test-Bed 1 实验报告
+├── test-bed2-medium-tasks/← Test-Bed 2 实验报告
+├── test-bed3-creative-task/← Test-Bed 3 实验报告
+├── test-bed4-creative-complex-task/← Test-Bed 4 实验报告
+└── raw-materials/         ← 所有实验的原始素材
+    ├── README.md          ← 素材目录说明
+    ├── v1.2.x/            ← v1.2.x时代的原始素材（30+个AB实验）
+    ├── test-bed1/         ← Test-Bed 1 原始素材
+    ├── test-bed2/         ← Test-Bed 2 原始素材
+    ├── test-bed3/         ← Test-Bed 3 原始素材
+    ├── test-bed4/         ← Test-Bed 4 原始素材
+    ├── desktop-beds-2026-09-17/  ← 桌面实验床
+    ├── fishing-3d-2026-09-18/    ← 钓鱼3D游戏
+    ├── furuan-fried-rice-2026-09-18/ ← 弗糯糯炒饭
+    ├── minigame-starcatch-2026-09-18/ ← 星之接球
+    ├── my3dgame-2026-09-18/      ← My3DGame
+    └── ww-dmg-table-2026-09-18/  ← Warframe伤害表
+```
 
 ## 方法论说明
 
-所有实验都是**双臂对照**：
-- A臂：带skill
-- B臂：裸模型，不加载任何skill
-- 两臂在空目录里从零开始，互不可见
+**为什么用双臂对照？**
+因为单臂实验没法归因——你不知道是skill带来的差异，还是模型本来就会。双臂对照把"有没有skill"作为唯一变量，才能干净地看出skill的效果。
 
-这样才能干净地归因——哪些差异是skill带来的，哪些是模型本来就会的。
+**为什么用空目录？**
+因为要排除"之前做过类似的"这种干扰。两臂都从零开始，才能保证起点一致。
+
+**n=1怎么办？**
+单个实验的结论不做外推。所有结论都是多组实验一致后才写进这里的。
 
 *当前主线版本：v1.6.0*
