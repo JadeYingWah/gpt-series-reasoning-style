@@ -103,6 +103,13 @@ while **avoiding the downside**:
 - no slide into checkbox-theatre.
 
 
+**与其他skill共存 / Coexists with Other Skills**
+
+> **不抢流程，只做验收。** 我们专门设计了共存机制：本skill只在**阶段2（规划）**和**阶段5（验收）**介入，阶段1/3/4完全开放——实现型skill（设计、编码、视觉等）的方法和流程照常执行，互不干扰。流程冲突时以宿主和用户指令为准。
+>
+> 这意味着你可以同时挂着 frontend-design、imagegen、xlsx 等任何实现型skill，再加上本skill做交付门禁——各管各的，不会打架。
+
+
 ## 首创性设计 / A First of Its Kind
 
 **中文**
