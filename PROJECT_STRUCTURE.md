@@ -53,3 +53,27 @@ GPT-series-reasoning-style-Local GitHub repository/
 | `gpt-series-reasoning-style/` | 正式发布的skill本体，面向用户 | main |
 | `experiments/` | 双臂对照实验、测试床、历史版本存档 | experiments |
 | `gpt-series-reasoning-style-workspace/` | 迭代过程中的草稿、提案、临时文件，不对外 | （本地工作区，不提交） |
+
+---
+
+## 上架平台投递记录
+
+### 已上架/已提交
+
+| 平台 | 链接 | 状态 | 提交时间 | 备注 |
+|------|------|------|----------|------|
+| GitHub | https://github.com/JadeYingWah/gpt-series-reasoning-style | ✅ 已发布 v1.6.0 | 2026-09-19 | 主仓库，Release已打tag |
+| Skillstore | https://skillstore.io/zh-hans/skills/jadeyingwah-gpt-series-reasoning-style | ✅ 已上架 | 2026-09-18 | 90分精选💎 |
+| Cursor Marketplace | https://cursor.com/marketplace/publish | ⏳ 审核中 | 2026-09-19 | 已提交申请表单 |
+| SkillHub（腾讯云） | https://skillhub.cn/ | ⏳ 安全审核中 | 2026-09-19 | 已上传v3版本zip |
+| ComposioHQ/awesome-claude-skills | PR #1935 | ⏳ PR审核中 | 2026-09-19 | 26k+ stars的awesome列表 |
+
+### 计划提交/未提交
+
+| 平台 | 状态 | 原因 |
+|------|------|------|
+| anthropics/skills | ❌ 不提交 | 官方仓库894个PR排队，通过率极低，中文skill不匹配 |
+| Claude Plugin Marketplace | ❌ 不提交 | 需要Team/Enterprise组织权限，个人用户提交不了 |
+| ClawHub | ⏸️ 暂缓 | OpenClaw生态匹配度一般 |
+| skills.sh (Vercel) | ✅ 自动收录 | 基于GitHub仓库和npm下载量，不用手动提交 |
+| claudemarketplaces.com | ✅ 自动收录 | 自动从GitHub抓取，不用手动提交 |
