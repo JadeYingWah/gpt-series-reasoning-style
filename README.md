@@ -6,7 +6,7 @@
 **Turn "the agent says it's done" into "the agent proves it's done".**
 
 
-<img src="assets/social-preview.png" alt="GPT-Series Reasoning Style · 交付纪律层" width="100%">
+<img src="assets/social-preview.svg" alt="GPT-Series Reasoning Style · 交付纪律层" width="100%">
 
 ![Version](https://img.shields.io/badge/version-1.6.0-blue)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
@@ -467,7 +467,7 @@ python scripts/selfcheck.py    # 可选：38 项静态自检，退出码 0=全�
 | `templates/`                     | 指挥官 / 执行者 / 审查者三张角色卡 + 任务包七要素                        |
 | `scripts/selfcheck.py`           | 仓库一致性自检（**38 项**，纯只读，已适配文件级渐进加载结构）                  |
 | `SECURITY.md`                    | 安全模型说明                                                 |
-| `assets/social-preview.png / .png`      | 仓库横幅图（1280×640）                                       |
+| `assets/social-preview.svg / .png`      | 仓库横幅图（1280×640）                                       |
 
 ## 版本 / Versioning
 
