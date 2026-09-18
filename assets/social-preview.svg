@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-labelledby="banner-title banner-desc">
   <title id="banner-title">GPT-Series Reasoning Style · Delivery discipline layer</title>
   <desc id="banner-desc">Bilingual banner v1.5.6: SKILL.md is a pure gate — DISCIPLINE.md is released at the latest action point (write deliverable / construction confirm / production command / claim done). Execution face has no rules. Delivery grades are C1 acceptable vs C2 product-satisfied (user or external scorecard only). Three cards: Planning (rules off then on), Execution (rules off), Review (rules on including completion grade C1/C2).</desc>
@@ -103,6 +103,6 @@
       </g>
       <text x="238" y="4" font-size="13" fill="#64748B">Rules loaded from file, stage by stage · five-stage timeline</text>
     </g>
-    <text x="1200" y="590" text-anchor="end" font-size="15" fill="#64748B">v1.5.6 · MIT</text>
+    <text x="1200" y="590" text-anchor="end" font-size="15" fill="#64748B">v1.6.0 · MIT</text>
   </g>
 </svg>
