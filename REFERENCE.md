@@ -7,7 +7,7 @@
 <div align="center">
 <img alt="Version" src="https://img.shields.io/badge/version-1.5.6-blue">
 <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-green">
-<img alt="Size" src="https://img.shields.io/badge/SKILL.md-2999%E5%AD%97%E8%8A%82%C2%B733%E8%A1%8C%E9%97%A8%E7%A6%81-orange">
+<img alt="Size" src="https://img.shields.io/badge/SKILL.md-3180%E5%AD%97%E8%8A%82%C2%B733%E8%A1%8C%E9%97%A8%E7%A6%81-orange">
 <img alt="Runtime" src="https://img.shields.io/badge/%E6%8C%89%E9%9C%80%E5%8A%A0%E8%BD%BD-%E7%BA%AF%E6%96%87%E6%9C%AC-blueviolet">
 <img alt="CI" src="https://github.com/JadeYingWah/gpt-series-reasoning-style/actions/workflows/ci.yml/badge.svg">
 </div>
@@ -72,7 +72,7 @@ AI agent 最贵的失败，从来不是"不会做"，而是**没验过就说做�
 本 skill 把隔离做到**两层物理级**：
 
 1. **执行者与审查者窗口不加载本 skill**——他们的全部行为规范来自身份文件与任务包（自包含），指挥官职权条款（五阶段、形态判断、配置确认）物理上不在他们的上下文里；
-2. **指挥官自己的 SKILL.md 也只是一道门禁**（2999 字节 / 33 行）——纪律全文（`DISCIPLINE.md`，3185 字节 / 33 行）在**前一刻**才被放行；「前一刻」= 写交付物 / 施工确认 / 产线命令 / 宣布交付 中最早者。创意类可有一轮不读 DISCIPLINE 的方向构想；陌生专名仍先问/搜。
+2. **指挥官自己的 SKILL.md 也只是一道门禁**（3180 字节 / 33 行）——纪律全文（`DISCIPLINE.md`，3185 字节 / 33 行）在**前一刻**才被放行；「前一刻」= 写交付物 / 施工确认 / 产线命令 / 宣布交付 中最早者。创意类可有一轮不读 DISCIPLINE 的方向构想；陌生专名仍先问/搜。
 
 常驻上下文里只有一句门禁。规则不是提示词里的一段话，而是**独立的物理文件**，按阶段读入。
 
@@ -251,7 +251,7 @@ AI agent 最贵的失败，从来不是"不会做"，而是**没验过就说做�
 
 | 项目 | 实测值 |
 |---|---|
-| SKILL.md | 2999 字节 / 33 行（常驻约 0.6k token）——纯门禁 |
+| SKILL.md | 3180 字节 / 33 行（常驻约 0.6k token）——纯门禁 |
 | DISCIPLINE.md | 3185 字节 / 33 行——动手前一刻才读 |
 | plan-rules.md | 5442 字节——仅阶段2 |
 | review-rules.md | 5041 字节——仅阶段5 |

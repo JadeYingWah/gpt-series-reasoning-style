@@ -10,7 +10,7 @@
 
 ![Version](https://img.shields.io/badge/version-1.5.6-blue)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
-![Size](https://img.shields.io/badge/SKILL.md-2999%E5%AD%97%E8%8A%82%C2%B733%E8%A1%8C%E9%97%A8%E7%A6%81-orange)
+![Size](https://img.shields.io/badge/SKILL.md-3180%E5%AD%97%E8%8A%82%C2%B733%E8%A1%8C%E9%97%A8%E7%A6%81-orange)
 ![Experiments](https://img.shields.io/badge/A%2FB%20%E4%B8%8E%E5%AE%9E%E6%B5%8B-300%2B%20%E8%87%82%E6%AC%A1-success)
 ![Runtime](https://img.shields.io/badge/按需加载-纯文本-blueviolet)
 ![CI](https://github.com/JadeYingWah/gpt-series-reasoning-style/actions/workflows/ci.yml/badge.svg)
@@ -173,7 +173,7 @@ AI agent 最贵的失败，从来不是“不会做”，而是**没验过就说
 本 skill 把隔离做到**两层物理级**：
 
 1. **执行者与审查者窗口不加载本 skill**——他们的全部行为规范来自身份文件与任务包（自包含），指挥官职权条款（五阶段、形态判断、配置确认）**物理上不在他们的上下文里**；
-2. **指挥官自己的 SKILL.md 也只是一道门禁**（2999 字节 / 33 行）——纪律全文（DISCIPLINE.md，3185 字节 / 33 行）在**动手做事的前一刻**才被放行。
+2. **指挥官自己的 SKILL.md 也只是一道门禁**（3180 字节 / 33 行）——纪律全文（DISCIPLINE.md，3185 字节 / 33 行）在**动手做事的前一刻**才被放行。
 
 
 
@@ -437,7 +437,7 @@ python scripts/selfcheck.py    # 可选：38 项静态自检，退出码 0=全�
 
 | 项目         | 实测值                                                          |
 | ---------- | ------------------------------------------------------------ |
-| `SKILL.md` | **2999 字节 / 33 行**（常驻约 0.6k token）——**纯门禁**，纪律全文在 `DISCIPLINE.md`（3185 字节/33 行，动手前一刻才读） |
+| `SKILL.md` | **3180 字节 / 33 行**（常驻约 0.6k token）——**纯门禁**，纪律全文在 `DISCIPLINE.md`（3185 字节/33 行，动手前一刻才读） |
 | 阶段 2 按需   | `references/plan-rules.md`（5442 字节）——仅在规则规划阶段读入        |
 | 阶段 5 按需   | `references/review-rules.md`（5041 字节）——仅在纪律检查阶段读入      |
 | 多智能体按需  | `references/multi-agent.md`（5718 字节）——仅叠加形态二三时读入       |
