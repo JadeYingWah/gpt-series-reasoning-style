@@ -10,7 +10,7 @@
 
 ![Version](https://img.shields.io/badge/version-1.5.6-blue)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
-![Size](https://img.shields.io/badge/SKILL.md-2027%E5%AD%97%E8%8A%82%C2%B722%E8%A1%8C%E9%97%A8%E7%A6%81-orange)
+![Size](https://img.shields.io/badge/SKILL.md-2999%E5%AD%97%E8%8A%82%C2%B733%E8%A1%8C%E9%97%A8%E7%A6%81-orange)
 ![Experiments](https://img.shields.io/badge/A%2FB%20%E4%B8%8E%E5%AE%9E%E6%B5%8B-300%2B%20%E8%87%82%E6%AC%A1-success)
 ![Runtime](https://img.shields.io/badge/按需加载-纯文本-blueviolet)
 ![CI](https://github.com/JadeYingWah/gpt-series-reasoning-style/actions/workflows/ci.yml/badge.svg)
@@ -173,7 +173,7 @@ AI agent 最贵的失败，从来不是“不会做”，而是**没验过就说
 本 skill 把隔离做到**两层物理级**：
 
 1. **执行者与审查者窗口不加载本 skill**——他们的全部行为规范来自身份文件与任务包（自包含），指挥官职权条款（五阶段、形态判断、配置确认）**物理上不在他们的上下文里**；
-2. **指挥官自己的 SKILL.md 也只是一道门禁**（2027 字节 / 22 行）——纪律全文（DISCIPLINE.md，3185 字节 / 33 行）在**动手或回答的前一刻**才被放行。
+2. **指挥官自己的 SKILL.md 也只是一道门禁**（2999 字节 / 33 行）——纪律全文（DISCIPLINE.md，3185 字节 / 33 行）在**动手或回答的前一刻**才被放行。
 
 
 
@@ -188,7 +188,7 @@ AI agent 最贵的失败，从来不是“不会做”，而是**没验过就说
 装上后**无需任何特殊指令**。当 agent 接到交付型任务（写代码、算数据、做页面、多 Agent 分工），SKILL.md 的纯门禁会在**动手前一刻**放行纪律全文，然后进入**五阶段时序**：
 
 ```text
-┌─ 门禁（SKILL.md · 22 行纯门禁）——「前一刻」= 写交付物/施工确认/产线命令/宣布交付 中最早者
+┌─ 门禁（SKILL.md · 33 行纯门禁）——「前一刻」= 写交付物/施工确认/产线命令/宣布交付 中最早者
 │         创意类可有一轮不读 DISCIPLINE 的方向构想；陌生专名仍先问/搜
 │
 ┌─ 阶段1 · 自由构想（不读 plan/review/multi-agent，不建治理目录）——凭你自己想清楚要做什么
@@ -437,11 +437,11 @@ python scripts/selfcheck.py    # 可选：38 项静态自检，退出码 0=全�
 
 | 项目         | 实测值                                                          |
 | ---------- | ------------------------------------------------------------ |
-| `SKILL.md` | **2027 字节 / 22 行**（常驻约 0.4k token）——**纯门禁**，纪律全文在 `DISCIPLINE.md`（3185 字节/33 行，动手前一刻才读） |
+| `SKILL.md` | **2999 字节 / 33 行**（常驻约 0.6k token）——**纯门禁**，纪律全文在 `DISCIPLINE.md`（3185 字节/33 行，动手前一刻才读） |
 | 阶段 2 按需   | `references/plan-rules.md`（5442 字节）——仅在规则规划阶段读入        |
 | 阶段 5 按需   | `references/review-rules.md`（5041 字节）——仅在纪律检查阶段读入      |
 | 多智能体按需  | `references/multi-agent.md`（5718 字节）——仅叠加形态二三时读入       |
-| 加载路径      | 平时只读 `SKILL.md`（22 行门禁）+ `VERSION`；**动手/回答前一刻**读 `DISCIPLINE.md`（纪律全文）；阶段 2 读 plan-rules、阶段 5 读 review-rules、多智能体场景另读 `multi-agent.md`；**任务结束后规则内容全部遗忘** |
+| 加载路径      | 平时只读 `SKILL.md`（33 行门禁）+ `VERSION`；**动手/回答前一刻**读 `DISCIPLINE.md`（纪律全文）；阶段 2 读 plan-rules、阶段 5 读 review-rules、多智能体场景另读 `multi-agent.md`；**任务结束后规则内容全部遗忘** |
 | 峰值常驻文本   | 任一时刻上下文里的规则文本不超过一份（规划或审查，二者不同时在场）              |
 
 **对比 v1.2.5 重版本**：38.7 KB / 179 行 / ~12k token —— 已由实验证明是更差的选择（见「实测与证据」）。
@@ -451,7 +451,7 @@ python scripts/selfcheck.py    # 可选：38 项静态自检，退出码 0=全�
 
 | 文件                               | 角色                                                     |
 | -------------------------------- | ------------------------------------------------------ |
-| `SKILL.md`                       | **门禁**（22 行）。不含纪律正文；「前一刻」动作化 + 创意构想例外            |
+| `SKILL.md`                       | **门禁**（33 行）。不含纪律正文；「前一刻」动作化 + 创意构想例外            |
 | `DISCIPLINE.md`                  | **纪律全文**（31 行）。五阶段 + **完成档位 C1/C2** + 任务后遗忘 + 边界 + 加载规则 |
 | `references/plan-rules.md`       | **阶段 2 专用**：规划规则（构想实质保留、形态裁定、A档不锁质量上限、创意质量预算） |
 | `references/review-rules.md`     | **阶段 5 专用**：8 条纪律（★三条轻任务必做）+ **第9条完成档位** + 退出条件    |
