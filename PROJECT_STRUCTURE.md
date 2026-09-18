@@ -73,13 +73,3 @@ GPT-series-reasoning-style-Local GitHub repository/
 | Cursor Marketplace | https://cursor.com/marketplace/publish | ⏳ 审核中 | 2026-09-19 | 已提交申请表单 |
 | SkillHub（腾讯云） | https://skillhub.cn/ | ⏳ 安全审核中 | 2026-09-19 | 已上传v3版本zip |
 | ComposioHQ/awesome-claude-skills | PR #1935 | ⏳ PR审核中 | 2026-09-19 | 26k+ stars的awesome列表 |
-
-### 计划提交/未提交
-
-| 平台 | 状态 | 原因 |
-|------|------|------|
-| anthropics/skills | ❌ 不提交 | 官方仓库894个PR排队，通过率极低，中文skill不匹配 |
-| Claude Plugin Marketplace | ❌ 不提交 | 需要Team/Enterprise组织权限，个人用户提交不了 |
-| ClawHub | ⏸️ 暂缓 | OpenClaw生态匹配度一般 |
-| skills.sh (Vercel) | ✅ 自动收录 | 基于GitHub仓库和npm下载量，不用手动提交 |
-| claudemarketplaces.com | ✅ 自动收录 | 自动从GitHub抓取，不用手动提交 |
