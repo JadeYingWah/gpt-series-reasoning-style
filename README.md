@@ -41,7 +41,6 @@
 - [成本](#成本)
 - [仓库结构](#仓库结构)
 - [版本](#版本)
-- [License](#license)
 
 ## 🇬🇧 English
 
@@ -64,6 +63,9 @@
 - [Cost](#cost)
 - [What's Inside](#whats-inside)
 - [Version](#version)
+
+## 📄 Common
+
 - [License](#license)
 
 ---
