@@ -10,7 +10,7 @@
 
 ![Version](https://img.shields.io/badge/version-1.6.0-blue)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
-![Size](https://img.shields.io/badge/SKILL.md-3594%E5%AD%97%E8%8A%82%C2%B721%E8%A1%8C%E9%97%A8%E7%A6%81-orange)
+![Size](https://img.shields.io/badge/SKILL.md-3594%E5%AD%97%E8%8A%82%C2%B735%E8%A1%8C%E9%97%A8%E7%A6%81-orange)
 ![Experiments](https://img.shields.io/badge/A%2FB%20%E4%B8%8E%E5%AE%9E%E6%B5%8B-300%2B%20%E8%87%82%E6%AC%A1-success)
 ![Runtime](https://img.shields.io/badge/按需加载-纯文本-blueviolet)
 ![CI](https://github.com/JadeYingWah/gpt-series-reasoning-style/actions/workflows/ci.yml/badge.svg)
@@ -180,7 +180,7 @@ AI agent 最贵的失败，从来不是“不会做”，而是**没验过就说
 本 skill 把隔离做到**两层物理级**：
 
 1. **执行者与审查者窗口不加载本 skill**——他们的全部行为规范来自身份文件与任务包（自包含），指挥官职权条款（五阶段、形态判断、配置确认）**物理上不在他们的上下文里**；
-2. **指挥官自己的 SKILL.md 也只是一道门禁**（3594 字节 / 21 行）——纪律全文（DISCIPLINE.md，3862 字节 / 22 行）在**动手做事的前一刻**才被放行。
+2. **指挥官自己的 SKILL.md 也只是一道门禁**（3594 字节 / 21 行）——纪律全文（DISCIPLINE.md，3862 字节 / 33 行）在**动手做事的前一刻**才被放行。
 
 
 
@@ -195,7 +195,7 @@ AI agent 最贵的失败，从来不是“不会做”，而是**没验过就说
 装上后**无需任何特殊指令**。当 agent 接到交付型任务（写代码、算数据、做页面、多 Agent 分工），SKILL.md 的纯门禁会在**动手前一刻**放行纪律全文，然后进入**五阶段时序**：
 
 ```text
-┌─ 门禁（SKILL.md · 21 行纯门禁）——「前一刻」= 写交付物/施工确认/产线命令/宣布交付 中最早者
+┌─ 门禁（SKILL.md · 35 行纯门禁）——「前一刻」= 写交付物/施工确认/产线命令/宣布交付 中最早者
 │         创意类可有一轮不读 DISCIPLINE 的方向构想；陌生专名仍先问/搜
 │
 ┌─ 阶段1 · 自由构想（不读 plan/review/multi-agent，不建治理目录）——凭你自己想清楚要做什么
