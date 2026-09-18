@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>弗糯糯炒饭</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- 标题屏 -->
+    <section id="screen-title" class="screen active">
+      <div class="title-bg"></div>
+      <div class="title-vignette"></div>
+      <div class="title-content">
+        <div class="title-char-wrap">
+          <img class="title-char" src="assets/funuonuo.png" alt="弗糯糯" draggable="false" />
+        </div>
+        <div class="title-panel">
+          <p class="title-eyebrow">手绘厨房 · 节奏烹饪</p>
+          <h1 class="title-logo">
+            <span class="logo-main">弗糯糯炒饭</span>
+            <span class="logo-sub">FUNUONUO FRIED RICE</span>
+          </h1>
+          <p class="title-desc">
+            跟着节拍下料、颠勺，帮弗糯糯完成一盘完美的黄金蛋炒饭。
+            指针滑入绿色区域时按下 <kbd>空格</kbd> 或点击屏幕。
+          </p>
+          <button id="btn-start" class="btn-primary" type="button">开始炒饭</button>
+          <div class="title-stars" aria-hidden="true">★ ★ ★</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 游戏屏 -->
+    <section id="screen-game" class="screen">
+      <div class="game-bg"></div>
+      <div class="game-overlay"></div>
+
+      <header class="hud">
+        <div class="hud-left">
+          <div class="hud-chip score-chip">
+            <span class="hud-label">得分</span>
+            <span id="hud-score" class="hud-value">0</span>
+          </div>
+          <div class="hud-chip combo-chip">
+            <span class="hud-label">连击</span>
+            <span id="hud-combo" class="hud-value">×0</span>
+          </div>
+        </div>
+        <div class="hud-center">
+          <div class="step-pill">
+            <span id="hud-step-index">1</span>/<span id="hud-step-total">10</span>
+            <em id="hud-step-name">热锅倒油</em>
+          </div>
+        </div>
+        <div class="hud-right">
+          <div class="heat-wrap">
+            <span class="hud-label">锅气</span>
+            <div class="heat-bar">
+              <div id="heat-fill" class="heat-fill"></div>
+              <div class="heat-danger"></div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="stage">
+        <!-- 角色 -->
+        <aside class="side-char">
+          <div class="char-frame">
+            <img id="char-img" src="assets/funuonuo.png" alt="弗糯糯" draggable="false" />
+          </div>
+          <div class="dialogue">
+            <div class="dialogue-name">弗糯糯</div>
+            <p id="dialogue-text">准备好啦，我们开火！</p>
+          </div>
+        </aside>
+
+        <!-- 主玩法 -->
+        <main class="side-main">
+          <div id="wok-zone" class="wok-zone">
+            <canvas id="fx-canvas" width="640" height="360"></canvas>
+            <div class="wok" id="wok">
+              <div class="wok-bowl">
+                <div class="wok-food" id="wok-food"></div>
+                <div class="wok-shine"></div>
+              </div>
+              <div class="wok-handle"></div>
+              <div class="wok-flame" id="wok-flame"></div>
+            </div>
+            <div id="judge-pop" class="judge-pop"></div>
+            <div id="float-layer" class="float-layer"></div>
+          </div>
+
+          <div class="timing-panel">
+            <div class="timing-hint" id="timing-hint">指针进入绿色区域时按下！</div>
+            <div class="timing-track" id="timing-track">
+              <div class="zone good" id="zone-good"></div>
+              <div class="zone perfect" id="zone-perfect"></div>
+              <div class="marker" id="marker"></div>
+            </div>
+            <div class="toss-pips" id="toss-pips" hidden></div>
+            <button id="btn-hit" class="btn-hit" type="button">翻炒！ <kbd>Space</kbd></button>
+          </div>
+        </main>
+
+        <!-- 菜谱 -->
+        <aside class="side-recipe">
+          <div class="recipe-card">
+            <h2>今日菜谱</h2>
+            <p class="recipe-title">弗糯糯黄金蛋炒饭</p>
+            <ol id="recipe-list" class="recipe-list"></ol>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- 结算屏 -->
+    <section id="screen-result" class="screen">
+      <div class="result-bg"></div>
+      <div class="result-card">
+        <p class="result-eyebrow">出锅！</p>
+        <h2 id="result-title" class="result-title">完美出餐</h2>
+        <div class="result-dish">
+          <img src="assets/fried_rice.png" alt="黄金蛋炒饭" draggable="false" />
+          <div id="result-stars" class="result-stars"></div>
+        </div>
+        <div class="result-stats">
+          <div><span>总分</span><strong id="result-score">0</strong></div>
+          <div><span>最高连击</span><strong id="result-combo">0</strong></div>
+          <div><span>完美次数</span><strong id="result-perfect">0</strong></div>
+          <div><span>失误次数</span><strong id="result-miss">0</strong></div>
+        </div>
+        <p id="result-comment" class="result-comment"></p>
+        <div class="result-actions">
+          <button id="btn-retry" class="btn-primary" type="button">再来一盘</button>
+          <button id="btn-home" class="btn-ghost" type="button">回标题</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="js/game.js"></script>
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>弗糯糯炒饭 · 节奏烹饪</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app" class="app">
+    <!-- 标题屏 -->
+    <section id="screen-title" class="screen screen-title is-active" aria-label="标题">
+      <div class="title-stage">
+        <div class="title-copy">
+          <p class="eyebrow">指挥家的灶台 · 节奏烹饪</p>
+          <h1 class="game-title">弗糯糯炒饭</h1>
+          <p class="tagline">跟上拍子，把一锅饭指挥到完美出锅。</p>
+          <div class="title-actions">
+            <button type="button" class="btn btn-primary" id="btn-start">开 演</button>
+            <button type="button" class="btn btn-ghost" id="btn-howto">怎么玩</button>
+          </div>
+          <p class="hint">键盘 D · F · J · K　或　点击轨道</p>
+        </div>
+        <div class="title-art">
+          <img src="assets/furuan.png" alt="弗糯糯 Q 版指挥家" width="420" height="630" />
+        </div>
+      </div>
+      <div class="curtain curtain-l" aria-hidden="true"></div>
+      <div class="curtain curtain-r" aria-hidden="true"></div>
+    </section>
+
+    <!-- 说明屏 -->
+    <section id="screen-howto" class="screen screen-howto" aria-label="怎么玩" hidden>
+      <div class="paper paper-tilt">
+        <p class="eyebrow">开演前的三行谱</p>
+        <h2>怎么玩</h2>
+        <ul class="howto-list">
+          <li><span class="key">D</span> 米饭落锅</li>
+          <li><span class="key">F</span> 蛋液入锅</li>
+          <li><span class="key">J</span> 葱花提香</li>
+          <li><span class="key">K</span> 酱油上色</li>
+        </ul>
+        <p class="howto-note">食材圆片落到判定圈时按键。Perfect 最香，Miss 糊锅。</p>
+        <div class="title-actions">
+          <button type="button" class="btn btn-primary" id="btn-start-2">开 演</button>
+          <button type="button" class="btn btn-ghost" id="btn-back-title">返回</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 游戏屏 -->
+    <section id="screen-play" class="screen screen-play" aria-label="演奏中" hidden>
+      <div class="play-bg" aria-hidden="true"></div>
+      <header class="hud">
+        <div class="hud-block">
+          <span class="hud-label">分数</span>
+          <span class="hud-value" id="hud-score">0</span>
+        </div>
+        <div class="hud-block hud-center">
+          <span class="hud-label">连击</span>
+          <span class="hud-value hud-combo" id="hud-combo">0</span>
+        </div>
+        <div class="hud-block">
+          <span class="hud-label">完成度</span>
+          <div class="progress" aria-hidden="true"><div class="progress-fill" id="hud-progress"></div></div>
+        </div>
+      </header>
+
+      <div class="judge" id="judge" aria-live="polite"></div>
+
+      <div class="stage-row">
+        <div class="character-bench" aria-hidden="true">
+          <img src="assets/furuan.png" alt="" id="char-img" />
+        </div>
+
+        <div class="lanes" id="lanes" role="application" aria-label="四轨节奏谱面">
+          <div class="lane" data-lane="0"><span class="lane-key">D</span><span class="lane-name">米</span></div>
+          <div class="lane" data-lane="1"><span class="lane-key">F</span><span class="lane-name">蛋</span></div>
+          <div class="lane" data-lane="2"><span class="lane-key">J</span><span class="lane-name">葱</span></div>
+          <div class="lane" data-lane="3"><span class="lane-key">K</span><span class="lane-name">酱</span></div>
+          <div class="receptor-row" id="receptor-row">
+            <div class="receptor" data-lane="0"></div>
+            <div class="receptor" data-lane="1"></div>
+            <div class="receptor" data-lane="2"></div>
+            <div class="receptor" data-lane="3"></div>
+          </div>
+          <div class="note-layer" id="note-layer"></div>
+        </div>
+
+        <div class="pot-bench">
+          <div class="pot" id="pot" aria-hidden="true">
+            <div class="pot-food" id="pot-food"></div>
+          </div>
+          <p class="pot-label">锅中完成度</p>
+        </div>
+      </div>
+
+      <footer class="play-footer">
+        <button type="button" class="btn btn-ghost btn-sm" id="btn-quit">中止</button>
+        <span class="bpm-tag">BPM 120 · 弗糯糯炒饭</span>
+      </footer>
+    </section>
+
+    <!-- 结算屏 -->
+    <section id="screen-result" class="screen screen-result" aria-label="结算" hidden>
+      <div class="paper paper-tilt result-paper">
+        <p class="eyebrow">演奏结束</p>
+        <h2 id="result-rank" class="rank">A</h2>
+        <p class="result-title" id="result-title">起锅成功</p>
+        <img class="result-dish" src="assets/dish.png" alt="完成的弗糯糯炒饭" width="220" height="220" />
+        <dl class="result-stats">
+          <div><dt>分数</dt><dd id="result-score">0</dd></div>
+          <div><dt>Perfect</dt><dd id="result-perfect">0</dd></div>
+          <div><dt>Great</dt><dd id="result-great">0</dd></div>
+          <div><dt>Miss</dt><dd id="result-miss">0</dd></div>
+          <div><dt>最大连击</dt><dd id="result-combo">0</dd></div>
+        </dl>
+        <div class="title-actions">
+          <button type="button" class="btn btn-primary" id="btn-retry">再来一局</button>
+          <button type="button" class="btn btn-ghost" id="btn-to-title">回标题</button>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script src="game.js"></script>
+</body>
+</html>
