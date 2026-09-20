@@ -23,6 +23,7 @@
 ## 🇨🇳 中文版
 
 - [来源与适用范围](#来源与适用范围)
+- [这个skill到底蒸馏了哪些GPT行为](#这个skill到底蒸馏了哪些gpt行为)
 - [为什么不是"把 GPT 的行为规则全搬过来"](#为什么不是把-gpt-的行为规则全搬过来)
 - [与其他skill共存](#与其他skill共存)
 - [首创性设计](#首创性设计)
@@ -45,6 +46,7 @@
 ## 🇬🇧 English
 
 - [Origin and Scope](#origin-and-scope)
+- [Which GPT Behaviors Does This Skill Actually Distill](#which-gpt-behaviors-does-this-skill-actually-distill)
 - [Why Not Copy Every Rule](#why-not-copy-every-rule)
 - [Coexists with Other Skills](#coexists-with-other-skills)
 - [A First of Its Kind](#a-first-of-its-kind)
@@ -83,6 +85,40 @@
 **它不挑场景。** 执行阶段规则文件根本不加载——挂着它的边际成本在执行期趋近于零：不打断思路、不占上下文、不把流程塞给你。小且可逆的任务自动降级为"直接做、做完扫一眼"，不触发调研和方案确认。在**历史 A/B（233 轮：任务×臂×轮）**与后续实测（experiments 脚本口径 ≥286 臂次/53 批至 09-17 素材，另加 09-17 八组床与 09-18 四场 v1.6.0 单臂包）中，**没有任何一类任务测出"带 skill 比不带更差"**；稳定的正向收益集中在交付可信度（敢不敢直接用、有没有假完成），而不是逼你走流程。
 
 代码、写作、设计、分析、日常问答——都可以挂着它。它唯一的"代价"是交付前多看一眼；如果你明确要最快出活，说一声"别管验收"即可。
+
+
+## 这个skill到底蒸馏了哪些GPT行为
+
+GPT在复杂任务中表现出很多优秀的行为模式，但**不是所有都能写进skill真的有效**。
+
+我们判断的标准很简单：**能被其他模型照着执行的，才写；需要模型本身够聪明才能做到的，写了也白写。**
+
+### 已应用（3个核心）
+
+| 行为 | 说明 | 为什么有效 |
+|------|------|-----------|
+| **验证后再完成** | 没真打开、没真测试，不要说"做完了" | 是规则 — 其他模型照着做就行 |
+| **校准确定性** | 结论强度不得超过证据强度；没验的标出来 | 是规则 — 其他模型照着做就行 |
+| **调整投入** | 简单任务快速做，复杂任务全套验收 | 是规则 — 其他模型照着做就行 |
+
+### 部分应用（4个）
+
+| 行为 | 说明 | 现状 |
+|------|------|------|
+| 理解后行动 | 先建立问题模型，再动手 | 阶段2有规划，但"建立问题模型"太抽象 |
+| 按依赖拆解 | 复杂问题拆成子问题，判断依赖 | 阶段2有形态裁定，但没有明确的拆解方法 |
+| 找区分证据 | 主动找能区分假设的信息 | 阶段5有真打开、重算，但没有"找区分证据"的概念 |
+| 找反例 | 主动找能推翻自己的情况 | 阶段5有"全绿不算证据"，但没有"检查前提" |
+
+### 无法应用（3个）
+
+| 行为 | 为什么写了也白写 |
+|------|-----------------|
+| **保留多假设** | 需要模型真的能想出多个解释 — 小模型可能只想出一个 |
+| **新证据更新旧结论** | 需要模型真的愿意推翻自己 — 小模型可能会坚持第一印象 |
+| **解决真正目标** | 需要模型真的能理解用户真正意图 — 小模型可能做不到 |
+
+> **一句话**：我们只做"照着做就行"的行为规则，不做"你得先够聪明才能做到"的能力要求。
 
 
 ## 为什么不是"把 GPT 的行为规则全搬过来"
@@ -483,6 +519,38 @@ It is therefore **not** a model-specific add-on. What is distilled is **behavior
 **It does not pick its battles.** During execution the rule files are not loaded at all — the marginal cost of keeping it on is effectively zero at execution time: no thought interruption, no context tax, no workflow shoved in your face. Small and reversible tasks auto-degrade to "just do it, glance at the end" — no research, no plan approval. Across the **historical A/B line (233 task×arm×round)** plus later beds (script count ≥286 arms / 53 batches through 09-17 materials, plus 09-17 eight desktop beds and 09-18 four v1.6.0 single-arm field packs), **no task category showed the skill making things worse**; the consistent gain is in delivery trustworthiness, not in forcing a pipeline.
 
 Code, writing, design, analysis, everyday Q&A — keep it on. Its only "cost" is one extra look before you ship; if you want raw speed, just say so.
+
+
+## Which GPT Behaviors Does This Skill Actually Distill
+
+GPT shows many excellent behavioral patterns on complex tasks, but **not all of them can be written into a skill and actually work**.
+
+Our test is simple: **if another model can just follow the rule, we write it down. If it requires the model to already be smart enough, it won't help.**
+
+### Fully Applied (3 Core)
+
+| Behavior | What it means | Why it works |
+|----------|--------------|--------------|
+| **Verify before claiming completion** | Don't say "done" if you didn't actually open and test it | It's a rule — other models just follow it |
+| **Calibrate certainty** | Confidence must not exceed evidence strength; flag what's unverified | It's a rule — other models just follow it |
+| **Scale reasoning effort** | Simple tasks get quick treatment; complex tasks get full acceptance | It's a rule — other models just follow it |
+
+### Partially Applied (4)
+
+| Behavior | What it means | Current status |
+|----------|--------------|----------------|
+| Understand before acting | Build a mental model first, then act | Stage 2 has planning, but "build a mental model" is too abstract |
+| Decompose by dependency | Break complex problems into subproblems with dependencies | Stage 2 has form adjudication, but no explicit decomposition method |
+| Seek discriminating evidence | Actively find information that distinguishes hypotheses | Stage 5 has "really open it" and recompute, but no "find discriminating evidence" concept |
+| Challenge assumptions | Actively find counterexamples that would falsify your hypothesis | Stage 5 has "all green is not evidence", but no "check the premises" |
+
+| **Cannot Apply (3)** | Why writing it down won't help |
+|----------------------|--------------------------------|
+| **Maintain multiple hypotheses** | Requires the model to actually generate multiple explanations — smaller models may only come up with one |
+| **Update old conclusions from new evidence** | Requires the model to actually be willing to overturn itself — smaller models may stick to first impression |
+| **Solve the actual objective** | Requires the model to actually understand the user's true intent — smaller models may not |
+
+> **In short**: we only write down behavioral rules that another model can just follow. We don't write down capability requirements that only smart models can satisfy.
 
 
 ## Why Not Copy Every Rule
