@@ -1,10 +1,10 @@
 # experiments · 实验数据分支
 
-<img src="assets/social-preview.svg" alt="GPT-Series Reasoning Style · 交付纪律层 v1.5.6" width="100%">
+<img src="assets/social-preview.svg" alt="GPT-Series Reasoning Style · 交付纪律层 v1.6.0" width="100%">
 
 本分支只存放 **gpt-series-reasoning-style** 的实验数据与产物。skill 本体在 [main 分支](https://github.com/JadeYingWah/gpt-series-reasoning-style)——本分支不含 skill 代码。
 
-横幅图与 main 同步至 **v1.5.6**（门禁动作化 · 执行面无规则 · 交付标 C1/C2）。
+横幅图与 main 同步至 **v1.6.0**（门禁动作化 · 执行面无规则 · 交付标 C1/C2 · GPT行为蒸馏总览）。
 
 ## 目录
 
@@ -31,7 +31,7 @@
 | 对照 | A（带 skill） | B（无 skill） |
 |------|--------------|--------------|
 | **2026-09-18 · v1.5.6 单臂包** | 鸣潮验算表：21/21+交叉+变异，**C1**；星光接取：24/24+C1；钓鱼/Neon Void：口供或证据层 **C1** | —（本日无双臂） |
-| 4399 四游戏 | 选题查证+确认+主角实现；验证近乎满分 | 静默丢弃任务核心词；**声称“实测可玩”未经过程背书** |
+| 4399 四游戏 | 选题查证+确认+主角实现；验证近乎满分 | 静默丢弃任务核心词；**声称"实测可玩"未经过程背书** |
 | 三游戏（exe 化） | **3/3 双击直启** | bat 依赖环境，**2/3 无法启动** |
 | 问答双臂 | 平手 | 平手（→问答条款撤销） |
 
@@ -43,9 +43,9 @@
 | 项 | 值（查阅 skillstore.io 时） |
 |---|---|
 | 商店页 | https://skillstore.io/zh-hans/skills/jadeyingwah-gpt-series-reasoning-style |
-| 商店所载作者版本 | **v1.5.0**（修订 r3；维护新鲜度 2026/9/16） |
-| GitHub 本体 | main 已是 **v1.5.6**（门禁动作化 + C1/C2） |
-| 含义 | 商店同步落后；刷新依赖 Skillstore/marketplace 拉取或作者侧提交，**不能只靠本地 push 自动变商店文案** |
+| 商店所载作者版本 | **v1.6.0**（内容修订 r6；90分精选） |
+| GitHub 本体 | main 已是 **v1.6.0**（门禁动作化 + C1/C2 + GPT行为蒸馏总览） |
+| 含义 | 商店已同步至 v1.6.0；后续更新需重新提交仓库URL触发审核 |
 
 ## 说明
 
